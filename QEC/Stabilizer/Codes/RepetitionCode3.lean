@@ -193,50 +193,6 @@ lemma logicalX_is_XType : NQubitPauliGroupElement.IsXTypeElement logicalX := by
   · intro i
     fin_cases i <;> simp [logicalX, NQubitPauliOperator.X, PauliOperator.IsXType]
 
-/-- Every vector in the symplectic span of Z-only generators has zero X-part
-  (first n components). -/
-private lemma sympSpan_ZType_XPart_zero (v : Fin (3 + 3) → ZMod 2)
-    (hv : v ∈ NQubitPauliGroupElement.sympSpan generatorsList) (i : Fin 3) :
-    v (Fin.castAdd 3 i) = 0 := by
-  have := NQubitPauliGroupElement.sympSpan_sum_eq_zero generatorsList {Fin.castAdd 3 i}
-    (fun k => by
-      simp only [NQubitPauliGroupElement.checkMatrix, Finset.sum_singleton]
-      rw [NQubitPauliOperator.toSymplectic_X_part]
-      fin_cases k <;> fin_cases i <;> decide)
-    v hv
-  simp only [Finset.sum_singleton] at this
-  exact this
-
-/-- In the symplectic span of the generators, the Z-component on the middle qubit equals
-(mod 2) the sum of the Z-components on the two outer qubits. -/
-private lemma sympSpan_ZPart_relation (v : Fin (3 + 3) → ZMod 2)
-    (hv : v ∈ NQubitPauliGroupElement.sympSpan generatorsList) :
-    v (Fin.natAdd 3 1) = v (Fin.natAdd 3 0) + v (Fin.natAdd 3 2) := by
-  have := NQubitPauliGroupElement.sympSpan_sum_eq_zero generatorsList
-    {Fin.natAdd 3 1, Fin.natAdd 3 0, Fin.natAdd 3 2} (fun k => by
-      simp only [NQubitPauliGroupElement.checkMatrix]
-      fin_cases k <;> rw [Finset.sum_insert (by simp), Finset.sum_insert (by simp),
-        Finset.sum_singleton, NQubitPauliOperator.toSymplectic_Z_part] <;> decide)
-    v hv
-  have h_sum : Finset.sum {Fin.natAdd 3 1, Fin.natAdd 3 0, Fin.natAdd 3 2} (fun j => v j) =
-      v (Fin.natAdd 3 1) + v (Fin.natAdd 3 0) + v (Fin.natAdd 3 2) := by
-    rw [Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton, add_assoc]
-  rw [h_sum] at this
-  rw [add_assoc] at this
-  have h_eq := eq_neg_iff_add_eq_zero.mpr this
-  rw [h_eq, neg_add]
-  simp only [ZMod.neg_eq_self_mod_two]
-
-/-- Logical X ∉ subgroup (symplectic vector has nonzero X-part). -/
-theorem logicalX_not_mem_subgroup : logicalX ∉ subgroup :=
-  NQubitPauliGroupElement.not_mem_subgroup_of_symp_not_in_span generatorsList subgroup
-    (by rw [subgroup, listToSet_generatorsList]) AllPhaseZero_generatorsList logicalX (by rfl)
-    fun h => by
-      have h0 := sympSpan_ZType_XPart_zero _ h 0
-      rw [show logicalX.operators = NQubitPauliOperator.X 3 from rfl,
-        NQubitPauliOperator.toSymplectic_X_one (i := 0)] at h0
-      exact one_ne_zero h0
-
 private lemma logicalZ_commutes_Z1Z2 : logicalZ * Z1Z2 = Z1Z2 * logicalZ := by
   pauli_comm_componentwise [logicalZ, Z1Z2]
   all_goals simp only [NQubitPauliOperator.Z]
@@ -267,19 +223,15 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
         NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
     exact mul_right_cancel H
 
-/-- Logical Z ∉ subgroup (its Z-block does not satisfy: middle Z-component equals (mod 2)
-the sum of the Z-components on the two outer qubits). -/
+/-- Logical X ∉ subgroup (witness: logical Z in centralizer, anticommutes with logical X). -/
+theorem logicalX_not_mem_subgroup : logicalX ∉ subgroup :=
+  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalX logicalZ
+    logicalZ_mem_centralizer logicalX_anticommutes_logicalZ
+
+/-- Logical Z ∉ subgroup (witness: logical X in centralizer, anticommutes with logical Z). -/
 theorem logicalZ_not_mem_subgroup : logicalZ ∉ subgroup :=
-  NQubitPauliGroupElement.not_mem_subgroup_of_symp_not_in_span generatorsList subgroup
-    (by rw [subgroup, listToSet_generatorsList]) AllPhaseZero_generatorsList logicalZ (by rfl)
-    fun h => by
-      have h_rel := sympSpan_ZPart_relation _ h
-      rw [show logicalZ.operators = NQubitPauliOperator.Z 3 from rfl,
-        NQubitPauliOperator.toSymplectic_Z_one (i := 0),
-        NQubitPauliOperator.toSymplectic_Z_one (i := 1),
-        NQubitPauliOperator.toSymplectic_Z_one (i := 2)] at h_rel
-      have h10 : (1 + 1 : ZMod 2) = 0 := by decide
-      exact one_ne_zero (h_rel.trans h10)
+  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalZ logicalX
+    logicalX_mem_centralizer (anticommute_symm logicalX logicalZ logicalX_anticommutes_logicalZ)
 
 end RepetitionCode3
 end StabilizerGroup

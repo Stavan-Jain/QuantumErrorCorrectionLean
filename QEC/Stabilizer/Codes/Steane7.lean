@@ -415,37 +415,6 @@ theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := b
     · exact logicalX_commutes_X2.symm
     · exact logicalX_commutes_X3.symm
 
-/-- Every vector in the symplectic span of the Steane generators has X-part
-satisfying
-  v₁ + v₂ + v₃ = 0 (indices 1,2,3 of the X-block). -/
-private lemma sympSpan_XPart_relation (v : Fin (7 + 7) → ZMod 2)
-    (hv : v ∈ NQubitPauliGroupElement.sympSpan generatorsList) :
-    v (Fin.castAdd 7 1) + v (Fin.castAdd 7 2) + v (Fin.castAdd 7 3) = 0 := by
-  have := NQubitPauliGroupElement.sympSpan_sum_eq_zero generatorsList
-    {Fin.castAdd 7 1, Fin.castAdd 7 2, Fin.castAdd 7 3} (fun k => by
-      simp only [NQubitPauliGroupElement.checkMatrix]
-      fin_cases k <;> simp only [generatorsList, List.get_cons_succ, Z1, Z2,
-      Z3, X1, X2, X3] <;> decide)
-    v hv
-  have h_sum : Finset.sum {Fin.castAdd 7 1, Fin.castAdd 7 2, Fin.castAdd 7 3} (fun j => v j) =
-      v (Fin.castAdd 7 1) + v (Fin.castAdd 7 2) + v (Fin.castAdd 7 3) := by
-    rw [Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton, add_assoc]
-  rw [h_sum] at this
-  exact this
-
-/-- Logical X ∉ subgroup (symplectic vector violates X-part relation). -/
-theorem logicalX_not_mem_subgroup : logicalX ∉ subgroup :=
-  NQubitPauliGroupElement.not_mem_subgroup_of_symp_not_in_span generatorsList subgroup
-    (by rw [subgroup, listToSet_generatorsList]) AllPhaseZero_generatorsList logicalX (by rfl)
-    fun h => by
-      have h_rel := sympSpan_XPart_relation _ h
-      rw [show logicalX.operators = NQubitPauliOperator.X 7 from rfl,
-        NQubitPauliOperator.toSymplectic_X_one (i := 1),
-        NQubitPauliOperator.toSymplectic_X_one (i := 2),
-        NQubitPauliOperator.toSymplectic_X_one (i := 3)] at h_rel
-      have h10 : (1 + 1 + 1 : ZMod 2) = 1 := by decide
-      exact (by decide : (1 : ZMod 2) ≠ 0) (h_rel.symm.trans h10).symm
-
 private lemma logicalZ_commutes_Z1 : logicalZ * Z1 = Z1 * logicalZ := by
   pauli_comm_componentwise [logicalZ, Z1, NQubitPauliOperator.Z]
 
@@ -510,34 +479,15 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
     · exact logicalZ_commutes_X2.symm
     · exact logicalZ_commutes_X3.symm
 
-/-- Every vector in the symplectic span has Z-part satisfying z₁ + z₂ + z₃ = 0. -/
-private lemma sympSpan_ZPart_relation (v : Fin (7 + 7) → ZMod 2)
-    (hv : v ∈ NQubitPauliGroupElement.sympSpan generatorsList) :
-    v (Fin.natAdd 7 1) + v (Fin.natAdd 7 2) + v (Fin.natAdd 7 3) = 0 := by
-  have := NQubitPauliGroupElement.sympSpan_sum_eq_zero generatorsList
-    {Fin.natAdd 7 1, Fin.natAdd 7 2, Fin.natAdd 7 3} (fun k => by
-      simp only [NQubitPauliGroupElement.checkMatrix]
-      fin_cases k <;>
-        simp only [generatorsList, List.get_cons_succ, Z1, Z2, Z3, X1, X2, X3] <;> decide)
-    v hv
-  have h_sum : Finset.sum {Fin.natAdd 7 1, Fin.natAdd 7 2, Fin.natAdd 7 3} (fun j => v j) =
-      v (Fin.natAdd 7 1) + v (Fin.natAdd 7 2) + v (Fin.natAdd 7 3) := by
-    rw [Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton, add_assoc]
-  rw [h_sum] at this
-  exact this
+/-- Logical X ∉ subgroup (witness: logical Z in centralizer, anticommutes with logical X). -/
+theorem logicalX_not_mem_subgroup : logicalX ∉ subgroup :=
+  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalX logicalZ
+    logicalZ_mem_centralizer logicalX_anticommutes_logicalZ
 
-/-- Logical Z ∉ subgroup (symplectic vector violates Z-part relation). -/
+/-- Logical Z ∉ subgroup (witness: logical X in centralizer, anticommutes with logical Z). -/
 theorem logicalZ_not_mem_subgroup : logicalZ ∉ subgroup :=
-  NQubitPauliGroupElement.not_mem_subgroup_of_symp_not_in_span generatorsList subgroup
-    (by rw [subgroup, listToSet_generatorsList]) AllPhaseZero_generatorsList logicalZ (by rfl)
-    fun h => by
-      have h_rel := sympSpan_ZPart_relation _ h
-      rw [show logicalZ.operators = NQubitPauliOperator.Z 7 from rfl,
-        NQubitPauliOperator.toSymplectic_Z_one (i := 1),
-        NQubitPauliOperator.toSymplectic_Z_one (i := 2),
-        NQubitPauliOperator.toSymplectic_Z_one (i := 3)] at h_rel
-      have h10 : (1 + 1 + 1 : ZMod 2) = 1 := by decide
-      exact (by decide : (1 : ZMod 2) ≠ 0) (h_rel.symm.trans h10).symm
+  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalZ logicalX
+    logicalX_mem_centralizer (anticommute_symm logicalX logicalZ logicalX_anticommutes_logicalZ)
 
 end Steane7
 end StabilizerGroup

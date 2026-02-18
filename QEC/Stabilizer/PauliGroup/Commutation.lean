@@ -318,6 +318,15 @@ lemma anticommutes_iff_odd_anticommutes (p q : NQubitPauliGroupElement n) :
     induction ( Finset.card _ / 2 ) <;> simp_all  [ Nat.mul_succ, nsmulRec ];
     simp_all  [ Fin.val_add]
 
+/-- Symmetry of anticommutation: if P anticommutes with Q, then Q anticommutes with P. -/
+lemma anticommute_symm (p q : NQubitPauliGroupElement n) :
+    Anticommute p q → Anticommute q p := by
+  unfold Anticommute
+  intro h
+  calc q * p = (minusOne n)⁻¹ * ((minusOne n) * (q * p)) := by rw [inv_mul_cancel_left]
+      _ = (minusOne n)⁻¹ * (p * q) := by rw [← h]
+      _ = (minusOne n) * (p * q) := by rw [minusOne_inv]
+
 /-- Every element commutes with itself. -/
 lemma commutes_refl (p : NQubitPauliGroupElement n) : p * p = p * p := rfl
 

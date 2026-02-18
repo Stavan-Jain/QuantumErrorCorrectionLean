@@ -156,6 +156,11 @@ noncomputable instance : Inv (NQubitPauliGroupElement n) := ⟨inv⟩
 
 @[simp] lemma inv_eq (p : NQubitPauliGroupElement n) : p⁻¹ = inv p := rfl
 
+/-- The central element -1 is its own inverse (phase 2 satisfies 2 + 2 = 0 in Fin 4). -/
+@[simp] lemma minusOne_inv (n : ℕ) : (minusOne n)⁻¹ = minusOne n := by
+  ext <;> simp [inv_eq, inv, minusOne]
+  decide
+
 /-- One element of the n-qubit Pauli group. -/
 noncomputable instance : One (NQubitPauliGroupElement n) := ⟨one n⟩
 
