@@ -7,6 +7,7 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
+import QEC.Stabilizer.Core.StabilizerCode
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 
 namespace Quantum
@@ -223,15 +224,14 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
         NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
     exact mul_right_cancel H
 
-/-- Logical X ∉ subgroup (witness: logical Z in centralizer, anticommutes with logical X). -/
-theorem logicalX_not_mem_subgroup : logicalX ∉ subgroup :=
-  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalX logicalZ
-    logicalZ_mem_centralizer logicalX_anticommutes_logicalZ
-
-/-- Logical Z ∉ subgroup (witness: logical X in centralizer, anticommutes with logical Z). -/
-theorem logicalZ_not_mem_subgroup : logicalZ ∉ subgroup :=
-  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup logicalZ logicalX
-    logicalX_mem_centralizer (anticommute_symm logicalX logicalZ logicalX_anticommutes_logicalZ)
+/-- The 3-qubit repetition code as a stabilizer code (group + logical X/Z and proofs). -/
+noncomputable def stabilizerCode : StabilizerCode 3 :=
+  { toStabilizerGroup := stabilizerGroup
+    logicalX := logicalX
+    logicalZ := logicalZ
+    logicalX_mem_centralizer := logicalX_mem_centralizer
+    logicalZ_mem_centralizer := logicalZ_mem_centralizer
+    logicalX_anticommutes_logicalZ := logicalX_anticommutes_logicalZ }
 
 end RepetitionCode3
 end StabilizerGroup
