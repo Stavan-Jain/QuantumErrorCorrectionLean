@@ -3,6 +3,7 @@ import QEC.Stabilizer.BinarySymplectic.CheckMatrix
 import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
 import QEC.Stabilizer.BinarySymplectic.SymplecticSpan
 import QEC.Stabilizer.Core.StabilizerCode
+import QEC.Stabilizer.Core.CodeDistance
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.Core.StabilizerGroup
@@ -10,6 +11,7 @@ import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
 import QEC.Stabilizer.PauliGroup.NQubitOperator
+import QEC.Stabilizer.PauliGroup.NQubitElement
 
 namespace Quantum
 open scoped BigOperators
@@ -253,6 +255,100 @@ noncomputable def stabilizerCode : StabilizerCode 3 1 where
   logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer
   logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
+
+/-!
+## Code distance [[3, 1, 1]]
+
+The repetition code has distance 1: a single Z on any physical qubit is a nontrivial logical
+(same coset as logical Z). So the minimum weight of a nontrivial logical is 1.
+-/
+
+open NQubitPauliOperator NQubitPauliGroupElement
+
+/-- Z on qubit 2 only (I on qubits 0 and 1). -/
+def Z_on_qubit2 : NQubitPauliGroupElement 3 :=
+  ⟨0, (NQubitPauliOperator.identity 3).set 2 PauliOperator.Z⟩
+
+lemma Z_on_qubit2_operators (i : Fin 3) :
+    Z_on_qubit2.operators i = if i = 2 then PauliOperator.Z else PauliOperator.I := by
+  simp only [Z_on_qubit2, NQubitPauliOperator.set, NQubitPauliOperator.identity]
+
+/-- Z_on_qubit2 has weight 1. -/
+lemma weight_Z_on_qubit2 : NQubitPauliGroupElement.weight Z_on_qubit2 = 1 := by
+  have h : NQubitPauliOperator.support Z_on_qubit2.operators = {2} := by
+    ext i
+    simp only [NQubitPauliOperator.mem_support, Z_on_qubit2_operators, Finset.mem_singleton]
+    split_ifs with h <;> simp [h]
+  rw [NQubitPauliGroupElement.weight, NQubitPauliOperator.weight, h]
+  simp only [Finset.card_singleton]
+
+private lemma Z_on_qubit2_commutes_Z1Z2 : Z_on_qubit2 * Z1Z2 = Z1Z2 * Z_on_qubit2 := by
+  pauli_comm_componentwise [Z_on_qubit2, Z1Z2]
+
+private lemma Z_on_qubit2_commutes_Z2Z3 : Z_on_qubit2 * Z2Z3 = Z2Z3 * Z_on_qubit2 := by
+  pauli_comm_componentwise [Z_on_qubit2, Z2Z3]
+
+/-- Z_on_qubit2 is in the centralizer of the repetition-code stabilizer. -/
+lemma Z_on_qubit2_mem_centralizer : Z_on_qubit2 ∈ centralizer stabilizerGroup := by
+  rw [StabilizerGroup.mem_centralizer_iff]
+  intro h hh
+  refine Subgroup.closure_induction (p := fun g _ => g * Z_on_qubit2 = Z_on_qubit2 * g)
+    (fun g hg => ?_)
+    (by simp only [NQubitPauliGroupElement.one_mul, NQubitPauliGroupElement.mul_one])
+    (fun x y _ _ hx hy => ?_) (fun x _ h => ?_) hh
+  · simp [generators] at hg
+    rcases hg with rfl | rfl
+    · exact Z_on_qubit2_commutes_Z1Z2.symm
+    · exact Z_on_qubit2_commutes_Z2Z3.symm
+  · calc (x * y) * Z_on_qubit2 = x * (y * Z_on_qubit2) := by rw [NQubitPauliGroupElement.mul_assoc]
+      _ = x * (Z_on_qubit2 * y) := by rw [hy]
+      _ = (x * Z_on_qubit2) * y := by rw [← NQubitPauliGroupElement.mul_assoc]
+      _ = (Z_on_qubit2 * x) * y := by rw [hx]
+      _ = Z_on_qubit2 * (x * y) := by rw [NQubitPauliGroupElement.mul_assoc]
+  · have H : (x⁻¹ * Z_on_qubit2) * x = (Z_on_qubit2 * x⁻¹) * x := by
+      rw [NQubitPauliGroupElement.mul_assoc, ← h, inv_mul_cancel_left,
+        NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
+    exact mul_right_cancel H
+
+/-- Z_on_qubit2 anticommutes with logical X (overlap only on qubit 2, where X and Z anticommute). -/
+lemma Z_on_qubit2_anticommutes_logicalX :
+    NQubitPauliGroupElement.Anticommute Z_on_qubit2 logicalX := by
+  classical
+  rw [NQubitPauliGroupElement.anticommutes_iff_odd_anticommutes]
+  have hfilter :
+      (Finset.univ.filter
+          (NQubitPauliGroupElement.anticommutesAt (n := 3) Z_on_qubit2.operators
+            logicalX.operators)) = ({2} : Finset (Fin 3)) := by
+    ext i
+    fin_cases i <;>
+      simp [Finset.mem_filter, NQubitPauliGroupElement.anticommutesAt, Z_on_qubit2_operators,
+        logicalX, NQubitPauliOperator.X, PauliOperator.mulOp]
+  rw [hfilter]
+  decide
+
+/-- Z_on_qubit2 is not in the stabilizer: it anticommutes with logical X (in the centralizer). -/
+lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup :=
+  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
+    logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX
+
+/-- Z_on_qubit2 is a nontrivial logical operator of weight 1. -/
+lemma Z_on_qubit2_nontrivial_logical :
+    IsNontrivialLogicalOperator Z_on_qubit2 stabilizerGroup :=
+  ⟨Z_on_qubit2_mem_centralizer, by simp only [stabilizerGroup]; exact Z_on_qubit2_not_mem_subgroup⟩
+
+/-- The 3-qubit repetition code has code distance 1. -/
+theorem repetitionCode3_has_distance_one : HasCodeDistance stabilizerCode 1 := by
+  refine ⟨by decide, ?_, ⟨Z_on_qubit2, Z_on_qubit2_nontrivial_logical, weight_Z_on_qubit2⟩⟩
+  intro g _ hw
+  exact Nat.one_le_of_lt hw
+
+/-- The minimum weight of a nontrivial logical operator for the repetition code is 1. -/
+theorem repetitionCode3_min_weight_nontrivial_logical (g : NQubitPauliGroupElement 3)
+    (hg : IsNontrivialLogicalOperator g stabilizerGroup)
+    (hw : 0 < NQubitPauliGroupElement.weight g) :
+    NQubitPauliGroupElement.weight g ≥ 1 :=
+  HasCodeDistance.min_weight stabilizerCode 1 repetitionCode3_has_distance_one g hg
+    hw
 
 end RepetitionCode3
 end StabilizerGroup
