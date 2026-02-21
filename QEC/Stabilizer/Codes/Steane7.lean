@@ -3,12 +3,13 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
-import QEC.Stabilizer.Core.StabilizerCode
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.BinarySymplectic.Core
 import QEC.Stabilizer.BinarySymplectic.CheckMatrix
+import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
 import QEC.Stabilizer.BinarySymplectic.SymplecticSpan
+import QEC.Stabilizer.Core.StabilizerCode
 import QEC.Stabilizer.BinarySymplectic.IndependentEquiv
 import QEC.Stabilizer.BinarySymplectic.SymplecticInner
 import QEC.Stabilizer.PauliGroup.NQubitOperator
@@ -340,6 +341,15 @@ lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generat
   simp only [generatorsList, List.mem_cons, List.mem_nil_iff, or_false] at hg
   rcases hg with rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
 
+/-- The check-matrix rows of the Steane generators are linearly independent. -/
+theorem rowsLinearIndependent_generatorsList :
+    NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by decide
+
+/-- The Steane generator list is an independent generating set. -/
+theorem GeneratorsIndependent_7_generatorsList : GeneratorsIndependent 7 generatorsList :=
+  GeneratorsIndependent_of_rowsLinearIndependent 7 generatorsList
+    rowsLinearIndependent_generatorsList
+
 /-- Logical X: X on all seven qubits. -/
 def logicalX : NQubitPauliGroupElement 7 :=
   ⟨0, NQubitPauliOperator.X 7⟩
@@ -479,15 +489,6 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
     · exact logicalZ_commutes_X1.symm
     · exact logicalZ_commutes_X2.symm
     · exact logicalZ_commutes_X3.symm
-
-/-- The Steane [[7,1,3]] code as a stabilizer code (group + logical X/Z with correctness proofs). -/
-noncomputable def stabilizerCode : StabilizerCode 7 :=
-  { toStabilizerGroup := stabilizerGroup
-    logicalX := logicalX
-    logicalZ := logicalZ
-    logicalX_mem_centralizer := logicalX_mem_centralizer
-    logicalZ_mem_centralizer := logicalZ_mem_centralizer
-    logicalX_anticommutes_logicalZ := logicalX_anticommutes_logicalZ }
 
 end Steane7
 end StabilizerGroup

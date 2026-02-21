@@ -1,13 +1,14 @@
 import QEC.Stabilizer.BinarySymplectic.Core
 import QEC.Stabilizer.BinarySymplectic.CheckMatrix
+import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
 import QEC.Stabilizer.BinarySymplectic.SymplecticSpan
+import QEC.Stabilizer.Core.StabilizerCode
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
-import QEC.Stabilizer.Core.StabilizerCode
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 
 namespace Quantum
@@ -50,6 +51,15 @@ lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generat
   intro g hg
   simp only [generatorsList, List.mem_cons, List.mem_nil_iff, or_false] at hg
   rcases hg with rfl | rfl <;> rfl
+
+/-- The check-matrix rows of the repetition-code generators are linearly independent. -/
+theorem rowsLinearIndependent_generatorsList :
+    NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by decide
+
+/-- The repetition-code generator list is an independent generating set. -/
+theorem GeneratorsIndependent_3_generatorsList : GeneratorsIndependent 3 generatorsList :=
+  GeneratorsIndependent_of_rowsLinearIndependent 3 generatorsList
+    rowsLinearIndependent_generatorsList
 
 /-- The generators commute (proved componentwise). -/
 lemma Z1Z2_commutes_Z2Z3 : Z1Z2 * Z2Z3 = Z2Z3 * Z1Z2 := by
@@ -223,15 +233,6 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
       rw [NQubitPauliGroupElement.mul_assoc, ← h, inv_mul_cancel_left,
         NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
     exact mul_right_cancel H
-
-/-- The 3-qubit repetition code as a stabilizer code (group + logical X/Z and proofs). -/
-noncomputable def stabilizerCode : StabilizerCode 3 :=
-  { toStabilizerGroup := stabilizerGroup
-    logicalX := logicalX
-    logicalZ := logicalZ
-    logicalX_mem_centralizer := logicalX_mem_centralizer
-    logicalZ_mem_centralizer := logicalZ_mem_centralizer
-    logicalX_anticommutes_logicalZ := logicalX_anticommutes_logicalZ }
 
 end RepetitionCode3
 end StabilizerGroup
