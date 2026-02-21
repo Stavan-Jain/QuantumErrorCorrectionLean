@@ -294,6 +294,47 @@ noncomputable instance : Group (NQubitPauliGroupElement n) where
   mul_one := mul_one
   inv_mul_cancel := mul_left_inv
 
+/-!
+## Pauli weight and support
+
+The **support** and **weight** of a group element are those of its operator part; the phase
+does not affect them.
+-/
+
+/-- The support of an n-qubit Pauli group element: qubits where the operator is not I. -/
+def support (p : NQubitPauliGroupElement n) : Finset (Fin n) :=
+  NQubitPauliOperator.support p.operators
+
+/-- The Pauli weight: number of qubits on which the element acts nontrivially (not I). -/
+def weight (p : NQubitPauliGroupElement n) : ℕ :=
+  NQubitPauliOperator.weight p.operators
+
+/-- Support is determined by the operator part only. -/
+@[simp] lemma support_ofOperator (op : NQubitPauliOperator n) :
+    support (ofOperator op) = NQubitPauliOperator.support op := rfl
+
+/-- Weight is determined by the operator part only. -/
+@[simp] lemma weight_ofOperator (op : NQubitPauliOperator n) :
+    weight (ofOperator op) = NQubitPauliOperator.weight op := rfl
+
+/-- The identity element has empty support. -/
+@[simp] lemma support_one (n : ℕ) : support (1 : NQubitPauliGroupElement n) = ∅ := by
+  simp [support, one_def, NQubitPauliOperator.support_identity]
+
+/-- The identity element has weight zero. -/
+@[simp] lemma weight_one (n : ℕ) : weight (1 : NQubitPauliGroupElement n) = 0 := by
+  simp [weight, one_def, NQubitPauliOperator.weight_identity]
+
+/-- A qubit is in the support iff the operator at that qubit is not I. -/
+lemma mem_support (p : NQubitPauliGroupElement n) (i : Fin n) :
+    i ∈ support p ↔ p.operators i ≠ PauliOperator.I :=
+  NQubitPauliOperator.mem_support p.operators i
+
+/-- Weight is zero iff the operator part is the identity. (Phase is irrelevant to weight.) -/
+lemma weight_eq_zero_iff (p : NQubitPauliGroupElement n) :
+    weight p = 0 ↔ p.operators = NQubitPauliOperator.identity n := by
+  simp [weight, NQubitPauliOperator.weight_eq_zero_iff]
+
 end NQubitPauliGroupElement
 
 end Quantum

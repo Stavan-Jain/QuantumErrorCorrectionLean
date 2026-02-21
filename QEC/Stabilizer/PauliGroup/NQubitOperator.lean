@@ -151,6 +151,76 @@ noncomputable def toGate (op : NQubitPauliOperator n) : QuantumGate (NQubitBasis
 /-- Connection between `toGate` and `toMatrix` for n-qubit operators. -/
 @[simp] lemma toGate_val (op : NQubitPauliOperator n) : (op.toGate).val = op.toMatrix := rfl
 
+/-!
+## Pauli weight and support
+
+The **support** of an n-qubit Pauli operator is the set of qubits on which it acts nontrivially
+(i.e., not as I). The **weight** is the size of the support.
+-/
+
+/-- The support of an n-qubit Pauli operator: qubits where the operator is not I. -/
+def support (op : NQubitPauliOperator n) : Finset (Fin n) :=
+  Finset.univ.filter (fun i => op i ≠ PauliOperator.I)
+
+/-- The Pauli weight: number of qubits on which the operator is not I. -/
+def weight (op : NQubitPauliOperator n) : ℕ :=
+  (support op).card
+
+/-- A qubit is in the support iff the operator at that qubit is not I. -/
+@[simp] lemma mem_support (op : NQubitPauliOperator n) (i : Fin n) :
+    i ∈ support op ↔ op i ≠ PauliOperator.I := by
+  simp [support]
+
+/-- The identity operator has empty support. -/
+@[simp] lemma support_identity (n : ℕ) : support (identity n) = ∅ := by
+  ext i
+  simp [support, identity]
+
+/-- The identity operator has weight zero. -/
+@[simp] lemma weight_identity (n : ℕ) : weight (identity n) = 0 := by
+  simp [weight, support_identity]
+
+/-- The all-X operator has full support. -/
+lemma support_X (n : ℕ) : support (X n) = Finset.univ := by
+  ext i
+  simp [support, X]
+
+/-- The all-X operator has weight n. -/
+@[simp] lemma weight_X (n : ℕ) : weight (X n) = n := by
+  simp [weight, support_X]
+
+/-- The all-Z operator has full support. -/
+lemma support_Z (n : ℕ) : support (Z n) = Finset.univ := by
+  ext i
+  simp [support, Z]
+
+/-- The all-Z operator has weight n. -/
+@[simp] lemma weight_Z (n : ℕ) : weight (Z n) = n := by
+  simp [weight, support_Z]
+
+/-- The all-Y operator has full support. -/
+lemma support_Y (n : ℕ) : support (Y n) = Finset.univ := by
+  ext i
+  simp [support, Y]
+
+/-- The all-Y operator has weight n. -/
+@[simp] lemma weight_Y (n : ℕ) : weight (Y n) = n := by
+  simp [weight, support_Y]
+
+/-- Weight is zero iff the operator is the identity. -/
+lemma weight_eq_zero_iff (op : NQubitPauliOperator n) :
+    weight op = 0 ↔ op = identity n := by
+  constructor
+  · intro h
+    ext i
+    have hem : support op = ∅ := Finset.card_eq_zero.mp (by rw [weight] at h; exact h)
+    by_contra hi
+    have mem : i ∈ support op := by rw [mem_support]; exact hi
+    rw [hem] at mem
+    exact Finset.notMem_empty i mem
+  · intro heq
+    rw [heq, weight_identity]
+
 end NQubitPauliOperator
 
 end Quantum
