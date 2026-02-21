@@ -1,4 +1,5 @@
 import Mathlib.Data.ZMod.Basic
+import Mathlib.LinearAlgebra.Span.Basic
 import Mathlib.Tactic
 import QEC.Stabilizer.BinarySymplectic.Core
 import QEC.Stabilizer.PauliGroupSingle
@@ -115,5 +116,51 @@ theorem allX_allZ_anticommute (n : ℕ) (hn : Odd n) :
   exact hn
 
 end NQubitPauliOperator
+
+/-! ## Closure → span (general set)
+
+The same proof idea as `mem_closure_implies_symp_in_span` in `SymplecticSpan.lean` (for
+`S = listToSet L`), but for an arbitrary set `S`. Used by `IndependentEquiv` for
+`S = listToSet L \ {g}`. -/
+
+open NQubitPauliOperator Submodule
+
+/-- The symplectic vector of the product is the sum of the symplectic vectors. -/
+lemma toSymplectic_mul (p q : NQubitPauliGroupElement n) (j : Fin (n + n)) :
+    toSymplectic (p * q).operators j = toSymplectic p.operators j + toSymplectic q.operators j := by
+  rw [NQubitPauliGroupElement.mul_eq p q]
+  exact toSymplectic_add p.operators q.operators j
+
+/-- The symplectic vector of the identity is zero. -/
+lemma toSymplectic_one_operators :
+    toSymplectic (1 : NQubitPauliGroupElement n).operators = 0 := by
+  ext j
+  simp only [NQubitPauliGroupElement.one_operators_def, toSymplectic, Pi.zero_apply,
+    NQubitPauliOperator.identity, PauliOperator.toSymplecticSingle_I]
+  split_ifs <;> rfl
+
+/-- The inverse has the same operator part, so the same symplectic vector. -/
+lemma toSymplectic_inv_operators (g : NQubitPauliGroupElement n) :
+    toSymplectic (g⁻¹).operators = toSymplectic g.operators := by
+  simp only [NQubitPauliGroupElement.inv_eq, NQubitPauliGroupElement.inv]
+
+/-- If an element is in the subgroup closure of a set, its symplectic vector is in the
+  span of the symplectic vectors of the set. -/
+lemma toSymplectic_mem_span_of_mem_closure {S : Set (NQubitPauliGroupElement n)}
+    {x : NQubitPauliGroupElement n} (hx : x ∈ Subgroup.closure S) :
+    toSymplectic x.operators ∈ span (ZMod 2) ((fun g => toSymplectic g.operators) '' S) := by
+  let sp := span (ZMod 2) ((fun g => toSymplectic g.operators) '' S)
+  suffices toSymplectic x.operators ∈ sp by exact this
+  refine Subgroup.closure_induction
+    (p := fun k _ => toSymplectic k.operators ∈ sp) ?_ ?_ ?_ ?_ hx
+  · exact fun g hg => subset_span (Set.mem_image_of_mem _ hg)
+  · change toSymplectic (1 : NQubitPauliGroupElement n).operators ∈ sp
+    rw [toSymplectic_one_operators]; exact zero_mem sp
+  · intro a b _ _ ha hb
+    have heq : toSymplectic (a * b).operators = toSymplectic a.operators +
+    toSymplectic b.operators :=
+      by ext j; exact toSymplectic_mul a b j
+    rw [heq]; exact add_mem ha hb
+  · intro a _ ha; rw [toSymplectic_inv_operators]; exact ha
 
 end Quantum

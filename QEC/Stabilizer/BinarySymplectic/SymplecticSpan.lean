@@ -30,17 +30,24 @@ open Submodule
 def sympSpan (L : List (NQubitPauliGroupElement n)) : Submodule (ZMod 2) (Fin (n + n) → ZMod 2) :=
   span (ZMod 2) (Set.range (checkMatrix L))
 
-/-- The symplectic vector of the identity operator is the zero vector. -/
-lemma toSymplectic_one_operators : toSymplectic (1 : NQubitPauliGroupElement n).operators = 0 := by
-  ext j
-  simp only [NQubitPauliGroupElement.one_operators_def, toSymplectic, Pi.zero_apply,
-    NQubitPauliOperator.identity, PauliOperator.toSymplecticSingle_I]
-  split_ifs <;> rfl
-
-/-- The inverse has the same operator part, so the same symplectic vector. -/
-lemma toSymplectic_inv_operators (g : NQubitPauliGroupElement n) :
-    toSymplectic (g⁻¹).operators = toSymplectic g.operators := by
-  simp only [NQubitPauliGroupElement.inv_eq, NQubitPauliGroupElement.inv]
+/-- The span of the check-matrix rows equals the span of the symplectic image of `listToSet L`. -/
+lemma sympSpan_eq_span_listToSet (L : List (NQubitPauliGroupElement n)) :
+    sympSpan L = span (ZMod 2) ((fun g => toSymplectic g.operators) '' listToSet L) := by
+  rw [sympSpan]
+  congr 1
+  ext v
+  simp only [listToSet, Set.mem_range, Set.mem_image, Set.mem_setOf, List.mem_iff_get]
+  constructor
+  · rintro ⟨i, hi⟩
+    use L.get i
+    constructor
+    · use i
+    · rw [← hi]
+      ext j; rfl
+  · rintro ⟨g, ⟨i, rfl⟩, hg⟩
+    use i
+    rw [← hg]
+    ext j; rfl
 
 /-- If `g` is in the list `L`, then its symplectic vector is a row of the check matrix. -/
 lemma mem_listToSet_symp_in_range (L : List (NQubitPauliGroupElement n))
@@ -58,27 +65,8 @@ theorem mem_closure_implies_symp_in_span (L : List (NQubitPauliGroupElement n))
     (_ : AllPhaseZero L) (g : NQubitPauliGroupElement n)
     (hg : g ∈ Subgroup.closure (listToSet L)) :
     toSymplectic g.operators ∈ sympSpan L := by
-  refine Subgroup.closure_induction
-    (p := fun (k : NQubitPauliGroupElement n) _ => toSymplectic k.operators ∈ sympSpan L)
-    (fun k hk => subset_span (mem_listToSet_symp_in_range L k hk))
-    (by change (1 : NQubitPauliGroupElement n).operators.toSymplectic ∈ sympSpan L
-        rw [toSymplectic_one_operators]; exact zero_mem _)
-    (fun x y _ _ hx hy => ?_)
-    (fun x _ hx => ?_)
-    hg
-  · change (x * y).operators.toSymplectic ∈ sympSpan L
-    have heq : (x * y).operators.toSymplectic =
-        x.operators.toSymplectic + y.operators.toSymplectic := by
-      ext j
-      have h_mul_op : (NQubitPauliGroupElement.mul x y).operators =
-          (NQubitPauliGroupElement.mulOp x.operators y.operators).operators := rfl
-      rw [NQubitPauliGroupElement.mul_eq, h_mul_op, toSymplectic_add]
-      conv_rhs => rw [Pi.add_apply]
-    rw [heq]
-    exact add_mem hx hy
-  · change (x⁻¹).operators.toSymplectic ∈ sympSpan L
-    rw [toSymplectic_inv_operators]
-    exact hx
+  rw [sympSpan_eq_span_listToSet]
+  exact Quantum.toSymplectic_mem_span_of_mem_closure hg
 
 /-- Linear relation on the span: zero/add/smul cases are handled once. To prove
   ∀ v ∈ sympSpan L, (Finset.sum indices fun j => v j) = 0, it suffices to prove that
