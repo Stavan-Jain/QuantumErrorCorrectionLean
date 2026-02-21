@@ -490,6 +490,26 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
     · exact logicalZ_commutes_X2.symm
     · exact logicalZ_commutes_X3.symm
 
+/-!
+## StabilizerCode [[7, 1]]
+-/
+
+/-- The Steane code as a stabilizer code [[7, 1]]: one logical qubit. -/
+noncomputable def stabilizerCode : StabilizerCode 7 1 where
+  hk := by decide
+  toStabilizerGroup := stabilizerGroup
+  generatorsList := generatorsList
+  subgroup_eq_closure := by rw [listToSet_generatorsList]; simp only [stabilizerGroup]; rfl
+  generators_length := rfl
+  generators_phaseZero := AllPhaseZero_generatorsList
+  generators_independent := GeneratorsIndependent_7_generatorsList
+  logicalX := fun _ => logicalX
+  logicalZ := fun _ => logicalZ
+  logicalX_mem_centralizer := fun _ => logicalX_mem_centralizer
+  logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer
+  logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ
+  logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
+
 end Steane7
 end StabilizerGroup
 

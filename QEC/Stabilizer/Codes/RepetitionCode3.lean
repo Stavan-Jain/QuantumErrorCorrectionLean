@@ -234,6 +234,26 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
         NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
     exact mul_right_cancel H
 
+/-!
+## StabilizerCode [[3, 1]]
+-/
+
+/-- The 3-qubit repetition code as a stabilizer code [[3, 1]]: one logical qubit. -/
+noncomputable def stabilizerCode : StabilizerCode 3 1 where
+  hk := by decide
+  toStabilizerGroup := stabilizerGroup
+  generatorsList := generatorsList
+  subgroup_eq_closure := by rw [listToSet_generatorsList]; simp only [stabilizerGroup]; rfl
+  generators_length := rfl
+  generators_phaseZero := AllPhaseZero_generatorsList
+  generators_independent := GeneratorsIndependent_3_generatorsList
+  logicalX := fun _ => logicalX
+  logicalZ := fun _ => logicalZ
+  logicalX_mem_centralizer := fun _ => logicalX_mem_centralizer
+  logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer
+  logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ
+  logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
+
 end RepetitionCode3
 end StabilizerGroup
 
