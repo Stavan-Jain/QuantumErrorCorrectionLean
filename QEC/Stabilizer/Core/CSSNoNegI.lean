@@ -24,11 +24,6 @@ namespace CSS
 
 open NQubitPauliGroupElement
 
-lemma negIdentity_ne_one (n : ℕ) : (negIdentity n : NQubitPauliGroupElement n) ≠ 1 := by
-  intro h
-  have := congrArg NQubitPauliGroupElement.phasePower h
-  simp [negIdentity] at this
-
 /-- If `ZGen` and `XGen` are phase-0 Z-type / X-type generators that commute generatorwise,
 then `negIdentity n` is not in the subgroup they generate. -/
 theorem negIdentity_not_mem_closure_union

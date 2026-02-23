@@ -1,3 +1,4 @@
+import Mathlib.Data.List.OfFn
 import Mathlib.LinearAlgebra.LinearIndependent.Defs
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.LinearAlgebra.Span.Basic
@@ -44,10 +45,61 @@ def listToSet (L : List (NQubitPauliGroupElement n)) : Set (NQubitPauliGroupElem
 def AllPhaseZero (L : List (NQubitPauliGroupElement n)) : Prop :=
   ∀ g ∈ L, g.phasePower = 0
 
+/-!
+## Boilerplate reduction for code definitions
+
+When a code defines `generatorsList` as either `List.ofFn f` or a literal list `[g₁, g₂, ...]`,
+these lemmas avoid repeating the same proof pattern for `listToSet generatorsList = generators`
+and `AllPhaseZero generatorsList`.
+-/
+
+/-- The set of elements of `List.ofFn f` is `Set.range f`. -/
+lemma listToSet_ofFn {k : ℕ} (f : Fin k → NQubitPauliGroupElement n) :
+    listToSet (List.ofFn f) = Set.range f := by
+  ext g
+  rw [listToSet, Set.mem_setOf, Set.mem_range]
+  exact List.mem_ofFn' f g
+
+/-- `List.ofFn f` has all phase powers 0 iff each `f i` has phase power 0. -/
+lemma AllPhaseZero_ofFn {k : ℕ} (f : Fin k → NQubitPauliGroupElement n)
+    (h : ∀ i, (f i).phasePower = 0) : AllPhaseZero (List.ofFn f) :=
+  (List.forall_mem_ofFn_iff
+    (P := fun g : NQubitPauliGroupElement n => g.phasePower = 0)).mpr h
+
+/-- The set of elements of `a :: L` is `insert a (listToSet L)`. -/
+@[simp] lemma listToSet_cons (a : NQubitPauliGroupElement n) (L : List
+(NQubitPauliGroupElement n)) :
+    listToSet (a :: L) = insert a (listToSet L) := by
+  ext g
+  simp only [listToSet, Set.mem_setOf, Set.mem_insert_iff, List.mem_cons]
+
+/-- The set of elements of the empty list is empty. -/
+@[simp] lemma listToSet_nil : listToSet ([] : List (NQubitPauliGroupElement n)) = ∅ := by
+  ext g
+  simp only [listToSet, Set.mem_setOf, List.mem_nil_iff, Set.mem_empty_iff_false]
+
+/-- The set of elements of `[a]` is `{a}`. -/
+@[simp] lemma listToSet_singleton (a : NQubitPauliGroupElement n) : listToSet [a] = {a} := by
+  ext g
+  simp only [listToSet, Set.mem_setOf, List.mem_cons, List.mem_nil_iff, or_false,
+    Set.mem_singleton_iff]
+
+/-- `AllPhaseZero (a :: L)` iff `a` has phase 0 and `AllPhaseZero L`. -/
+lemma AllPhaseZero_cons (a : NQubitPauliGroupElement n) (L : List (NQubitPauliGroupElement n)) :
+    AllPhaseZero (a :: L) ↔ a.phasePower = 0 ∧ AllPhaseZero L := by
+  simp only [AllPhaseZero, List.mem_cons, or_imp]
+  constructor
+  · intro h
+    exact ⟨(h a).1 rfl, fun g hg => (h g).2 hg⟩
+  · rintro ⟨ha, hL⟩ g
+    exact ⟨fun hga => hga.symm ▸ ha, fun hg => hL g hg⟩
+
+/-- The empty list has all phase powers 0. -/
+@[simp] lemma AllPhaseZero_nil : AllPhaseZero ([] : List (NQubitPauliGroupElement n)) :=
+  fun g h => by cases h
+
 /-- If the check-matrix rows of `L` are linearly independent, then the set of elements is an
-  independent generating set. Use this to prove that code generator lists (e.g. `generatorsList`
-  for RepetitionCode3 or Steane7) satisfy `Subgroup.IndependentGenerators (listToSet L)` by
-  first proving `rowsLinearIndependent L`. -/
+  independent generating set. -/
 theorem rowsLinearIndependent_implies_independentGenerators (L : List (NQubitPauliGroupElement n))
     (h : rowsLinearIndependent L) :
     Subgroup.IndependentGenerators (listToSet L) := by

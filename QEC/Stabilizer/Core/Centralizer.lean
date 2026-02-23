@@ -1,5 +1,6 @@
 import Mathlib.GroupTheory.Subgroup.Centralizer
 import QEC.Stabilizer.Core.StabilizerGroup
+import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.PauliGroup
 import QEC.Stabilizer.PauliGroup.Commutation
 
@@ -27,6 +28,15 @@ def centralizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :
 lemma mem_centralizer_iff (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) :
     g ∈ centralizer S ↔ ∀ h ∈ S.toSubgroup, h * g = g * h :=
   Subgroup.mem_centralizer_iff
+
+/-- When the stabilizer subgroup is the closure of a set of generators,
+membership in the centralizer reduces to commuting with each generator. -/
+lemma mem_centralizer_iff_closure (g : NQubitPauliGroupElement n) (S : StabilizerGroup n)
+    (genSet : Set (NQubitPauliGroupElement n)) (h_closure : S.toSubgroup =
+    Subgroup.closure genSet) :
+    g ∈ centralizer S ↔ ∀ s ∈ genSet, s * g = g * s := by
+  rw [mem_centralizer_iff, h_closure]
+  exact Subgroup.forall_comm_closure_iff g genSet
 
 /-- Every element of the stabilizer group lies in its centralizer (S is abelian). -/
 theorem stabilizer_le_centralizer (S : StabilizerGroup n) :

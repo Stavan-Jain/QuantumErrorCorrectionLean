@@ -11,6 +11,7 @@ import QEC.Stabilizer.BinarySymplectic.SymplecticInner
 import QEC.Stabilizer.BinarySymplectic.CheckMatrix
 import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
 import QEC.Stabilizer.BinarySymplectic.Core
+import QEC.Stabilizer.BinarySymplectic.IndependentEquiv
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 import QEC.Stabilizer.PauliGroupSingle.Operator
 
@@ -69,25 +70,13 @@ lemma generatorsList_get (n : ℕ) (i : Fin (generatorsList n).length) :
 /-- The list of generators has the same elements as `ZGenerators n`. -/
 lemma listToSet_generatorsList (n : ℕ) :
     listToSet (generatorsList n) = ZGenerators n := by
-  ext g
-  simp only [listToSet, Set.mem_setOf, ZGenerators, Set.mem_range]
-  rw [List.mem_iff_get]
-  constructor
-  · intro ⟨i, hi⟩
-    use Fin.cast (generatorsList_length n) i
-    rw [← hi, generatorsList_get]
-  · intro ⟨i, hi⟩
-    use Fin.cast (generatorsList_length n).symm i
-    rw [generatorsList_get (i := Fin.cast (generatorsList_length n).symm i),
-      (Fin.rightInverse_cast (generatorsList_length n)) i, hi]
+  rw [generatorsList, ZGenerators, NQubitPauliGroupElement.listToSet_ofFn]
 
 /-- Every element of the generators list has phase power 0. -/
 lemma AllPhaseZero_generatorsList (n : ℕ) :
     NQubitPauliGroupElement.AllPhaseZero (generatorsList n) := by
-  intro g hg
-  obtain ⟨i, rfl⟩ := List.mem_iff_get.mp hg
-  rw [generatorsList_get]
-  rfl
+  rw [generatorsList]
+  exact NQubitPauliGroupElement.AllPhaseZero_ofFn (ZPair n) (fun _ => rfl)
 
 def subgroup (n : ℕ) : Subgroup (NQubitPauliGroupElement (n + 2)) :=
   Subgroup.closure (generators n)
@@ -421,48 +410,24 @@ noncomputable def stabilizerGroup (n : ℕ) : StabilizerGroup (n + 2) :=
 /-- Logical X commutes with every element of the stabilizer. -/
 theorem logicalX_mem_centralizer (n : ℕ) :
     logicalX n ∈ centralizer (stabilizerGroup n) := by
-  rw [StabilizerGroup.mem_centralizer_iff]
-  intro _ hh
-  refine Subgroup.closure_induction (p := fun g _ => g * logicalX n = logicalX n * g)
-    (fun g hg => ?_)
-    (by simp only [NQubitPauliGroupElement.one_mul, NQubitPauliGroupElement.mul_one])
-    (fun x y _ _ hx hy => ?_) (fun x _ h => ?_) hh
-  · simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hg
-    rcases hg with ⟨i, rfl⟩ | hEmp
-    · exact (logicalX_commutes_ZPair n i).symm
-    · exact False.elim hEmp
-  · calc (x * y) * logicalX n = x * (y * logicalX n) := by rw [NQubitPauliGroupElement.mul_assoc]
-      _ = x * (logicalX n * y) := by rw [hy]
-      _ = (x * logicalX n) * y := by rw [← NQubitPauliGroupElement.mul_assoc]
-      _ = (logicalX n * x) * y := by rw [hx]
-      _ = logicalX n * (x * y) := by rw [NQubitPauliGroupElement.mul_assoc]
-  · have H : (x⁻¹ * logicalX n) * x = (logicalX n * x⁻¹) * x := by
-      rw [NQubitPauliGroupElement.mul_assoc, ← h, inv_mul_cancel_left,
-        NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
-    exact mul_right_cancel H
+  rw [StabilizerGroup.mem_centralizer_iff_closure (logicalX n) (stabilizerGroup n) (generators n)
+    (by simp only [stabilizerGroup, subgroup])]
+  intro s hs
+  simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hs
+  rcases hs with ⟨i, rfl⟩ | hEmp
+  · exact (logicalX_commutes_ZPair n i).symm
+  · exact False.elim hEmp
 
 /-- Logical Z commutes with every element of the stabilizer. -/
 theorem logicalZ_mem_centralizer (n : ℕ) :
     logicalZ n ∈ centralizer (stabilizerGroup n) := by
-  rw [StabilizerGroup.mem_centralizer_iff]
-  intro _ hh
-  refine Subgroup.closure_induction (p := fun g _ => g * logicalZ n = logicalZ n * g)
-    (fun g hg => ?_)
-    (by simp only [NQubitPauliGroupElement.one_mul, NQubitPauliGroupElement.mul_one])
-    (fun x y _ _ hx hy => ?_) (fun x _ h => ?_) hh
-  · simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hg
-    rcases hg with ⟨i, rfl⟩ | hEmp
-    · exact (logicalZ_commutes_ZPair n i).symm
-    · exact False.elim hEmp
-  · calc (x * y) * logicalZ n = x * (y * logicalZ n) := by rw [NQubitPauliGroupElement.mul_assoc]
-      _ = x * (logicalZ n * y) := by rw [hy]
-      _ = (x * logicalZ n) * y := by rw [← NQubitPauliGroupElement.mul_assoc]
-      _ = (logicalZ n * x) * y := by rw [hx]
-      _ = logicalZ n * (x * y) := by rw [NQubitPauliGroupElement.mul_assoc]
-  · have H : (x⁻¹ * logicalZ n) * x = (logicalZ n * x⁻¹) * x := by
-      rw [NQubitPauliGroupElement.mul_assoc, ← h, inv_mul_cancel_left,
-        NQubitPauliGroupElement.mul_assoc, inv_mul_cancel, NQubitPauliGroupElement.mul_one]
-    exact mul_right_cancel H
+  rw [StabilizerGroup.mem_centralizer_iff_closure (logicalZ n) (stabilizerGroup n) (generators n)
+    (by simp only [stabilizerGroup, subgroup])]
+  intro s hs
+  simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hs
+  rcases hs with ⟨i, rfl⟩ | hEmp
+  · exact (logicalZ_commutes_ZPair n i).symm
+  · exact False.elim hEmp
 
 /-!
 ## StabilizerCode [[n+2, 1]] for odd n

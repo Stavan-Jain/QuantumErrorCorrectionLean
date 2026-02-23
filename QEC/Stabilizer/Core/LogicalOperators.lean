@@ -16,11 +16,6 @@ operators are those in the centralizer but not in the stabilizer. Two operators 
 differ by a stabilizer element act the same on the codespace (same logical operator).
 -/
 
-/-- A Pauli element is in the centralizer of S iff it commutes with every element of S.
-    Such elements preserve the codespace. -/
-def IsInCentralizer (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
-  g ∈ centralizer S
-
 /-- A nontrivial logical operator commutes with S but is not in S; it acts nontrivially
     on the logical qubits. -/
 def IsNontrivialLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
