@@ -23,6 +23,11 @@ stabilizer groups (no -I), the centralizer coincides with the normalizer.
 def centralizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
   Subgroup.centralizer (S.toSubgroup : Set (NQubitPauliGroupElement n))
 
+/-- The centralizer depends only on the underlying subgroup. -/
+lemma centralizer_eq_of_toSubgroup_eq (S T : StabilizerGroup n) (h : S.toSubgroup = T.toSubgroup) :
+    centralizer S = centralizer T := by
+  rw [centralizer, centralizer, h]
+
 /-- Membership in the centralizer is equivalent to commuting with every element
     of the stabilizer group. -/
 lemma mem_centralizer_iff (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) :

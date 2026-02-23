@@ -296,12 +296,6 @@ theorem generators_commute (n : ℕ) :
   simp [generators, XGenerators] at hg hh
   exact ZType_commutes (ZGenerators_are_ZType n g hg) (ZGenerators_are_ZType n h hh)
 
-theorem subgroup_is_abelian (n : ℕ) :
-    ∀ g ∈ subgroup n, ∀ h ∈ subgroup n, g * h = h * g := by
-  simpa [subgroup] using
-    (Subgroup.abelian_closure_of_pairwise_commute (G := NQubitPauliGroupElement (n + 2))
-      (generators n) (generators_commute n))
-
 /-!
 ## No `-I` in the generated subgroup (CSS lemma with empty X-generators)
 -/
@@ -319,6 +313,10 @@ theorem negIdentity_not_mem (n : ℕ) :
   simpa [subgroup, generators] using
     (CSS.negIdentity_not_mem_closure_union (ZGenerators n) (XGenerators n)
       (ZGenerators_are_ZType n) hX hZX)
+
+lemma listToSet_generators_eq (n : ℕ) :
+    listToSet (generatorsList n) = generators n := by
+  rw [listToSet_generatorsList, generators, XGenerators, Set.union_empty]
 
 /-!
 ## Logical operators (one logical qubit when `n+2` is odd)
@@ -399,19 +397,21 @@ private lemma logicalZ_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
 ## Bundled `StabilizerGroup (n+2)`
 -/
 
+/-- The repetition code as a stabilizer group (canonical: from generator list). -/
 noncomputable def stabilizerGroup (n : ℕ) : StabilizerGroup (n + 2) :=
-{ toSubgroup := subgroup n
-, is_abelian := by
-    intro g h hg hh
-    exact subgroup_is_abelian n g hg h hh
-, no_neg_identity := by
-    simpa using negIdentity_not_mem n }
+  mkStabilizerFromGenerators (n + 2) (generatorsList n)
+    (by rw [listToSet_generators_eq]; exact generators_commute n)
+    (by rw [listToSet_generators_eq]; exact negIdentity_not_mem n)
+
+lemma stabilizerGroup_toSubgroup_eq (n : ℕ) : (stabilizerGroup n).toSubgroup = subgroup n := by
+  simp only [stabilizerGroup, mkStabilizerFromGenerators, subgroup]
+  rw [listToSet_generators_eq]
 
 /-- Logical X commutes with every element of the stabilizer. -/
 theorem logicalX_mem_centralizer (n : ℕ) :
     logicalX n ∈ centralizer (stabilizerGroup n) := by
   rw [StabilizerGroup.mem_centralizer_iff_closure (logicalX n) (stabilizerGroup n) (generators n)
-    (by simp only [stabilizerGroup, subgroup])]
+    (stabilizerGroup_toSubgroup_eq n)]
   intro s hs
   simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hs
   rcases hs with ⟨i, rfl⟩ | hEmp
@@ -422,7 +422,7 @@ theorem logicalX_mem_centralizer (n : ℕ) :
 theorem logicalZ_mem_centralizer (n : ℕ) :
     logicalZ n ∈ centralizer (stabilizerGroup n) := by
   rw [StabilizerGroup.mem_centralizer_iff_closure (logicalZ n) (stabilizerGroup n) (generators n)
-    (by simp only [stabilizerGroup, subgroup])]
+    (stabilizerGroup_toSubgroup_eq n)]
   intro s hs
   simp only [generators, XGenerators, Set.mem_union, Set.mem_empty_iff_false] at hs
   rcases hs with ⟨i, rfl⟩ | hEmp
@@ -437,23 +437,22 @@ qubits; they anticommute only when the number of physical qubits `n+2` is odd, s
 is defined only for odd `n` (i.e. `Odd (n + 2)`).
 -/
 
+private def logicalOpsRepN (n : ℕ) (hn : Odd (n + 2)) :
+    Fin 1 → LogicalQubitOps (n + 2) (stabilizerGroup n) :=
+  fun _ => ⟨logicalX n, logicalZ n, logicalX_mem_centralizer n, logicalZ_mem_centralizer n,
+    logicalX_anticommutes_logicalZ n hn⟩
+
 /-- The parametric repetition code as a stabilizer code [[n+2, 1]] when `n+2` is odd. -/
 noncomputable def stabilizerCode (n : ℕ) (hn : Odd (n + 2)) :
     StabilizerCode (n + 2) 1 where
   hk := Nat.succ_le_succ (Nat.zero_le (n + 1))
-  toStabilizerGroup := stabilizerGroup n
   generatorsList := generatorsList n
-  subgroup_eq_closure := by
-    rw [listToSet_generatorsList]
-    simp only [stabilizerGroup, subgroup, generators, XGenerators, Set.union_empty]
   generators_length := by rw [generatorsList_length]; omega
   generators_phaseZero := AllPhaseZero_generatorsList n
   generators_independent := GeneratorsIndependent_generatorsList n
-  logicalX := fun _ => logicalX n
-  logicalZ := fun _ => logicalZ n
-  logicalX_mem_centralizer := fun _ => logicalX_mem_centralizer n
-  logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer n
-  logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ n hn
+  generators_commute := by rw [listToSet_generators_eq]; exact generators_commute n
+  closure_no_neg_identity := by rw [listToSet_generators_eq]; exact negIdentity_not_mem n
+  logicalOps := logicalOpsRepN n hn
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 
 end RepetitionCodeN

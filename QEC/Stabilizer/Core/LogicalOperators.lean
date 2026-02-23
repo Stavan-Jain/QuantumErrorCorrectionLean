@@ -21,6 +21,51 @@ differ by a stabilizer element act the same on the codespace (same logical opera
 def IsNontrivialLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
   g ∈ centralizer S ∧ g ∉ S.toSubgroup
 
+/-- Nontrivial logical operator is unchanged when the stabilizer has the same subgroup. -/
+theorem IsNontrivialLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElement n)
+    {S T : StabilizerGroup n} (h : S.toSubgroup = T.toSubgroup) :
+    (IsNontrivialLogicalOperator g S ↔ IsNontrivialLogicalOperator g T) := by
+  rw [IsNontrivialLogicalOperator, IsNontrivialLogicalOperator,
+    centralizer_eq_of_toSubgroup_eq S T h, h]
+
+/-- Data for one logical qubit: a pair of logical X and Z operators that commute with
+    the stabilizer and anticommute with each other. -/
+structure LogicalQubitOps (n : ℕ) (S : StabilizerGroup n) where
+  /-- Logical X operator. -/
+  xOp : NQubitPauliGroupElement n
+  /-- Logical Z operator. -/
+  zOp : NQubitPauliGroupElement n
+  /-- Logical X is in the centralizer of S. -/
+  x_mem_centralizer : xOp ∈ centralizer S
+  /-- Logical Z is in the centralizer of S. -/
+  z_mem_centralizer : zOp ∈ centralizer S
+  /-- X̄ and Z̄ anticommute. -/
+  anticommute : NQubitPauliGroupElement.Anticommute xOp zOp
+
+namespace LogicalQubitOps
+
+/-- The logical X operator is not in the stabilizer. -/
+theorem xOp_not_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
+    ops.xOp ∉ S.toSubgroup :=
+  not_mem_stabilizer_of_anticommutes_centralizer S ops.xOp ops.zOp ops.z_mem_centralizer
+    ops.anticommute
+
+/-- The logical Z operator is not in the stabilizer. -/
+theorem zOp_not_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
+    ops.zOp ∉ S.toSubgroup :=
+  not_mem_stabilizer_of_anticommutes_centralizer S ops.zOp ops.xOp ops.x_mem_centralizer
+    (NQubitPauliGroupElement.anticommute_symm ops.xOp ops.zOp ops.anticommute)
+
+/-- The logical X operator is a nontrivial logical operator. -/
+theorem xOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
+    IsNontrivialLogicalOperator ops.xOp S := ⟨ops.x_mem_centralizer, ops.xOp_not_mem⟩
+
+/-- The logical Z operator is a nontrivial logical operator. -/
+theorem zOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
+    IsNontrivialLogicalOperator ops.zOp S := ⟨ops.z_mem_centralizer, ops.zOp_not_mem⟩
+
+end LogicalQubitOps
+
 /-- Two Pauli elements represent the same logical operator if they differ by an element
     of the stabilizer (same coset of S in the centralizer). -/
 def SameLogicalOperator (L L' : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=

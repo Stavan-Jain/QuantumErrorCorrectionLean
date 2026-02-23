@@ -85,14 +85,6 @@ theorem generators_commute :
 def subgroup : Subgroup (NQubitPauliGroupElement 3) :=
   Subgroup.closure generators
 
-/-- Example usage: the generated subgroup is abelian, via `SubgroupLemmas`. -/
-theorem subgroup_is_abelian :
-    ∀ g ∈ subgroup, ∀ h ∈ subgroup, g * h = h * g := by
-  -- `subgroup` is definitionaly `Subgroup.closure generators`.
-  simpa [subgroup] using
-    (Subgroup.abelian_closure_of_pairwise_commute (G := NQubitPauliGroupElement 3)
-      generators generators_commute)
-
 /-!
 ## No `-I` in the generated subgroup
 
@@ -128,14 +120,15 @@ lemma negIdentity_not_mem :
     (CSS.negIdentity_not_mem_closure_union (n := 3) generators (∅ : Set (NQubitPauliGroupElement 3))
       generators_are_ZType hX hZX)
 
-/-- The 3-qubit repetition code as a stabilizer group: abelian closure of Z₁Z₂ and Z₂Z₃, no −I. -/
+/-- The 3-qubit repetition code as a stabilizer group (canonical: from generator list). -/
 noncomputable def stabilizerGroup : StabilizerGroup 3 :=
-{ toSubgroup := subgroup
-, is_abelian := by
-    intro g h hg hh
-    exact subgroup_is_abelian g hg h hh
-, no_neg_identity := by
-    simpa using negIdentity_not_mem }
+  mkStabilizerFromGenerators 3 generatorsList
+    (by rw [listToSet_generatorsList]; exact generators_commute)
+    (by rw [listToSet_generatorsList]; exact negIdentity_not_mem)
+
+lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := by
+  simp only [stabilizerGroup, mkStabilizerFromGenerators, subgroup]
+  rw [listToSet_generatorsList]
 
 /-!
 ## Logical operators
@@ -182,7 +175,7 @@ private lemma logicalX_commutes_Z2Z3 : logicalX * Z2Z3 = Z2Z3 * logicalX := by
 /-- Logical X commutes with every element of the stabilizer. -/
 theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := by
   rw [StabilizerGroup.mem_centralizer_iff_closure logicalX stabilizerGroup generators
-    (by simp only [stabilizerGroup, subgroup])]
+    stabilizerGroup_toSubgroup_eq]
   intro s hs
   simp [generators] at hs
   rcases hs with rfl | rfl
@@ -207,7 +200,7 @@ private lemma logicalZ_commutes_Z2Z3 : logicalZ * Z2Z3 = Z2Z3 * logicalZ := by
 /-- Logical Z commutes with every element of the stabilizer. -/
 theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := by
   rw [StabilizerGroup.mem_centralizer_iff_closure logicalZ stabilizerGroup generators
-    (by simp only [stabilizerGroup, subgroup])]
+    stabilizerGroup_toSubgroup_eq]
   intro s hs
   simp [generators] at hs
   rcases hs with rfl | rfl
@@ -218,20 +211,20 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
 ## StabilizerCode [[3, 1]]
 -/
 
+private def logicalOpsRep3 : Fin 1 → LogicalQubitOps 3 stabilizerGroup :=
+  fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+    logicalX_anticommutes_logicalZ⟩
+
 /-- The 3-qubit repetition code as a stabilizer code [[3, 1]]: one logical qubit. -/
 noncomputable def stabilizerCode : StabilizerCode 3 1 where
   hk := by decide
-  toStabilizerGroup := stabilizerGroup
   generatorsList := generatorsList
-  subgroup_eq_closure := by rw [listToSet_generatorsList]; simp only [stabilizerGroup]; rfl
   generators_length := rfl
   generators_phaseZero := AllPhaseZero_generatorsList
   generators_independent := GeneratorsIndependent_3_generatorsList
-  logicalX := fun _ => logicalX
-  logicalZ := fun _ => logicalZ
-  logicalX_mem_centralizer := fun _ => logicalX_mem_centralizer
-  logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer
-  logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ
+  generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
+  closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+  logicalOps := logicalOpsRep3
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 
 /-!
@@ -269,7 +262,7 @@ private lemma Z_on_qubit2_commutes_Z2Z3 : Z_on_qubit2 * Z2Z3 = Z2Z3 * Z_on_qubit
 /-- Z_on_qubit2 is in the centralizer of the repetition-code stabilizer. -/
 lemma Z_on_qubit2_mem_centralizer : Z_on_qubit2 ∈ centralizer stabilizerGroup := by
   rw [StabilizerGroup.mem_centralizer_iff_closure Z_on_qubit2 stabilizerGroup generators
-    (by simp only [stabilizerGroup, subgroup])]
+    stabilizerGroup_toSubgroup_eq]
   intro s hs
   simp [generators] at hs
   rcases hs with rfl | rfl
@@ -293,14 +286,17 @@ lemma Z_on_qubit2_anticommutes_logicalX :
   decide
 
 /-- Z_on_qubit2 is not in the stabilizer: it anticommutes with logical X (in the centralizer). -/
-lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup :=
-  not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
+lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup := by
+  rw [← stabilizerGroup_toSubgroup_eq]
+  exact not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
     logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX
 
 /-- Z_on_qubit2 is a nontrivial logical operator of weight 1. -/
 lemma Z_on_qubit2_nontrivial_logical :
     IsNontrivialLogicalOperator Z_on_qubit2 stabilizerGroup :=
-  ⟨Z_on_qubit2_mem_centralizer, by simp only [stabilizerGroup]; exact Z_on_qubit2_not_mem_subgroup⟩
+  ⟨Z_on_qubit2_mem_centralizer,
+    not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
+      logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX⟩
 
 /-- The 3-qubit repetition code has code distance 1. -/
 theorem repetitionCode3_has_distance_one : HasCodeDistance stabilizerCode 1 := by
@@ -313,8 +309,7 @@ theorem repetitionCode3_min_weight_nontrivial_logical (g : NQubitPauliGroupEleme
     (hg : IsNontrivialLogicalOperator g stabilizerGroup)
     (hw : 0 < NQubitPauliGroupElement.weight g) :
     NQubitPauliGroupElement.weight g ≥ 1 :=
-  HasCodeDistance.min_weight stabilizerCode 1 repetitionCode3_has_distance_one g hg
-    hw
+  HasCodeDistance.min_weight stabilizerCode 1 repetitionCode3_has_distance_one g hg hw
 
 end RepetitionCode3
 end StabilizerGroup

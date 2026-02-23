@@ -299,31 +299,7 @@ theorem negIdentity_not_mem :
     (CSS.negIdentity_not_mem_closure_union (n := 7) ZGenerators XGenerators
       ZGenerators_are_ZType XGenerators_are_XType hZX)
 
-/-!
-## Bundled `StabilizerGroup 7`
--/
-
-/-- Steane code as `StabilizerGroup 7`: abelian closure of the six checks, no −I. -/
-noncomputable def stabilizerGroup : StabilizerGroup 7 :=
-{ toSubgroup := subgroup
-, is_abelian := by
-    intro g h hg hh
-    have hcomm :=
-      Subgroup.abelian_closure_of_pairwise_commute (G := NQubitPauliGroupElement 7)
-        generators generators_commute
-    simpa [subgroup] using hcomm g (by simpa [subgroup] using hg) h (by simpa [subgroup] using hh)
-, no_neg_identity := by
-    simpa using negIdentity_not_mem }
-
-/-!
-## Logical operators
-
-Logical X = X on all 7 qubits, logical Z = Z on all 7 qubits. They commute with the
-stabilizer, anticommute with each other, and are not in the subgroup (proved via
-symplectic span).
--/
-
-/-- Generators as a list (for symplectic-span arguments). -/
+/-- Generators as a list (for symplectic-span arguments and bundled stabilizer group). -/
 def generatorsList : List (NQubitPauliGroupElement 7) :=
   [Z1, Z2, Z3, X1, X2, X3]
 
@@ -334,6 +310,28 @@ lemma listToSet_generatorsList : NQubitPauliGroupElement.listToSet generatorsLis
   ext g
   simp only [Set.mem_insert_iff, Set.mem_union, Set.mem_singleton_iff, Set.mem_empty_iff_false,
     or_false, or_assoc]
+
+/-!
+## Bundled `StabilizerGroup 7`
+-/
+
+/-- Steane code as `StabilizerGroup 7` (canonical: from generator list). -/
+noncomputable def stabilizerGroup : StabilizerGroup 7 :=
+  mkStabilizerFromGenerators 7 generatorsList
+    (by rw [listToSet_generatorsList]; exact generators_commute)
+    (by rw [listToSet_generatorsList]; exact negIdentity_not_mem)
+
+lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := by
+  simp only [stabilizerGroup, mkStabilizerFromGenerators, subgroup]
+  rw [listToSet_generatorsList]
+
+/-!
+## Logical operators
+
+Logical X = X on all 7 qubits, logical Z = Z on all 7 qubits. They commute with the
+stabilizer, anticommute with each other, and are not in the subgroup (proved via
+symplectic span).
+-/
 
 /-- Every element of the generators list has phase power 0. -/
 lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generatorsList := by
@@ -416,7 +414,7 @@ private lemma logicalX_commutes_X3 : logicalX * X3 = X3 * logicalX := by
 
 /-- Logical X commutes with every element of the stabilizer. -/
 theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff]; simp only [stabilizerGroup, subgroup]
+  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup]
   rw [Subgroup.forall_comm_closure_iff]
   intro s hs
   simp [generators] at hs
@@ -480,7 +478,7 @@ private lemma logicalZ_commutes_X3 : logicalZ * X3 = X3 * logicalZ := by
 
 /-- Logical Z commutes with every element of the stabilizer. -/
 theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff]; simp only [stabilizerGroup, subgroup]
+  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup]
   rw [Subgroup.forall_comm_closure_iff]
   intro s hs
   simp [generators] at hs
@@ -498,20 +496,20 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
 ## StabilizerCode [[7, 1]]
 -/
 
+private def logicalOpsSteane7 : Fin 1 → LogicalQubitOps 7 stabilizerGroup :=
+  fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+    logicalX_anticommutes_logicalZ⟩
+
 /-- The Steane code as a stabilizer code [[7, 1]]: one logical qubit. -/
 noncomputable def stabilizerCode : StabilizerCode 7 1 where
   hk := by decide
-  toStabilizerGroup := stabilizerGroup
   generatorsList := generatorsList
-  subgroup_eq_closure := by rw [listToSet_generatorsList]; simp only [stabilizerGroup]; rfl
   generators_length := rfl
   generators_phaseZero := AllPhaseZero_generatorsList
   generators_independent := GeneratorsIndependent_7_generatorsList
-  logicalX := fun _ => logicalX
-  logicalZ := fun _ => logicalZ
-  logicalX_mem_centralizer := fun _ => logicalX_mem_centralizer
-  logicalZ_mem_centralizer := fun _ => logicalZ_mem_centralizer
-  logicalX_anticommute_logicalZ := fun _ => logicalX_anticommutes_logicalZ
+  generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
+  closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+  logicalOps := logicalOpsSteane7
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 
 end Steane7

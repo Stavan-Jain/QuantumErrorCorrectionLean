@@ -51,73 +51,92 @@ theorem GeneratorsIndependent_of_rowsLinearIndependent (n : ℕ)
     GeneratorsIndependent n L :=
   NQubitPauliGroupElement.rowsLinearIndependent_implies_independentGenerators L h
 
+/-!
+## Stabilizer group from generators
+
+The stabilizer is defined as the closure of the generator list (single source of truth).
+-/
+
+/-- Build a stabilizer group from a list of generators that pairwise commute and whose
+    closure does not contain -I. -/
+def mkStabilizerFromGenerators (n : ℕ) (L : List (NQubitPauliGroupElement n))
+    (h_comm : ∀ g ∈ NQubitPauliGroupElement.listToSet L,
+      ∀ h ∈ NQubitPauliGroupElement.listToSet L, g * h = h * g)
+    (h_no_neg : negIdentity n ∉ Subgroup.closure (NQubitPauliGroupElement.listToSet L)) :
+    StabilizerGroup n where
+  toSubgroup := Subgroup.closure (NQubitPauliGroupElement.listToSet L)
+  is_abelian := fun g h hg hh =>
+    Subgroup.abelian_closure_of_pairwise_commute
+      (NQubitPauliGroupElement.listToSet L) h_comm g hg h hh
+  no_neg_identity := h_no_neg
+
 /-- A stabilizer code encoding k logical qubits on n physical qubits.
 
-    Requires k ≤ n. The stabilizer is given by a generating list of length n − k whose
-    rows (symplectic vectors) are linearly independent. The logical operators are
-    indexed by Fin k and satisfy the usual Pauli algebra per logical qubit, with
-    cross-commutation between different logical qubits.
+    The stabilizer is given by a generating list of length n − k (single source of truth).
+    Generators must pairwise commute and their closure must not contain -I. Every generator
+    has phase power 0 for the symplectic/check-matrix representation. The logical operators
+    are bundled per logical qubit and commute across different qubits.
 -/
 structure StabilizerCode (n k : ℕ) where
   /-- We need k ≤ n so that n - k generator count is meaningful. -/
   hk : k ≤ n
-  /-- The underlying stabilizer group. -/
-  toStabilizerGroup : StabilizerGroup n
   /-- A list of generators whose closure is the stabilizer subgroup. -/
   generatorsList : List (NQubitPauliGroupElement n)
-  /-- The stabilizer subgroup equals the closure of the generator list. -/
-  subgroup_eq_closure :
-    Subgroup.closure (NQubitPauliGroupElement.listToSet generatorsList) =
-      toStabilizerGroup.toSubgroup
   /-- There are exactly n - k generators (so the code space has dimension 2^k). -/
   generators_length : generatorsList.length = n - k
-  /-- Every generator has phase power 0 (for symplectic representation). -/
+  /-- Every generator has phase power 0 (for symplectic/check-matrix representation). -/
   generators_phaseZero : NQubitPauliGroupElement.AllPhaseZero generatorsList
   /-- The generator list is independent (prove via check-matrix: rowsLinearIndependent). -/
   generators_independent : GeneratorsIndependent n generatorsList
-  /-- Logical X for each of the k logical qubits. -/
-  logicalX : Fin k → NQubitPauliGroupElement n
-  /-- Logical Z for each of the k logical qubits. -/
-  logicalZ : Fin k → NQubitPauliGroupElement n
-  /-- Each logical X is in the centralizer. -/
-  logicalX_mem_centralizer : ∀ ℓ, logicalX ℓ ∈ centralizer toStabilizerGroup
-  /-- Each logical Z is in the centralizer. -/
-  logicalZ_mem_centralizer : ∀ ℓ, logicalZ ℓ ∈ centralizer toStabilizerGroup
-  /-- Within each logical qubit, X̄ and Z̄ anticommute. -/
-  logicalX_anticommute_logicalZ : ∀ ℓ, NQubitPauliGroupElement.Anticommute (logicalX ℓ) (logicalZ ℓ)
+  /-- Generators pairwise commute. -/
+  generators_commute : ∀ g ∈ NQubitPauliGroupElement.listToSet generatorsList,
+    ∀ h ∈ NQubitPauliGroupElement.listToSet generatorsList, g * h = h * g
+  /-- The closure of the generators does not contain -I. -/
+  closure_no_neg_identity : negIdentity n ∉ Subgroup.closure
+    (NQubitPauliGroupElement.listToSet generatorsList)
+  /-- For each logical qubit, logical X and Z in the centralizer, anticommuting. -/
+  logicalOps : Fin k → LogicalQubitOps n (mkStabilizerFromGenerators n generatorsList
+    generators_commute closure_no_neg_identity)
   /-- Logical operators for different logical qubits commute. -/
-  logical_commute_cross :
-    ∀ ℓ ℓ', ℓ ≠ ℓ' →
-      (logicalX ℓ) * (logicalX ℓ') = (logicalX ℓ') * (logicalX ℓ) ∧
-      (logicalX ℓ) * (logicalZ ℓ') = (logicalZ ℓ') * (logicalX ℓ) ∧
-      (logicalZ ℓ) * (logicalX ℓ') = (logicalX ℓ') * (logicalZ ℓ) ∧
-      (logicalZ ℓ) * (logicalZ ℓ') = (logicalZ ℓ') * (logicalZ ℓ)
+  logical_commute_cross : ∀ ℓ ℓ', ℓ ≠ ℓ' →
+    ((logicalOps ℓ).xOp * (logicalOps ℓ').xOp = (logicalOps ℓ').xOp * (logicalOps ℓ).xOp ∧
+      (logicalOps ℓ).xOp * (logicalOps ℓ').zOp = (logicalOps ℓ').zOp * (logicalOps ℓ).xOp ∧
+      (logicalOps ℓ).zOp * (logicalOps ℓ').xOp = (logicalOps ℓ').xOp * (logicalOps ℓ).zOp ∧
+      (logicalOps ℓ).zOp * (logicalOps ℓ').zOp = (logicalOps ℓ').zOp * (logicalOps ℓ).zOp)
 
 namespace StabilizerCode
+
+/-- The stabilizer group of the code (derived from the generator list). -/
+def toStabilizerGroup (C : StabilizerCode n k) : StabilizerGroup n :=
+  mkStabilizerFromGenerators n C.generatorsList C.generators_commute C.closure_no_neg_identity
+
+/-- Logical X for logical qubit ℓ. -/
+def logicalX (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
+  (C.logicalOps ℓ).xOp
+
+/-- Logical Z for logical qubit ℓ. -/
+def logicalZ (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
+  (C.logicalOps ℓ).zOp
 
 /-- Logical X for qubit ℓ is not in the stabilizer subgroup. -/
 theorem logicalX_not_mem_subgroup (C : StabilizerCode n k) (ℓ : Fin k) :
     C.logicalX ℓ ∉ C.toStabilizerGroup.toSubgroup :=
-  not_mem_stabilizer_of_anticommutes_centralizer C.toStabilizerGroup (C.logicalX ℓ) (C.logicalZ ℓ)
-    (C.logicalZ_mem_centralizer ℓ) (C.logicalX_anticommute_logicalZ ℓ)
+  (C.logicalOps ℓ).xOp_not_mem
 
 /-- Logical Z for qubit ℓ is not in the stabilizer subgroup. -/
 theorem logicalZ_not_mem_subgroup (C : StabilizerCode n k) (ℓ : Fin k) :
     C.logicalZ ℓ ∉ C.toStabilizerGroup.toSubgroup :=
-  not_mem_stabilizer_of_anticommutes_centralizer C.toStabilizerGroup (C.logicalZ ℓ) (C.logicalX ℓ)
-    (C.logicalX_mem_centralizer ℓ)
-    (NQubitPauliGroupElement.anticommute_symm (C.logicalX ℓ) (C.logicalZ ℓ)
-      (C.logicalX_anticommute_logicalZ ℓ))
+  (C.logicalOps ℓ).zOp_not_mem
 
 /-- Each logical X is a nontrivial logical operator. -/
 theorem logicalX_nontrivial (C : StabilizerCode n k) (ℓ : Fin k) :
     IsNontrivialLogicalOperator (C.logicalX ℓ) C.toStabilizerGroup :=
-  ⟨C.logicalX_mem_centralizer ℓ, C.logicalX_not_mem_subgroup ℓ⟩
+  (C.logicalOps ℓ).xOp_nontrivial
 
 /-- Each logical Z is a nontrivial logical operator. -/
 theorem logicalZ_nontrivial (C : StabilizerCode n k) (ℓ : Fin k) :
     IsNontrivialLogicalOperator (C.logicalZ ℓ) C.toStabilizerGroup :=
-  ⟨C.logicalZ_mem_centralizer ℓ, C.logicalZ_not_mem_subgroup ℓ⟩
+  (C.logicalOps ℓ).zOp_nontrivial
 
 /-- The generator set is an independent generating set for the stabilizer. -/
 theorem generators_independentGenerators (C : StabilizerCode n k) :

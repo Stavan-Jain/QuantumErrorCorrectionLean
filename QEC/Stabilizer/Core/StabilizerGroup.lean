@@ -251,6 +251,7 @@ lemma IsStabilizedBy.inv_in_group {g : NQubitPauliGroupElement n} {ψ : NQubitSt
   IsStabilizedBy (g⁻¹) ψ :=
   IsStabilizedBy.inv hg_stab
 
+
 end StabilizerGroup
 
 end Quantum
