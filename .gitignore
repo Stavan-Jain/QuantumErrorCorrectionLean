@@ -1,1 +1,7 @@
 /.lake
+
+# Cursor local state and continual-learning index
+.cursor/
+
+# Learned preferences/facts (optional: keep local only)
+AGENTS.md
