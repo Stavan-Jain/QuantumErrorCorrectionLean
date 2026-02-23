@@ -329,17 +329,21 @@ def generatorsList : List (NQubitPauliGroupElement 7) :=
 
 /-- The list of generators has the same elements as the generator set. -/
 lemma listToSet_generatorsList : NQubitPauliGroupElement.listToSet generatorsList = generators := by
+  simp only [generatorsList, generators, ZGenerators, XGenerators,
+    NQubitPauliGroupElement.listToSet_cons, NQubitPauliGroupElement.listToSet_nil]
   ext g
-  simp only [NQubitPauliGroupElement.listToSet, Set.mem_setOf, generatorsList, generators,
-    ZGenerators, XGenerators, List.mem_cons, List.mem_nil_iff, or_false, Set.mem_union,
-    Set.mem_insert_iff, Set.mem_singleton_iff]
-  grind
+  simp only [Set.mem_insert_iff, Set.mem_union, Set.mem_singleton_iff, Set.mem_empty_iff_false,
+    or_false, or_assoc]
 
 /-- Every element of the generators list has phase power 0. -/
 lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generatorsList := by
-  intro g hg
-  simp only [generatorsList, List.mem_cons, List.mem_nil_iff, or_false] at hg
-  rcases hg with rfl | rfl | rfl | rfl | rfl | rfl <;> rfl
+  rw [generatorsList, NQubitPauliGroupElement.AllPhaseZero_cons]
+  exact ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
+    ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
+      ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
+        ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
+          ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
+            ⟨rfl, NQubitPauliGroupElement.AllPhaseZero_nil⟩⟩⟩⟩⟩⟩
 
 /-- The check-matrix rows of the Steane generators are linearly independent. -/
 theorem rowsLinearIndependent_generatorsList :
