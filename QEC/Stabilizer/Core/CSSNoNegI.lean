@@ -22,7 +22,7 @@ The proof is purely algebraic:
 
 namespace CSS
 
-open NQubitPauliGroupElement
+open StabilizerGroup NQubitPauliGroupElement
 
 /-- If `ZGen` and `XGen` are phase-0 Z-type / X-type generators that commute generatorwise,
 then `negIdentity n` is not in the subgroup they generate. -/
