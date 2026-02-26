@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Matrix.Notation
 import QEC.Foundations.Foundations
 import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.Centralizer
-import QEC.Stabilizer.Core.Normalizer
+import QEC.Stabilizer.Core.LogicalGateGroup
 import QEC.Stabilizer.PauliGroup
 
 namespace Quantum
@@ -16,89 +16,53 @@ open Matrix
 /-!
 # Logical gates
 
-A **logical gate** is a unitary operator that maps the codespace to itself. This file defines
-logical gates and proves that a unitary is a logical gate for a stabilizer
-group if and only if it lies in the
-**normalizer** of the stabilizer group (i.e. conjugation by the gate sends the stabilizer group
-to itself). Pauli logical operators are those Paulis whose gate is a logical gate; see
-`LogicalOperators.lean`. For Pauli operators, this coincides with the centralizer.
+A **logical gate** is a unitary operator that maps the codespace to itself. We define
+`IsLogicalGate U S` as membership in the **logical gate group** `logicalGateGroup S` (see
+`LogicalGateGroup.lean`). Equivalently, for every g ∈ S the conjugated operator U† g U stabilizes
+every codespace state. Pauli logical operators are those Paulis whose gate is a logical gate;
+see `LogicalOperators.lean`. For Pauli operators, this coincides with the centralizer.
 -/
 
-/-- A unitary gate is a logical gate for S if it maps every state in the codespace
-    into the codespace. -/
+/-- A unitary gate is a logical gate for S iff it lies in the logical gate group (unitaries
+    that map the codespace to itself). -/
 def IsLogicalGate (U : NQubitGate n) (S : StabilizerGroup n) : Prop :=
-  ∀ ψ : NQubitState n, IsInCodespace ψ S → IsInCodespace (U • ψ) S
+  U ∈ logicalGateGroup S
 
-/-!
-A unitary U is a logical gate if and only if it maps the stabilizer group to itself under
-conjugation (i.e. U ∈ normalizer of S).
--/
+/-- IsLogicalGate is equivalent to mapping every codespace state into the codespace. -/
+theorem isLogicalGate_iff (U : NQubitGate n) (S : StabilizerGroup n) :
+    IsLogicalGate U S ↔ ∀ ψ, IsInCodespace ψ S → IsInCodespace (U • ψ) S :=
+  mem_logicalGateGroup_iff U S
 
-/-- If `U` is a logical gate for `S`, then `U` lies in the normalizer of `S`:
-conjugating any stabilizer by `U` yields a stabilizer. -/
-theorem IsInStabilizerNormalizer.of_logicalGate (U : NQubitGate n) (S : StabilizerGroup n)
-    (h : IsLogicalGate U S) : IsInStabilizerNormalizer U S := by
-  intro g hg ψ hψ
-  have hUψ : IsInCodespace (U • ψ) S := h ψ hψ
-  rw [IsInCodespace.iff_all_stabilizers] at hUψ
-  have h_stab : IsStabilizedBy g (U • ψ) := hUψ g hg
-  simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val] at h_stab
-  have h_conj : (star U.val * g.toMatrix * U.val).mulVec ψ.val = ψ.val := by
-    calc (star U.val * g.toMatrix * U.val).mulVec ψ.val
-        = (star U.val * (g.toMatrix * U.val)).mulVec ψ.val := by rw [Matrix.mul_assoc]
-      _ = (star U.val).mulVec ((g.toMatrix * U.val).mulVec ψ.val) := by
-          rw [← mulVec_mulVec ψ.val (star U.val) (g.toMatrix * U.val)]
-      _ = (star U.val).mulVec (g.toMatrix.mulVec (U.val.mulVec ψ.val)) := by
-          rw [← mulVec_mulVec ψ.val g.toMatrix U.val]
-      _ = (star U.val).mulVec (U.val.mulVec ψ.val) := by rw [h_stab]
-      _ = ((star U.val) * U.val).mulVec ψ.val := by
-          rw [← mulVec_mulVec ψ.val (star U.val) U.val]
-      _ = ψ.val := by
-        have h_unit : (star U.val) * U.val = 1 := Matrix.mem_unitaryGroup_iff'.1 U.2
-        rw [h_unit, one_mulVec]
-  exact h_conj
-
-/-- If U is in the normalizer of S then
-    U maps the codespace to itself and is therefore a logical gate. -/
-theorem IsLogicalGate.of_normalizer (U : NQubitGate n) (S : StabilizerGroup n)
-    (h : IsInStabilizerNormalizer U S) : IsLogicalGate U S := by
-  intro ψ hψ
-  rw [IsInCodespace.iff_all_stabilizers]
-  intro g hg
-  simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val]
-  have h_conj := h g hg ψ hψ
-  calc g.toMatrix.mulVec (U.val.mulVec ψ.val)
-      = (g.toMatrix * U.val).mulVec ψ.val := by rw [mulVec_mulVec]
-    _ = (U.val * (star U.val) * (g.toMatrix * U.val)).mulVec ψ.val := by
-      have h_unit : U.val * star U.val = 1 := Matrix.mem_unitaryGroup_iff.1 U.2
-      rw [← Matrix.mul_assoc, h_unit, one_mul]
-    _ = (U.val * ((star U.val) * (g.toMatrix * U.val))).mulVec ψ.val := by rw [Matrix.mul_assoc]
-    _ = U.val.mulVec (((star U.val) * (g.toMatrix * U.val)).mulVec ψ.val) := by rw [mulVec_mulVec]
-    _ = U.val.mulVec ψ.val := by rw [← Matrix.mul_assoc, h_conj]
-
-/-- A unitary is a logical gate if and only if it is in the normalizer
-    of the stabilizer group (as a predicate). -/
-theorem isLogicalGate_iff_isInStabilizerNormalizer (U : NQubitGate n) (S : StabilizerGroup n) :
-    IsLogicalGate U S ↔ IsInStabilizerNormalizer U S :=
-  ⟨IsInStabilizerNormalizer.of_logicalGate U S, IsLogicalGate.of_normalizer U S⟩
-
-/-- A unitary is a logical gate if and only if it
-    lies in the normalizer subgroup `stabilizerNormalizer S`. -/
-theorem isLogicalGate_iff_mem_stabilizerNormalizer (U : NQubitGate n) (S : StabilizerGroup n) :
-    IsLogicalGate U S ↔ U ∈ stabilizerNormalizer S := by
-  rw [isLogicalGate_iff_isInStabilizerNormalizer]
-  rfl
+/-- IsLogicalGate is equivalent to the conjugation characterization (U† g U fixes codespace). -/
+theorem isLogicalGate_iff_conjugation (U : NQubitGate n) (S : StabilizerGroup n) :
+    IsLogicalGate U S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
+      IsInCodespace ψ S → (star U.val * g.toMatrix * U.val).mulVec ψ.val = ψ.val :=
+  mem_logicalGateGroup_iff_conjugation U S
 
 /-- Logical gate depends only on the underlying stabilizer subgroup. -/
 theorem isLogicalGate_iff_toSubgroup_eq (U : NQubitGate n) (S T : StabilizerGroup n)
     (h : S.toSubgroup = T.toSubgroup) : IsLogicalGate U S ↔ IsLogicalGate U T := by
   unfold IsLogicalGate
-  congr! 1
-  ext ψ
-  simp only [IsInCodespace]
-  congr! 1
-  ext g
-  rw [h]
+  rw [mem_logicalGateGroup_iff, mem_logicalGateGroup_iff]
+  constructor
+  · intro hL ψ hψT
+    have hψS : IsInCodespace ψ S := by
+      rw [IsInCodespace.iff_all_stabilizers]
+      intro g hg
+      exact (IsInCodespace.iff_all_stabilizers ψ T).1 hψT g (h.symm ▸ hg)
+    have hUψS : IsInCodespace (U • ψ) S := hL ψ hψS
+    rw [IsInCodespace.iff_all_stabilizers]
+    intro g hg
+    exact (IsInCodespace.iff_all_stabilizers (U • ψ) S).1 hUψS g (h ▸ hg)
+  · intro hL ψ hψS
+    have hψT : IsInCodespace ψ T := by
+      rw [IsInCodespace.iff_all_stabilizers]
+      intro g hg
+      exact (IsInCodespace.iff_all_stabilizers ψ S).1 hψS g (h.symm ▸ hg)
+    have hUψT : IsInCodespace (U • ψ) T := hL ψ hψT
+    rw [IsInCodespace.iff_all_stabilizers]
+    intro g hg
+    exact (IsInCodespace.iff_all_stabilizers (U • ψ) T).1 hUψT g (h ▸ hg)
 
 end StabilizerGroup
 end Quantum

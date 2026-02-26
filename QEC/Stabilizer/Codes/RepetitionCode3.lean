@@ -294,7 +294,8 @@ lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup := by
 /-- Z_on_qubit2 is a nontrivial logical operator of weight 1. -/
 lemma Z_on_qubit2_nontrivial_logical :
     IsNontrivialLogicalOperator Z_on_qubit2 stabilizerGroup :=
-  ⟨Z_on_qubit2_mem_centralizer,
+  ⟨(isPauliLogicalOperator_iff_mem_centralizer Z_on_qubit2 stabilizerGroup).2
+      Z_on_qubit2_mem_centralizer,
     not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
       logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX⟩
 
