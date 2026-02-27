@@ -327,6 +327,15 @@ lemma anticommute_symm (p q : NQubitPauliGroupElement n) :
       _ = (minusOne n)⁻¹ * (p * q) := by rw [← h]
       _ = (minusOne n) * (p * q) := by rw [minusOne_inv]
 
+/-- Any two n-qubit Pauli group elements either commute or anticommute. -/
+lemma commute_or_anticommute (p q : NQubitPauliGroupElement n) :
+  p * q = q * p ∨ Anticommute p q := by
+  classical
+  set k := (Finset.univ.filter (anticommutesAt (n := n) p.operators q.operators)).card
+  rcases Nat.even_or_odd k with ⟨m, hm⟩ | ⟨m, hm⟩
+  · left; exact (commutes_iff_even_anticommutes p q).mpr ⟨m, hm⟩
+  · right; exact (anticommutes_iff_odd_anticommutes p q).mpr ⟨m, hm⟩
+
 /-- Every element commutes with itself. -/
 lemma commutes_refl (p : NQubitPauliGroupElement n) : p * p = p * p := rfl
 
