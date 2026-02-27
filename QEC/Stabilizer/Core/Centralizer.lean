@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Group.Subgroup.Basic
 import Mathlib.GroupTheory.Subgroup.Centralizer
 import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
@@ -27,6 +28,73 @@ def centralizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :
 lemma centralizer_eq_of_toSubgroup_eq (S T : StabilizerGroup n) (h : S.toSubgroup = T.toSubgroup) :
     centralizer S = centralizer T := by
   rw [centralizer, centralizer, h]
+
+/-- The normalizer of S in the n-qubit Pauli group: Pauli elements g such that
+    conjugation sends S to itself (g⁻¹ * s * g ∈ S for all s ∈ S). -/
+def pauliNormalizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
+  S.toSubgroup.normalizer
+
+/-- For a stabilizer group (abelian, no -I), the normalizer of S in the Pauli group
+    equals the centralizer of S in the Pauli group. -/
+theorem pauliNormalizer_eq_centralizer (S : StabilizerGroup n) :
+    pauliNormalizer S = centralizer S := by
+  ext g
+  constructor
+  · intro hg
+    rw [centralizer, Subgroup.mem_centralizer_iff]
+    intro s hs
+    rw [pauliNormalizer, Subgroup.mem_normalizer_iff] at hg
+    have h_conj := (hg s).1 hs
+    have h_comm_or_anti := NQubitPauliGroupElement.commute_or_anticommute g s
+    cases h_comm_or_anti with
+    | inl h_comm => exact h_comm.symm
+    | inr h_anti =>
+        have h_conj_eq : g * s * g⁻¹ = negIdentity n * s := by
+          unfold NQubitPauliGroupElement.Anticommute at h_anti
+          calc g * s * g⁻¹ = (NQubitPauliGroupElement.minusOne n * (s * g)) *
+          g⁻¹ := by rw [← h_anti]
+            _ = NQubitPauliGroupElement.minusOne n * ((s * g) * g⁻¹) := by rw [mul_assoc]
+            _ = NQubitPauliGroupElement.minusOne n * (s * (g * g⁻¹)) := by rw [mul_assoc]
+            _ = NQubitPauliGroupElement.minusOne n * (s * 1) := by rw [mul_inv_cancel]
+            _ = negIdentity n * s := by rw [mul_one, negIdentity_eq_minusOne n]
+        rw [h_conj_eq] at h_conj
+        have h_neg_mem : negIdentity n ∈ S.toSubgroup := by
+          have H : (negIdentity n * s) * s⁻¹ = negIdentity n := by group
+          rw [← H]
+          exact S.toSubgroup.mul_mem h_conj (S.toSubgroup.inv_mem hs)
+        exact absurd h_neg_mem S.neg_identity_not_mem
+  · intro hg
+    rw [pauliNormalizer, Subgroup.mem_normalizer_iff]
+    intro s
+    constructor
+    · intro hs
+      rw [centralizer, Subgroup.mem_centralizer_iff] at hg
+      have h_comm := hg s hs
+      have H : g * s * g⁻¹ = s := by
+        calc g * s * g⁻¹ = (s * g) * g⁻¹ := by rw [← h_comm]
+          _ = s * (g * g⁻¹) := by rw [mul_assoc]
+          _ = s * 1 := by rw [mul_inv_cancel]
+          _ = s := by rw [mul_one]
+      rw [H]
+      exact hs
+    · intro hs'
+      rw [centralizer, Subgroup.mem_centralizer_iff] at hg
+      have h_comm := hg (g * s * g⁻¹) hs'
+      have H_eq : g⁻¹ * (g * s * g⁻¹) * g = g * s * g⁻¹ := by
+        calc g⁻¹ * (g * s * g⁻¹) * g = g⁻¹ * ((g * s * g⁻¹) * g) := by rw [mul_assoc]
+          _ = g⁻¹ * (g * (g * s * g⁻¹)) := by rw [h_comm]
+          _ = (g⁻¹ * g) * (g * s * g⁻¹) := by rw [← mul_assoc]
+          _ = g * s * g⁻¹ := by rw [inv_mul_cancel, one_mul]
+      have H : s = g * s * g⁻¹ := by
+        calc s = g⁻¹ * (g * s) := by rw [← mul_assoc, inv_mul_cancel, one_mul]
+          _ = g⁻¹ * (g * s * 1) := by rw [mul_one]
+          _ = g⁻¹ * (g * s * (g⁻¹ * g)) := by rw [inv_mul_cancel]
+          _ = g⁻¹ * ((g * s * g⁻¹) * g) := by simp only [mul_assoc]
+          _ = g⁻¹ * (g * (g * s * g⁻¹)) := by rw [h_comm]
+          _ = (g⁻¹ * g) * (g * s * g⁻¹) := by rw [← mul_assoc]
+          _ = g * s * g⁻¹ := by rw [inv_mul_cancel, one_mul]
+      rw [H]
+      exact hs'
 
 /-- Membership in the centralizer is equivalent to commuting with every element
     of the stabilizer group. -/
