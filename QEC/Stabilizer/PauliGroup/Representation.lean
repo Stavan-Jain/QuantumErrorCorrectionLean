@@ -23,6 +23,12 @@ namespace NQubitPauliGroupElement
   ((1 : NQubitPauliGroupElement n).toMatrix) = (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
   simp [toMatrix, NQubitPauliOperator.identity_toMatrix]
 
+/-- The matrix of -I (phase -1, identity on all qubits) is -1 times the identity matrix. -/
+@[simp] lemma minusOne_toMatrix (n : ℕ) :
+  (minusOne n).toMatrix = (-1 : ℂ) • (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
+  rw [toMatrix, minusOne_operators, minusOne_phasePower, PauliGroupElement.phasePowerToComplex_2,
+    NQubitPauliOperator.identity_toMatrix]
+
 /-- The identity n-qubit Pauli group element maps to the identity gate. -/
 @[simp] lemma toGate_one (n : ℕ) :
   toGate (1 : NQubitPauliGroupElement n) = (1 : QuantumGate (NQubitBasis n)) := by

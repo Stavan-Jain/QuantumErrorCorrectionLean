@@ -7,6 +7,7 @@ import Mathlib.Algebra.Group.Nat.Even
 import Mathlib.Algebra.Ring.Parity
 import QEC.Foundations.Foundations
 import QEC.Stabilizer.PauliGroup.NQubitElement
+import QEC.Stabilizer.PauliGroup.Representation
 
 namespace Quantum
 open Matrix
@@ -246,6 +247,17 @@ lemma anticommutes_iff_mulOp_phasePower (p q : NQubitPauliGroupElement n) :
     · ext i
       simp only [mul, mul_eq, minusOne_operators, mulOp_operators_at, mulOp_identity_left_op,
         PauliOperator.mulOp_operator_comm]
+
+/-- When two Pauli elements anticommute, their product's matrix is -1 times the reversed product. -/
+lemma Anticommute.toMatrix_neg (p q : NQubitPauliGroupElement n) (h : Anticommute p q) :
+    (p * q).toMatrix = (-1 : ℂ) • (q * p).toMatrix := by
+  unfold Anticommute at h
+  rw [h, toMatrix_mul, minusOne_toMatrix, Matrix.smul_mul, Matrix.one_mul, toMatrix_mul]
+
+/-- When two Pauli elements anticommute, the matrix product satisfies s * g = -1 • (g * s). -/
+lemma Anticommute.toMatrix_mul_neg (p q : NQubitPauliGroupElement n) (h : Anticommute p q) :
+    p.toMatrix * q.toMatrix = (-1 : ℂ) • (q.toMatrix * p.toMatrix) := by
+  rw [← toMatrix_mul, ← toMatrix_mul, Anticommute.toMatrix_neg p q h]
 
 /-- Two n-qubit Pauli group elements anticommute iff the number of qubit positions where the
 corresponding single-qubit factors anticommute is odd. -/

@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Tactic
+import Mathlib.Data.Fintype.Basic
 
 namespace Quantum
 
