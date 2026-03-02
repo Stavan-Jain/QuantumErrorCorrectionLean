@@ -15,9 +15,15 @@ import QEC.Stabilizer.BinarySymplectic.SymplecticInner
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 
 /-!
-# Rotated planar surface code with distance d = 3 ([[9, 1, 3]])
+# Rotated planar surface code ([[9, 1, 3]] / Surface-17)
 
-Formalization of the rotated planar surface code: 9 physical qubits, 1 logical qubit, distance 3.
+Formalization of the rotated planar surface code: 9 data qubits, 1 logical qubit. In the
+literature (Bombin–Martin-Delgado, Error Correction Zoo, Surface-17), [[9,1,3]] denotes
+**n = 9, k = 1, d = 3** (distance 3).
+
+Qubit indices follow a canonical layout so that the standard generators (left-boundary Z on
+{0,3}, top-boundary X, etc.) pairwise commute. Stabilizer group does **not** contain -I.
+
 Includes Z- and X-type stabilizer generators, logical operators, and proofs of commutation,
 independence, and CSS structure. Constructs a `StabilizerCode 9 1` instance.
 -/
@@ -28,10 +34,10 @@ open scoped BigOperators
 namespace StabilizerGroup
 namespace RotatedSurfaceCode3
 
-/-- Z-check on face A: Z on qubits {0, 1, 3, 4}. -/
+/-- Z-check on face A: Z on qubits {0, 1, 4, 6}. -/
 def Z0 : Quantum.NQubitPauliGroupElement 9 :=
-  ⟨0, ((((NQubitPauliOperator.identity 9).set 0 PauliOperator.Z).set 1 PauliOperator.Z).set 3
-    PauliOperator.Z).set 4 PauliOperator.Z⟩
+  ⟨0, ((((NQubitPauliOperator.identity 9).set 0 PauliOperator.Z).set 1 PauliOperator.Z).set 4
+    PauliOperator.Z).set 6 PauliOperator.Z⟩
 
 /-
 Z-check on face D: Z on qubits {4, 5, 7, 8}.
@@ -60,17 +66,17 @@ def X0 : Quantum.NQubitPauliGroupElement 9 :=
     PauliOperator.X).set 5 PauliOperator.X⟩
 
 /-
-X-check on face C: X on qubits {3, 4, 6, 7}.
+X-check on face C: X on qubits {0, 3, 4, 7}.
 -/
 def X1 : Quantum.NQubitPauliGroupElement 9 :=
-  ⟨0, ((((NQubitPauliOperator.identity 9).set 3 PauliOperator.X).set 4 PauliOperator.X).set 6
+  ⟨0, ((((NQubitPauliOperator.identity 9).set 0 PauliOperator.X).set 3 PauliOperator.X).set 4
     PauliOperator.X).set 7 PauliOperator.X⟩
 
 /-
-X-check on top boundary: X on qubits {0, 1}.
+X-check on top boundary: X on qubits {1, 6}.
 -/
 def X2 : Quantum.NQubitPauliGroupElement 9 :=
-  ⟨0, ((NQubitPauliOperator.identity 9).set 0 PauliOperator.X).set 1 PauliOperator.X⟩
+  ⟨0, ((NQubitPauliOperator.identity 9).set 1 PauliOperator.X).set 6 PauliOperator.X⟩
 
 /-
 X-check on bottom boundary: X on qubits {7, 8}.
@@ -108,19 +114,12 @@ private lemma XType_commutes {g h : Quantum.NQubitPauliGroupElement 9}
   cases h_op i <;> cases h_op' i <;> simp +decide [*]
 
 /-
-Z-check on left boundary: Z on qubits {3, 6}.
-(The original Z2 with {0, 3} anticommutes with X2 and X1.)
--/
-def Z2' : Quantum.NQubitPauliGroupElement 9 :=
-  ⟨0, ((NQubitPauliOperator.identity 9).set 3 PauliOperator.Z).set 6 PauliOperator.Z⟩
-
-/-
-The list of all 8 generators for the d=3 rotated surface code (using Z2' on left boundary).
+The list of all 8 generators for the rotated surface code [[9,1,3]] (canonical layout).
 -/
 def generatorsList : List (Quantum.NQubitPauliGroupElement 9) :=
   [Z0,
 Z1,
-Z2',
+Z2,
 Z3,
 X0,
 X1,
@@ -133,7 +132,7 @@ The set of Z-check generators.
 def ZGenerators : Set (Quantum.NQubitPauliGroupElement 9) :=
   {Z0,
 Z1,
-Z2',
+Z2,
 Z3}
 
 /-
@@ -157,7 +156,7 @@ All Z-generators are Z-type elements.
 lemma ZGenerators_are_ZType :
     ∀ g, g ∈ ZGenerators → NQubitPauliGroupElement.IsZTypeElement g := by
   unfold ZGenerators; simp +decide [NQubitPauliGroupElement.IsZTypeElement]
-  unfold NQubitPauliOperator.IsZType; simp +decide [Z0, Z1, Z2', Z3, PauliOperator.IsZType]
+  unfold NQubitPauliOperator.IsZType; simp +decide [Z0, Z1, Z2, Z3, PauliOperator.IsZType]
 
 /-
 All Z-generators commute with each other.
@@ -218,10 +217,10 @@ def logicalX : Quantum.NQubitPauliGroupElement 9 :=
     PauliOperator.X⟩
 
 /-
-Logical Z: Z on qubits {3, 4, 5} (horizontal). Commutes with all generators.
+Logical Z: Z on qubits {0, 4, 5} (horizontal). Commutes with all generators.
 -/
 def logicalZ : Quantum.NQubitPauliGroupElement 9 :=
-  ⟨0, (((NQubitPauliOperator.identity 9).set 3 PauliOperator.Z).set 4 PauliOperator.Z).set 5
+  ⟨0, (((NQubitPauliOperator.identity 9).set 0 PauliOperator.Z).set 4 PauliOperator.Z).set 5
     PauliOperator.Z⟩
 
 /-
@@ -252,7 +251,7 @@ lemma logicalX_commutes_ZGenerators :
     ext <;> [rfl; decide +revert]
   · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, Z1, logicalX]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, Z2', logicalX]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, Z2, logicalX]
     ext <;> [rfl; decide +revert]
   · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, Z3, logicalX]
     ext <;> [rfl; decide +revert]
