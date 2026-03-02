@@ -17,7 +17,8 @@ open Matrix
 
 The **logical gate group** for a stabilizer group S is the subgroup of n-qubit unitaries that
 map the codespace to itself (i.e. **logical gates**). Equivalently, for every g ∈ S the conjugated
-operator U† g U stabilizes every state in the codespace. See `LogicalGates.lean` for `IsLogicalGate`.
+operator U† g U stabilizes every state in the codespace.
+See `LogicalGates.lean` for `IsLogicalGate`.
 -/
 
 /-- Conjugation formulation: for every g ∈ S, U† g U stabilizes every codespace state. -/
@@ -70,10 +71,12 @@ lemma mem_codespace_iff_mem_submodule (ψ : NQubitState n) (S : StabilizerGroup 
   IsInCodespace ψ S ↔ ψ.val ∈ codespaceSubmodule S := by
   simp [IsInCodespace, IsStabilizedBy, IsStabilizedVec, codespaceSubmodule]
 
-/-- If U preserves the codespace (conjugation formulation), then U maps the submodule into itself. -/
+/-- If U preserves the codespace (conjugation formulation),
+then U maps the submodule into itself. -/
 private lemma maps_to_codespace_of_conjugation (U : NQubitGate n) (S : StabilizerGroup n)
   (h : PreservesCodespaceConjugation U S) :
-  ∀ v ∈ codespaceSubmodule S, Matrix.mulVec U.val v ∈ codespaceSubmodule S := by
+  ∀ v ∈ codespaceSubmodule S,
+    Matrix.mulVec U.val v ∈ codespaceSubmodule S := by
   intro v hv; contrapose! h; simp_all +decide [Quantum.StabilizerGroup.codespaceSubmodule]
   obtain ⟨g, hg₁, hg₂⟩ := h; intro H; specialize H g hg₁
   simp_all +decide [← Matrix.mulVec_mulVec]
@@ -153,7 +156,8 @@ lemma mem_logicalGateGroup_iff_conjugation (U : NQubitGate n) (S : StabilizerGro
   constructor
   · intro hU g hg ψ hψ
     have hUψ : IsInCodespace (U • ψ) S := hU ψ hψ
-    have h_stab : IsStabilizedBy g (U • ψ) := (IsInCodespace.iff_all_stabilizers (U • ψ) S).1 hUψ g hg
+    have h_stab : IsStabilizedBy g (U • ψ) :=
+      (IsInCodespace.iff_all_stabilizers (U • ψ) S).1 hUψ g hg
     simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val] at h_stab
     calc (star U.val * g.toMatrix * U.val).mulVec ψ.val
         = (star U.val * (g.toMatrix * U.val)).mulVec ψ.val := by rw [Matrix.mul_assoc]
