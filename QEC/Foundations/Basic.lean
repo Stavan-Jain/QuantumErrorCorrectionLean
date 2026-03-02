@@ -18,6 +18,12 @@ lemma norm_nonneg {v : Vector α} : 0 ≤ norm v := by
   simp only [norm]
   exact Real.sqrt_nonneg _
 
+/-- The norm of the zero vector is zero. -/
+lemma norm_zero : norm (0 : Vector α) = 0 := by
+  rw [norm_def]
+  have h_sum : (∑ i, ‖(0 : Vector α) i‖^2) = 0 := Finset.sum_eq_zero (fun i _ => by simp)
+  rw [h_sum, Real.sqrt_zero]
+
 /-- The square of the norm equals the sum of squared magnitudes. -/
 lemma norm_sq_def {v : Vector α} : (norm v)^2 = ∑ i, ‖v i‖^2 := by
   simp [norm]
@@ -40,11 +46,21 @@ lemma norm_eq_iff_norm_sq_eq {v w : Vector α} :
     rw [← norm_def, ← norm_def] at hsqrt_eq
     exact hsqrt_eq
 
+/-- Scaling a vector by a scalar scales its norm by the magnitude of the scalar. -/
+lemma norm_smul (c : ℂ) (v : Vector α) : norm (c • v) = ‖c‖ * norm v := by
+  simp [norm]
+  have h_factor : ∑ x : α, (‖c‖ * ‖v x‖)^2 = ‖c‖^2 * ∑ x : α, ‖v x‖^2 := by
+    simp [mul_pow, Finset.mul_sum]
+  rw [h_factor, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity)]
+
 abbrev QuantumState (α : Type*) [Fintype α] [DecidableEq α] :=
   { v : Vector α // norm v = 1 }
 
 -- Coerce a quantum state to its underlying vector
 instance : CoeTC (QuantumState α) (Vector α) := ⟨Subtype.val⟩
+
+/-- The coercion of a quantum state to a vector is its `.val`. -/
+lemma QuantumState.coe_val (ψ : QuantumState α) : (ψ : Vector α) = ψ.val := rfl
 
 abbrev QubitBasis : Type := Fin 2
 
