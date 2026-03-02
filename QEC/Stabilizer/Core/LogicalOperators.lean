@@ -1,13 +1,18 @@
+import QEC.Foundations.Basic
 import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.Centralizer
+import QEC.Stabilizer.Core.Codespace
 import QEC.Stabilizer.Core.LogicalGates
-import QEC.Stabilizer.Core.Normalizer
+import QEC.Stabilizer.Core.LogicalGateGroup
 import QEC.Stabilizer.PauliGroup
+import QEC.Stabilizer.PauliGroup.Representation
 
 namespace Quantum
 namespace StabilizerGroup
 
 variable {n : ℕ}
+open Matrix
+open scoped BigOperators
 
 /-!
 # Logical operators
@@ -27,65 +32,114 @@ differ by a stabilizer element act the same on the codespace (same logical opera
 def IsPauliLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
   IsLogicalGate (g.toGate) S
 
+/-- If a Pauli operator anticommutes with an element of the stabilizer group,
+    it is not a Pauli logical operator. -/
+lemma anticommutes_imp_not_isPauliLogicalOperator (g : NQubitPauliGroupElement n)
+    (S : StabilizerGroup n) (s : NQubitPauliGroupElement n) (hs : s ∈ S.toSubgroup)
+    (h_anti : NQubitPauliGroupElement.Anticommute s g) : ¬IsPauliLogicalOperator g S := by
+  intro hg
+  have h_contradiction : ∀ ψ : NQubitState n,
+      ¬IsInCodespace ψ S ∨ ¬IsInCodespace (g.toGate • ψ) S := by
+    intro ψ
+    by_contra h_contra
+    push_neg at h_contra
+    obtain ⟨hψ, hgψ⟩ := h_contra
+    unfold NQubitPauliGroupElement.Anticommute at h_anti
+    have h_sg := NQubitPauliGroupElement.Anticommute.toMatrix_mul_neg s g h_anti
+    have h_lhs : (s.toMatrix * g.toMatrix) *ᵥ ↑ψ = (g.toMatrix * s.toMatrix) *ᵥ ↑ψ := by
+      have hab := mulVec_mulVec (↑ψ) s.toMatrix g.toMatrix
+      have hba := mulVec_mulVec (↑ψ) g.toMatrix s.toMatrix
+      rw [← hab]
+      conv_lhs => arg 2; rw [QuantumState.coe_val ψ, ← NQubitPauliGroupElement.toGate_val,
+        ← smul_QState_val g.toGate ψ]
+      rw [hgψ s hs, ← hba, hψ s hs, QuantumState.coe_val (g.toGate • ψ), smul_QState_val g.toGate ψ,
+        QuantumState.coe_val ψ, NQubitPauliGroupElement.toGate_val]
+    have h_rhs : (s.toMatrix * g.toMatrix) *ᵥ ↑ψ = (-1 : ℂ) • (g.toMatrix * s.toMatrix) *ᵥ ↑ψ := by
+      rw [h_sg]
+      show (-1 • (g.toMatrix * s.toMatrix)).mulVec (↑ψ) =
+          (-1 : ℂ) • (g.toMatrix * s.toMatrix).mulVec (↑ψ)
+      rw [Matrix.smul_mulVec]
+    have h_eq : (g.toMatrix * s.toMatrix) *ᵥ ↑ψ = (-1 : ℂ) • (g.toMatrix * s.toMatrix) *ᵥ ↑ψ := by
+      rw [← h_rhs, h_lhs]
+    have h_zero : (g.toMatrix * s.toMatrix) *ᵥ ↑ψ = 0 := by
+      ext i
+      have h_eq_i := congr_fun h_eq i
+      have h2 : 2 * ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i = 0 := by
+        have e := h_eq_i; rw [Pi.smul_apply] at e
+        calc 2 * ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i
+            = ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i + ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i := by
+                rw [two_mul]
+          _ = (-1 : ℂ) • ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i +
+                ((g.toMatrix * s.toMatrix) *ᵥ ↑ψ) i := by
+              conv_lhs => arg 1; rw [e]
+          _ = 0 := by rw [neg_one_smul ℂ, add_comm]; exact add_neg_cancel _
+      exact (mul_eq_zero.1 h2).resolve_left (by norm_num)
+    have h_sψ : s.toMatrix *ᵥ ↑ψ = ↑ψ := by rw [QuantumState.coe_val ψ]; exact hψ s hs
+    have h_ψ_zero : g.toMatrix *ᵥ ↑ψ = 0 := by
+      calc g.toMatrix *ᵥ ↑ψ
+          = g.toMatrix *ᵥ (s.toMatrix *ᵥ ↑ψ) := by rw [h_sψ]
+        _ = (g.toMatrix * s.toMatrix) *ᵥ ↑ψ := by rw [← mulVec_mulVec (↑ψ) g.toMatrix s.toMatrix]
+        _ = 0 := h_zero
+    have h_ψ_val_zero : ψ.val = 0 := by
+      have h_inv : (star g.toGate.val).mulVec (g.toGate.val.mulVec ψ.val) = ψ.val := by
+        rw [mulVec_mulVec ψ.val (star g.toGate.val) g.toGate.val,
+          Matrix.mem_unitaryGroup_iff'.1 (g.toGate.2), one_mulVec]
+      rw [← h_inv, NQubitPauliGroupElement.toGate_val]
+      rw [QuantumState.coe_val ψ] at h_ψ_zero
+      rw [h_ψ_zero, Matrix.mulVec_zero]
+    have h_norm : Quantum.norm ψ.val = 1 := ψ.2
+    rw [h_ψ_val_zero, Quantum.norm_zero] at h_norm
+    norm_num at h_norm
+  obtain ⟨ψ, hψ⟩ := exists_codespace_state S
+  exact (h_contradiction ψ).elim (fun nψ => absurd hψ nψ) (fun ngψ =>
+    absurd (mem_logicalGateGroup_iff (g.toGate) S |>.1 hg ψ hψ) ngψ)
+
 /-- A Pauli is a logical operator if and only if it lies in the centralizer of S. -/
 theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement n)
     (S : StabilizerGroup n) : IsPauliLogicalOperator g S ↔ g ∈ centralizer S := by
   constructor
-  · -- Forward: logical gate → centralizer
-    intro h
-    rw [mem_centralizer_iff]
-    intro s hs
-    -- We have IsLogicalGate (g.toGate) S, so g.toGate is in the normalizer
-    have h_norm : IsInStabilizerNormalizer (g.toGate) S := by
-      rw [← isLogicalGate_iff_isInStabilizerNormalizer]
-      exact h
-    -- For any ψ in codespace, conjugation of s by g.toGate stabilizes ψ
-    -- The key: for Pauli operators, matrix conjugation equals group conjugation
-    -- star g.toMatrix * s.toMatrix * g.toMatrix = (g⁻¹ * s * g).toMatrix
-    have h_mat_conj : (star g.toMatrix * s.toMatrix * g.toMatrix) = (g⁻¹ * s * g).toMatrix := by
-      simp only [NQubitPauliGroupElement.toGate_val]
-      rw [NQubitPauliGroupElement.toMatrix_inv, ← NQubitPauliGroupElement.toMatrix_mul,
-          ← NQubitPauliGroupElement.toMatrix_mul]
-      congr! 1
-      rw [mul_assoc]
-    -- For any ψ in codespace, (g⁻¹ * s * g).toMatrix stabilizes ψ
-    -- This means g⁻¹ * s * g stabilizes every codespace state
-    have h_stab : ∀ ψ : NQubitState n, IsInCodespace ψ S →
-        (g⁻¹ * s * g).toMatrix.mulVec ψ.val = ψ.val := by
-      intro ψ hψ
-      rw [← h_mat_conj]
-      exact h_norm s hs ψ hψ
-    -- TODO: Complete this proof. The key step is showing that if g⁻¹ * s * g stabilizes
-    -- the codespace, then g⁻¹ * s * g ∈ centralizer S. This requires a lemma that any
-    -- Pauli that stabilizes the codespace is in the centralizer (which is essentially
-    -- the forward direction of the equivalence we're proving). For now, we use sorry
-    -- but the backward direction (centralizer → logical gate) is complete and is the
-    -- direction currently used in practice.
-    sorry
-  · -- Backward: centralizer → logical gate
-    intro h
-    rw [isLogicalGate_iff_isInStabilizerNormalizer]
-    intro s hs ψ hψ
-    have h_comm : s * g = g * s := (mem_centralizer_iff g S).1 h s hs
-    have h_mat : s.toMatrix * g.toMatrix = g.toMatrix * s.toMatrix := by
-      have h_toGate_mul := congrArg NQubitPauliGroupElement.toMatrix h_comm
-      rw [NQubitPauliGroupElement.toMatrix_mul, NQubitPauliGroupElement.toMatrix_mul] at h_toGate_mul
-      exact h_toGate_mul
-    have h_stab : s.toMatrix.mulVec ψ.val = ψ.val := (IsInCodespace.iff_all_stabilizers ψ S).1 hψ s hs
-    simp only [NQubitPauliGroupElement.toGate_val]
-    calc (star g.toMatrix * s.toMatrix * g.toMatrix).mulVec ψ.val
-        = (star g.toMatrix * (s.toMatrix * g.toMatrix)).mulVec ψ.val := by rw [Matrix.mul_assoc]
-      _ = (star g.toMatrix).mulVec ((s.toMatrix * g.toMatrix).mulVec ψ.val) := by
-          rw [← mulVec_mulVec ψ.val (star g.toMatrix) (s.toMatrix * g.toMatrix)]
-      _ = (star g.toMatrix).mulVec (g.toMatrix.mulVec (s.toMatrix.mulVec ψ.val)) := by
-          rw [h_mat, mulVec_mulVec ψ.val g.toMatrix s.toMatrix]
-      _ = (star g.toMatrix).mulVec (g.toMatrix.mulVec ψ.val) := by rw [h_stab]
-      _ = ((star g.toMatrix) * g.toMatrix).mulVec ψ.val := by rw [mulVec_mulVec]
-      _ = ψ.val := by
-        have h_unit : (star g.toMatrix) * g.toMatrix = 1 := by
-          rw [← NQubitPauliGroupElement.toGate_val g, ← gate_inv_val (g.toGate),
-              gate_val_inv_mul (g.toGate)]
-        rw [h_unit, one_mulVec]
+  · intro hg
+    by_contra h_not_comm
+    obtain ⟨h, hh⟩ : ∃ h ∈ S.toSubgroup, h * g ≠ g * h := by
+      contrapose! h_not_comm
+      rw [mem_centralizer_iff]
+      intro x hx
+      exact h_not_comm x hx
+    have h_anticomm : NQubitPauliGroupElement.Anticommute h g := by
+      apply Classical.byContradiction
+      intro h_not_anticomm
+      have h_comm : h * g = g * h := by
+        have h_or := NQubitPauliGroupElement.commute_or_anticommute h g
+        cases h_or with
+        | inl heq => exact heq
+        | inr h_anti => exact absurd h_anti h_not_anticomm
+      exact hh.2 h_comm
+    exact absurd hg (anticommutes_imp_not_isPauliLogicalOperator g S h hh.1 h_anticomm)
+  · intro hg
+    rw [IsPauliLogicalOperator, isLogicalGate_iff_conjugation]
+    intro h hh ψ hψ
+    have h_comm := (mem_centralizer_iff g S).1 hg h hh
+    have h_mat_comm : h.toMatrix * g.toMatrix = g.toMatrix * h.toMatrix := by
+      rw [← NQubitPauliGroupElement.toMatrix_mul, ← NQubitPauliGroupElement.toMatrix_mul, h_comm]
+    have h_star_mul : star g.toGate.val * g.toMatrix = 1 := by
+      have h_mul : g.toGate.val * star g.toGate.val = 1 := g.toGate.2.2
+      rw [NQubitPauliGroupElement.toGate_val] at h_mul ⊢
+      exact Matrix.mul_eq_one_comm.mp h_mul
+    have h_star_mul' : star g.toMatrix * g.toMatrix = 1 := by
+      rw [← NQubitPauliGroupElement.toGate_val]
+      exact Matrix.mem_unitaryGroup_iff'.1 (g.toGate.2)
+    have h_conj_eq : star g.toGate.val * h.toMatrix * g.toGate.val = h.toMatrix := by
+      calc star g.toGate.val * h.toMatrix * g.toGate.val
+          = (star g.toGate.val * h.toMatrix) * g.toGate.val := by rw [Matrix.mul_assoc]
+        _ = star g.toGate.val * (h.toMatrix * g.toGate.val) := by rw [Matrix.mul_assoc]
+        _ = star g.toGate.val * (g.toGate.val * h.toMatrix) := by
+            rw [NQubitPauliGroupElement.toGate_val, ← h_mat_comm]
+        _ = (star g.toGate.val * g.toGate.val) * h.toMatrix := by rw [Matrix.mul_assoc]
+        _ = 1 * h.toMatrix := by
+            rw [NQubitPauliGroupElement.toGate_val, h_star_mul']
+        _ = h.toMatrix := by rw [Matrix.one_mul]
+    change (star g.toGate.val * h.toMatrix * g.toGate.val).mulVec ψ.val = ψ.val
+    rw [h_conj_eq, hψ h hh]
 
 /-- Membership in the centralizer is equivalent to being a Pauli logical operator. -/
 lemma mem_centralizer_iff_IsPauliLogicalOperator (g : NQubitPauliGroupElement n)
@@ -196,7 +250,7 @@ theorem symm (S : StabilizerGroup n) {L L' : NQubitPauliGroupElement n}
     (h : SameLogicalOperator L L' S) : SameLogicalOperator L' L S := by
   simp only [SameLogicalOperator] at h ⊢
   suffices L'⁻¹ * L = (L⁻¹ * L')⁻¹ by rw [this]; exact S.inv_mem h
-  rw [mul_inv_rev, inv_inv]
+  rw [_root_.mul_inv_rev, inv_inv]
 
 /-- Same logical operator is transitive. -/
 theorem trans (S : StabilizerGroup n) {L L' L'' : NQubitPauliGroupElement n}
