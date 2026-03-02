@@ -32,7 +32,8 @@ def sympSpan (L : List (NQubitPauliGroupElement n)) : Submodule (ZMod 2) (Fin (n
 
 /-- The span of the check-matrix rows equals the span of the symplectic image of `listToSet L`. -/
 lemma sympSpan_eq_span_listToSet (L : List (NQubitPauliGroupElement n)) :
-    sympSpan L = span (ZMod 2) ((fun g => toSymplectic g.operators) '' listToSet L) := by
+    sympSpan L = span (ZMod 2)
+      ((fun g => NQubitPauliOperator.toSymplectic g.operators) '' listToSet L) := by
   rw [sympSpan]
   congr 1
   ext v
@@ -52,19 +53,21 @@ lemma sympSpan_eq_span_listToSet (L : List (NQubitPauliGroupElement n)) :
 /-- If `g` is in the list `L`, then its symplectic vector is a row of the check matrix. -/
 lemma mem_listToSet_symp_in_range (L : List (NQubitPauliGroupElement n))
     (g : NQubitPauliGroupElement n) (hg : g ∈ listToSet L) :
-    toSymplectic g.operators ∈ Set.range (checkMatrix L) := by
+    NQubitPauliOperator.toSymplectic g.operators ∈ Set.range (checkMatrix L) := by
   rw [listToSet, Set.mem_setOf] at hg
   obtain ⟨i, hi⟩ := List.mem_iff_get.mp hg
   use i
-  have h_row : checkMatrix L i = toSymplectic (L.get i).operators := by ext j; rfl
-  rw [h_row, congr_arg (fun e => toSymplectic e.operators) hi]
+  have h_row : checkMatrix L i = NQubitPauliOperator.toSymplectic (L.get i).operators := by
+    ext j; rfl
+  rw [h_row, congr_arg (fun e => NQubitPauliOperator.toSymplectic e.operators) hi]
 
 /-- For phase-0 generators, closure is contained in the symplectic span:
-  if `g ∈ Subgroup.closure (listToSet L)` then `toSymplectic g.operators ∈ sympSpan L`. -/
+  if `g ∈ Subgroup.closure (listToSet L)` then
+  `NQubitPauliOperator.toSymplectic g.operators ∈ sympSpan L`. -/
 theorem mem_closure_implies_symp_in_span (L : List (NQubitPauliGroupElement n))
     (_ : AllPhaseZero L) (g : NQubitPauliGroupElement n)
     (hg : g ∈ Subgroup.closure (listToSet L)) :
-    toSymplectic g.operators ∈ sympSpan L := by
+    NQubitPauliOperator.toSymplectic g.operators ∈ sympSpan L := by
   rw [sympSpan_eq_span_listToSet]
   exact Quantum.toSymplectic_mem_span_of_mem_closure hg
 
@@ -95,7 +98,7 @@ theorem sympSpan_sum_eq_zero (L : List (NQubitPauliGroupElement n)) (indices : F
   `L` is not in the subgroup closure. -/
 theorem not_mem_closure_of_symp_not_in_span (L : List (NQubitPauliGroupElement n))
     (hPhase : AllPhaseZero L) (g : NQubitPauliGroupElement n) (_ : g.phasePower = 0)
-    (hg_symp : toSymplectic g.operators ∉ sympSpan L) :
+    (hg_symp : NQubitPauliOperator.toSymplectic g.operators ∉ sympSpan L) :
     g ∉ Subgroup.closure (listToSet L) := by
   intro h
   exact hg_symp (mem_closure_implies_symp_in_span L hPhase g h)
@@ -105,7 +108,7 @@ theorem not_mem_closure_of_symp_not_in_span (L : List (NQubitPauliGroupElement n
 theorem not_mem_subgroup_of_symp_not_in_span (L : List (NQubitPauliGroupElement n))
     (H : Subgroup (NQubitPauliGroupElement n)) (h_eq : Subgroup.closure (listToSet L) = H)
     (hPhase : AllPhaseZero L) (g : NQubitPauliGroupElement n) (hg_phase : g.phasePower = 0)
-    (hg_symp : toSymplectic g.operators ∉ sympSpan L) : g ∉ H := by
+    (hg_symp : NQubitPauliOperator.toSymplectic g.operators ∉ sympSpan L) : g ∉ H := by
   rw [← h_eq]
   exact not_mem_closure_of_symp_not_in_span L hPhase g hg_phase hg_symp
 
