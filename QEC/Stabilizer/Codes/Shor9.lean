@@ -31,44 +31,60 @@ open NQubitPauliGroupElement
 
 /-!
 ## Generator definitions
+
+Qubits are indexed `0..8` in three blocks `{0,1,2}`, `{3,4,5}`, `{6,7,8}`.
+`M1`–`M6` are **intra-block** Z⊗Z on adjacent pairs within each block of three.
+`M7` is X on all qubits `0..5`; `M8` is X on all qubits `3..8` (standard Shor CSS
+presentation; overlapping supports).
 -/
 
+/-- Z⊗Z on qubits 0 and 1 (first block, adjacent pair). -/
 def M1 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 0 PauliOperator.Z).set 1 PauliOperator.Z⟩
 
+/-- Z⊗Z on qubits 1 and 2 (first block, adjacent pair). -/
 def M2 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 1 PauliOperator.Z).set 2 PauliOperator.Z⟩
 
+/-- Z⊗Z on qubits 3 and 4 (second block). -/
 def M3 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 3 PauliOperator.Z).set 4 PauliOperator.Z⟩
 
+/-- Z⊗Z on qubits 4 and 5 (second block). -/
 def M4 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 4 PauliOperator.Z).set 5 PauliOperator.Z⟩
 
+/-- Z⊗Z on qubits 6 and 7 (third block). -/
 def M5 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 6 PauliOperator.Z).set 7 PauliOperator.Z⟩
 
+/-- Z⊗Z on qubits 7 and 8 (third block). -/
 def M6 : NQubitPauliGroupElement 9 :=
   ⟨0, ((NQubitPauliOperator.identity 9).set 7 PauliOperator.Z).set 8 PauliOperator.Z⟩
 
+/-- X on each of qubits 0–5 (six-qubit X stabilizer, overlapping first two blocks). -/
 def M7 : NQubitPauliGroupElement 9 :=
   ⟨0,
     ((((((NQubitPauliOperator.identity 9).set 0 PauliOperator.X).set 1 PauliOperator.X).set 2
                 PauliOperator.X).set 3 PauliOperator.X).set 4 PauliOperator.X).set 5
       PauliOperator.X⟩
 
+/-- X on each of qubits 3–8 (six-qubit X stabilizer, overlapping last two blocks). -/
 def M8 : NQubitPauliGroupElement 9 :=
   ⟨0,
     ((((((NQubitPauliOperator.identity 9).set 3 PauliOperator.X).set 4 PauliOperator.X).set 5
                 PauliOperator.X).set 6 PauliOperator.X).set 7 PauliOperator.X).set 8
       PauliOperator.X⟩
 
+/-- The six Z-type generators `M1`–`M6`. -/
 def ZGenerators : Set (NQubitPauliGroupElement 9) :=
   {M1, M2, M3, M4, M5, M6}
 
+/-- The two X-type generators `M7`, `M8`. -/
 def XGenerators : Set (NQubitPauliGroupElement 9) :=
   {M7, M8}
 
+/-- Full generating set: ZGenerators ∪ XGenerators. -/
 def generators : Set (NQubitPauliGroupElement 9) :=
   ZGenerators ∪ XGenerators
 

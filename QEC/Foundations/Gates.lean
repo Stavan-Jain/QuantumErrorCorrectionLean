@@ -8,16 +8,43 @@ import QEC.Foundations.Basic
 namespace Quantum
 open Matrix
 
+/-!
+# Unitary gates as matrices
+
+This file builds the **gate** layer on top of `Basic.lean`: unitary matrices acting on
+finite-dimensional complex Hilbert spaces indexed by a basis type `α`.
+
+## Main idea
+
+- A **`QuantumGate α`** is an element of `Matrix.unitaryGroup α ℂ`: a matrix `U` with
+  `Uᴴ U = 1` (stored as a subtype with the unitary proof).
+- **Composition** is matrix multiplication; **inverse** is conjugate transpose (`star`),
+  see lemmas `gate_inv_val`, `gate_val_inv`, `gate_mul_val`.
+- Fixed sizes use the basis types from `Basic`: `QubitBasis` (Fin 2), `TwoQubitBasis`,
+  `ThreeQubitBasis`, and parametric `NQubitBasis n` for `NQubitGate n`.
+
+## Contents
+
+- Abbreviations `OneQubitGate`, `TwoQubitGate`, `ThreeQubitGate`, `NQubitGate n`.
+- `UnitComplex` and phase factors for controlled/phase gates.
+- Concrete gates (Pauli, Hadamard, CNOT, etc.) and tensor-product style combinators
+  used by the repetition code and stabilizer formalism.
+
+Depends on `Basic.lean` for `QubitBasis`, `NQubitBasis`, and state types.
+-/
+
+/-- A unitary gate on basis `α`: matrix `U` with `Uᴴ U = 1`. -/
 abbrev QuantumGate (α : Type*) [DecidableEq α] [Fintype α] :=
   Matrix.unitaryGroup α ℂ
 
+/-- Single-qubit gates: 2×2 unitaries in the computational basis. -/
 abbrev OneQubitGate : Type :=
-  QuantumGate QubitBasis   -- i.e. Matrix.unitaryGroup (Fin 2) ℂ
+  QuantumGate QubitBasis
 
+/-- Two-qubit gates: unitaries on `QubitBasis × QubitBasis`. -/
 abbrev TwoQubitGate : Type := QuantumGate TwoQubitBasis
 
--- 3-qubit basis as a product of three 1-qubit bases.
-
+/-- Three-qubit gates: unitaries on `ThreeQubitBasis` (product of three qubit bases). -/
 abbrev ThreeQubitGate : Type := QuantumGate ThreeQubitBasis
 
 /-- Gate type for n-qubit systems (indexed by NQubitBasis n). -/

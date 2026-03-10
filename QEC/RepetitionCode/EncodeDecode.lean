@@ -3,11 +3,29 @@ import QEC.Foundations.Foundations
 namespace Quantum
 
 /-!
-# EncodeDecode
+# Encode / decode for the 3-qubit repetition code (semantic layer)
 
-This file contains only the *semantic* encode/decode maps between
-1-qubit vectors/states and the 3-qubit repetition-code subspace.
+This file defines the **semantic** encode and decode maps between **one** qubit and the
+**3-qubit** bit-flip repetition code subspace spanned by |000⟩ and |111⟩.
 
+## Layout
+
+- **Codewords**: `zeroL` = |000⟩, `oneL` = |111⟩ (`ket000` / `ket111` from `Foundations`).
+- **Encoder** `encodeVec` / `encode_state`: places amplitudes `v 0` and `v 1` only on
+  basis labels (0,0,0) and (1,1,1); all other components are zero — so the image lies
+  in the 2-dimensional codespace.
+- **Decoder** `decodeVec` / `decode_state`: restricts back to the two support points and
+  builds a 1-qubit vector/state (normalization handled where needed).
+
+## Related modules
+
+- **`Recovery.lean`**: majority projection onto the same subspace (collapses arbitrary
+  3-qubit vectors onto |000⟩/|111⟩ components).
+- **`LogicalX.lean`**: logical X implemented as a 3-qubit gate plus decode = single-qubit X.
+- Stabilizer generators for this code live in `Stabilizer/Codes/RepetitionCode3.lean`;
+  this file stays independent of the Pauli-group stabilizer API.
+
+No syndrome measurement here — only linear maps on amplitude vectors / normalized states.
 -/
 
 -- Logical codewords for the 3-bit repetition code (bit-flip code)

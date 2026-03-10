@@ -3,6 +3,26 @@ import QEC.Foundations.Foundations
 
 namespace Quantum
 
+/-!
+# Logical X for the 3-qubit repetition code
+
+The **logical Pauli X** on the encoded subspace is implemented as a **physical** 3-qubit
+unitary `LogicalX` (here `X_q1q2q3_3` — X applied jointly so that the codespace {|000⟩, |111⟩}
+is swapped). After encoding a 1-qubit state, applying `LogicalX` and **decoding** should
+agree with applying the **single-qubit** `X` gate on the original qubit.
+
+## Main results
+
+- `logicalX_correct_ket0` / `logicalX_correct_ket1`: correctness on |0⟩ and |1⟩.
+- `F` packages encode → `LogicalX` → decode as a map `QubitVec → QubitVec`.
+- `F_correct` and `logicalX_correct_val` / `logicalX_correct_state`: full linear extension
+  to arbitrary 1-qubit vectors/states.
+
+Depends on `EncodeDecode.lean` (`encode_state`, `decode_state`, `encodeVec`, `decodeVec`)
+and gate definitions from `Foundations` (e.g. `X`, `Xmat`).
+-/
+
+/-- Physical 3-qubit gate realizing logical X on the repetition-code subspace. -/
 noncomputable def LogicalX : ThreeQubitGate := X_q1q2q3_3
 
 lemma LogicalX_encode_ket0 : LogicalX • encode_state ket0 = ket111 := by simp[LogicalX]

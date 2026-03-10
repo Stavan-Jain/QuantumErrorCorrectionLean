@@ -2,6 +2,35 @@ import QEC.RepetitionCode.EncodeDecode
 import QEC.Foundations.Foundations
 
 namespace Quantum
+
+/-!
+# Majority recovery for the 3-qubit repetition code (semantic layer)
+
+This file defines **recovery** as a *semantic* map on `ThreeQubitVec`: project an
+arbitrary 3-qubit amplitude vector onto the **codespace** spanned by |000⟩ and |111⟩
+using **majority vote** on the eight computational basis labels.
+
+## Encode/decode context
+
+- **Encode** lives in `EncodeDecode.lean`: `encodeVec` / `encode_state` embed a 1-qubit
+  vector into the subspace supported on {(0,0,0), (1,1,1)}.
+- **Recovery** here collapses any 3-qubit vector to that same subspace: only
+  (0,0,0) and (1,1,1) can remain nonzero. The amplitude on |000⟩ is the **sum of
+  amplitudes on basis states with majority 0**; similarly for |111⟩ and majority 1.
+
+## Main definitions
+
+- `maj0_amp` / `maj1_amp`: sums of `v ijk` over the four basis triples with two or
+  more 0s (resp. 1s).
+- `recoverVec`: piecewise — `(0,0,0) ↦ maj0_amp v`, `(1,1,1) ↦ maj1_amp v`, else 0.
+- State-level recovery (`recover_state`, etc.) builds normalized states when inputs
+  are valid.
+
+This is the linear-algebraic analogue of “decode by majority”; it does not depend on
+the stabilizer generator list directly, but matches the bit-flip repetition code
+codespace used elsewhere in the project.
+-/
+
 /-- Aggregate amplitude for majority-0 basis states. -/
 noncomputable def maj0_amp (v : ThreeQubitVec) : ℂ :=
   v (0, 0, 0) + v (0, 0, 1) + v (0, 1, 0) + v (1, 0, 0)

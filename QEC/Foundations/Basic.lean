@@ -5,7 +5,36 @@ import Mathlib.Tactic
 namespace Quantum
 open Matrix
 
+/-!
+# Vectors, norms, and quantum states
+
+This file is the **linear-algebra foundation** for the QEC library: complex amplitude
+vectors indexed by a finite basis, the Euclidean norm, and normalized **quantum states**
+as a subtype.
+
+## Core types
+
+- **`Vector α`**: `α → ℂ` — not necessarily normalized; used for amplitudes and intermediates.
+- **`norm`**: `√(∑ᵢ |v i|²)` — standard finite-dimensional norm; lemmas show positivity,
+  scaling, and `norm_zero`.
+- **`QuantumState α`**: `{ v : Vector α // norm v = 1 }` — normalized vectors only.
+  Coerced to `Vector α` via `CoeTC` for convenient use in sums and matrix-vector products.
+
+## Basis bundles
+
+- **`QubitBasis`** (= `Fin 2`): one qubit.
+- **`TwoQubitBasis`**, **`ThreeQubitBasis`**: tuple bases for 2- and 3-qubit systems
+  (convenient for repetition code indexing).
+- **`NQubitBasis n`**: function type `Fin n → QubitBasis` for generic n-qubit systems
+  (used with stabilizer / Pauli formalism).
+
+Standard kets **`ket0`**, **`ket1`** and basis vectors are defined here; `Gates.lean`
+builds unitary matrices on these spaces.
+-/
+
 variable {α : Type*} [Fintype α] [DecidableEq α]
+
+/-- Complex amplitude vector over basis `α` (not necessarily normalized). -/
 abbrev Vector (α : Type*) [Fintype α] [DecidableEq α] := α → ℂ
 
 noncomputable def norm (v : Vector α) :=
@@ -53,22 +82,29 @@ lemma norm_smul (c : ℂ) (v : Vector α) : norm (c • v) = ‖c‖ * norm v :=
     simp [mul_pow, Finset.mul_sum]
   rw [h_factor, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity)]
 
+/-- Normalized vector: unit norm in the `norm` above (quantum state in Dirac notation). -/
 abbrev QuantumState (α : Type*) [Fintype α] [DecidableEq α] :=
   { v : Vector α // norm v = 1 }
 
--- Coerce a quantum state to its underlying vector
+/-- Coerce a quantum state to its underlying amplitude vector. -/
 instance : CoeTC (QuantumState α) (Vector α) := ⟨Subtype.val⟩
 
 /-- The coercion of a quantum state to a vector is its `.val`. -/
 lemma QuantumState.coe_val (ψ : QuantumState α) : (ψ : Vector α) = ψ.val := rfl
 
+/-- Computational basis index for one qubit (`0` and `1`). -/
 abbrev QubitBasis : Type := Fin 2
 
+/-- Normalized 1-qubit state. -/
 abbrev Qubit := QuantumState QubitBasis
+
+/-- Unnormalized 1-qubit amplitudes (same as `Vector QubitBasis`). -/
 abbrev QubitVec := QubitBasis → ℂ
 
+/-- Computational basis ket |0⟩ = (1, 0). -/
 def ket0 : Qubit := ⟨![1, 0], by simp⟩
 
+/-- Computational basis ket |1⟩ = (0, 1). -/
 def ket1 : Qubit := ⟨![0, 1], by simp⟩
 
 /-- Basis type for 2-qubit systems using tuple representation.
