@@ -141,10 +141,13 @@ theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement 
     change (star g.toGate.val * h.toMatrix * g.toGate.val).mulVec ψ.val = ψ.val
     rw [h_conj_eq, hψ h hh]
 
-/-- Membership in the centralizer is equivalent to being a Pauli logical operator. -/
-lemma mem_centralizer_iff_IsPauliLogicalOperator (g : NQubitPauliGroupElement n)
-    (S : StabilizerGroup n) : g ∈ centralizer S ↔ IsPauliLogicalOperator g S := by
-  rw [isPauliLogicalOperator_iff_mem_centralizer]
+/-- A Pauli is a logical operator iff it commutes with every element of a generating set
+    for the stabilizer. -/
+theorem isPauliLogicalOperator_iff_commutes_generators (g : NQubitPauliGroupElement n)
+    (S : StabilizerGroup n) (genSet : Set (NQubitPauliGroupElement n))
+    (h_closure : S.toSubgroup = Subgroup.closure genSet) :
+    IsPauliLogicalOperator g S ↔ ∀ s ∈ genSet, s * g = g * s := by
+  rw [isPauliLogicalOperator_iff_mem_centralizer, mem_centralizer_iff_closure g S genSet h_closure]
 
 /-- The stabilizer group is contained in its centralizer (every stabilizer is a
     Pauli logical operator). -/

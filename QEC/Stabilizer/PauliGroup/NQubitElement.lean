@@ -98,7 +98,7 @@ def ofOperator (op : NQubitPauliOperator n) : NQubitPauliGroupElement n :=
 
 -- Simp lemmas for minusOne
 @[simp] lemma minusOne_phasePower (n : ℕ) : (minusOne n).phasePower = 2 := rfl
-@[simp] lemma minusOne_operators (n : ℕ) : (minusOne n).operators = 
+@[simp] lemma minusOne_operators (n : ℕ) : (minusOne n).operators =
 NQubitPauliOperator.identity n := rfl
 
 /-- Get the Pauli operator at a specific qubit position. -/

@@ -334,7 +334,7 @@ theorem logicalX_anticommutes_logicalZ :
 The rows of the check matrix for the generator list are linearly independent.
 -/
 set_option maxRecDepth 16384 in
-set_option maxHeartbeats 2000000 in
+set_option maxHeartbeats 1500000 in
 -- decide needs many heartbeats for 2^8 coefficient vectors
 theorem rowsLinearIndependent_generatorsList :
     NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by

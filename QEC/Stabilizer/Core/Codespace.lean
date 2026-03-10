@@ -135,7 +135,7 @@ lemma mul_stabilizerSum_eq (S : StabilizerGroup n) (g : NQubitPauliGroupElement 
     conv_rhs => rw [← h_bij, Finset.sum_image (Finset.card_image_iff.mp <| by aesop)]
   convert h_sum_eq using 1
   simp only [stabilizerSum, Finset.mul_sum _ _ _]
-  exact Finset.sum_congr rfl fun x hx => by exact?
+  exact Finset.sum_congr rfl fun x hx => by exact Eq.symm (NQubitPauliGroupElement.toMatrix_mul g x)
 
 /-- The codespace of a stabilizer group is always non-empty. -/
 lemma exists_codespace_state (S : StabilizerGroup n) : ∃ ψ : NQubitState n, IsInCodespace ψ S := by
