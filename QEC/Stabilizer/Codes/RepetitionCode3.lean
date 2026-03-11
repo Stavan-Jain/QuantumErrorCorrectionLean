@@ -291,13 +291,30 @@ lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup := by
   exact not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
     logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX
 
+/-- No stabilizer element has the same operator part as Z_on_qubit2 (stabilizers are
+    products of adjacent Zs; Z_on_qubit2 is Z on one qubit only). -/
+lemma Z_on_qubit2_operators_ne_of_mem (s : NQubitPauliGroupElement 3) (hs : s ∈ subgroup) :
+    s.operators ≠ Z_on_qubit2.operators := by
+      -- By contradiction, assume that $s.operators = Z_on_qubit2.operators$.
+      by_contra h_eq;
+      have h_contradiction :
+          NQubitPauliOperator.toSymplectic s.operators ∈
+            NQubitPauliGroupElement.sympSpan generatorsList := by
+        apply mem_closure_implies_symp_in_span generatorsList AllPhaseZero_generatorsList s (by
+          convert hs using 1
+          exact congr_arg _ (by ext; simp +decide [listToSet_generatorsList]))
+      simp_all +decide [ NQubitPauliGroupElement.sympSpan ];
+      rw [ Submodule.mem_span_range_iff_exists_fun ] at h_contradiction;
+      obtain ⟨ c, hc ⟩ := h_contradiction;
+      fin_cases c <;> simp_all +decide
+
 /-- Z_on_qubit2 is a nontrivial logical operator of weight 1. -/
 lemma Z_on_qubit2_nontrivial_logical :
     IsNontrivialLogicalOperator Z_on_qubit2 stabilizerGroup :=
-  ⟨(isPauliLogicalOperator_iff_mem_centralizer Z_on_qubit2 stabilizerGroup).2
-      Z_on_qubit2_mem_centralizer,
-    not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
-      logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX⟩
+  ⟨Z_on_qubit2_mem_centralizer,
+    by rw [stabilizerGroup_toSubgroup_eq]; exact Z_on_qubit2_not_mem_subgroup,
+    fun s hs =>
+      Z_on_qubit2_operators_ne_of_mem s (by rw [← stabilizerGroup_toSubgroup_eq]; exact hs)⟩
 
 /-- The 3-qubit repetition code has code distance 1. -/
 theorem repetitionCode3_has_distance_one : HasCodeDistance stabilizerCode 1 := by
