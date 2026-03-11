@@ -376,6 +376,17 @@ lemma commutes_if_one_identity_right (p : NQubitPauliGroupElement n) :
   p * (1 : NQubitPauliGroupElement n) = (1 : NQubitPauliGroupElement n) * p :=
   commutes_one_right p
 
+/-- If p has operator part equal to the identity (phase-only element), then p commutes with
+    every q. -/
+lemma commutes_of_operators_identity (p q : NQubitPauliGroupElement n)
+    (h : p.operators = NQubitPauliOperator.identity n) : p * q = q * p := by
+  simp only [mul_eq, mul]
+  congr 1
+  · rw [h, mulOp_identity_left_phase, mulOp_identity_right_phase]
+    rw [add_comm p.phasePower q.phasePower]
+  · rw [h, NQubitPauliGroupElement.mulOp_identity_left_op, ← NQubitPauliGroupElement.one_operators,
+      NQubitPauliGroupElement.mulOp_identity_right_op]
+
 end NQubitPauliGroupElement
 
 end Quantum

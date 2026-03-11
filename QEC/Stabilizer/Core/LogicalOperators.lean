@@ -1,11 +1,14 @@
 import QEC.Foundations.Basic
 import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.Centralizer
+import QEC.Stabilizer.Core.LogicalOperatorCoset
 import QEC.Stabilizer.Core.Codespace
 import QEC.Stabilizer.Core.LogicalGates
 import QEC.Stabilizer.Core.LogicalGateGroup
 import QEC.Stabilizer.PauliGroup
 import QEC.Stabilizer.PauliGroup.Representation
+import QEC.Stabilizer.PauliGroup.NQubitElement
+import QEC.Stabilizer.PauliGroup.Commutation
 
 namespace Quantum
 namespace StabilizerGroup
@@ -22,9 +25,14 @@ viewed as a unitary gate via `toGate`, they map the codespace to itself (i.e. ar
 We define `IsPauliLogicalOperator g S` as `IsLogicalGate (g.toGate) S`. This is equivalent to
 lying in the centralizer of S (commuting with every element of the stabilizer).
 
-**Nontrivial logical operators** (logical errors) are those that are logical operators but not
-in the stabilizer; they act nontrivially on the logical qubits. Two operators that
-differ by a stabilizer element act the same on the codespace (same logical operator).
+**Logical operators as cosets**: The mathematical notion of "a logical operator" is a coset of S
+in the group of Pauli logical operators (the centralizer). Two elements represent the same
+logical operator iff they lie in the same coset (`SameLogicalOperator`).
+
+**Nontrivial logical operators (for distance)** are those that represent a coset that is not the
+identity coset and not a phase-only coset (φ·S). The element predicate `IsNontrivialLogicalOperator g S`
+means: g is a Pauli logical operator and g represents such a nontrivial coset (i.e.
+`RepresentsNontrivialCoset g S`).
 -/
 
 /-- A Pauli logical operator is a Pauli whose associated gate maps the codespace to itself.
@@ -163,26 +171,23 @@ theorem IsPauliLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElement n)
   rw [IsPauliLogicalOperator, IsPauliLogicalOperator]
   exact isLogicalGate_iff_toSubgroup_eq (g.toGate) S T h
 
-/-- A nontrivial logical operator is a Pauli logical operator that is not in S;
-    it acts nontrivially on the logical qubits. -/
+/-- A nontrivial logical operator (for code distance) is a Pauli logical operator that represents
+    a nontrivial coset: g is in the centralizer, not in S, and no s ∈ S has the same operator
+    part as g (so the coset is not a phase-only coset φ·S). -/
 def IsNontrivialLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
-  IsPauliLogicalOperator g S ∧ g ∉ S.toSubgroup
+  RepresentsNontrivialCoset g S
 
-/-- Nontrivial logical operator is equivalent to Pauli logical operator not in S. -/
+/-- Nontrivial logical operator is equivalent to representing a nontrivial coset. -/
 theorem IsNontrivialLogicalOperator_iff (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) :
-    IsNontrivialLogicalOperator g S ↔ IsPauliLogicalOperator g S ∧ g ∉ S.toSubgroup :=
+    IsNontrivialLogicalOperator g S ↔
+      g ∈ centralizer S ∧ g ∉ S.toSubgroup ∧ ∀ s ∈ S.toSubgroup, s.operators ≠ g.operators :=
   Iff.rfl
 
 /-- Nontrivial logical operator is unchanged when the stabilizer has the same subgroup. -/
 theorem IsNontrivialLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElement n)
     {S T : StabilizerGroup n} (h : S.toSubgroup = T.toSubgroup) :
-    (IsNontrivialLogicalOperator g S ↔ IsNontrivialLogicalOperator g T) := by
-  rw [IsNontrivialLogicalOperator, IsNontrivialLogicalOperator]
-  constructor
-  · intro ⟨h1, h2⟩
-    exact ⟨(IsPauliLogicalOperator_of_toSubgroup_eq g h).1 h1, by rw [← h]; exact h2⟩
-  · intro ⟨h1, h2⟩
-    exact ⟨(IsPauliLogicalOperator_of_toSubgroup_eq g h).2 h1, by rw [h]; exact h2⟩
+    (IsNontrivialLogicalOperator g S ↔ IsNontrivialLogicalOperator g T) :=
+  RepresentsNontrivialCoset_of_toSubgroup_eq g h
 
 /-- Data for one logical qubit: a pair of logical X and Z operators that commute with
     the stabilizer and anticommute with each other. -/
@@ -222,15 +227,108 @@ theorem zOp_not_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
   not_mem_stabilizer_of_anticommutes_centralizer S ops.zOp ops.xOp ops.x_mem_centralizer
     (NQubitPauliGroupElement.anticommute_symm ops.xOp ops.zOp ops.anticommute)
 
-/-- The logical X operator is a nontrivial logical operator. -/
+/-- No stabilizer element has the same operator part as logical X; otherwise X̄ would commute
+    with Z̄ (since X̄ would differ from that stabilizer only by phase). -/
+theorem xOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S)
+    (s : NQubitPauliGroupElement n) (hs : s ∈ S.toSubgroup) :
+    s.operators ≠ ops.xOp.operators := by
+  intro heq
+  have h_phase : (ops.xOp * s⁻¹).operators = NQubitPauliOperator.identity n :=
+    NQubitPauliGroupElement.mul_inv_operators_identity_of_eq_operators ops.xOp s heq.symm
+  have h_comm_phase : (ops.xOp * s⁻¹) * ops.zOp = ops.zOp * (ops.xOp * s⁻¹) :=
+    NQubitPauliGroupElement.commutes_of_operators_identity (ops.xOp * s⁻¹) ops.zOp h_phase
+  have h_sz : s * ops.zOp = ops.zOp * s := (mem_centralizer_iff ops.zOp S).1 ops.z_mem_centralizer s hs
+  have key_sz : ops.zOp = s * ops.zOp * s⁻¹ :=
+    (show s * ops.zOp * s⁻¹ = ops.zOp by rw [h_sz, mul_assoc, NQubitPauliGroupElement.mul_right_inv, mul_one]).symm
+  have h_inv_sz : s⁻¹ * ops.zOp = ops.zOp * s⁻¹ := by
+    -- Multiply both sides of `key_sz` by `s⁻¹` on the left and by `s` on the right.
+    have h_comm_s : s⁻¹ * ops.zOp * s = ops.zOp := by
+      rw [ mul_assoc, eq_comm ];
+      rw [ ← h_sz, inv_mul_cancel_left ];
+    convert congr_arg ( · * s⁻¹ ) h_comm_s using 1 ; group
+  have h_eq : (ops.xOp * ops.zOp) * s⁻¹ = (ops.zOp * ops.xOp) * s⁻¹ := by
+    calc (ops.xOp * ops.zOp) * s⁻¹ = ops.xOp * (ops.zOp * s⁻¹) := by group
+      _ = ops.xOp * (s⁻¹ * ops.zOp) := by rw [h_inv_sz]
+      _ = (ops.xOp * s⁻¹) * ops.zOp := by group
+      _ = ops.zOp * (ops.xOp * s⁻¹) := h_comm_phase
+      _ = (ops.zOp * ops.xOp) * s⁻¹ := by group
+  have h_comm : ops.xOp * ops.zOp = ops.zOp * ops.xOp := by
+    calc ops.xOp * ops.zOp = (ops.xOp * ops.zOp) * (s⁻¹ * s) := by group
+      _ = ((ops.xOp * ops.zOp) * s⁻¹) * s := by group
+      _ = ((ops.zOp * ops.xOp) * s⁻¹) * s := by rw [h_eq]
+      _ = ops.zOp * ops.xOp := by group
+  have h_neg : negIdentity n * (ops.xOp * ops.zOp) = ops.xOp * ops.zOp := by
+    -- Since $ops.xOp$ and $ops.zOp$ anticommute, we have $ops.xOp * ops.zOp = -ops.zOp * ops.xOp$.
+    have h_anticomm : ops.xOp * ops.zOp = Quantum.StabilizerGroup.negIdentity n * (ops.zOp * ops.xOp) := by
+      exact ops.anticommute;
+    grind
+  have h_one : negIdentity n = 1 := by
+    exact?
+  exact negIdentity_ne_one n h_one
+
+/-- No stabilizer element has the same operator part as logical Z; otherwise Z̄ would commute
+    with X̄ (since Z̄ would differ from that stabilizer only by phase). -/
+theorem zOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S)
+    (s : NQubitPauliGroupElement n) (hs : s ∈ S.toSubgroup) :
+    s.operators ≠ ops.zOp.operators := by
+  intro heq
+  have h_phase : (ops.zOp * s⁻¹).operators = NQubitPauliOperator.identity n :=
+    NQubitPauliGroupElement.mul_inv_operators_identity_of_eq_operators ops.zOp s heq.symm
+  have h_comm_phase : (ops.zOp * s⁻¹) * ops.xOp = ops.xOp * (ops.zOp * s⁻¹) :=
+    NQubitPauliGroupElement.commutes_of_operators_identity (ops.zOp * s⁻¹) ops.xOp h_phase
+  have h_sx : s * ops.xOp = ops.xOp * s := (mem_centralizer_iff ops.xOp S).1 ops.x_mem_centralizer s hs
+  have key_sx : ops.xOp = s * ops.xOp * s⁻¹ :=
+    (show s * ops.xOp * s⁻¹ = ops.xOp by rw [h_sx, mul_assoc, NQubitPauliGroupElement.mul_right_inv, mul_one]).symm
+  have h_inv_sx : s⁻¹ * ops.xOp = ops.xOp * s⁻¹ := by
+    rw [ eq_comm ] at key_sx;
+    -- Multiply both sides of the equation $s * ops.xOp * s⁻¹ = ops.xOp$ by $s⁻¹$ on the left.
+    have h_s_inv_x : s⁻¹ * (s * ops.xOp * s⁻¹) = s⁻¹ * ops.xOp := by
+      rw [key_sx];
+    convert h_s_inv_x.symm using 1 ; group
+  have h_eq : (ops.zOp * ops.xOp) * s⁻¹ = (ops.xOp * ops.zOp) * s⁻¹ := by
+    calc (ops.zOp * ops.xOp) * s⁻¹ = ops.zOp * (ops.xOp * s⁻¹) := by group
+      _ = ops.zOp * (s⁻¹ * ops.xOp) := by rw [h_inv_sx]
+      _ = (ops.zOp * s⁻¹) * ops.xOp := by group
+      _ = ops.xOp * (ops.zOp * s⁻¹) := h_comm_phase
+      _ = (ops.xOp * ops.zOp) * s⁻¹ := by group
+  have h_comm : ops.zOp * ops.xOp = ops.xOp * ops.zOp := by
+    calc ops.zOp * ops.xOp = (ops.zOp * ops.xOp) * (s⁻¹ * s) := by group
+      _ = ((ops.zOp * ops.xOp) * s⁻¹) * s := by group
+      _ = ((ops.xOp * ops.zOp) * s⁻¹) * s := by rw [h_eq]
+      _ = ops.xOp * ops.zOp := by group
+  have h_symm := NQubitPauliGroupElement.anticommute_symm ops.xOp ops.zOp ops.anticommute
+  have h_neg : negIdentity n * (ops.zOp * ops.xOp) = ops.zOp * ops.xOp := by
+    calc negIdentity n * (ops.zOp * ops.xOp)
+        = negIdentity n * (NQubitPauliGroupElement.minusOne n * (ops.xOp * ops.zOp)) := by rw [h_symm.symm]
+      _ = (negIdentity n * NQubitPauliGroupElement.minusOne n) * (ops.xOp * ops.zOp) := by rw [mul_assoc]
+      _ = 1 * (ops.xOp * ops.zOp) := by
+        have h_contra : NQubitPauliGroupElement.Anticommute ops.zOp ops.xOp → False := by
+          intro h_anti
+          have h_contra : ops.zOp * ops.xOp = (Quantum.StabilizerGroup.negIdentity n) * (ops.xOp * ops.zOp) := by
+            exact h_anti.symm ▸ by rfl;
+          generalize_proofs at *;
+          rw [ h_comm ] at h_contra
+          generalize_proofs at *; (
+          have h_contra : Quantum.StabilizerGroup.negIdentity n = 1 := by
+            exact?
+          generalize_proofs at *; (
+          exact absurd h_contra ( by exact ne_of_apply_ne ( fun x => x.phasePower ) ( by simp +decide [ Quantum.StabilizerGroup.negIdentity ] ) ) ;));
+        exact False.elim <| h_contra h_symm
+      _ = ops.xOp * ops.zOp := by rw [one_mul]
+      _ = ops.zOp * ops.xOp := h_comm.symm
+  have h_one : negIdentity n = 1 := by
+    exact?
+  exact negIdentity_ne_one n h_one
+
+/-- The logical X operator is a nontrivial logical operator (represents a nontrivial coset). -/
 theorem xOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
     IsNontrivialLogicalOperator ops.xOp S :=
-  ⟨xOp_IsPauliLogicalOperator ops, ops.xOp_not_mem⟩
+  ⟨ops.x_mem_centralizer, ops.xOp_not_mem, fun s hs => xOp_operators_ne_of_mem ops s hs⟩
 
-/-- The logical Z operator is a nontrivial logical operator. -/
+/-- The logical Z operator is a nontrivial logical operator (represents a nontrivial coset). -/
 theorem zOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
     IsNontrivialLogicalOperator ops.zOp S :=
-  ⟨zOp_IsPauliLogicalOperator ops, ops.zOp_not_mem⟩
+  ⟨ops.z_mem_centralizer, ops.zOp_not_mem, fun s hs => zOp_operators_ne_of_mem ops s hs⟩
 
 end LogicalQubitOps
 

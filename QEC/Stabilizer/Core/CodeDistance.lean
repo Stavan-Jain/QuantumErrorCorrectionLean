@@ -12,9 +12,11 @@ variable {n k : ℕ}
 
 The **code distance** d of a stabilizer code is the minimum Pauli weight among
 nontrivial logical operators that act nontrivially on the physical qubits (weight > 0).
-Phase-only elements (e.g. -1) have weight 0 and are excluded so that distance is
-meaningful. A code with distance d can detect any error of weight < d and
-correct any error of weight < d/2.
+Nontrivial logical operators are defined at the element level as representing a
+nontrivial coset of the stabilizer (in the centralizer): not the identity coset and
+not a phase-only coset. Phase-only elements (e.g. -1) have weight 0 and are excluded
+so that distance is meaningful. A code with distance d can detect any error of
+weight < d and correct any error of weight < d/2.
 -/
 
 open NQubitPauliGroupElement

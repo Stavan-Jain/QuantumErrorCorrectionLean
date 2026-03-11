@@ -249,6 +249,18 @@ private lemma mulOp_self_inv (op : NQubitPauliOperator n) :
     ext i
     cases h : op i <;> simp [h]
 
+/-- The inverse does not change the operator part (only the phase). -/
+@[simp] lemma inv_operators (p : NQubitPauliGroupElement n) : (p⁻¹).operators = p.operators := by
+  simp [inv_eq, inv]
+
+/-- If p and q have the same operator part, then p * q⁻¹ differs from the identity only by phase
+    (its operator part is the identity). -/
+lemma mul_inv_operators_identity_of_eq_operators (p q : NQubitPauliGroupElement n)
+    (h : p.operators = q.operators) :
+    (p * q⁻¹).operators = NQubitPauliOperator.identity n := by
+  rw [mul_eq, mul, inv_operators, h]
+  exact (mulOp_self_inv q.operators).2
+
 /-- Right inverse property: p * p⁻¹ = 1. -/
 @[simp] lemma mul_right_inv (p : NQubitPauliGroupElement n) : p * p⁻¹ = 1 := by
   simp [mul, inv, mulOp_self_inv]
