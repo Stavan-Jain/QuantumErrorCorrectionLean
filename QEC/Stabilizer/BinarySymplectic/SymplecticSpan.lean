@@ -112,6 +112,39 @@ theorem not_mem_subgroup_of_symp_not_in_span (L : List (NQubitPauliGroupElement 
   rw [← h_eq]
   exact not_mem_closure_of_symp_not_in_span L hPhase g hg_phase hg_symp
 
+/-- If the symplectic vector of an operator is in the symplectic span of the generators,
+  there exists an element of the subgroup closure with that operator part. -/
+theorem exists_mem_closure_of_symp_in_span (L : List (NQubitPauliGroupElement n))
+    (op : NQubitPauliOperator n)
+    (h_in_span : NQubitPauliOperator.toSymplectic op ∈ sympSpan L) :
+    ∃ s ∈ Subgroup.closure (listToSet L), s.operators = op := by
+  obtain ⟨s, hs⟩ : ∃ s ∈ Subgroup.closure (listToSet L),
+      s.operators.toSymplectic = op.toSymplectic := by
+    revert h_in_span
+    rw [sympSpan]
+    refine Submodule.span_induction ?_ ?_ ?_ ?_
+    · intro v ⟨a, ha⟩
+      use L.get a
+      have h_row : checkMatrix L a = NQubitPauliOperator.toSymplectic (L.get a).operators := by
+        ext j; rfl
+      simp only [listToSet]
+      exact ⟨Subgroup.subset_closure (List.mem_iff_get.mpr ⟨a, rfl⟩),
+        (ha.symm.trans h_row).symm⟩
+    · use 1
+      exact ⟨Subgroup.one_mem _, Quantum.toSymplectic_one_operators⟩
+    · rintro x y _ _ ⟨s, hs, rfl⟩ ⟨t, ht, rfl⟩
+      use s * t
+      refine ⟨Subgroup.mul_mem _ hs ht, ?_⟩
+      ext j
+      exact Quantum.toSymplectic_mul s t j
+    · rintro a x hx ⟨s, hs, rfl⟩
+      fin_cases a
+      · use 1
+        exact ⟨Subgroup.one_mem _,
+          by rw [Quantum.toSymplectic_one_operators]; exact (zero_smul _ _).symm⟩
+      · exact ⟨s, hs, (one_smul _ _).symm⟩
+  exact ⟨s, hs.1, NQubitPauliOperator.toSymplectic_injective hs.2⟩
+
 end NQubitPauliGroupElement
 
 end Quantum
