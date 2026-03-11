@@ -1,5 +1,8 @@
 /.lake
 
+# Docs (Aristotle prompts, evaluations, guides)
+docs/
+
 # Cursor local state and continual-learning index
 .cursor/
 
