@@ -547,6 +547,30 @@ noncomputable def Z : OneQubitGate :=
   ext
   rw [gate_inv_val, coe_H, star_eq_conjTranspose, (Hermitian_def Hmat).1 Hmat_hermitian]
 
+/-- Phase gate S (√Z) matrix: |1⟩ gets phase i. -/
+noncomputable def Smat : Matrix QubitBasis QubitBasis ℂ :=
+  !![1, 0; 0, Complex.I]
+
+/-- The phase gate matrix is unitary. -/
+lemma Smat_mem_unitaryGroup : Smat ∈ Matrix.unitaryGroup QubitBasis ℂ := by
+  constructor
+  · ext i j; fin_cases i <;> fin_cases j <;>
+      norm_num [Smat, Matrix.mul_apply, Complex.ext_iff]
+  · ext i j; fin_cases i <;> fin_cases j <;>
+      norm_num [Smat, Matrix.vecMul, dotProduct, Complex.ext_iff]
+
+/-- Phase gate S (√Z) as a one-qubit gate. -/
+noncomputable def S : OneQubitGate :=
+  ⟨Smat, Smat_mem_unitaryGroup⟩
+
+/-- The inverse of the phase gate S (S†). -/
+noncomputable def inv_S : OneQubitGate := S⁻¹
+
+@[simp] lemma coe_S : (S : Matrix QubitBasis QubitBasis ℂ) = Smat := rfl
+
+lemma inv_S_val : inv_S.val = star S.val := by
+  rw [inv_S, gate_inv_val]
+
 @[simp] lemma X_on_ket0 : X • ket0 = ket1 := by
   vec_expand_simp [Xmat, ket0, ket1]
 
