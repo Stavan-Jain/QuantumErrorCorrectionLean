@@ -360,6 +360,10 @@ def logicalX : NQubitPauliGroupElement 7 :=
 def logicalZ : NQubitPauliGroupElement 7 :=
   ⟨0, NQubitPauliOperator.Z 7⟩
 
+/-- Logical Y with the convention `Ȳ = i X̄ Z̄`. -/
+noncomputable def logicalY : NQubitPauliGroupElement 7 :=
+  NQubitPauliGroupElement.phaseI 7 * (logicalX * logicalZ)
+
 /-- Logical X and logical Z anticommute (symplectic inner product 1 mod 2). -/
 theorem logicalX_anticommutes_logicalZ : NQubitPauliGroupElement.Anticommute logicalX logicalZ :=
   NQubitPauliOperator.allX_allZ_anticommute 7 (by decide)

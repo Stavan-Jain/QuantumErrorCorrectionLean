@@ -6,6 +6,7 @@ import QEC.Foundations.UniformTransversalGate
 import QEC.Foundations.Gates
 import QEC.Foundations.GateConjugation
 import QEC.Stabilizer.Core.LogicalGates
+import QEC.Stabilizer.Core.LogicalCliffordAction
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 import QEC.Stabilizer.PauliGroup.NQubitElement
 import QEC.Stabilizer.PauliGroup.Representation
@@ -252,6 +253,40 @@ theorem transversalH_Steane7_isLogicalGate :
   rw [ heq ];
   exact hψ g' hg'
 
+/-- `swapXZ_element` sends Steane logical X to logical Z. -/
+private lemma swapXZ_element_logicalX_eq_logicalZ :
+    swapXZ_element logicalX = logicalZ := by
+  ext i <;> simp [swapXZ_element, logicalX, logicalZ, NQubitPauliOperator.transversalSwapXZ,
+    NQubitPauliOperator.X, NQubitPauliOperator.Z, PauliOperator.swapXZ]
+
+/-- `swapXZ_element` sends Steane logical Z to logical X. -/
+private lemma swapXZ_element_logicalZ_eq_logicalX :
+    swapXZ_element logicalZ = logicalX := by
+  ext i <;> simp [swapXZ_element, logicalX, logicalZ, NQubitPauliOperator.transversalSwapXZ,
+    NQubitPauliOperator.X, NQubitPauliOperator.Z, PauliOperator.swapXZ]
+
+/-- Steane logical X has no Y components. -/
+private lemma logicalX_no_Y : ∀ i, logicalX.operators i ≠ PauliOperator.Y := by
+  intro i
+  simp [logicalX, NQubitPauliOperator.X]
+
+/-- Steane logical Z has no Y components. -/
+private lemma logicalZ_no_Y : ∀ i, logicalZ.operators i ≠ PauliOperator.Y := by
+  intro i
+  simp [logicalZ, NQubitPauliOperator.Z]
+
+/-- Transversal Hadamard acts as logical Hadamard on the canonical Steane logical pair. -/
+theorem transversalH_Steane7_isLogicalHadamardOn :
+    LogicalQubitOps.IsLogicalHadamard
+      ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+        logicalX_anticommutes_logicalZ⟩
+      transversalH_Steane7 := by
+  refine ⟨transversalH_Steane7_isLogicalGate, ?_, ?_⟩
+  · simpa [swapXZ_element_logicalX_eq_logicalZ] using
+      transversalH_conjugates_element logicalX logicalX_no_Y
+  · simpa [swapXZ_element_logicalZ_eq_logicalX] using
+      transversalH_conjugates_element logicalZ logicalZ_no_Y
+
 /-!
 ## Transversal S as a logical gate
 
@@ -366,7 +401,7 @@ lemma transversalS_conjugates_X1 :
         · rcases b₁ 4 with ( _ | _ | b₁₄ ) <;>
             rcases b₂ 4 with ( _ | _ | b₂₄ ) <;> norm_num [ Fin.ext_iff ] at *
         · grind;
-      · linarith;
+      · omega;
     · linarith;
     · rcases b₁ 1 with ( _ | _ | b₁₁ ) <;>
         rcases b₂ 1 with ( _ | _ | b₂₁ ) <;> norm_num [ Fin.ext_iff ] at *
@@ -378,7 +413,7 @@ lemma transversalS_conjugates_X1 :
         · rcases b₁ 4 with ( _ | _ | b₁₄ ) <;>
             rcases b₂ 4 with ( _ | _ | b₂₄ ) <;> norm_num [ Fin.ext_iff ] at *
         · linarith;
-      · linarith;
+      · omega;
       · rcases b₁ 2 with ( _ | _ | b₁₂ ) <;>
           rcases b₂ 2 with ( _ | _ | b₂₂ ) <;> norm_num [ Fin.ext_iff ] at *
         · rcases b₁ 4 with ( _ | _ | b₁₄ ) <;>
@@ -425,38 +460,38 @@ lemma transversalS_conjugates_X2 :
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
       · linarith;
-    · linarith;
+    · omega;
     · rcases i3 : i 3 with ( _ | _ | i3 ) <;>
         rcases j3 : j 3 with ( _ | _ | j3 ) <;> simp +decide [ i3, j3 ] at *
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
+      · omega;
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
-    · linarith;
-  · grind;
+      · omega;
+    · omega;
+  · omega;
   · rcases i1 : i 1 with ( _ | _ | i1 ) <;>
       rcases j1 : j 1 with ( _ | _ | j1 ) <;> simp +decide [ i1, j1 ] at *
     · rcases i3 : i 3 with ( _ | _ | i3 ) <;>
         rcases j3 : j 3 with ( _ | _ | j3 ) <;> simp +decide [ i3, j3 ] at *
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
+      · omega;
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
-    · grind;
+      · omega;
+    · omega;
     · rcases i3 : i 3 with ( _ | _ | i3 ) <;>
         rcases j3 : j 3 with ( _ | _ | j3 ) <;> simp +decide [ i3, j3 ] at *
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
+      · omega;
       · rcases i5 : i 5 with ( _ | _ | i5 ) <;>
           rcases j5 : j 5 with ( _ | _ | j5 ) <;> simp +decide [ i5, j5 ] at *
-      · linarith;
-    · grind;
-  · grind
+      · omega;
+    · omega;
+  · omega
 
 set_option maxHeartbeats 1000000 in
 -- This proof relies on explicit basis-index case analysis after conjugation expansion, and
@@ -640,6 +675,72 @@ theorem transversalS_Steane7_isLogicalGate :
   obtain ⟨g', hg', heq⟩ := h_conjugate g hg
   rw [ heq ];
   convert hψ g' hg' using 1
+
+/-- Transversal `S†` (implemented as `inv_S` on each qubit) acts as logical phase `S` on the
+canonical Steane logical pair under the convention `Ȳ := i X̄ Z̄`. -/
+theorem transversalS_Steane7_isLogicalS :
+    LogicalQubitOps.IsLogicalS
+      ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+        logicalX_anticommutes_logicalZ⟩
+      transversalS_Steane7 := by
+  refine ⟨transversalS_Steane7_isLogicalGate, ?_, ?_⟩
+  · change (uniformTransversalGateMatrix 7 inv_S) * logicalZ.toMatrix *
+      star (uniformTransversalGateMatrix 7 inv_S) = logicalZ.toMatrix
+    simpa [logicalZ, NQubitPauliGroupElement.toMatrix, PauliGroupElement.phasePowerToComplex] using
+      (uniformTransversalGateMatrix_inv_S_conj_Z_op 7 (NQubitPauliOperator.Z 7)
+        (by intro i; exact Or.inl rfl))
+  · change (uniformTransversalGateMatrix 7 inv_S) * logicalX.toMatrix *
+      star (uniformTransversalGateMatrix 7 inv_S) =
+      (LogicalQubitOps.logicalY
+        ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+          logicalX_anticommutes_logicalZ⟩).toMatrix
+    change (uniformTransversalGateMatrix 7 inv_S) * logicalX.toMatrix *
+      star (uniformTransversalGateMatrix 7 inv_S) = logicalY.toMatrix
+    have h_logicalY :
+        logicalY = ({ phasePower := (2 : Fin 4), operators := NQubitPauliOperator.Y 7 } :
+          NQubitPauliGroupElement 7) := by
+      ext
+      · decide
+      · simp [logicalY, logicalX, logicalZ, NQubitPauliGroupElement.mul,
+          NQubitPauliGroupElement.mulOp, NQubitPauliOperator.X, NQubitPauliOperator.Z,
+          NQubitPauliOperator.Y, NQubitPauliOperator.identity, PauliOperator.mulOp]
+    have hX :
+        logicalX.toMatrix = (NQubitPauliOperator.X 7).toMatrix := by
+      simp [logicalX, NQubitPauliGroupElement.toMatrix, PauliGroupElement.phasePowerToComplex]
+    rw [hX, uniformTransversalGateMatrix_conjugation]
+    ext b₁ b₂
+    have hSX :
+        ∀ i : Fin 7,
+          (inv_S.val * (NQubitPauliOperator.X 7 i).toMatrix * star inv_S.val) (b₁ i) (b₂ i) =
+            -((NQubitPauliOperator.Y 7 i).toMatrix (b₁ i) (b₂ i)) := by
+      intro i
+      simpa [inv_S_val, NQubitPauliOperator.X, NQubitPauliOperator.Y,
+        NQubitPauliOperator.toMatrix, mul_assoc]
+        using congrArg (fun M => M (b₁ i) (b₂ i)) S_adj_X_S
+    let a : Fin 7 → ℂ := fun i => (NQubitPauliOperator.Y 7 i).toMatrix (b₁ i) (b₂ i)
+    have h_neg_prod :
+        (∏ i : Fin 7, -(a i)) = -∏ i : Fin 7, a i := by
+      calc
+        (∏ i : Fin 7, -(a i)) = ∏ i : Fin 7, ((-1 : ℂ) * a i) := by
+          refine Finset.prod_congr rfl ?_
+          intro i hi
+          simp
+        _ = (∏ i : Fin 7, (-1 : ℂ)) * ∏ i : Fin 7, a i := by
+          rw [Finset.prod_mul_distrib]
+        _ = -∏ i : Fin 7, a i := by
+          norm_num
+    calc
+      (∏ x : Fin 7, (inv_S.val * (NQubitPauliOperator.X 7 x).toMatrix * star inv_S.val)
+          (b₁ x) (b₂ x)) =
+          ∏ x : Fin 7, -(a x) := by
+            refine Finset.prod_congr rfl ?_
+            intro i _
+            simpa [a] using hSX i
+      _ = -∏ i : Fin 7, a i := h_neg_prod
+      _ = logicalY.toMatrix b₁ b₂ := by
+            simp [a, h_logicalY, NQubitPauliGroupElement.toMatrix, NQubitPauliOperator.toMatrix,
+              PauliGroupElement.phasePowerToComplex]
+
 
 end Steane7
 end StabilizerGroup
