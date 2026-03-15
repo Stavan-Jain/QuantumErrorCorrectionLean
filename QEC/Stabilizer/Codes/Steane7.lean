@@ -364,6 +364,16 @@ def logicalZ : NQubitPauliGroupElement 7 :=
 noncomputable def logicalY : NQubitPauliGroupElement 7 :=
   NQubitPauliGroupElement.phaseI 7 * (logicalX * logicalZ)
 
+/-- Steane logical `Ȳ` is phase-2 all-`Y`, under the convention `Ȳ = i X̄ Z̄`. -/
+lemma logicalY_eq_phase2_allY :
+    logicalY = ({ phasePower := (2 : Fin 4), operators := NQubitPauliOperator.Y 7 } :
+      NQubitPauliGroupElement 7) := by
+  ext
+  · decide
+  · simp [logicalY, logicalX, logicalZ, NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp,
+      NQubitPauliOperator.X, NQubitPauliOperator.Z, NQubitPauliOperator.Y,
+      NQubitPauliOperator.identity, PauliOperator.mulOp]
+
 /-- Logical X and logical Z anticommute (symplectic inner product 1 mod 2). -/
 theorem logicalX_anticommutes_logicalZ : NQubitPauliGroupElement.Anticommute logicalX logicalZ :=
   NQubitPauliOperator.allX_allZ_anticommute 7 (by decide)

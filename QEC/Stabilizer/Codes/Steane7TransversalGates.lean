@@ -696,50 +696,13 @@ theorem transversalS_Steane7_isLogicalS :
           logicalX_anticommutes_logicalZ⟩).toMatrix
     change (uniformTransversalGateMatrix 7 inv_S) * logicalX.toMatrix *
       star (uniformTransversalGateMatrix 7 inv_S) = logicalY.toMatrix
-    have h_logicalY :
-        logicalY = ({ phasePower := (2 : Fin 4), operators := NQubitPauliOperator.Y 7 } :
-          NQubitPauliGroupElement 7) := by
-      ext
-      · decide
-      · simp [logicalY, logicalX, logicalZ, NQubitPauliGroupElement.mul,
-          NQubitPauliGroupElement.mulOp, NQubitPauliOperator.X, NQubitPauliOperator.Z,
-          NQubitPauliOperator.Y, NQubitPauliOperator.identity, PauliOperator.mulOp]
     have hX :
         logicalX.toMatrix = (NQubitPauliOperator.X 7).toMatrix := by
       simp [logicalX, NQubitPauliGroupElement.toMatrix, PauliGroupElement.phasePowerToComplex]
-    rw [hX, uniformTransversalGateMatrix_conjugation]
-    ext b₁ b₂
-    have hSX :
-        ∀ i : Fin 7,
-          (inv_S.val * (NQubitPauliOperator.X 7 i).toMatrix * star inv_S.val) (b₁ i) (b₂ i) =
-            -((NQubitPauliOperator.Y 7 i).toMatrix (b₁ i) (b₂ i)) := by
-      intro i
-      simpa [inv_S_val, NQubitPauliOperator.X, NQubitPauliOperator.Y,
-        NQubitPauliOperator.toMatrix, mul_assoc]
-        using congrArg (fun M => M (b₁ i) (b₂ i)) S_adj_X_S
-    let a : Fin 7 → ℂ := fun i => (NQubitPauliOperator.Y 7 i).toMatrix (b₁ i) (b₂ i)
-    have h_neg_prod :
-        (∏ i : Fin 7, -(a i)) = -∏ i : Fin 7, a i := by
-      calc
-        (∏ i : Fin 7, -(a i)) = ∏ i : Fin 7, ((-1 : ℂ) * a i) := by
-          refine Finset.prod_congr rfl ?_
-          intro i hi
-          simp
-        _ = (∏ i : Fin 7, (-1 : ℂ)) * ∏ i : Fin 7, a i := by
-          rw [Finset.prod_mul_distrib]
-        _ = -∏ i : Fin 7, a i := by
-          norm_num
-    calc
-      (∏ x : Fin 7, (inv_S.val * (NQubitPauliOperator.X 7 x).toMatrix * star inv_S.val)
-          (b₁ x) (b₂ x)) =
-          ∏ x : Fin 7, -(a x) := by
-            refine Finset.prod_congr rfl ?_
-            intro i _
-            simpa [a] using hSX i
-      _ = -∏ i : Fin 7, a i := h_neg_prod
-      _ = logicalY.toMatrix b₁ b₂ := by
-            simp [a, h_logicalY, NQubitPauliGroupElement.toMatrix, NQubitPauliOperator.toMatrix,
-              PauliGroupElement.phasePowerToComplex]
+    rw [hX, uniformTransversalGateMatrix_inv_S_conj_allX]
+    have hpow : ((-1 : ℂ) ^ 7) = -1 := by norm_num
+    simp [logicalY_eq_phase2_allY, NQubitPauliGroupElement.toMatrix,
+      PauliGroupElement.phasePowerToComplex, hpow]
 
 
 end Steane7
