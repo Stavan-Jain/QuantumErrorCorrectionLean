@@ -57,6 +57,10 @@ def set (op : NQubitPauliOperator n) (i : Fin n) (p : PauliOperator) :
   NQubitPauliOperator n :=
   fun j => if j = i then p else op j
 
+/-- Apply `PauliOperator.swapXZ` (X↔Z, I and Y fixed) on each qubit. -/
+def transversalSwapXZ (op : NQubitPauliOperator n) : NQubitPauliOperator n :=
+  fun i => PauliOperator.swapXZ (op i)
+
 /-- Convert an n-qubit Pauli operator to its matrix representation.
 
 For n qubits, this computes the tensor product (Kronecker product) of the

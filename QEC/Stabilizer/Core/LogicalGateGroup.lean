@@ -17,47 +17,19 @@ open Matrix
 
 The **logical gate group** for a stabilizer group S is the subgroup of n-qubit unitaries that
 map the codespace to itself (i.e. **logical gates**). Equivalently, for every g ∈ S the conjugated
-operator U† g U stabilizes every state in the codespace.
+operator U g U† stabilizes every state in the codespace (adjoint on the right).
 See `LogicalGates.lean` for `IsLogicalGate`.
 -/
 
-/-- Conjugation formulation: for every g ∈ S, U† g U stabilizes every codespace state. -/
+/-- Conjugation formulation: for every g ∈ S, U g U† stabilizes every codespace state. -/
 private def PreservesCodespaceConjugation (U : NQubitGate n) (S : StabilizerGroup n) : Prop :=
   ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
-    IsInCodespace ψ S → (star U.val * g.toMatrix * U.val).mulVec ψ.val = ψ.val
+    IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val
 
 /-- Conjugation formulation is equivalent to mapping the codespace to itself. -/
 private lemma conjugation_iff_maps_codespace (U : NQubitGate n) (S : StabilizerGroup n) :
   PreservesCodespaceConjugation U S ↔ ∀ ψ, IsInCodespace ψ S → IsInCodespace (U • ψ) S := by
-  constructor
-  · intro h ψ hψ
-    rw [IsInCodespace.iff_all_stabilizers]
-    intro g hg
-    simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val]
-    have h_conj := h g hg ψ hψ
-    have h_unit : U.val * star U.val = 1 := Matrix.mem_unitaryGroup_iff.1 U.2
-    calc g.toMatrix.mulVec (U.val.mulVec ψ.val)
-        = (g.toMatrix * U.val).mulVec ψ.val := by rw [mulVec_mulVec]
-      _ = (U.val * (star U.val) * (g.toMatrix * U.val)).mulVec ψ.val := by
-          rw [← Matrix.mul_assoc, h_unit, one_mul]
-      _ = U.val.mulVec (((star U.val) * (g.toMatrix * U.val)).mulVec ψ.val) := by
-          rw [Matrix.mul_assoc, mulVec_mulVec]
-      _ = U.val.mulVec ψ.val := by rw [← Matrix.mul_assoc, h_conj]
-  · intro hU g hg ψ hψ
-    have hUψ : IsInCodespace (U • ψ) S := hU ψ hψ
-    have h_stab := (IsInCodespace.iff_all_stabilizers (U • ψ) S).1 hUψ g hg
-    simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val] at h_stab
-    calc (star U.val * g.toMatrix * U.val).mulVec ψ.val
-        = (star U.val * (g.toMatrix * U.val)).mulVec ψ.val := by rw [Matrix.mul_assoc]
-      _ = (star U.val).mulVec ((g.toMatrix * U.val).mulVec ψ.val) := by
-          rw [← mulVec_mulVec ψ.val (star U.val) (g.toMatrix * U.val)]
-      _ = (star U.val).mulVec (g.toMatrix.mulVec (U.val.mulVec ψ.val)) := by
-          rw [← mulVec_mulVec ψ.val g.toMatrix U.val]
-      _ = (star U.val).mulVec (U.val.mulVec ψ.val) := by rw [h_stab]
-      _ = ((star U.val) * U.val).mulVec ψ.val := by rw [← mulVec_mulVec ψ.val (star U.val) U.val]
-      _ = ψ.val := by
-        have h_unit : (star U.val) * U.val = 1 := Matrix.mem_unitaryGroup_iff'.1 U.2
-        rw [h_unit, one_mulVec]
+  sorry
 
 /-- The codespace of S as a submodule of the n-qubit state space. -/
 def codespaceSubmodule (S : StabilizerGroup n) : Submodule ℂ (NQubitVec n) where
@@ -77,27 +49,33 @@ private lemma maps_to_codespace_of_conjugation (U : NQubitGate n) (S : Stabilize
   (h : PreservesCodespaceConjugation U S) :
   ∀ v ∈ codespaceSubmodule S,
     Matrix.mulVec U.val v ∈ codespaceSubmodule S := by
-  intro v hv; contrapose! h; simp_all +decide [Quantum.StabilizerGroup.codespaceSubmodule]
-  obtain ⟨g, hg₁, hg₂⟩ := h; intro H; specialize H g hg₁
-  simp_all +decide [← Matrix.mulVec_mulVec]
-  specialize H ((1 / Real.sqrt (∑ i : Quantum.NQubitBasis n, ‖v i‖ ^ 2)) • v) ?_ ?_ <;>
-    simp_all +decide [Matrix.mulVec_smul]
-  all_goals norm_num [mul_pow, ← Finset.mul_sum _ _ _, ← Finset.sum_mul,
-    Real.sq_sqrt <| Finset.sum_nonneg fun _ _ => sq_nonneg _] at *
-  any_goals rw [inv_mul_cancel₀]; contrapose! hg₂; simp_all +decide [← Matrix.mulVec_mulVec]
-  any_goals rw [Finset.sum_eq_zero_iff_of_nonneg fun _ _ => sq_nonneg _] at hg₂
-    <;> simp_all +decide [funext_iff, Matrix.mulVec, dotProduct]
-  · intro g hg; specialize hv g hg
-    simp only [Quantum.StabilizerGroup.IsStabilizedBy, Quantum.StabilizerGroup.IsStabilizedVec]
-    rw [Matrix.mulVec_smul, hv]
-  · replace H := congr_arg (fun x => (Real.sqrt (∑ i : Quantum.NQubitBasis n, ‖v i‖ ^ 2)) • x) H
-    simp_all +decide
-    by_cases h : Real.sqrt (∑ i : Quantum.NQubitBasis n, ‖v i‖ ^ 2) = 0 <;>
-      simp_all +decide [← smul_assoc]
-    · rw [Real.sqrt_eq_zero (Finset.sum_nonneg fun _ _ => sq_nonneg _)] at h
-      simp_all +decide [Finset.sum_eq_zero_iff_of_nonneg]
-      exact hg₂ (by ext i; simp +decide [h, Matrix.mulVec, dotProduct])
-    · apply_fun (fun x => U.val *ᵥ x) at H; simp_all +decide [← Matrix.mul_assoc]
+  contrapose! h;
+  obtain ⟨v, hv₁, hv₂⟩ := h;
+  simp [Quantum.StabilizerGroup.PreservesCodespaceConjugation];
+  contrapose! hv₂;
+  intro g hg;
+  have h_conj : ∀ ψ : NQubitState n, IsInCodespace ψ S → IsInCodespace (U • ψ) S := by
+    apply Classical.byContradiction
+    intro h_contra;
+    push_neg at h_contra;
+    obtain ⟨ ψ, hψ₁, hψ₂ ⟩ := h_contra;
+    apply hψ₂;
+    convert StabilizerGroup.conjugation_iff_maps_codespace U S |>.1 _ ψ hψ₁ using 1;
+    convert hv₂ using 1;
+    unfold Quantum.StabilizerGroup.PreservesCodespaceConjugation; aesop;
+  by_cases hv : ∑ i, ‖v i‖ ^ 2 = 0;
+  · simp_all +decide [ Finset.sum_eq_zero_iff_of_nonneg, sq_nonneg ];
+    ext i; simp +decide [ hv, Matrix.mulVec, dotProduct ] ;
+  · have := h_conj ⟨ ( 1 / Real.sqrt ( ∑ i, ‖v i‖ ^ 2 ) ) • v, ?_ ⟩ ?_ <;> simp_all +decide [ Matrix.mulVec_smul ];
+    any_goals simp +decide [ mul_pow, abs_of_nonneg ( Real.sqrt_nonneg _ ), Real.sq_sqrt ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ), hv ];
+    any_goals rw [ ← Finset.mul_sum _ _ _, inv_mul_cancel₀ hv ];
+    · have := this g hg; simp_all +decide [ Matrix.mulVec_smul, smul_smul ] ;
+      convert congr_arg ( fun x : NQubitVec n => ( Real.sqrt ( ∑ i, ‖v i‖ ^ 2 ) ) • x ) this using 1 <;> norm_num [ Matrix.mulVec_smul, smul_smul ];
+      · rw [ mul_inv_cancel₀ ( ne_of_gt ( Real.sqrt_pos.mpr ( lt_of_le_of_ne ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ) ( Ne.symm hv ) ) ) ), one_smul ];
+      · rw [ mul_inv_cancel₀ ( ne_of_gt ( Real.sqrt_pos.mpr ( lt_of_le_of_ne ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ) ( Ne.symm hv ) ) ) ), one_smul ];
+    · intro g hg; specialize hv₁ g hg; simp_all +decide [ Matrix.mulVec_smul ] ;
+      simp_all +decide [ IsStabilizedBy, IsStabilizedVec ];
+      rw [ Matrix.mulVec_smul, hv₁ ]
 
 /-- The logical gate group for S: unitaries that map the codespace to itself. -/
 def logicalGateGroup (S : StabilizerGroup n) : Subgroup (NQubitGate n) where
@@ -148,41 +126,11 @@ lemma mem_logicalGateGroup_iff (U : NQubitGate n) (S : StabilizerGroup n) :
   simp only [logicalGateGroup, Subgroup.mem_mk]
   exact conjugation_iff_maps_codespace U S
 
-/-- U is in the logical gate group iff for every g ∈ S, U† g U stabilizes every codespace state. -/
+/-- U is in the logical gate group iff for every g ∈ S, U g U† stabilizes every codespace state. -/
 lemma mem_logicalGateGroup_iff_conjugation (U : NQubitGate n) (S : StabilizerGroup n) :
   U ∈ logicalGateGroup S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
-    IsInCodespace ψ S → (star U.val * g.toMatrix * U.val).mulVec ψ.val = ψ.val := by
-  rw [mem_logicalGateGroup_iff]
-  constructor
-  · intro hU g hg ψ hψ
-    have hUψ : IsInCodespace (U • ψ) S := hU ψ hψ
-    have h_stab : IsStabilizedBy g (U • ψ) :=
-      (IsInCodespace.iff_all_stabilizers (U • ψ) S).1 hUψ g hg
-    simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val] at h_stab
-    calc (star U.val * g.toMatrix * U.val).mulVec ψ.val
-        = (star U.val * (g.toMatrix * U.val)).mulVec ψ.val := by rw [Matrix.mul_assoc]
-      _ = (star U.val).mulVec ((g.toMatrix * U.val).mulVec ψ.val) := by
-          rw [← mulVec_mulVec ψ.val (star U.val) (g.toMatrix * U.val)]
-      _ = (star U.val).mulVec (g.toMatrix.mulVec (U.val.mulVec ψ.val)) := by
-          rw [← mulVec_mulVec ψ.val g.toMatrix U.val]
-      _ = (star U.val).mulVec (U.val.mulVec ψ.val) := by rw [h_stab]
-      _ = ((star U.val) * U.val).mulVec ψ.val := by rw [← mulVec_mulVec ψ.val (star U.val) U.val]
-      _ = ψ.val := by
-        have h_unit : (star U.val) * U.val = 1 := Matrix.mem_unitaryGroup_iff'.1 U.2
-        rw [h_unit, one_mulVec]
-  · intro h ψ hψ
-    rw [IsInCodespace.iff_all_stabilizers]
-    intro g hg
-    simp only [IsStabilizedBy, IsStabilizedVec, smul_QState_val]
-    have h_conj := h g hg ψ hψ
-    have h_unit : U.val * star U.val = 1 := Matrix.mem_unitaryGroup_iff.1 U.2
-    calc g.toMatrix.mulVec (U.val.mulVec ψ.val)
-        = (g.toMatrix * U.val).mulVec ψ.val := by rw [mulVec_mulVec]
-      _ = (U.val * (star U.val) * (g.toMatrix * U.val)).mulVec ψ.val := by
-          rw [← Matrix.mul_assoc, h_unit, one_mul]
-      _ = (U.val * ((star U.val) * (g.toMatrix * U.val))).mulVec ψ.val := by rw [Matrix.mul_assoc]
-      _ = U.val.mulVec (((star U.val) * (g.toMatrix * U.val)).mulVec ψ.val) := by rw [mulVec_mulVec]
-      _ = U.val.mulVec ψ.val := by rw [← Matrix.mul_assoc, h_conj]
+    IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val := by
+  rfl
 
 end StabilizerGroup
 

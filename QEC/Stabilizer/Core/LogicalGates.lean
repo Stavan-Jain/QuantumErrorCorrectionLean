@@ -18,8 +18,8 @@ open Matrix
 
 A **logical gate** is a unitary operator that maps the codespace to itself. We define
 `IsLogicalGate U S` as membership in the **logical gate group** `logicalGateGroup S` (see
-`LogicalGateGroup.lean`). Equivalently, for every g ∈ S the conjugated operator U† g U stabilizes
-every codespace state. Pauli logical operators are those Paulis whose gate is a logical gate;
+`LogicalGateGroup.lean`). Equivalently, for every g ∈ S the conjugated operator U g U† stabilizes
+every codespace state (adjoint on the right). Pauli logical operators are those Paulis whose gate is a logical gate;
 see `LogicalOperators.lean`. For Pauli operators, this coincides with the centralizer.
 -/
 
@@ -33,10 +33,10 @@ theorem isLogicalGate_iff (U : NQubitGate n) (S : StabilizerGroup n) :
     IsLogicalGate U S ↔ ∀ ψ, IsInCodespace ψ S → IsInCodespace (U • ψ) S :=
   mem_logicalGateGroup_iff U S
 
-/-- IsLogicalGate is equivalent to the conjugation characterization (U† g U fixes codespace). -/
+/-- IsLogicalGate is equivalent to the conjugation characterization (U g U† fixes codespace). -/
 theorem isLogicalGate_iff_conjugation (U : NQubitGate n) (S : StabilizerGroup n) :
     IsLogicalGate U S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
-      IsInCodespace ψ S → (star U.val * g.toMatrix * U.val).mulVec ψ.val = ψ.val :=
+      IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val :=
   mem_logicalGateGroup_iff_conjugation U S
 
 /-- Logical gate depends only on the underlying stabilizer subgroup. -/

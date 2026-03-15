@@ -88,6 +88,12 @@ lemma mulOp_operator_comm (P Q : PauliOperator) :
     (P.mulOp Q).operator = (Q.mulOp P).operator := by
   cases P <;> cases Q <;> simp
 
+/-- Swap X and Z, leave I and Y unchanged. Used for conjugation by Hadamard. -/
+def swapXZ : PauliOperator → PauliOperator
+  | .X => .Z
+  | .Z => .X
+  | p => p
+
 end PauliOperator
 
 end Quantum

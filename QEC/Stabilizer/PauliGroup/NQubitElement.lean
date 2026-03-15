@@ -76,6 +76,15 @@ def one (n : ℕ) : NQubitPauliGroupElement n :=
 def minusOne (n : ℕ) : NQubitPauliGroupElement n :=
   ⟨2, NQubitPauliOperator.identity n⟩
 
+/-- The central phase element `i` of the n-qubit Pauli group: phase `i` with identity operators. -/
+def phaseI (n : ℕ) : NQubitPauliGroupElement n :=
+  ⟨1, NQubitPauliOperator.identity n⟩
+
+/-- The central phase element `-i` of the n-qubit Pauli group: phase `-i` with identity
+operators. -/
+def phaseNegI (n : ℕ) : NQubitPauliGroupElement n :=
+  ⟨3, NQubitPauliOperator.identity n⟩
+
 /-- Extract the global phase power. -/
 def phase (p : NQubitPauliGroupElement n) : Fin 4 := p.phasePower
 
@@ -99,6 +108,16 @@ def ofOperator (op : NQubitPauliOperator n) : NQubitPauliGroupElement n :=
 -- Simp lemmas for minusOne
 @[simp] lemma minusOne_phasePower (n : ℕ) : (minusOne n).phasePower = 2 := rfl
 @[simp] lemma minusOne_operators (n : ℕ) : (minusOne n).operators =
+NQubitPauliOperator.identity n := rfl
+
+-- Simp lemmas for phaseI
+@[simp] lemma phaseI_phasePower (n : ℕ) : (phaseI n).phasePower = 1 := rfl
+@[simp] lemma phaseI_operators (n : ℕ) : (phaseI n).operators =
+NQubitPauliOperator.identity n := rfl
+
+-- Simp lemmas for phaseNegI
+@[simp] lemma phaseNegI_phasePower (n : ℕ) : (phaseNegI n).phasePower = 3 := rfl
+@[simp] lemma phaseNegI_operators (n : ℕ) : (phaseNegI n).operators =
 NQubitPauliOperator.identity n := rfl
 
 /-- Get the Pauli operator at a specific qubit position. -/

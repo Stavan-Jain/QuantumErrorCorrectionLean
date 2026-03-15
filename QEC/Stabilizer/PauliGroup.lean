@@ -1,6 +1,7 @@
 import QEC.Stabilizer.PauliGroupSingle
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 import QEC.Stabilizer.PauliGroup.NQubitElement
+import QEC.Stabilizer.PauliGroup.TransversalConjugation
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.PauliGroup.Representation
@@ -13,6 +14,7 @@ group development from smaller files:
 
 - `QEC.Stabilizer.PauliGroup.NQubitOperator`
 - `QEC.Stabilizer.PauliGroup.NQubitElement`
+- `QEC.Stabilizer.PauliGroup.TransversalConjugation`
 - `QEC.Stabilizer.PauliGroup.Commutation`
 - `QEC.Stabilizer.PauliGroup.CommutationTactics`
   (tactics `pauli_comm_componentwise`, `pauli_comm_even_anticommutes`)
