@@ -74,43 +74,33 @@ private lemma swapXZ_element_Z3_eq_X3 :
   unfold swapXZ_element; congr 2; ext i; fin_cases i <;>
     simp [Z3, NQubitPauliOperator.transversalSwapXZ, PauliOperator.swapXZ,
       NQubitPauliOperator.set, NQubitPauliOperator.identity]
+private lemma swapXZ_element_X1_eq_Z1 : swapXZ_element X1 = Z1 := by
+  unfold swapXZ_element; congr 2; ext i; fin_cases i <;>
+    simp [X1, NQubitPauliOperator.transversalSwapXZ, PauliOperator.swapXZ,
+      NQubitPauliOperator.set, NQubitPauliOperator.identity]
+private lemma swapXZ_element_X2_eq_Z2 : swapXZ_element X2 = Z2 := by
+  unfold swapXZ_element; congr 2; ext i; fin_cases i <;>
+    simp [X2, NQubitPauliOperator.transversalSwapXZ, PauliOperator.swapXZ,
+      NQubitPauliOperator.set, NQubitPauliOperator.identity]
+private lemma swapXZ_element_X3_eq_Z3 : swapXZ_element X3 = Z3 := by
+  unfold swapXZ_element; congr 2; ext i; fin_cases i <;>
+    simp [X3, NQubitPauliOperator.transversalSwapXZ, PauliOperator.swapXZ,
+      NQubitPauliOperator.set, NQubitPauliOperator.identity]
 
 /-- Swapping X↔Z on any Steane generator yields an element of the stabilizer subgroup. -/
 lemma transversalSwapXZ_mem_subgroup
     (g : NQubitPauliGroupElement 7) (hg : g ∈ generatorsList) :
     (⟨g.phasePower, NQubitPauliOperator.transversalSwapXZ g.operators⟩ :
       NQubitPauliGroupElement 7) ∈ subgroup := by
-  unfold subgroup generatorsList at *
-  simp_all +decide [Subgroup.mem_closure]
-  rcases hg with (rfl | rfl | rfl | rfl | rfl | rfl) <;> simp +decide [generators]
+  change swapXZ_element g ∈ subgroup
+  rcases (by simpa [generatorsList] using hg) with
+    (rfl | rfl | rfl | rfl | rfl | rfl)
   all_goals
-    intro K hK₁ hK₂
-    unfold ZGenerators XGenerators at *
-    simp_all +decide [Set.insert_subset_iff, Set.singleton_subset_iff]
-  · convert hK₂.1 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
-  · convert hK₂.2.1 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
-  · convert hK₂.2.2 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
-  · convert hK₁.1 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
-  · convert hK₁.2.1 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
-  · convert hK₁.2.2 using 1
-    congr
-    ext i
-    fin_cases i <;> rfl
+    unfold subgroup
+    refine Subgroup.subset_closure ?_
+    simp [generators, ZGenerators, XGenerators,
+      swapXZ_element_Z1_eq_X1, swapXZ_element_Z2_eq_X2, swapXZ_element_Z3_eq_X3,
+      swapXZ_element_X1_eq_Z1, swapXZ_element_X2_eq_Z2, swapXZ_element_X3_eq_Z3]
 
 /-- Single-qubit: H P H† = swapXZ(P) for P ≠ Y
 (conjugation = adjoint on the right). -/
@@ -276,7 +266,7 @@ private lemma logicalZ_no_Y : ∀ i, logicalZ.operators i ≠ PauliOperator.Y :=
   simp [logicalZ, NQubitPauliOperator.Z]
 
 /-- Transversal Hadamard acts as logical Hadamard on the canonical Steane logical pair. -/
-theorem transversalH_Steane7_isLogicalHadamardOn :
+theorem transversalH_Steane7_isLogicalHadamard :
     LogicalQubitOps.IsLogicalHadamard
       ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
         logicalX_anticommutes_logicalZ⟩
