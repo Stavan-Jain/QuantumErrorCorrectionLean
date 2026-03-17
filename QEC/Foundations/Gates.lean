@@ -95,6 +95,98 @@ abbrev NQubitGate (n : ℕ) : Type := QuantumGate (NQubitBasis n)
 {α : Type*} [Fintype α] [DecidableEq α] :
   (1 : QuantumGate α).val = (1 : Matrix α α ℂ) := rfl
 
+/--
+Conjugation of a matrix by a gate.
+
+This is the matrix-level helper `U M U†`, intended as a bridge for proofs that still work
+directly with matrix expressions.
+-/
+noncomputable def conjBy
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U : QuantumGate α) (M : Matrix α α ℂ) : Matrix α α ℂ :=
+  U.val * M * star U.val
+
+/-- Definitional expansion of `conjBy`. -/
+@[simp] lemma conjBy_def
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U : QuantumGate α) (M : Matrix α α ℂ) :
+  conjBy U M = U.val * M * star U.val := rfl
+
+/-- Conjugation by any gate fixes the identity matrix. -/
+@[simp] lemma conjBy_one
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U : QuantumGate α) :
+  conjBy U (1 : Matrix α α ℂ) = 1 := by
+  unfold conjBy
+  rw [Matrix.mul_assoc, one_mul]
+  exact gate_val_mul_inv U
+
+/-- Reassociation form of `conjBy` on a matrix product. -/
+lemma conjBy_mul
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U : QuantumGate α) (M N : Matrix α α ℂ) :
+  conjBy U (M * N) = U.val * M * (N * star U.val) := by
+  unfold conjBy
+  simp [Matrix.mul_assoc]
+
+/--
+Gate-level conjugation.
+
+`conjByGate U G` is `U * G * U⁻¹`, i.e. conjugation in the unitary group.
+-/
+def conjByGate
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G : QuantumGate α) : QuantumGate α :=
+  U * G * U⁻¹
+
+/-- Definitional expansion of `conjByGate` in the gate group. -/
+@[simp] lemma conjByGate_def
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G : QuantumGate α) :
+  conjByGate U G = U * G * U⁻¹ := rfl
+
+/-- Matrix view of gate-level conjugation. -/
+@[simp] lemma conjByGate_val
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G : QuantumGate α) :
+  (conjByGate U G).val = U.val * G.val * star U.val := by
+  simp [conjByGate, Matrix.mul_assoc]
+
+/-- Gate-level conjugation agrees with matrix-level `conjBy`. -/
+@[simp] lemma conjByGate_eq_conjBy
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G : QuantumGate α) :
+  (conjByGate U G).val = conjBy U G.val := by
+  simp [conjBy]
+
+/-- Conjugation by any gate fixes the identity gate. -/
+@[simp] lemma conjByGate_one
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U : QuantumGate α) :
+  conjByGate U 1 = 1 := by
+  simp [conjByGate]
+
+/-- Conjugation by identity is the identity map on gates. -/
+@[simp] lemma one_conjByGate
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (G : QuantumGate α) :
+  conjByGate (1 : QuantumGate α) G = G := by
+  simp [conjByGate]
+
+/-- Conjugation by a fixed gate preserves gate multiplication. -/
+@[simp] lemma conjByGate_mul
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G₁ G₂ : QuantumGate α) :
+  conjByGate U (G₁ * G₂) = conjByGate U G₁ * conjByGate U G₂ := by
+  simp [conjByGate, mul_assoc]
+
+/-- Conjugation commutes with taking inverses. -/
+@[simp] lemma conjByGate_inv
+  {α : Type*} [Fintype α] [DecidableEq α]
+  (U G : QuantumGate α) :
+  conjByGate U G⁻¹ = (conjByGate U G)⁻¹ := by
+  simp [conjByGate, mul_assoc]
+
 /-- The type of unit complex numbers (those with absolute value 1). -/
 def UnitComplex : Type := {z : ℂ // z * star z = 1}
 

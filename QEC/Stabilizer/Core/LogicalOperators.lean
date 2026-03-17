@@ -125,7 +125,7 @@ theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement 
       exact hh.2 h_comm
     exact absurd hg (anticommutes_imp_not_isPauliLogicalOperator g S h hh.1 h_anticomm)
   · intro hg
-    rw [IsPauliLogicalOperator, isLogicalGate_iff_conjugation]
+    rw [IsPauliLogicalOperator, isLogicalGate_iff_conjugation_matrix]
     intro h hh ψ hψ
     -- Since $g$ is in the centralizer of $S$, we have $g * h.toMatrix = h.toMatrix * g$.
     have h_comm : g.toGate.val * h.toMatrix = h.toMatrix * g.toGate.val := by
@@ -138,7 +138,12 @@ theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement 
       · exact NQubitPauliGroupElement.toGate_val g;
       · exact NQubitPauliGroupElement.toGate_val g;
     simp_all +decide [ mul_assoc];
-    exact hψ h hh
+    have h_stab : Matrix.mulVec h.toMatrix ψ.val = ψ.val := hψ h hh
+    have h_unitary :
+        g.toMatrix * star g.toMatrix =
+          (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
+      simpa [NQubitPauliGroupElement.toGate_val] using g.toGate.2.2
+    simpa [Matrix.mulVec_mulVec, Matrix.mul_assoc, h_unitary] using h_stab
 
 /-- A Pauli is a logical operator iff it commutes with every element of a generating set
     for the stabilizer. -/

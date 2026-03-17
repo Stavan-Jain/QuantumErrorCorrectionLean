@@ -63,6 +63,36 @@ lemma S_adj_Z_S : star S.val * Zmat * S.val = Zmat := by
 lemma S_adj_X_S : star S.val * Xmat * S.val = -Ymat := by
   matrix_expand[Smat, Xmat, Ymat]
 
+/-- `inv_S` conjugates Z to itself: `inv_S Z inv_S† = Z`. -/
+lemma inv_S_conj_Z : inv_S.val * Zmat * star inv_S.val = Zmat := by
+  calc
+    inv_S.val * Zmat * star inv_S.val = star S.val * Zmat * S.val := by
+      simp [inv_S_val]
+    _ = Zmat := S_adj_Z_S
+
+/-- `inv_S` conjugates X to `-Y`: `inv_S X inv_S† = -Y`. -/
+lemma inv_S_conj_X : inv_S.val * Xmat * star inv_S.val = -Ymat := by
+  calc
+    inv_S.val * Xmat * star inv_S.val = star S.val * Xmat * S.val := by
+      simp [inv_S_val]
+    _ = -Ymat := S_adj_X_S
+
+/-- `inv_S` conjugates Y to X: `inv_S Y inv_S† = X`. -/
+lemma inv_S_conj_Y : inv_S.val * Ymat * star inv_S.val = Xmat := by
+  rw [inv_S_val]
+  matrix_expand[Smat, Xmat, Ymat]
+
+/-- `inv_S` conjugates identity to identity. -/
+lemma inv_S_conj_I :
+    inv_S.val * (1 : Matrix QubitBasis QubitBasis ℂ) * star inv_S.val =
+      (1 : Matrix QubitBasis QubitBasis ℂ) := by
+  have hU : inv_S.val * star inv_S.val = (1 : Matrix QubitBasis QubitBasis ℂ) := by
+    exact Matrix.mem_unitaryGroup_iff.1 inv_S.2
+  calc
+    inv_S.val * (1 : Matrix QubitBasis QubitBasis ℂ) * star inv_S.val
+        = inv_S.val * star inv_S.val := by simp
+    _ = (1 : Matrix QubitBasis QubitBasis ℂ) := hU
+
 /-! ### CNOT (control = first qubit, target = second) -/
 
 /-- CNOT† (X ⊗ I) CNOT = X ⊗ X. -/

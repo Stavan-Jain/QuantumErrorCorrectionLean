@@ -171,15 +171,12 @@ lemma toGate_inv (p : NQubitPauliGroupElement n) : toGate (p⁻¹) = (toGate p)�
 
 lemma toMatrix_eq_iff_toGate_eq (p q : NQubitPauliGroupElement n)
  : toMatrix p = toMatrix q ↔ toGate p = toGate q := by
-  simp [NQubitPauliGroupElement.toGate];
-  apply Iff.intro;
-  · intro h;
-    convert h using 1;
-    constructor <;> intro h <;>
-    rw [ ← NQubitPauliGroupElement.toGate_val,
-     ← NQubitPauliGroupElement.toGate_val ] at * <;> aesop;
-  · intro h;
-     replace h := congr_arg ( fun g : QuantumGate ( Fin n → QubitBasis ) => g.val ) h; aesop;
+  constructor
+  · intro h
+    apply Subtype.ext
+    simpa [NQubitPauliGroupElement.toGate_val] using h
+  · intro h
+    simpa [NQubitPauliGroupElement.toGate_val] using congrArg Subtype.val h
 /-
 The trace of the product of two Pauli matrices is 2 if they are equal, and 0 otherwise.
 -/
