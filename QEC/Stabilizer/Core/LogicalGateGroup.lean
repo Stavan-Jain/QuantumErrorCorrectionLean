@@ -26,6 +26,12 @@ private def PreservesCodespaceConjugation (U : NQubitGate n) (S : StabilizerGrou
   ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
     IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val
 
+/-- Gate-level conjugation formulation: for every g ∈ S, `(conjByGate U g.gate)` stabilizes
+every codespace state. -/
+private def PreservesCodespaceConjugationGate (U : NQubitGate n) (S : StabilizerGroup n) : Prop :=
+  ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
+    IsInCodespace ψ S → ((conjByGate U g.gate).val).mulVec ψ.val = ψ.val
+
 /-- Conjugation formulation is equivalent to mapping the codespace to itself. -/
 private lemma conjugation_iff_maps_codespace (U : NQubitGate n) (S : StabilizerGroup n) :
   PreservesCodespaceConjugation U S ↔ ∀ ψ, IsInCodespace ψ S → IsInCodespace (U • ψ) S := by
@@ -64,16 +70,32 @@ private lemma maps_to_codespace_of_conjugation (U : NQubitGate n) (S : Stabilize
     convert hv₂ using 1;
     unfold Quantum.StabilizerGroup.PreservesCodespaceConjugation; aesop;
   by_cases hv : ∑ i, ‖v i‖ ^ 2 = 0;
-  · simp_all +decide [ Finset.sum_eq_zero_iff_of_nonneg, sq_nonneg ];
+  · simp_all +decide [Finset.sum_eq_zero_iff_of_nonneg];
     ext i; simp +decide [ hv, Matrix.mulVec, dotProduct ] ;
-  · have := h_conj ⟨ ( 1 / Real.sqrt ( ∑ i, ‖v i‖ ^ 2 ) ) • v, ?_ ⟩ ?_ <;> simp_all +decide [ Matrix.mulVec_smul ];
-    any_goals simp +decide [ mul_pow, abs_of_nonneg ( Real.sqrt_nonneg _ ), Real.sq_sqrt ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ), hv ];
+  · have := h_conj ⟨(1 / Real.sqrt (∑ i, ‖v i‖ ^ 2)) • v, ?_⟩ ?_ <;> simp_all +decide
+    any_goals simp +decide
+      [mul_pow, abs_of_nonneg (Real.sqrt_nonneg _),
+        Real.sq_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
     any_goals rw [ ← Finset.mul_sum _ _ _, inv_mul_cancel₀ hv ];
-    · have := this g hg; simp_all +decide [ Matrix.mulVec_smul, smul_smul ] ;
-      convert congr_arg ( fun x : NQubitVec n => ( Real.sqrt ( ∑ i, ‖v i‖ ^ 2 ) ) • x ) this using 1 <;> norm_num [ Matrix.mulVec_smul, smul_smul ];
-      · rw [ mul_inv_cancel₀ ( ne_of_gt ( Real.sqrt_pos.mpr ( lt_of_le_of_ne ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ) ( Ne.symm hv ) ) ) ), one_smul ];
-      · rw [ mul_inv_cancel₀ ( ne_of_gt ( Real.sqrt_pos.mpr ( lt_of_le_of_ne ( Finset.sum_nonneg fun _ _ => sq_nonneg _ ) ( Ne.symm hv ) ) ) ), one_smul ];
-    · intro g hg; specialize hv₁ g hg; simp_all +decide [ Matrix.mulVec_smul ] ;
+    · have := this g hg
+      simp_all +decide
+      convert congr_arg (fun x : NQubitVec n => (Real.sqrt (∑ i, ‖v i‖ ^ 2)) • x) this using 1 <;>
+        norm_num [Matrix.mulVec_smul, smul_smul]
+      · rw
+          [mul_inv_cancel₀
+            (ne_of_gt
+              (Real.sqrt_pos.mpr
+                (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv)))),
+            one_smul]
+      · rw
+          [mul_inv_cancel₀
+            (ne_of_gt
+              (Real.sqrt_pos.mpr
+                (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv)))),
+            one_smul]
+    · intro g hg
+      specialize hv₁ g hg
+      simp_all +decide
       simp_all +decide [ IsStabilizedBy, IsStabilizedVec ];
       rw [ Matrix.mulVec_smul, hv₁ ]
 
@@ -131,6 +153,13 @@ lemma mem_logicalGateGroup_iff_conjugation (U : NQubitGate n) (S : StabilizerGro
   U ∈ logicalGateGroup S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
     IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val := by
   rfl
+
+/-- Gate-level conjugation characterization of logical-gate-group membership. -/
+lemma mem_logicalGateGroup_iff_conjugation_gate (U : NQubitGate n) (S : StabilizerGroup n) :
+  U ∈ logicalGateGroup S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
+    IsInCodespace ψ S → ((conjByGate U g.gate).val).mulVec ψ.val = ψ.val := by
+  simpa [conjByGate_val, NQubitPauliGroupElement.gate_val] using
+    (mem_logicalGateGroup_iff_conjugation U S)
 
 end StabilizerGroup
 
