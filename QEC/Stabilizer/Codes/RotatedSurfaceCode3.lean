@@ -10,8 +10,12 @@ import QEC.Stabilizer.BinarySymplectic.CheckMatrix
 import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
 import QEC.Stabilizer.BinarySymplectic.SymplecticSpan
 import QEC.Stabilizer.Core.StabilizerCode
+import QEC.Stabilizer.Core.CodeDistance
+import QEC.Stabilizer.Core.LogicalOperators
 import QEC.Stabilizer.BinarySymplectic.IndependentEquiv
 import QEC.Stabilizer.BinarySymplectic.SymplecticInner
+import QEC.Stabilizer.BinarySymplectic.SymplecticOrthogonal
+import QEC.Stabilizer.BinarySymplectic.WeightTwoInSpan
 import QEC.Stabilizer.PauliGroup.NQubitOperator
 
 /-!
@@ -362,6 +366,10 @@ lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := b
   simp only [stabilizerGroup, StabilizerGroup.mkStabilizerFromGenerators, subgroup]
   rw [listToSet_generatorsList]
 
+lemma subgroup_eq_closure : subgroup = Subgroup.closure
+(NQubitPauliGroupElement.listToSet generatorsList) := by
+  simp only [subgroup, listToSet_generatorsList]
+
 /-- logicalX is in the centralizer of the stabilizer group. -/
 lemma logicalX_mem_centralizer :
     logicalX ∈ StabilizerGroup.centralizer stabilizerGroup := by
@@ -414,6 +422,144 @@ noncomputable def stabilizerCode : StabilizerGroup.StabilizerCode 9 1 where
     exact negIdentity_not_mem
   logicalOps := logicalOpsRotatedSurfaceCode3
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
+
+lemma stabilizerCode_toStabilizerGroup_eq : stabilizerCode.toStabilizerGroup =
+stabilizerGroup := rfl
+
+/-!
+## Code distance [[9, 1, 3]]
+
+The rotated surface code has distance 3: the minimum weight of a nontrivial logical operator
+is 3 (witnessed by logical X and logical Z), and no weight-1 or weight-2 Pauli is a
+nontrivial logical operator.
+-/
+
+open NQubitPauliGroupElement NQubitPauliOperator
+
+/-- The weight of logical X is 3. -/
+lemma logicalX_weight : weight logicalX = 3 := by decide
+
+/-- The weight of logical Z is 3. -/
+lemma logicalZ_weight : weight logicalZ = 3 := by decide
+
+set_option maxHeartbeats 1500000 in
+-- decide needs many heartbeats for the full ∀ so we use
+theorem weight_1_not_centralizer :
+    ∀ g : NQubitPauliGroupElement 9, NQubitPauliGroupElement.weight g = 1 →
+      g ∉ centralizer stabilizerGroup := by
+  intro g h_weight
+  rw [StabilizerGroup.mem_centralizer_iff_closure g stabilizerGroup generators
+    stabilizerGroup_toSubgroup_eq]
+  intro h_comm
+  have h : ∀ s ∈ generatorsList, g * s = s * g := fun s hs =>
+    (h_comm s (by rw [← listToSet_generatorsList]; exact Set.mem_setOf.mpr hs)).symm
+  have key : ∀ g' : NQubitPauliGroupElement 9, NQubitPauliGroupElement.weight g' = 1 →
+      ¬∀ s ∈ generatorsList, g' * s = s * g' := by
+    intros g' hg' h_comm';
+    have h_cases : ∀ p : Fin 9 → PauliOperator, weight (⟨g'.phasePower, p⟩ :
+    NQubitPauliGroupElement 9) = 1 →
+    ¬(∀ s ∈ generatorsList,
+    (⟨g'.phasePower, p⟩ :
+    NQubitPauliGroupElement 9) * s = s * (⟨g'.phasePower, p⟩ :
+    NQubitPauliGroupElement 9)) := by
+      intros p hp h_comm''; (
+      have h_cases : ∀ i : Fin 9, ∀ p_i : PauliOperator, p_i ≠ PauliOperator.I →
+      ¬(∀ s ∈ generatorsList,
+      (⟨g'.phasePower, (fun j => if j = i then p_i else PauliOperator.I)⟩
+      : NQubitPauliGroupElement 9) * s =
+      s * (⟨g'.phasePower, (fun j => if j = i then p_i else PauliOperator.I)⟩ :
+      NQubitPauliGroupElement 9)) := by
+        intros i p_i hp_i_ne_I h_comm''; simp_all +decide ;
+        fin_cases i <;> simp +decide
+        [ generatorsList ] at h_comm'' ⊢;
+        all_goals rcases p_i with ( _ | _ | _ | _ ) <;> simp +decide
+        [ NQubitPauliGroupElement.mul ] at h_comm'' hp_i_ne_I ⊢;
+        all_goals simp +decide [
+        Z0, Z1, Z2, Z3, X0, X1, X2, X3 ] at h_comm'' ⊢;
+      obtain ⟨i, hi⟩ : ∃ i : Fin 9, p i ≠ PauliOperator.I ∧ ∀ j : Fin 9, j ≠ i →
+      p j = PauliOperator.I := by
+        have h_card : Finset.card (Finset.filter (fun i => p i ≠
+        PauliOperator.I) Finset.univ) = 1 := by
+          exact hp;
+        obtain ⟨ i, hi ⟩ := Finset.card_eq_one.mp h_card;
+        exact ⟨ i, by simpa using Finset.ext_iff.mp hi i, fun j hj =>
+        Classical.not_not.1 fun h => hj <| by simpa [ h ] using Finset.ext_iff.mp hi j ⟩;
+      apply h_cases i (p i) hi.left;
+      convert h_comm'' using 3;
+      · congr! 2;
+        ext j; by_cases hj : j = i <;> simp +decide [ hj, hi.2 ] ;
+      · congr! 2;
+        ext j; by_cases hj : j = i <;> simp +decide [ hj, hi.2 ] ;);
+    exact h_cases _ hg' h_comm'
+  exact key g h_weight h
+
+/-- No weight-1 Pauli is a nontrivial logical operator. -/
+theorem no_weight_1_logical (g : NQubitPauliGroupElement 9)
+    (hg : NQubitPauliGroupElement.weight g = 1) :
+    ¬IsNontrivialLogicalOperator g stabilizerGroup := by
+  intro h_nontrivial
+  have h_cent := (IsNontrivialLogicalOperator_iff g stabilizerGroup).mp h_nontrivial |>.1
+  exact weight_1_not_centralizer g hg h_cent
+
+-- native_decide checks all (i,j,pi,pj) combinations: 9×8×3×3 = 648 cases,
+-- each checking commutation with generators and existence of span coefficients.
+set_option maxRecDepth 16384 in
+set_option maxHeartbeats 4000000 in
+private lemma weight_2_pairs_span_coeffs :
+    ∀ (i j : Fin 9), i ≠ j → ∀ (pi pj : PauliOperator), pi ≠ .I → pj ≠ .I →
+    let op : NQubitPauliOperator 9 := fun k => if k = i then pi else if k = j then pj else .I
+    (∀ g ∈ generatorsList, symplecticInner op g.operators = 0) →
+    ∃ (c : Fin 8 → ZMod 2),
+      NQubitPauliOperator.toSymplectic op = ∑ k : Fin 8, c k • checkMatrix generatorsList k := by
+  native_decide
+
+/-- Every weight-2 operator that commutes with all generators has its symplectic vector
+    in the symplectic span of the generators. -/
+theorem weight_2_operators_in_span (op : NQubitPauliOperator 9)
+    (h_weight : NQubitPauliOperator.weight op = 2)
+    (h_comm : ∀ g ∈ generatorsList, symplecticInner op g.operators = 0) :
+    NQubitPauliOperator.toSymplectic op ∈ sympSpan generatorsList :=
+  NQubitPauliGroupElement.weight_2_in_span_by_enum generatorsList
+    (fun i j hij pi pj hpi hpj h_comm' => by
+      obtain ⟨c, hc⟩ := weight_2_pairs_span_coeffs i j hij pi pj hpi hpj h_comm'
+      unfold sympSpan
+      rw [hc]
+      exact Submodule.sum_mem _ fun k _ =>
+        Submodule.smul_mem _ _ (Submodule.subset_span (Set.mem_range_self k)))
+    op h_weight h_comm
+
+/-- If the symplectic vector of an operator is in the span of the generators, there is
+    a stabilizer element with that operator part. (Used for no_weight_2_logical.) -/
+lemma exists_mem_subgroup_operators_of_symp_in_span (op : NQubitPauliOperator 9)
+    (h_in_span : NQubitPauliOperator.toSymplectic op ∈ sympSpan generatorsList) :
+    ∃ s ∈ subgroup, s.operators = op := by
+  obtain ⟨s, hs_closure, hs_eq⟩ :=
+    NQubitPauliGroupElement.exists_mem_closure_of_symp_in_span generatorsList op h_in_span
+  exact ⟨s, subgroup_eq_closure.symm ▸ hs_closure, hs_eq⟩
+
+/-- No weight-2 Pauli is a nontrivial logical operator. -/
+theorem no_weight_2_logical (g : NQubitPauliGroupElement 9)
+    (hg : NQubitPauliGroupElement.weight g = 2) :
+    ¬IsNontrivialLogicalOperator g stabilizerGroup := by
+  intro h_nontrivial
+  exact NQubitPauliGroupElement.no_weight_w_logical_of_centralizer_in_span generatorsList
+    stabilizerGroup 2 (stabilizerGroup_toSubgroup_eq.trans subgroup_eq_closure)
+    (fun op h_weight h_comm => weight_2_operators_in_span op h_weight h_comm) g hg h_nontrivial
+
+/-- The rotated surface code has code distance 3. -/
+theorem rotatedSurfaceCode3_has_distance_three : HasCodeDistance stabilizerCode 3 :=
+  hasCodeDistance_of stabilizerCode 3 (by decide)
+    ⟨logicalX, stabilizerCode.logicalX_nontrivial ⟨0, by decide⟩, logicalX_weight⟩
+    (fun w _ hw_lt g hw => by
+      have hw_val : w = 1 ∨ w = 2 := by omega
+      have h_subgroup_eq :
+        stabilizerCode.toStabilizerGroup.toSubgroup = stabilizerGroup.toSubgroup :=
+        congr_arg StabilizerGroup.toSubgroup stabilizerCode_toStabilizerGroup_eq
+      rcases hw_val with rfl | rfl
+      · exact (Iff.not (IsNontrivialLogicalOperator_of_toSubgroup_eq g h_subgroup_eq)).2
+          (no_weight_1_logical g hw)
+      · exact (Iff.not (IsNontrivialLogicalOperator_of_toSubgroup_eq g h_subgroup_eq)).2
+          (no_weight_2_logical g hw))
 
 end RotatedSurfaceCode3
 end StabilizerGroup

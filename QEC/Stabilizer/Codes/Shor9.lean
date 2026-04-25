@@ -99,7 +99,6 @@ lemma ZGenerators_are_ZType :
     ∀ g, g ∈ ZGenerators → NQubitPauliGroupElement.IsZTypeElement g := by
   classical
   intro g hg
-  -- Each `Mi` is by construction phase-0 with only I/Z entries.
   rcases (by simpa [ZGenerators] using hg) with rfl | rfl | rfl | rfl | rfl | rfl <;>
     · constructor
       · rfl
@@ -304,7 +303,6 @@ private lemma ZType_commutes {g h : NQubitPauliGroupElement 9}
   classical
   apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
   intro i
-  -- At each qubit, both operators are `I` or `Z`, so `mulOp` commutes.
   have hg' := hg.2 i
   have hh' := hh.2 i
   rcases hg' with hgI | hgZ <;> rcases hh' with hhI | hhZ
@@ -346,10 +344,8 @@ theorem generators_commute :
 
 theorem negIdentity_not_mem :
     negIdentity 9 ∉ subgroup := by
-  -- `subgroup = closure (ZGenerators ∪ XGenerators)` and `generators = ZGenerators ∪ XGenerators`.
   have hZX : ∀ z ∈ ZGenerators, ∀ x ∈ XGenerators, z * x = x * z :=
     ZGenerators_commute_XGenerators
-  -- Use the reusable CSS lemma.
   simpa [subgroup, generators] using
     (CSS.negIdentity_not_mem_closure_union (n := 9) ZGenerators XGenerators
       ZGenerators_are_ZType XGenerators_are_XType hZX)
@@ -362,7 +358,6 @@ noncomputable def stabilizerGroup : StabilizerGroup 9 :=
 { toSubgroup := subgroup
 , is_abelian := by
     intro g h hg hh
-    -- Abelian closure from commuting generators.
     have hcomm :=
       Subgroup.abelian_closure_of_pairwise_commute (G := NQubitPauliGroupElement 9)
         generators generators_commute

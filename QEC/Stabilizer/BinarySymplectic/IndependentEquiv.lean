@@ -108,14 +108,11 @@ theorem rowsLinearIndependent_implies_independentGenerators (L : List (NQubitPau
     obtain ⟨i, hi⟩ := List.mem_iff_get.mp hg
     exact ⟨i, hi.symm⟩
   by_contra h_contra
-  -- g ∈ closure (listToSet L \ {g}) ⇒ toSymplectic g.operators ∈ span of symplectic image
-  -- of (listToSet L \ {g})
   have h_symplectic :
       toSymplectic (L.get i).operators ∈
         span (ZMod 2) ((fun g' => toSymplectic g'.operators) '' (listToSet L \ {g})) := by
     rw [← hi]
     exact Quantum.toSymplectic_mem_span_of_mem_closure h_contra
-  -- That span is contained in the span of rows j ≠ i (listToSet L \ {g} ⊆ image of indices ≠ i)
   have h_span_subset :
       (fun g' => toSymplectic g'.operators) '' (listToSet L \ {g}) ⊆
         (fun j => checkMatrix L j) '' (↑(Finset.univ.erase i) : Set (Fin L.length)) := by
@@ -139,8 +136,6 @@ theorem rowsLinearIndependent_implies_independentGenerators (L : List (NQubitPau
   rw [Finsupp.mem_span_image_iff_linearCombination (R := ZMod 2) (v := checkMatrix L)
     ] at h_in_span_erase
   obtain ⟨l, hl_supp, hl_eq⟩ := h_in_span_erase
-  -- l is supported on indices ≠ i, so l i = 0; then l' := single i 1 + l has combination 0
-  -- but l' ≠ 0
   have hi_not_mem : i ∉ (Finset.univ.erase i : Set (Fin L.length)) := by simp
   have li_zero : l i = 0 :=
     by
@@ -150,7 +145,6 @@ theorem rowsLinearIndependent_implies_independentGenerators (L : List (NQubitPau
     rw [LinearMap.map_add, Finsupp.linearCombination_single, hl_eq, one_smul,
       ← two_smul (ZMod 2) (checkMatrix L i)]
     norm_num
-    -- Since we're working in ZMod 2, 2 is equivalent to 0.
     left; norm_cast
   have l'_ne_zero : l' ≠ 0 := by
     rw [Finsupp.ne_iff]

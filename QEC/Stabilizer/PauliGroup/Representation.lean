@@ -192,7 +192,6 @@ of the traces of the individual single-qubit Pauli operator matrix products.
 -/
 lemma NQubitPauliOperator.trace_matrix_mul (p q : NQubitPauliOperator n) :
   (p.toMatrix * q.toMatrix).trace = ∏ i, ((p i).toMatrix * (q i).toMatrix).trace := by
-    -- By Fubini's theorem, we can interchange the order of summation.
     have h_fubini : ∑ b : NQubitBasis n,
     ∑ k : NQubitBasis n, (∏ i : Fin n, (p i).toMatrix (b i) (k i))
     * (∏ i : Fin n, (q i).toMatrix (k i) (b i)) = ∏ i : Fin n, ∑ b : QubitBasis,

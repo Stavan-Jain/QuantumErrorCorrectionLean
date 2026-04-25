@@ -257,16 +257,13 @@ lemma ZGenerators_are_ZType (n : ℕ) :
   rcases hg with ⟨i, rfl⟩
   refine ⟨rfl, ?_⟩
   intro j
-  -- The operator is `Z` at `i` and `i+1`, and `I` elsewhere.
   by_cases h1 : j = Fin.succ i
   · subst h1
     exact Or.inr (by simp [ZPair, NQubitPauliOperator.set])
   · by_cases h2 : j = Fin.castSucc i
     · subst h2
-      -- Here we use `h1 : castSucc i ≠ succ i` to simplify the outer `set`.
       exact Or.inr (by simp [ZPair, NQubitPauliOperator.set, h1])
-    · -- Otherwise the operator is `I`.
-      simp [ZPair, NQubitPauliOperator.set, NQubitPauliOperator.identity, h1, h2,
+    · simp [ZPair, NQubitPauliOperator.set, NQubitPauliOperator.identity, h1, h2,
         PauliOperator.IsZType]
 
 /-!
@@ -292,7 +289,6 @@ theorem generators_commute (n : ℕ) :
     ∀ g ∈ generators n, ∀ h ∈ generators n, g * h = h * g := by
   classical
   intro g hg h hh
-  -- Since `XGenerators = ∅`, membership reduces to `ZGenerators`.
   simp [generators, XGenerators] at hg hh
   exact ZType_commutes (ZGenerators_are_ZType n g hg) (ZGenerators_are_ZType n h hh)
 
@@ -352,24 +348,19 @@ private lemma logicalX_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
       true_and, logicalX, ZPair, NQubitPauliOperator.X, NQubitPauliOperator.set,
       NQubitPauliOperator.identity, NQubitPauliGroupElement.anticommutesAt]
     by_cases hj1 : j = Fin.castSucc i <;> by_cases hj2 : j = Fin.succ i
-    · -- j = castSucc i and j = succ i: contradiction
-      subst hj1
+    · subst hj1
       exact False.elim ((Fin.castSucc_lt_succ i).ne hj2)
-    · -- j = castSucc i only
-      subst hj1
+    · subst hj1
       simp only [if_neg (Fin.castSucc_lt_succ i).ne, if_true, PauliOperator.mulOp_X_Z,
         PauliOperator.mulOp_Z_X]
       simp
-    · -- j = succ i only
-      subst hj2
+    · subst hj2
       simp only [if_neg (Fin.castSucc_lt_succ i).ne.symm, if_true, PauliOperator.mulOp_X_Z,
         PauliOperator.mulOp_Z_X]
       simp only [Fin.isValue, Fin.reduceAdd, or_true]
-    · -- j ≠ both: (ZPair n i).operators j = I, so 0 = 0+2 is false
-      simp only [if_neg hj1, if_neg hj2, PauliOperator.mulOp_X_I, PauliOperator.mulOp_I_X]
+    · simp only [if_neg hj1, if_neg hj2, PauliOperator.mulOp_X_I, PauliOperator.mulOp_I_X]
       omega
   rw [hfilter]
-  -- {a, b} = insert a {b}; need castSucc i ∉ {succ i}
   have hne : Fin.castSucc i ∉ {Fin.succ i} :=
     fun h => (Fin.castSucc_lt_succ i).ne (Finset.mem_singleton.mp h)
   rw [Finset.card_insert_of_notMem hne, Finset.card_singleton]

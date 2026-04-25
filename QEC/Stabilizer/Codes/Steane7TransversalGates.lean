@@ -135,7 +135,6 @@ lemma transversalH_conjugates_stabilizer_to_stabilizer (g : NQubitPauliGroupElem
     · apply Subtype.ext
       simpa [conjByGate_val, NQubitPauliGroupElement.gate_val] using
         transversalH_conjugates_element x (generators_no_Y x hxList)
-  -- derive matrix statement from gate-level conjugation witness
   obtain ⟨g', hg', hgg'⟩ :=
     conjugates_mem_closure_of_set_conjugates transversalH_Steane7
       (NQubitPauliGroupElement.listToSet generatorsList)

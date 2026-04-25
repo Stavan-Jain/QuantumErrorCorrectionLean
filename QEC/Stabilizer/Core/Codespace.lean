@@ -47,7 +47,6 @@ noncomputable def stabilizerSum (S : StabilizerGroup n) :
 lemma eq_one_of_mem_stabilizer_and_is_scalar (S : StabilizerGroup n) (g : NQubitPauliGroupElement n)
     (hg : g ∈ S.toSubgroup) (h_scalar : g.operators = NQubitPauliOperator.identity n) :
     g = 1 := by
-      -- Since g is a Pauli operator with identity for all qubits, it must be of the form $i^k I$ for some $k$.
       obtain ⟨k, hk⟩ : ∃ k : Fin 4, g = ⟨k, (NQubitPauliOperator.identity n)⟩ := by
         exact ⟨ g.phasePower, by cases g; aesop ⟩;
       fin_cases k <;> simp_all +decide;
@@ -60,8 +59,7 @@ lemma eq_one_of_mem_stabilizer_and_is_scalar (S : StabilizerGroup n) (g : NQubit
           · exact NQubitPauliGroupElement.mulOp_identity_left_phase (NQubitPauliOperator.identity n)
         · exact?
       · exact S.no_neg_identity hg;
-      · -- Since $g^2 = -I$, and $-I$ is not in the stabilizer group $S$, this leads to a contradiction.
-        have h_contra : (g * g) ∈ S.toSubgroup := by
+      · have h_contra : (g * g) ∈ S.toSubgroup := by
           exact S.toSubgroup.mul_mem ( hk ▸ hg ) ( hk ▸ hg );
         convert S.neg_identity_not_mem _;
         convert h_contra using 1;
@@ -111,11 +109,8 @@ lemma trace_stabilizerSum (S : StabilizerGroup n) : (stabilizerSum S).trace = (2
 
 /-- The stabilizer sum is not the zero matrix. -/
 lemma stabilizerSum_ne_zero (S : StabilizerGroup n) : stabilizerSum S ≠ 0 := by
-  -- The trace of the stabilizer sum is $2^n$, which is not zero.
   have h_trace_nonzero : (stabilizerSum S).trace ≠ 0 := by
-    -- Since $2^n$ is always positive, its real part is also positive, hence non-zero.
     have h_trace_pos : (S.stabilizerSum).trace = (2 : ℂ)^n := by
-      -- Apply the lemma that states the trace of the stabilizer sum is 2^n.
       apply trace_stabilizerSum
     rw [h_trace_pos]
     norm_num [Complex.ext_iff]

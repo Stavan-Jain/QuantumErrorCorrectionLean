@@ -111,7 +111,6 @@ lemma generators_are_ZType :
 /-- The repetition-code subgroup does not contain −I (CSS lemma with empty X-generators). -/
 lemma negIdentity_not_mem :
     negIdentity 3 ∉ subgroup := by
-  -- Apply the generic CSS `-I` exclusion theorem with empty X-generators.
   have hX : ∀ x, x ∈ (∅ : Set (NQubitPauliGroupElement 3)) → IsXTypeElement x := by
     intro x hx; cases hx
   have hZX : ∀ z ∈ generators, ∀ x ∈ (∅ : Set (NQubitPauliGroupElement 3)), z * x = x * z := by
@@ -295,7 +294,6 @@ lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup := by
     products of adjacent Zs; Z_on_qubit2 is Z on one qubit only). -/
 lemma Z_on_qubit2_operators_ne_of_mem (s : NQubitPauliGroupElement 3) (hs : s ∈ subgroup) :
     s.operators ≠ Z_on_qubit2.operators := by
-      -- By contradiction, assume that $s.operators = Z_on_qubit2.operators$.
       by_contra h_eq;
       have h_contradiction :
           NQubitPauliOperator.toSymplectic s.operators ∈

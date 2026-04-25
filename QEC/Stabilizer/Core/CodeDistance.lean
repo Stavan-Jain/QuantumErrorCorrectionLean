@@ -48,5 +48,21 @@ theorem HasCodeDistance.exists_weight_eq (C : StabilizerCode n k) (d : ℕ)
     ∃ g, IsNontrivialLogicalOperator g C.toStabilizerGroup ∧ weight g = d :=
   h.2.2
 
+/-- To prove `HasCodeDistance C d`, it suffices to show: d ≥ 1, there exists a
+    nontrivial logical of weight d, and for every w with 1 ≤ w < d, no weight-w
+    Pauli is a nontrivial logical. -/
+theorem hasCodeDistance_of (C : StabilizerCode n k) (d : ℕ)
+    (hd : d ≥ 1)
+    (h_witness : ∃ g, IsNontrivialLogicalOperator g C.toStabilizerGroup ∧ weight g = d)
+    (h_min : ∀ w, 1 ≤ w → w < d → ∀ g, weight g = w →
+      ¬IsNontrivialLogicalOperator g C.toStabilizerGroup) :
+    HasCodeDistance C d := by
+  refine ⟨hd, ?_, h_witness⟩
+  intro g hg_nontrivial hw_pos
+  by_cases h : weight g < d
+  · have h1 : 1 ≤ weight g := Nat.one_le_of_lt hw_pos
+    exact absurd hg_nontrivial (h_min (weight g) h1 h g rfl)
+  · omega
+
 end StabilizerGroup
 end Quantum

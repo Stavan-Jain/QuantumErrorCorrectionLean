@@ -127,7 +127,6 @@ theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement 
   · intro hg
     rw [IsPauliLogicalOperator, isLogicalGate_iff_conjugation_matrix]
     intro h hh ψ hψ
-    -- Since $g$ is in the centralizer of $S$, we have $g * h.toMatrix = h.toMatrix * g$.
     have h_comm : g.toGate.val * h.toMatrix = h.toMatrix * g.toGate.val := by
       have h_comm : g.toMatrix * h.toMatrix = h.toMatrix * g.toMatrix := by
         have h_comm : g * h = h * g := by
@@ -239,7 +238,6 @@ theorem xOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n
     (show s * ops.zOp * s⁻¹ = ops.zOp by rw [h_sz, mul_assoc,
     NQubitPauliGroupElement.mul_right_inv, mul_one]).symm
   have h_inv_sz : s⁻¹ * ops.zOp = ops.zOp * s⁻¹ := by
-    -- Multiply both sides of `key_sz` by `s⁻¹` on the left and by `s` on the right.
     have h_comm_s : s⁻¹ * ops.zOp * s = ops.zOp := by
       rw [ mul_assoc, eq_comm ];
       rw [ ← h_sz, inv_mul_cancel_left ];
@@ -256,7 +254,6 @@ theorem xOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n
       _ = ((ops.zOp * ops.xOp) * s⁻¹) * s := by rw [h_eq]
       _ = ops.zOp * ops.xOp := by group
   have h_neg : negIdentity n * (ops.xOp * ops.zOp) = ops.xOp * ops.zOp := by
-    -- Since $ops.xOp$ and $ops.zOp$ anticommute, we have $ops.xOp * ops.zOp = -ops.zOp * ops.xOp$.
     have h_anticomm : ops.xOp * ops.zOp =
     Quantum.StabilizerGroup.negIdentity n * (ops.zOp * ops.xOp) := by
       exact ops.anticommute;
@@ -282,7 +279,6 @@ theorem zOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n
     rw [h_sx, mul_assoc, NQubitPauliGroupElement.mul_right_inv, mul_one]).symm
   have h_inv_sx : s⁻¹ * ops.xOp = ops.xOp * s⁻¹ := by
     rw [ eq_comm ] at key_sx;
-    -- Multiply both sides of the equation $s * ops.xOp * s⁻¹ = ops.xOp$ by $s⁻¹$ on the left.
     have h_s_inv_x : s⁻¹ * (s * ops.xOp * s⁻¹) = s⁻¹ * ops.xOp := by
       rw [key_sx];
     convert h_s_inv_x.symm using 1 ; group

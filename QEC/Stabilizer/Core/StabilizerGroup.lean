@@ -188,17 +188,14 @@ lemma IsStabilizedBy.inv {g : NQubitPauliGroupElement n} {v : NQubitVec n}
   (hg : IsStabilizedVec g v) :
   IsStabilizedVec (g⁻¹) v := by
   simp [IsStabilizedVec] at hg ⊢
-  -- Apply `(g⁻¹).toMatrix` to the stabilization equation `g.toMatrix *ᵥ v = v`.
   have h_apply :
       (g⁻¹).toMatrix *ᵥ (g.toMatrix *ᵥ v) = (g⁻¹).toMatrix *ᵥ v := by
     simp [hg]
-  -- Reassociate using `mulVec_mulVec`.
   have h_assoc :
       ((g⁻¹).toMatrix * g.toMatrix) *ᵥ v = (g⁻¹).toMatrix *ᵥ (g.toMatrix *ᵥ v) := by
     exact Eq.symm (mulVec_mulVec v (g⁻¹).toMatrix g.toMatrix)
   have h_combined : ((g⁻¹).toMatrix * g.toMatrix) *ᵥ v = (g⁻¹).toMatrix *ᵥ v :=
     h_assoc.trans h_apply
-  -- Use the group law `g⁻¹ * g = 1` transported through `toMatrix`.
   have h_mat :
       (g⁻¹).toMatrix * g.toMatrix = (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
     have h_inv_mul : (g⁻¹ * g : NQubitPauliGroupElement n) = 1 := by
@@ -213,9 +210,7 @@ lemma IsStabilizedBy.inv {g : NQubitPauliGroupElement n} {v : NQubitVec n}
       _   = (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
             simpa using (NQubitPauliGroupElement.toMatrix_one n)
   have h1 := h_combined
-  -- Rewrite the left matrix product to the identity matrix.
   rw [h_mat] at h1
-  -- Simplify `1 *ᵥ v = v`.
   have h2 : v = (g⁻¹).toMatrix *ᵥ v := by
     simpa [one_mulVec] using h1
   exact h2.symm

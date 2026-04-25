@@ -67,10 +67,8 @@ lemma commutes_iff_mulOp_phasePower (p q : PauliGroupElement) :
   · intro h
     have h_phase : (p * q).phasePower = (q * p).phasePower := by
       simpa using congrArg (fun r : PauliGroupElement => r.phasePower) h
-    -- Expand multiplication and cancel the (commutative) outer phase terms.
     simpa [mul, mul_eq, add_assoc, add_comm, add_left_comm] using h_phase
   · intro h_mulOp_phase
-    -- The operator parts are always equal, so it suffices to prove phase equality.
     ext
     · simp [mul, mul_eq, add_assoc, add_comm, h_mulOp_phase]
     · exact operator_mul_comm p q
