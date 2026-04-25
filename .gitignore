@@ -1,5 +1,6 @@
 /.lake
 .gauss/
+.DS_Store
 
 # Docs (Aristotle prompts, evaluations, guides)
 docs/
