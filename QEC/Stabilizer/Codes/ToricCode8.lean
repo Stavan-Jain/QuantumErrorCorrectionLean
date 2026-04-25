@@ -3,6 +3,8 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
+import QEC.Stabilizer.Core.CSSCommutationLemmas
+import QEC.Stabilizer.Core.CentralizerLemmas
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.BinarySymplectic.Core
@@ -96,24 +98,14 @@ private lemma ZType_commutes {g h : NQubitPauliGroupElement 8}
     (hg : NQubitPauliGroupElement.IsZTypeElement g)
     (hh : NQubitPauliGroupElement.IsZTypeElement h) :
     g * h = h * g := by
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes g h (fun i => by
-    have h_op : ∀ i, g.operators i = .I ∨ g.operators i = .Z := by
-      unfold NQubitPauliGroupElement.IsZTypeElement at hg; aesop
-    have h_op' : ∀ i, h.operators i = .I ∨ h.operators i = .Z := by
-      intro i; specialize hh; unfold NQubitPauliGroupElement.IsZTypeElement at hh; aesop
-    cases h_op i <;> cases h_op' i <;> simp +decide [*])
+  exact CSSCommutationLemmas.ZType_commutes hg hh
 
 /-- Any two X-type elements commute. -/
 private lemma XType_commutes {g h : NQubitPauliGroupElement 8}
     (hg : NQubitPauliGroupElement.IsXTypeElement g)
     (hh : NQubitPauliGroupElement.IsXTypeElement h) :
     g * h = h * g := by
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes g h (fun i => by
-    have h_op : ∀ i, g.operators i = .I ∨ g.operators i = .X := by
-      unfold NQubitPauliGroupElement.IsXTypeElement at hg; aesop
-    have h_op' : ∀ i, h.operators i = .I ∨ h.operators i = .X := by
-      intro i; specialize hh; unfold NQubitPauliGroupElement.IsXTypeElement at hh; aesop
-    cases h_op i <;> cases h_op' i <;> simp +decide [*])
+  exact CSSCommutationLemmas.XType_commutes hg hh
 
 /-- All Z-generators are Z-type elements. -/
 lemma ZGenerators_are_ZType :
@@ -464,46 +456,50 @@ lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := b
 /-- logicalX1 is in the centralizer of the stabilizer group. -/
 lemma logicalX1_mem_centralizer :
   logicalX1 ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalX1 stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalX1_commutes_ZGenerators s hz).symm
-  · exact (logicalX1_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalX1 stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalX1_commutes_ZGenerators s hz).symm
+      · exact (logicalX1_commutes_XGenerators s hx).symm)
 
 /-- logicalZ1 is in the centralizer of the stabilizer group. -/
 lemma logicalZ1_mem_centralizer :
   logicalZ1 ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalZ1 stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalZ1_commutes_ZGenerators s hz).symm
-  · exact (logicalZ1_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalZ1 stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalZ1_commutes_ZGenerators s hz).symm
+      · exact (logicalZ1_commutes_XGenerators s hx).symm)
 
 /-- logicalX2 is in the centralizer of the stabilizer group. -/
 lemma logicalX2_mem_centralizer :
   logicalX2 ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalX2 stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalX2_commutes_ZGenerators s hz).symm
-  · exact (logicalX2_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalX2 stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalX2_commutes_ZGenerators s hz).symm
+      · exact (logicalX2_commutes_XGenerators s hx).symm)
 
 /-- logicalZ2 is in the centralizer of the stabilizer group. -/
 lemma logicalZ2_mem_centralizer :
   logicalZ2 ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalZ2 stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalZ2_commutes_ZGenerators s hz).symm
-  · exact (logicalZ2_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalZ2 stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalZ2_commutes_ZGenerators s hz).symm
+      · exact (logicalZ2_commutes_XGenerators s hx).symm)
 
 /-- The 6-generator list forms an independent generating set. -/
 theorem GeneratorsIndependent_generatorsList6 :

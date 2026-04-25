@@ -3,6 +3,8 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
+import QEC.Stabilizer.Core.CSSCommutationLemmas
+import QEC.Stabilizer.Core.CentralizerLemmas
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 import QEC.Stabilizer.BinarySymplectic.Core
@@ -95,12 +97,7 @@ private lemma ZType_commutes {g h : Quantum.NQubitPauliGroupElement 9}
     (hg : NQubitPauliGroupElement.IsZTypeElement g)
     (hh : NQubitPauliGroupElement.IsZTypeElement h) :
     g * h = h * g := by
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes g h (fun i => by
-    have h_op : ∀ i, g.operators i = .I ∨ g.operators i = .Z := by
-      unfold NQubitPauliGroupElement.IsZTypeElement at hg; aesop
-    have h_op' : ∀ i, h.operators i = .I ∨ h.operators i = .Z := by
-      intro i; specialize hh; unfold NQubitPauliGroupElement.IsZTypeElement at hh; aesop
-    cases h_op i <;> cases h_op' i <;> simp +decide [*])
+  exact CSSCommutationLemmas.ZType_commutes hg hh
 
 /-
 Any two X-type elements commute.
@@ -109,13 +106,7 @@ private lemma XType_commutes {g h : Quantum.NQubitPauliGroupElement 9}
     (hg : NQubitPauliGroupElement.IsXTypeElement g)
     (hh : NQubitPauliGroupElement.IsXTypeElement h) :
     g * h = h * g := by
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
-  intro i
-  have h_op : ∀ i, g.operators i = .I ∨ g.operators i = .X := by
-    unfold NQubitPauliGroupElement.IsXTypeElement at hg; aesop
-  have h_op' : ∀ i, h.operators i = .I ∨ h.operators i = .X := by
-    intro i; specialize hh; unfold NQubitPauliGroupElement.IsXTypeElement at hh; aesop
-  cases h_op i <;> cases h_op' i <;> simp +decide [*]
+  exact CSSCommutationLemmas.XType_commutes hg hh
 
 /-
 The list of all 8 generators for the rotated surface code [[9,1,3]] (canonical layout).
@@ -373,24 +364,26 @@ lemma subgroup_eq_closure : subgroup = Subgroup.closure
 /-- logicalX is in the centralizer of the stabilizer group. -/
 lemma logicalX_mem_centralizer :
     logicalX ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalX stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalX_commutes_ZGenerators s hz).symm
-  · exact (logicalX_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalX stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalX_commutes_ZGenerators s hz).symm
+      · exact (logicalX_commutes_XGenerators s hx).symm)
 
 /-- logicalZ is in the centralizer of the stabilizer group. -/
 lemma logicalZ_mem_centralizer :
     logicalZ ∈ StabilizerGroup.centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff_closure logicalZ stabilizerGroup
-    generators stabilizerGroup_toSubgroup_eq]
-  intro s hs
-  simp only [generators] at hs
-  rcases hs with (hz | hx)
-  · exact (logicalZ_commutes_ZGenerators s hz).symm
-  · exact (logicalZ_commutes_XGenerators s hx).symm
+  exact StabilizerGroup.CentralizerLemmas.mem_centralizer_of_commutes_genSet
+    logicalZ stabilizerGroup generators stabilizerGroup_toSubgroup_eq
+    (by
+      intro s hs
+      simp only [generators] at hs
+      rcases hs with (hz | hx)
+      · exact (logicalZ_commutes_ZGenerators s hz).symm
+      · exact (logicalZ_commutes_XGenerators s hx).symm)
 
 /-
 The logical operators packaged for the stabilizer code.

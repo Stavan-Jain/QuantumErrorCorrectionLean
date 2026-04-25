@@ -3,6 +3,7 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.Core.SubgroupLemmas
 import QEC.Stabilizer.Core.CSS
 import QEC.Stabilizer.Core.CSSNoNegI
+import QEC.Stabilizer.Core.CSSCommutationLemmas
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
 
@@ -300,31 +301,13 @@ private lemma ZType_commutes {g h : NQubitPauliGroupElement 9}
     (hg : NQubitPauliGroupElement.IsZTypeElement g)
     (hh : NQubitPauliGroupElement.IsZTypeElement h) :
     g * h = h * g := by
-  classical
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
-  intro i
-  have hg' := hg.2 i
-  have hh' := hh.2 i
-  rcases hg' with hgI | hgZ <;> rcases hh' with hhI | hhZ
-  · simp [PauliOperator.mulOp, hgI, hhI]
-  · simp [PauliOperator.mulOp, hgI, hhZ]
-  · simp [PauliOperator.mulOp, hgZ, hhI]
-  · simp [PauliOperator.mulOp, hgZ, hhZ]
+  exact CSSCommutationLemmas.ZType_commutes hg hh
 
 private lemma XType_commutes {g h : NQubitPauliGroupElement 9}
     (hg : NQubitPauliGroupElement.IsXTypeElement g)
     (hh : NQubitPauliGroupElement.IsXTypeElement h) :
     g * h = h * g := by
-  classical
-  apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
-  intro i
-  have hg' := hg.2 i
-  have hh' := hh.2 i
-  rcases hg' with hgI | hgX <;> rcases hh' with hhI | hhX
-  · simp [PauliOperator.mulOp, hgI, hhI]
-  · simp [PauliOperator.mulOp, hgI, hhX]
-  · simp [PauliOperator.mulOp, hgX, hhI]
-  · simp [PauliOperator.mulOp, hgX, hhX]
+  exact CSSCommutationLemmas.XType_commutes hg hh
 
 theorem generators_commute :
     ∀ g ∈ generators, ∀ h ∈ generators, g * h = h * g := by
