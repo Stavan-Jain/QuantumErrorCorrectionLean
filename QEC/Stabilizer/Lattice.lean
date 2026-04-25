@@ -4,6 +4,8 @@ import QEC.Stabilizer.Lattice.CellComplexTypes
 import QEC.Stabilizer.Lattice.ToricChains
 import QEC.Stabilizer.Lattice.ToricBoundaryMaps
 import QEC.Stabilizer.Lattice.ToricHomology
+import QEC.Stabilizer.Lattice.ToricH1Dimension
+import QEC.Stabilizer.Lattice.ToricWrappingInvariants
 import QEC.Stabilizer.Lattice.ToricOperatorChains
 import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceX
 

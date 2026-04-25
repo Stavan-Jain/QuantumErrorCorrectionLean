@@ -63,8 +63,11 @@ def toricBoundary1 : C1 L →ₗ[ZMod 2] C0 L where
 /-- Chain-complex law for toric boundaries. -/
 theorem toricBoundary_comp_zero :
     (toricBoundary1 (L := L)).comp (toricBoundary2 (L := L)) = 0 := by
-  sorry
-
+  ext f v
+  simp [LinearMap.comp_apply, toricBoundary1, toricBoundary2,
+    add_assoc, add_comm, add_left_comm]
+  ring_nf
+  grind
 /-- Pointwise corollary of `toricBoundary_comp_zero`. -/
 theorem toricBoundary_comp_zero_apply (f : C2 L) :
     toricBoundary1 (L := L) (toricBoundary2 (L := L) f) = 0 := by
@@ -74,4 +77,3 @@ theorem toricBoundary_comp_zero_apply (f : C2 L) :
 end Lattice
 end Stabilizer
 end Quantum
-

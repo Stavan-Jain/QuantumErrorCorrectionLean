@@ -6,6 +6,7 @@ import QEC.Stabilizer.Core.CSSNoNegI
 import QEC.Stabilizer.Core.Centralizer
 import QEC.Stabilizer.PauliGroup.Commutation
 import QEC.Stabilizer.PauliGroup.CommutationTactics
+import QEC.Stabilizer.PauliGroup.SupportLemmas
 import QEC.Stabilizer.BinarySymplectic.Core
 import QEC.Stabilizer.BinarySymplectic.CheckMatrix
 import QEC.Stabilizer.BinarySymplectic.CheckMatrixDecidable
@@ -29,6 +30,10 @@ Formalizes the parametric toric code for an L×L lattice:
 - Horizontal edges `H(x,y)` and vertical edges `V(x,y)` with periodic boundaries
 - Vertex stabilizers (X-type) and face stabilizers (Z-type)
 - All generators as lists for use in Steps 2–4
+
+Convention note: this file uses vertex=X and face=Z checks. Many expositions use the
+swapped convention (vertex=Z, face=X); both are equivalent via global Hadamard
+(X ↔ Z on every qubit), so code parameters and distance statements are unchanged.
 
 Step 1: qubit–edge bijection, generator definitions, and consistency check at L=2
 against the concrete `ToricCode8`.
@@ -74,13 +79,42 @@ lemma vEdge_val_ge_sq (L : ℕ) (x y : Fin L) : L * L ≤ (vEdge L x y).val := b
 lemma hEdge_injective (L : ℕ) [Fact (0 < L)] :
     Function.Injective (fun p : Fin L × Fin L => hEdge L p.1 p.2) := by
   intro p q h
-  sorry
+  apply Stabilizer.Lattice.rowMajor_injective (L := L)
+  exact congrArg Fin.val h
 
 /-- Vertical edge indexing as a map from lattice coordinates is injective. -/
 lemma vEdge_injective (L : ℕ) [Fact (0 < L)] :
     Function.Injective (fun p : Fin L × Fin L => vEdge L p.1 p.2) := by
   intro p q h
-  sorry
+  have hsum : p.2.val * L + p.1.val = q.2.val * L + q.1.val := by
+    have hval : (vEdge L p.1 p.2).val = (vEdge L q.1 q.2).val := congrArg Fin.val h
+    have hval' : L * L + (p.2.val * L + p.1.val) = L * L + (q.2.val * L + q.1.val) := by
+      simpa [vEdge_val, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using hval
+    exact Nat.add_left_cancel hval'
+  apply Stabilizer.Lattice.rowMajor_injective (L := L)
+  exact hsum
+
+/-- Characterization of equality for horizontal edge indices. -/
+lemma hEdge_eq_iff (L : ℕ) [Fact (0 < L)] (x₁ y₁ x₂ y₂ : Fin L) :
+    hEdge L x₁ y₁ = hEdge L x₂ y₂ ↔ x₁ = x₂ ∧ y₁ = y₂ := by
+  constructor
+  · intro h
+    have hinj := hEdge_injective (L := L)
+    have hp : (x₁, y₁) = (x₂, y₂) := hinj h
+    exact Prod.mk.inj_iff.mp hp
+  · rintro ⟨rfl, rfl⟩
+    rfl
+
+/-- Characterization of equality for vertical edge indices. -/
+lemma vEdge_eq_iff (L : ℕ) [Fact (0 < L)] (x₁ y₁ x₂ y₂ : Fin L) :
+    vEdge L x₁ y₁ = vEdge L x₂ y₂ ↔ x₁ = x₂ ∧ y₁ = y₂ := by
+  constructor
+  · intro h
+    have hinj := vEdge_injective (L := L)
+    have hp : (x₁, y₁) = (x₂, y₂) := hinj h
+    exact Prod.mk.inj_iff.mp hp
+  · rintro ⟨rfl, rfl⟩
+    rfl
 
 /-- Horizontal and vertical edge encodings are disjoint. -/
 lemma hEdge_ne_vEdge (L : ℕ) (x₁ y₁ x₂ y₂ : Fin L) :
@@ -204,12 +238,44 @@ private lemma XType_commutes {n : ℕ} {g h : NQubitPauliGroupElement n}
 /-- Every face stabilizer is Z-type. -/
 lemma faceStab_is_ZType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
     NQubitPauliGroupElement.IsZTypeElement (faceStab L x y) := by
-  sorry
+  refine ⟨rfl, ?_⟩
+  let op0 : NQubitPauliOperator (numQubits L) := NQubitPauliOperator.identity (numQubits L)
+  let op1 : NQubitPauliOperator (numQubits L) := op0.set (hEdge L x y) PauliOperator.Z
+  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L x (next L y)) PauliOperator.Z
+  let op3 : NQubitPauliOperator (numQubits L) := op2.set (vEdge L x y) PauliOperator.Z
+  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L (next L x) y) PauliOperator.Z
+  have h0 : NQubitPauliOperator.IsZType op0 := by
+    simpa [op0] using (NQubitPauliOperator.IsZType_identity (n := numQubits L))
+  have h1 : NQubitPauliOperator.IsZType op1 := by
+    simpa [op1] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op0 (hEdge L x y) h0
+  have h2 : NQubitPauliOperator.IsZType op2 := by
+    simpa [op2] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op1 (hEdge L x (next L y)) h1
+  have h3 : NQubitPauliOperator.IsZType op3 := by
+    simpa [op3] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op2 (vEdge L x y) h2
+  have h4 : NQubitPauliOperator.IsZType op4 := by
+    simpa [op4] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op3 (vEdge L (next L x) y) h3
+  simpa [faceStab, op0, op1, op2, op3, op4] using h4
 
 /-- Every vertex stabilizer is X-type. -/
 lemma vertexStab_is_XType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
     NQubitPauliGroupElement.IsXTypeElement (vertexStab L x y) := by
-  sorry
+  refine ⟨rfl, ?_⟩
+  let op0 : NQubitPauliOperator (numQubits L) := NQubitPauliOperator.identity (numQubits L)
+  let op1 : NQubitPauliOperator (numQubits L) := op0.set (hEdge L x y) PauliOperator.X
+  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L (prev L x) y) PauliOperator.X
+  let op3 : NQubitPauliOperator (numQubits L) := op2.set (vEdge L x y) PauliOperator.X
+  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L x (prev L y)) PauliOperator.X
+  have h0 : NQubitPauliOperator.IsXType op0 := by
+    simpa [op0] using (NQubitPauliOperator.IsXType_identity (n := numQubits L))
+  have h1 : NQubitPauliOperator.IsXType op1 := by
+    simpa [op1] using NQubitPauliOperator.IsXType_set_X_of_IsXType op0 (hEdge L x y) h0
+  have h2 : NQubitPauliOperator.IsXType op2 := by
+    simpa [op2] using NQubitPauliOperator.IsXType_set_X_of_IsXType op1 (hEdge L (prev L x) y) h1
+  have h3 : NQubitPauliOperator.IsXType op3 := by
+    simpa [op3] using NQubitPauliOperator.IsXType_set_X_of_IsXType op2 (vEdge L x y) h2
+  have h4 : NQubitPauliOperator.IsXType op4 := by
+    simpa [op4] using NQubitPauliOperator.IsXType_set_X_of_IsXType op3 (vEdge L x (prev L y)) h3
+  simpa [vertexStab, op0, op1, op2, op3, op4] using h4
 
 /-- All Z generators are Z-type. -/
 lemma ZGenerators_are_ZType (L : ℕ) [Fact (0 < L)] :
@@ -241,6 +307,8 @@ lemma XGenerators_commute (L : ℕ) [Fact (0 < L)] :
 lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
     ∀ z ∈ ZGenerators L, ∀ x ∈ XGenerators L, z * x = x * z := by
   intro z hz x hx
+  rcases hz with ⟨⟨xf, yf⟩, rfl⟩
+  rcases hx with ⟨⟨xv, yv⟩, rfl⟩
   sorry
 
 /-- All toric generators commute pairwise. -/
@@ -259,7 +327,8 @@ theorem generators_commute (L : ℕ) [Fact (2 ≤ L)] :
 -/
 
 /-- Canonical subgroup generated by all toric generators. -/
-noncomputable def subgroup (L : ℕ) [Fact (0 < L)] : Subgroup (NQubitPauliGroupElement (numQubits L)) :=
+noncomputable def subgroup (L : ℕ) [Fact (0 < L)] : Subgroup
+(NQubitPauliGroupElement (numQubits L)) :=
   Subgroup.closure (generators L)
 
 /-- `-I` is not in the toric stabilizer subgroup. -/
@@ -360,12 +429,14 @@ lemma vEdge_L2_vals :
 /-- At `L=2`, the face stabilizer at `(0,0)` has the same support as `ToricCode8.B00`. -/
 lemma faceStab00_L2_support :
     (faceStab 2 0 0).operators = ToricCode8.B00.operators := by
-  sorry
+  ext i
+  fin_cases i <;> decide
 
 /-- At `L=2`, the vertex stabilizer at `(0,0)` has the same support as `ToricCode8.A00`. -/
 lemma vertexStab00_L2_support :
     (vertexStab 2 0 0).operators = ToricCode8.A00.operators := by
-  sorry
+  ext i
+  fin_cases i <;> decide
 
 end ToricCodeN
 end StabilizerGroup
