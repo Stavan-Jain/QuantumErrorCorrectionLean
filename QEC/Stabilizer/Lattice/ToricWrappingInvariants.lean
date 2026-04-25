@@ -135,16 +135,38 @@ theorem v_boundary_zero (b : toricBoundaries (L := L)) :
   simpa [toricBoundary2, Finset.sum_add_distrib, hsum_prev] using hdouble_zero
 
 /-- Quotient-level `(h,v)` map is well-defined. -/
-noncomputable def phi : toricH1 (L := L) → ZMod 2 × ZMod 2 := by
-  sorry
+noncomputable def phi : toricH1 (L := L) → ZMod 2 × ZMod 2 :=
+  -- Inline the boundary-submodule-in-cycles so Lean can synthesize instances on
+  -- the explicit `⧸` quotient, sidestepping the opaque `toricH1` def.
+  let N : Submodule (ZMod 2) (toricCycles (L := L)) :=
+    Submodule.comap (toricCycles (L := L)).subtype (toricBoundaries (L := L))
+  -- Define phiLin with an explicit toFun so application reduces by rfl,
+  -- avoiding the `Pi.prod` intermediate form from `LinearMap.prod`.
+  let phiLin : toricCycles (L := L) →ₗ[ZMod 2] ZMod 2 × ZMod 2 :=
+    { toFun := fun c => (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1)
+      map_add' := fun a b => by
+        simp only [Submodule.coe_add]
+        exact Prod.ext (hAt_linear (L := L) (zeroCoord L) a.1 b.1)
+                       (vAt_linear (L := L) (zeroCoord L) a.1 b.1)
+      map_smul' := fun r c => by
+        simp only [RingHom.id_apply, Submodule.coe_smul_of_tower]
+        ext <;> simp [hAt, vAt, Finset.mul_sum] }
+  -- `Submodule.liftQ` produces a linear map on `toricCycles L ⧸ N`,
+  -- which is definitionally `toricH1 L`.
+  Submodule.liftQ N phiLin (by
+    intro c hc
+    rw [LinearMap.mem_ker]
+    rw [Submodule.mem_comap] at hc
+    -- hc : c.1 ∈ toricBoundaries L
+    have hh := h_boundary_zero (L := L) ⟨c.1, hc⟩
+    have hv := v_boundary_zero (L := L) ⟨c.1, hc⟩
+    exact Prod.ext hh hv)
 
-/-- Quotient-level `(h,v)` map is linear. -/
-theorem phi_linear
-    [AddCommMonoid (toricH1 (L := L))]
-    [Module (ZMod 2) (toricH1 (L := L))] :
-    ∃ _ : toricH1 (L := L) →ₗ[ZMod 2] (ZMod 2 × ZMod 2), True := by
-  refine ⟨0, ?_⟩
-  trivial
+/-- `phi` agrees with the underlying linear lift on equivalence classes. -/
+theorem phi_liftQ_eq (c : toricCycles (L := L)) :
+    phi (L := L) (Submodule.Quotient.mk c) =
+      (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1) := by
+  simp only [phi, Submodule.liftQ_apply, LinearMap.coe_mk, AddHom.coe_mk]
 
 /-- Surjectivity scaffold for `φ`. -/
 theorem phi_surjective :

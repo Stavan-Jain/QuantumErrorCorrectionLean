@@ -101,7 +101,8 @@ lemma hEdge_eq_iff (L : ℕ) [Fact (0 < L)] (x₁ y₁ x₂ y₂ : Fin L) :
   · intro h
     have hinj := hEdge_injective (L := L)
     have hp : (x₁, y₁) = (x₂, y₂) := hinj h
-    exact Prod.mk.inj_iff.mp hp
+    cases hp
+    exact ⟨rfl, rfl⟩
   · rintro ⟨rfl, rfl⟩
     rfl
 
@@ -112,7 +113,8 @@ lemma vEdge_eq_iff (L : ℕ) [Fact (0 < L)] (x₁ y₁ x₂ y₂ : Fin L) :
   · intro h
     have hinj := vEdge_injective (L := L)
     have hp : (x₁, y₁) = (x₂, y₂) := hinj h
-    exact Prod.mk.inj_iff.mp hp
+    cases hp
+    exact ⟨rfl, rfl⟩
   · rintro ⟨rfl, rfl⟩
     rfl
 
@@ -303,13 +305,245 @@ lemma XGenerators_commute (L : ℕ) [Fact (0 < L)] :
   intro x₁ hx₁ x₂ hx₂
   exact XType_commutes (XGenerators_are_XType L x₁ hx₁) (XGenerators_are_XType L x₂ hx₂)
 
+/-- Support characterization for a face stabilizer. -/
+lemma mem_support_faceStab_iff (L : ℕ) [Fact (0 < L)] (xf yf : Fin L) (i : Fin (numQubits L)) :
+    i ∈ (faceStab L xf yf).operators.support ↔
+      i = hEdge L xf yf ∨ i = hEdge L xf (next L yf) ∨
+      i = vEdge L xf yf ∨ i = vEdge L (next L xf) yf := by
+  constructor
+  · intro hi
+    by_contra hnot
+    have hi' : (faceStab L xf yf).operators i ≠ PauliOperator.I := by
+      simpa [NQubitPauliOperator.support] using hi
+    have h1 : i ≠ hEdge L xf yf := by intro h; exact hnot (Or.inl h)
+    have h2 : i ≠ hEdge L xf (next L yf) := by
+      intro h
+      exact hnot (Or.inr (Or.inl h))
+    have h3 : i ≠ vEdge L xf yf := by
+      intro h
+      exact hnot (Or.inr (Or.inr (Or.inl h)))
+    have h4 : i ≠ vEdge L (next L xf) yf := by
+      intro h
+      exact hnot (Or.inr (Or.inr (Or.inr h)))
+    have hI : (faceStab L xf yf).operators i = PauliOperator.I := by
+      simp [faceStab, NQubitPauliOperator.set, NQubitPauliOperator.identity, h1, h2, h3, h4]
+    exact hi' hI
+  · intro hi
+    rcases hi with h1 | h2 | h3 | h4
+    · subst h1
+      simp [NQubitPauliOperator.support, faceStab, NQubitPauliOperator.set]
+    · subst h2
+      simp [NQubitPauliOperator.support, faceStab, NQubitPauliOperator.set]
+    · subst h3
+      simp [NQubitPauliOperator.support, faceStab, NQubitPauliOperator.set]
+    · subst h4
+      simp [NQubitPauliOperator.support, faceStab, NQubitPauliOperator.set]
+
+/-- Support characterization for a vertex stabilizer. -/
+lemma mem_support_vertexStab_iff (L : ℕ) [Fact (0 < L)] (xv yv : Fin L) (i : Fin (numQubits L)) :
+    i ∈ (vertexStab L xv yv).operators.support ↔
+      i = hEdge L xv yv ∨ i = hEdge L (prev L xv) yv ∨
+      i = vEdge L xv yv ∨ i = vEdge L xv (prev L yv) := by
+  constructor
+  · intro hi
+    by_contra hnot
+    have hi' : (vertexStab L xv yv).operators i ≠ PauliOperator.I := by
+      simpa [NQubitPauliOperator.support] using hi
+    have h1 : i ≠ hEdge L xv yv := by intro h; exact hnot (Or.inl h)
+    have h2 : i ≠ hEdge L (prev L xv) yv := by
+      intro h
+      exact hnot (Or.inr (Or.inl h))
+    have h3 : i ≠ vEdge L xv yv := by
+      intro h
+      exact hnot (Or.inr (Or.inr (Or.inl h)))
+    have h4 : i ≠ vEdge L xv (prev L yv) := by
+      intro h
+      exact hnot (Or.inr (Or.inr (Or.inr h)))
+    have hI : (vertexStab L xv yv).operators i = PauliOperator.I := by
+      simp [vertexStab, NQubitPauliOperator.set, NQubitPauliOperator.identity, h1, h2, h3, h4]
+    exact hi' hI
+  · intro hi
+    rcases hi with h1 | h2 | h3 | h4
+    · subst h1
+      simp [NQubitPauliOperator.support, vertexStab, NQubitPauliOperator.set]
+    · subst h2
+      simp [NQubitPauliOperator.support, vertexStab, NQubitPauliOperator.set]
+    · subst h3
+      simp [NQubitPauliOperator.support, vertexStab, NQubitPauliOperator.set]
+    · subst h4
+      simp [NQubitPauliOperator.support, vertexStab, NQubitPauliOperator.set]
+
+/-- At each qubit, face/vertex anticommute exactly when both supports contain that qubit. -/
+lemma anticommutesAt_face_vertex_iff_mem_support_both
+    (L : ℕ) [Fact (0 < L)] (xf yf xv yv : Fin L) (i : Fin (numQubits L)) :
+    NQubitPauliGroupElement.anticommutesAt
+      (faceStab L xf yf).operators (vertexStab L xv yv).operators i
+      ↔ i ∈ (faceStab L xf yf).operators.support ∧ i ∈ (vertexStab L xv yv).operators.support := by
+  exact NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_ZXType
+    (faceStab_is_ZType L xf yf).2 (vertexStab_is_XType L xv yv).2 i
+
 /-- Any Z generator commutes with any X generator. -/
 lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
     ∀ z ∈ ZGenerators L, ∀ x ∈ XGenerators L, z * x = x * z := by
+  classical
   intro z hz x hx
   rcases hz with ⟨⟨xf, yf⟩, rfl⟩
   rcases hx with ⟨⟨xv, yv⟩, rfl⟩
-  sorry
+  haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)⟩
+  let C : Prop := (xv = xf ∨ xv = next L xf) ∧ (yv = yf ∨ yv = next L yf)
+  let hh : Fin (numQubits L) := hEdge L xf yv
+  let vv : Fin (numQubits L) := vEdge L xv yf
+  have hboth :
+      ∀ i : Fin (numQubits L),
+        i ∈ (faceStab L xf yf).operators.support ∧ i ∈ (vertexStab L xv yv).operators.support
+          ↔ C ∧ (i = hh ∨ i = vv) := by
+    intro i
+    constructor
+    · intro hi
+      rcases (mem_support_faceStab_iff L xf yf i).1 hi.1 with hf | hf | hf | hf
+      · rcases (mem_support_vertexStab_iff L xv yv i).1 hi.2 with hv | hv | hv | hv
+        · have hEq : hEdge L xv yv = hEdge L xf yf := hv.symm.trans hf
+          rcases (hEdge_eq_iff L xv yv xf yf).1 hEq with ⟨hxEq, hyEq⟩
+          refine ⟨?_, Or.inl ?_⟩
+          · exact ⟨Or.inl hxEq, Or.inl hyEq⟩
+          · subst hxEq hyEq
+            simpa [hh] using hf
+        · have hEq : hEdge L (prev L xv) yv = hEdge L xf yf := hv.symm.trans hf
+          rcases (hEdge_eq_iff L (prev L xv) yv xf yf).1 hEq with ⟨hxPrev, hyEq⟩
+          refine ⟨?_, Or.inl ?_⟩
+          · exact ⟨Or.inr ((Stabilizer.Lattice.prev_eq_iff_eq_next L xv xf).1 hxPrev), Or.inl hyEq⟩
+          · subst hyEq
+            simpa [hh] using hf
+        · exact False.elim ((hEdge_ne_vEdge L xf yf xv yv) (hf.symm.trans hv))
+        · exact False.elim ((hEdge_ne_vEdge L xf yf xv (prev L yv)) (hf.symm.trans hv))
+      · rcases (mem_support_vertexStab_iff L xv yv i).1 hi.2 with hv | hv | hv | hv
+        · have hEq : hEdge L xv yv = hEdge L xf (next L yf) := hv.symm.trans hf
+          rcases (hEdge_eq_iff L xv yv xf (next L yf)).1 hEq with ⟨hxEq, hyEq⟩
+          refine ⟨?_, Or.inl ?_⟩
+          · exact ⟨Or.inl hxEq, Or.inr hyEq⟩
+          · subst hxEq hyEq
+            simpa [hh] using hf
+        · have hEq : hEdge L (prev L xv) yv = hEdge L xf (next L yf) := hv.symm.trans hf
+          rcases (hEdge_eq_iff L (prev L xv) yv xf (next L yf)).1 hEq with ⟨hxPrev, hyEq⟩
+          refine ⟨?_, Or.inl ?_⟩
+          · exact
+              ⟨Or.inr ((Stabilizer.Lattice.prev_eq_iff_eq_next L xv xf).1 hxPrev), Or.inr hyEq⟩
+          · subst hyEq
+            simpa [hh] using hf
+        · exact False.elim ((hEdge_ne_vEdge L xf (next L yf) xv yv) (hf.symm.trans hv))
+        · exact
+            False.elim ((hEdge_ne_vEdge L xf (next L yf) xv (prev L yv)) (hf.symm.trans hv))
+      · rcases (mem_support_vertexStab_iff L xv yv i).1 hi.2 with hv | hv | hv | hv
+        · exact False.elim ((hEdge_ne_vEdge L xv yv xf yf) (hv.symm.trans hf))
+        · exact False.elim ((hEdge_ne_vEdge L (prev L xv) yv xf yf) (hv.symm.trans hf))
+        · have hEq : vEdge L xv yv = vEdge L xf yf := hv.symm.trans hf
+          rcases (vEdge_eq_iff L xv yv xf yf).1 hEq with ⟨hxEq, hyEq⟩
+          refine ⟨?_, Or.inr ?_⟩
+          · exact ⟨Or.inl hxEq, Or.inl hyEq⟩
+          · subst hxEq hyEq
+            simpa [vv] using hf
+        · have hEq : vEdge L xv (prev L yv) = vEdge L xf yf := hv.symm.trans hf
+          rcases (vEdge_eq_iff L xv (prev L yv) xf yf).1 hEq with ⟨hxEq, hyPrev⟩
+          refine ⟨?_, Or.inr ?_⟩
+          · exact ⟨Or.inl hxEq, Or.inr ((Stabilizer.Lattice.prev_eq_iff_eq_next L yv yf).1 hyPrev)⟩
+          · subst hxEq hyPrev
+            simpa [vv] using hf
+      · rcases (mem_support_vertexStab_iff L xv yv i).1 hi.2 with hv | hv | hv | hv
+        · exact False.elim ((hEdge_ne_vEdge L xv yv (next L xf) yf) (hv.symm.trans hf))
+        · exact
+            False.elim ((hEdge_ne_vEdge L (prev L xv) yv (next L xf) yf) (hv.symm.trans hf))
+        · have hEq : vEdge L xv yv = vEdge L (next L xf) yf := hv.symm.trans hf
+          rcases (vEdge_eq_iff L xv yv (next L xf) yf).1 hEq with ⟨hxEq, hyEq⟩
+          refine ⟨?_, Or.inr ?_⟩
+          · exact ⟨Or.inr hxEq, Or.inl hyEq⟩
+          · subst hxEq hyEq
+            simpa [vv] using hf
+        · have hEq : vEdge L xv (prev L yv) = vEdge L (next L xf) yf := hv.symm.trans hf
+          rcases (vEdge_eq_iff L xv (prev L yv) (next L xf) yf).1 hEq with ⟨hxEq, hyPrev⟩
+          refine ⟨?_, Or.inr ?_⟩
+          · exact ⟨Or.inr hxEq, Or.inr ((Stabilizer.Lattice.prev_eq_iff_eq_next L yv yf).1 hyPrev)⟩
+          · subst hxEq hyPrev
+            simpa [vv] using hf
+    · rintro ⟨hC, hi⟩
+      rcases hC with ⟨hxC, hyC⟩
+      rcases hi with hi | hi
+      · subst hi
+        constructor
+        · rw [mem_support_faceStab_iff L xf yf]
+          rcases hyC with rfl | hyNext
+          · exact Or.inl rfl
+          · exact Or.inr (Or.inl (by simp [hh, hyNext]))
+        · rw [mem_support_vertexStab_iff L xv yv]
+          rcases hxC with hxEq | hxNext
+          · exact Or.inl (by simp [hh, hxEq])
+          · have hPrev : prev L xv = xf := by
+              rw [hxNext]
+              simp [Stabilizer.Lattice.prev_next]
+            exact Or.inr (Or.inl (by simp [hh, hPrev]))
+      · subst hi
+        constructor
+        · rw [mem_support_faceStab_iff L xf yf]
+          rcases hxC with hxEq | hxNext
+          · exact Or.inr (Or.inr (Or.inl (by simp [vv, hxEq])))
+          · exact Or.inr (Or.inr (Or.inr (by simp [vv, hxNext])))
+        · rw [mem_support_vertexStab_iff L xv yv]
+          rcases hyC with hyEq | hyNext
+          · exact Or.inr (Or.inr (Or.inl (by simp [vv, hyEq])))
+          · have hPrev : prev L yv = yf := by
+              rw [hyNext]
+              simp [Stabilizer.Lattice.prev_next]
+            exact Or.inr (Or.inr (Or.inr (by simp [vv, hPrev])))
+  pauli_comm_even_anticommutes
+  by_cases hC : C
+  · have hfilter :
+      (Finset.univ.filter
+            (NQubitPauliGroupElement.anticommutesAt
+              (faceStab L xf yf).operators (vertexStab L xv yv).operators)) =
+        ({hh, vv} : Finset (Fin (numQubits L))) := by
+      ext i
+      constructor
+      · intro hi
+        have hanti : C ∧ (i = hh ∨ i = vv) := by
+          have hi' :
+              NQubitPauliGroupElement.anticommutesAt
+                (faceStab L xf yf).operators (vertexStab L xv yv).operators i :=
+            (Finset.mem_filter.mp hi).2
+          rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i] at hi'
+        simpa [Finset.mem_insert, Finset.mem_singleton] using hanti.2
+      · intro hi
+        refine Finset.mem_filter.mpr ?_
+        refine ⟨by simp, ?_⟩
+        have hi' : i = hh ∨ i = vv := by
+          simpa [Finset.mem_insert, Finset.mem_singleton] using hi
+        have hanti : C ∧ (i = hh ∨ i = vv) := ⟨hC, hi'⟩
+        rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i]
+    rw [hfilter]
+    have hhv : hh ≠ vv := by
+      simpa [hh, vv] using (hEdge_ne_vEdge L xf yv xv yf)
+    have hnotmem : hh ∉ ({vv} : Finset (Fin (numQubits L))) := by
+      simpa [Finset.mem_singleton] using hhv
+    rw [Finset.card_insert_of_notMem hnotmem, Finset.card_singleton]
+    exact even_two
+  · have hfilter :
+      (Finset.univ.filter
+            (NQubitPauliGroupElement.anticommutesAt
+              (faceStab L xf yf).operators (vertexStab L xv yv).operators)) =
+        (∅ : Finset (Fin (numQubits L))) := by
+      ext i
+      constructor
+      · intro hi
+        exfalso
+        have hanti : C ∧ (i = hh ∨ i = vv) := by
+          have hi' :
+              NQubitPauliGroupElement.anticommutesAt
+                (faceStab L xf yf).operators (vertexStab L xv yv).operators i :=
+            (Finset.mem_filter.mp hi).2
+          rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i] at hi'
+        exact hC hanti.1
+      · intro hi
+        exact False.elim (Finset.notMem_empty i hi)
+    rw [hfilter, Finset.card_empty]
+    exact ⟨0, rfl⟩
 
 /-- All toric generators commute pairwise. -/
 theorem generators_commute (L : ℕ) [Fact (2 ≤ L)] :
