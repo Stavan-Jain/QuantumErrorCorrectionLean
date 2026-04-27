@@ -584,7 +584,11 @@ private lemma sum_checkMatrix_Z_eq
     Finset.filter p Finset.univ
   have hs : ∀ x : Fin (generatorsList r).length, x ∈ s ↔ p x := by
     intro x; simp [s, p, Finset.mem_filter]
-  sorry
+  simp +zetaDelta at *;
+  refine' Finset.sum_bij ( fun x hx => ⟨ x.val, by
+    grind +qlia ⟩ ) _ _ _ _ <;> simp_all +decide;
+  · exact fun a ha b hb hab => Fin.ext hab;
+  · exact fun b => ⟨ ⟨ b, by rw [ generatorsList_length ] ; linarith [ Fin.is_lt b ] ⟩, by simp +decide ⟩
 
 /-- The sum ∑_{idx} f(idx) * checkMatrix(idx, X-col k) = ∑_{a:Fin r} f(r+a) * hammingEntry(a,k). -/
 private lemma sum_checkMatrix_X_eq
@@ -612,7 +616,17 @@ private lemma sum_checkMatrix_X_eq
     Finset.filter p Finset.univ
   have hs : ∀ x : Fin (generatorsList r).length, x ∈ s ↔ p x := by
     intro x; simp [s, p, Finset.mem_filter]
-  sorry
+  simp;
+  refine' Finset.sum_bij ( fun x _ => ⟨ x.val - r, by
+    have hxge : r ≤ x.val := by
+      exact le_of_not_gt (by simpa [p] using x.property)
+    have hxlt : x.val < (generatorsList r).length := x.1.isLt
+    have hlen : (generatorsList r).length = 2 * r := generatorsList_length r
+    have hxlt' : x.val < 2 * r := by simpa [hlen] using hxlt
+    omega⟩ ) _ _ _ _ <;> simp +decide;
+  · exact fun a ha b hb hab => Fin.ext <| by linarith [ Nat.sub_add_cancel ha, Nat.sub_add_cancel hb ] ;
+  · intro b; use ⟨ r + b, by rw [ generatorsList_length ] ; linarith [ Fin.is_lt b ] ⟩ ; aesop;
+  · exact fun a ha => Or.inl <| congr_arg f <| Fin.ext <| by simp +decide [ Nat.add_sub_of_le ha ] ;
 
 /-- The check-matrix rows of the quantum Hamming generators are linearly independent. -/
 theorem rowsLinearIndependent_generatorsList :
