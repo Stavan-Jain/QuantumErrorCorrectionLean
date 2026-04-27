@@ -115,7 +115,7 @@ theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
       · exact ⟨ prev L x, by simp +decide [ next_prev ] ⟩);
     · have := prev_next L x; have := prev_next L y; aesop;
   generalize_proofs at *; (
-  simp_all +decide [ Finset.sum_add_distrib, mul_add, add_mul, Finset.mul_sum _ _ _, Finset.sum_mul _ _ _ ];
+  simp_all +decide [ Finset.sum_add_distrib, mul_add, add_mul ];
   simp +decide only [← Finset.sum_product'] ; ring!;)))
 
 /-- Bridge theorem placeholder between `∂₁` rank and cut-map rank. -/
@@ -130,19 +130,19 @@ theorem toric_rank_boundary1_eq_rank_cutMap :
   refine' fun x => ⟨ _, _ ⟩;
   refine' { toFun := fun c => ∑ e : EdgeIdx L, c e * x.val e, map_add' := _, map_smul' := _ };
   all_goals norm_num [ funext_iff, Finset.sum_add_distrib, mul_add, add_mul, mul_assoc, mul_left_comm, Finset.mul_sum _ _ _ ];
-  any_goals intros; ext; simp +decide [ Finset.mul_sum _ _ _, mul_assoc, mul_left_comm, Finset.sum_add_distrib ];
+  any_goals intros; ext; simp +decide [ Finset.mul_sum _ _ _ ];
   all_goals norm_num [ Function.Injective, Function.Surjective ];
   · obtain ⟨ y, hy ⟩ := x.2;
     refine' ⟨ _, _ ⟩;
     exact ∑ v : VtxIdx L, y v • ( LinearMap.proj v );
-    ext c; simp +decide [ ← hy, toricBoundary1_cutMap_transpose ] ;
+    ext c; simp +decide [ ← hy ] ;
     convert toricBoundary1_cutMap_transpose L ( Pi.single c 1 ) y using 1;
     ac_rfl;
   · intro a b h; ext x; replace h := congr_fun h ( fun y => if y = x then 1 else 0 ) ; aesop;
   · intro a;
     refine' ⟨ _, ⟨ _, rfl ⟩, _ ⟩;
     exact fun v => a ( fun u => if u = v then 1 else 0 );
-    ext c; simp +decide [ toricBoundary1_cutMap_transpose ] ;
+    ext c; simp +decide ;
     convert toricBoundary1_cutMap_transpose L ( Pi.single c 1 ) ( fun v => a fun u => if u = v then 1 else 0 ) |> Eq.symm using 1;
     convert a.pi_apply_eq_sum_univ _ using 1;
     simp +decide [ eq_comm, mul_comm ]
@@ -234,7 +234,46 @@ theorem toric_finrank_cycles :
 /-- Kernel-dimension placeholder for `∂₂`. -/
 theorem toric_finrank_ker_boundary2_eq_one :
     Module.finrank (ZMod 2) (LinearMap.ker (toricBoundary2 (L := L))) = 1 := by
-  sorry
+  have h_span : ∀ f ∈ LinearMap.ker (toricBoundary2 (L := L)), ∃ c : ZMod 2, f = fun _ => c := by
+    intro f hf
+    have h_const : ∀ x y, f (x, next L y) = f (x, y) := by
+      intro x y; have := congr_fun hf ( EdgeIdx.h x ( next L y ) ) ; simp_all +decide [ toricBoundary2 ] ;
+      rw [ eq_neg_of_add_eq_zero_left this, neg_eq_of_add_eq_zero_right ( show f ( x, y ) + f ( x, y ) = 0 from by rw [ ← two_smul ( ZMod 2 ) _ ] ; simp +decide ) ];
+    -- By induction on $y$, we can show that $f(x, y) = f(x, 0)$ for all $x$ and $y$.
+    have h_ind : ∀ x y, f (x, y) = f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) := by
+      intro x y; induction' y with y ih;
+      induction' y with y ih;
+      · rfl;
+      · convert h_const x ⟨ y, by linarith ⟩ using 1;
+        · congr;
+          norm_num [ Fin.val_add, Nat.mod_eq_of_lt ih ];
+        · exact Eq.symm ( by solve_by_elim [ Nat.lt_of_succ_lt ] );
+    have h_const_x : ∀ x, f (next L x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) = f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) := by
+      intro x
+      have h_eq : f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) + f (prev L x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) = 0 := by
+        convert congr_arg ( fun g => g ( EdgeIdx.v x ⟨ 0, by linarith [ Fact.out ( p := 0 < L ) ] ⟩ ) ) hf using 1;
+      have h_eq : f (next L x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) + f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) = 0 := by
+        have := hf; simp_all +decide [ toricBoundary2 ] ;
+        have := congr_fun hf ( EdgeIdx.v ( next L x ) ⟨ 0, by linarith [ Fact.out ( p := 0 < L ) ] ⟩ ) ; simp +decide at this;
+        exact this;
+      grind;
+    -- By induction on $x$, we can show that $f(x, 0) = f(0, 0)$ for all $x$.
+    have h_ind_x : ∀ x, f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) = f (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) := by
+      intro x
+      induction' x with x ih;
+      induction' x with x ih;
+      · rfl;
+      · convert h_const_x ⟨ x, by linarith ⟩ using 1;
+        · exact Fin.ext ( by simp +decide [ next, Nat.mod_eq_of_lt ih ] );
+        · exact Eq.symm ( by solve_by_elim [ Nat.lt_of_succ_lt ] );
+    exact ⟨ f ( ⟨ 0, by linarith [ Fact.out ( p := 0 < L ) ] ⟩, ⟨ 0, by linarith [ Fact.out ( p := 0 < L ) ] ⟩ ), funext fun x => by aesop ⟩;
+  refine' finrank_eq_one_iff'.mpr _;
+  refine' ⟨ ⟨ fun _ => 1, _ ⟩, _, _ ⟩ <;> norm_num;
+  · ext e; cases e <;> simp +decide [ toricBoundary2 ] ;
+    · grind;
+    · grind +qlia;
+  · exact fun h => by simpa using congr_fun h ( ⟨ 0, Fact.out ⟩, ⟨ 0, Fact.out ⟩ ) ;
+  · intro f hf; obtain ⟨ c, rfl ⟩ := h_span f hf; exact ⟨ c, by ext; simp +decide ⟩ ;
 
 /-- Target boundary-space dimension formula. -/
 theorem toric_finrank_boundaries :
