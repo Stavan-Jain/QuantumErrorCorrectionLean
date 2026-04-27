@@ -78,16 +78,122 @@ noncomputable def toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L := by
     ext e
     cases e <;> simp [mul_add]
 
+/-
+The pairing ⟨∂₁ c, s⟩ = ⟨c, cutMap s⟩, showing ∂₁ and cutMap are transposes.
+-/
+set_option maxHeartbeats 400000 in
+theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
+    ∑ v : VtxIdx L, toricBoundary1 (L := L) c v * s v =
+    ∑ e : EdgeIdx L, c e * toricVertexCutMap (L := L) s e := by
+  -- Expand both sides using the definitions. The LHS is ∑_{(x,y)} (c(h x y) + c(h (prev x) y) + c(v x y) + c(v x (prev y))) * s(x,y).
+  have h_expand_lhs : ∑ v : Fin L × Fin L, (toricBoundary1 L c v) * s v = ∑ v : Fin L × Fin L, (c (EdgeIdx.h v.1 v.2) + c (EdgeIdx.h (prev L v.1) v.2) + c (EdgeIdx.v v.1 v.2) + c (EdgeIdx.v v.1 (prev L v.2))) * s v := by
+    rfl
+  generalize_proofs at *; (
+  have h_expand_rhs : ∑ e : EdgeIdx L, c e * (toricVertexCutMap L s e) = ∑ x : Fin L, ∑ y : Fin L, (c (EdgeIdx.h x y) * (s (x, y) + s (next L x, y)) + c (EdgeIdx.v x y) * (s (x, y) + s (x, next L y))) := by
+    rw [ ← Finset.sum_product' ];
+    rw [ ← Finset.sum_subset ( Finset.subset_univ ( Finset.image ( fun x : Fin L × Fin L => EdgeIdx.h x.1 x.2 ) ( Finset.univ ×ˢ Finset.univ ) ∪ Finset.image ( fun x : Fin L × Fin L => EdgeIdx.v x.1 x.2 ) ( Finset.univ ×ˢ Finset.univ ) ) ) ];
+    · rw [ Finset.sum_union ];
+      · rw [ Finset.sum_image, Finset.sum_image ] <;> simp +decide [ Finset.sum_add_distrib ];
+        · rfl;
+      · simp +decide [ Finset.disjoint_left ];
+        aesop;
+    · intro x hx hx'; rcases x with ( _ | _ ) <;> simp +decide at hx' ⊢;
+  generalize_proofs at *; (
+  -- By reindexing the sums, we can see that they are equal.
+  have h_reindex : ∑ x : Fin L, ∑ y : Fin L, c (EdgeIdx.h x y) * s (next L x, y) = ∑ x : Fin L, ∑ y : Fin L, c (EdgeIdx.h (prev L x) y) * s (x, y) ∧ ∑ x : Fin L, ∑ y : Fin L, c (EdgeIdx.v x y) * s (x, next L y) = ∑ x : Fin L, ∑ y : Fin L, c (EdgeIdx.v x (prev L y)) * s (x, y) := by
+    constructor <;> rw [ ← Equiv.sum_comp ( Equiv.ofBijective ( prev L ) ⟨ fun x y hxy => ?_, fun x => ?_ ⟩ ) ] <;> norm_num [ add_comm, add_left_comm, add_assoc ];
+    · have := prev_next L x; have := prev_next L y; aesop;
+    · -- By reindexing the sums, we can see that they are equal. Specifically, we can use the fact that `prev L` is a bijection.
+      have h_reindex : ∀ x : Fin L, ∑ y : Fin L, c (EdgeIdx.v x (prev L y)) * s (x, y) = ∑ y : Fin L, c (EdgeIdx.v x y) * s (x, next L y) := by
+        intro x; rw [ ← Equiv.sum_comp ( Equiv.ofBijective ( fun y : Fin L => next L y ) ⟨ fun x y hxy => ?_, fun x => ?_ ⟩ ) ] ; norm_num [ prev_next, next_prev ] ;
+        · exact prev_next L x ▸ prev_next L y ▸ congr_arg ( fun z => prev L z ) hxy ▸ rfl;
+        · exact ⟨ prev L x, by simp +decide [ next_prev ] ⟩
+      generalize_proofs at *; (
+      rw [ ← Equiv.sum_comp ( Equiv.ofBijective ( fun x : Fin L => next L x ) ⟨ fun x y hxy => ?_, fun x => ?_ ⟩ ) ] <;> norm_num [ next_prev, prev_next ];
+      · exact Finset.sum_congr rfl fun _ _ => h_reindex _ ▸ rfl;
+      · exact prev_next L x ▸ prev_next L y ▸ congr_arg ( fun z => prev L z ) hxy ▸ rfl;
+      · exact ⟨ prev L x, by simp +decide [ next_prev ] ⟩);
+    · have := prev_next L x; have := prev_next L y; aesop;
+  generalize_proofs at *; (
+  simp_all +decide [ Finset.sum_add_distrib, mul_add, add_mul, Finset.mul_sum _ _ _, Finset.sum_mul _ _ _ ];
+  simp +decide only [← Finset.sum_product'] ; ring!;)))
+
 /-- Bridge theorem placeholder between `∂₁` rank and cut-map rank. -/
 theorem toric_rank_boundary1_eq_rank_cutMap :
     Module.finrank (ZMod 2) (LinearMap.range (toricBoundary1 (L := L))) =
       Module.finrank (ZMod 2) (LinearMap.range (toricVertexCutMap (L := L))) := by
-  sorry
+  rw [ ← LinearMap.finrank_range_dualMap_eq_finrank_range ];
+  fapply LinearEquiv.finrank_eq;
+  symm;
+  refine' ( LinearEquiv.ofBijective _ ⟨ _, _ ⟩ );
+  refine' { .. };
+  refine' fun x => ⟨ _, _ ⟩;
+  refine' { toFun := fun c => ∑ e : EdgeIdx L, c e * x.val e, map_add' := _, map_smul' := _ };
+  all_goals norm_num [ funext_iff, Finset.sum_add_distrib, mul_add, add_mul, mul_assoc, mul_left_comm, Finset.mul_sum _ _ _ ];
+  any_goals intros; ext; simp +decide [ Finset.mul_sum _ _ _, mul_assoc, mul_left_comm, Finset.sum_add_distrib ];
+  all_goals norm_num [ Function.Injective, Function.Surjective ];
+  · obtain ⟨ y, hy ⟩ := x.2;
+    refine' ⟨ _, _ ⟩;
+    exact ∑ v : VtxIdx L, y v • ( LinearMap.proj v );
+    ext c; simp +decide [ ← hy, toricBoundary1_cutMap_transpose ] ;
+    convert toricBoundary1_cutMap_transpose L ( Pi.single c 1 ) y using 1;
+    ac_rfl;
+  · intro a b h; ext x; replace h := congr_fun h ( fun y => if y = x then 1 else 0 ) ; aesop;
+  · intro a;
+    refine' ⟨ _, ⟨ _, rfl ⟩, _ ⟩;
+    exact fun v => a ( fun u => if u = v then 1 else 0 );
+    ext c; simp +decide [ toricBoundary1_cutMap_transpose ] ;
+    convert toricBoundary1_cutMap_transpose L ( Pi.single c 1 ) ( fun v => a fun u => if u = v then 1 else 0 ) |> Eq.symm using 1;
+    convert a.pi_apply_eq_sum_univ _ using 1;
+    simp +decide [ eq_comm, mul_comm ]
 
 /-- Kernel-dimension placeholder for the cut-map connectivity argument. -/
 theorem toric_finrank_ker_cutMap_eq_one :
     Module.finrank (ZMod 2) (LinearMap.ker (toricVertexCutMap (L := L))) = 1 := by
-  sorry
+  have h_span : ∀ s : C0 L, s ∈ LinearMap.ker (toricVertexCutMap (L := L)) ↔ ∃ c : ZMod 2, s = fun _ => c := by
+    intro s
+    constructor
+    intro hs
+    have h_const : ∀ x y : Fin L, s (x, y) = s (next L x, y) ∧ s (x, y) = s (x, next L y) := by
+      intro x y
+      have h_eq : s (x, y) + s (next L x, y) = 0 ∧ s (x, y) + s (x, next L y) = 0 := by
+        exact ⟨ by simpa using congr_fun hs ( EdgeIdx.h x y ), by simpa using congr_fun hs ( EdgeIdx.v x y ) ⟩;
+      grind +splitImp
+    have h_const_val : ∃ c : ZMod 2, ∀ x y : Fin L, s (x, y) = c := by
+      use s (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩);
+      intro x y
+      have h_const_x : ∀ x : Fin L, s (x, y) = s (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, y) := by
+        intro x
+        have h_const_x_step : ∀ k : ℕ, s (⟨(k % L), Nat.mod_lt _ (Fact.out (p := 0 < L))⟩, y) = s (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, y) := by
+          intro k
+          induction' k with k ih
+          all_goals generalize_proofs at *;
+          · norm_num [ Nat.mod_eq_of_lt ];
+          · specialize h_const ⟨ k % L, by linarith ⟩ y;
+            unfold next at h_const; aesop;
+        simpa [ Nat.mod_eq_of_lt x.2 ] using h_const_x_step x.1
+      have h_const_y : ∀ y : Fin L, s (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, y) = s (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) := by
+        intro y
+        induction' y with y ih;
+        induction' y with y ih;
+        · rfl;
+        · specialize h_const ⟨ 0, by linarith [ Fact.out ( p := 0 < L ) ] ⟩ ⟨ y, by linarith [ Fact.out ( p := 0 < L ) ] ⟩;
+          simp_all +decide [ next ];
+          simp_all +decide [ Nat.mod_eq_of_lt ( by linarith : y + 1 < L ) ];
+          grind
+      exact h_const_x x ▸ h_const_y y ▸ rfl
+    obtain ⟨c, hc⟩ := h_const_val
+    use c
+    funext p
+    simp [hc];
+    rintro ⟨ c, rfl ⟩ ; ext e; cases e <;> simp +decide ;
+    · exact show c + c = 0 from by fin_cases c <;> rfl;
+    · exact show ( c + c : ZMod 2 ) = 0 from by have := Fin.exists_fin_two.mp ⟨ c, rfl ⟩ ; aesop;
+  rw [ show LinearMap.ker ( toricVertexCutMap L ) = Submodule.span ( ZMod 2 ) { fun _ => 1 } from _ ];
+  · rw [ finrank_span_singleton ] ; norm_num;
+    exact fun h => by simpa using congr_fun h ( ⟨ 0, Fact.out ⟩, ⟨ 0, Fact.out ⟩ ) ;
+  · ext s; specialize h_span s; simp_all +decide [ Submodule.mem_span_singleton ] ;
+    exact ⟨ fun ⟨ c, hc ⟩ => ⟨ c, hc ▸ by ext; simp +decide ⟩, fun ⟨ c, hc ⟩ => ⟨ c, hc ▸ by ext; simp +decide ⟩ ⟩
 
 /-- Target rank formula for `∂₁`. -/
 theorem toric_rank_boundary1 :
