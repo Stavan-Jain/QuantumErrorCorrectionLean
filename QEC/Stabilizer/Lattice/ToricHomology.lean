@@ -24,7 +24,7 @@ theorem toricBoundaries_le_toricCycles :
   exact hcomp
 
 /-- First homology `H1 = Z1/B1` for the toric chain complex over `ZMod 2`. -/
-def toricH1 : Type :=
+abbrev toricH1 : Type :=
   toricCycles (L := L) ⧸ Submodule.comap (toricCycles (L := L)).subtype
     (toricBoundaries (L := L))
 
