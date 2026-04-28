@@ -92,6 +92,23 @@ lemma anticommutesAt_iff_mem_support_both_of_ZXType
     · simp [anticommutesAt, NQubitPauliOperator.support, hpZ, hqI]
     · simp [anticommutesAt, NQubitPauliOperator.support, hpZ, hqX]
 
+/-- For X/Z-typed operator tensors, `anticommutesAt` is equivalent to both positions being in support. -/
+lemma anticommutesAt_iff_mem_support_both_of_XZType
+    {p q : NQubitPauliOperator n}
+    (hp : NQubitPauliOperator.IsXType p)
+    (hq : NQubitPauliOperator.IsZType q)
+    (i : Fin n) :
+    anticommutesAt (n := n) p q i ↔ i ∈ p.support ∧ i ∈ q.support := by
+  have hp' : p i = PauliOperator.I ∨ p i = PauliOperator.X := hp i
+  have hq' : q i = PauliOperator.I ∨ q i = PauliOperator.Z := hq i
+  rcases hp' with hpI | hpX
+  · rcases hq' with hqI | hqZ
+    · simp [anticommutesAt, NQubitPauliOperator.support, hpI, hqI]
+    · simp [anticommutesAt, NQubitPauliOperator.support, hpI, hqZ]
+  · rcases hq' with hqI | hqZ
+    · simp [anticommutesAt, NQubitPauliOperator.support, hpX, hqI]
+    · simp [anticommutesAt, NQubitPauliOperator.support, hpX, hqZ]
+
 end NQubitPauliGroupElement
 end Quantum
 

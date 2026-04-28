@@ -28,12 +28,12 @@ import QEC.Stabilizer.Codes.ToricCode8
 Formalizes the parametric toric code for an L×L lattice:
 - `numQubits L = 2·L·L` physical qubits placed on edges
 - Horizontal edges `H(x,y)` and vertical edges `V(x,y)` with periodic boundaries
-- Vertex stabilizers (X-type) and face stabilizers (Z-type)
+- Face stabilizers (X-type) and vertex stabilizers (Z-type)
 - All generators as lists for use in Steps 2–4
 
-Convention note: this file uses vertex=X and face=Z checks. Many expositions use the
-swapped convention (vertex=Z, face=X); both are equivalent via global Hadamard
-(X ↔ Z on every qubit), so code parameters and distance statements are unchanged.
+Convention note: this file uses face=X and vertex=Z checks, matching the convention
+in `distance_proof.md`. Some expositions use the swapped convention (face=Z, vertex=X);
+both are equivalent via global Hadamard (X ↔ Z on every qubit).
 
 Step 1: qubit–edge bijection, generator definitions, and consistency check at L=2
 against the concrete `ToricCode8`.
@@ -138,27 +138,27 @@ abbrev prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L := Stabilizer.Lattice.p
 ## 3. Parametric toric stabilizer generators
 -/
 
-/-- Vertex stabilizer at `(x,y)`: X on the four incident edges. -/
+/-- Vertex stabilizer at `(x,y)`: Z on the four incident edges. -/
 def vertexStab (L : ℕ) [Fact (0 < L)] (x y : Fin L) : NQubitPauliGroupElement (numQubits L) :=
-  ⟨0, (((NQubitPauliOperator.identity (numQubits L)).set (hEdge L x y) PauliOperator.X
-    |>.set (hEdge L (prev L x) y) PauliOperator.X
-    |>.set (vEdge L x y) PauliOperator.X)
-    |>.set (vEdge L x (prev L y)) PauliOperator.X)⟩
-
-/-- Face stabilizer at `(x,y)`: Z on the four boundary edges. -/
-def faceStab (L : ℕ) [Fact (0 < L)] (x y : Fin L) : NQubitPauliGroupElement (numQubits L) :=
   ⟨0, (((NQubitPauliOperator.identity (numQubits L)).set (hEdge L x y) PauliOperator.Z
-    |>.set (hEdge L x (next L y)) PauliOperator.Z
+    |>.set (hEdge L (prev L x) y) PauliOperator.Z
     |>.set (vEdge L x y) PauliOperator.Z)
-    |>.set (vEdge L (next L x) y) PauliOperator.Z)⟩
+    |>.set (vEdge L x (prev L y)) PauliOperator.Z)⟩
 
-/-- X-type generator family indexed by vertices. -/
+/-- Face stabilizer at `(x,y)`: X on the four boundary edges. -/
+def faceStab (L : ℕ) [Fact (0 < L)] (x y : Fin L) : NQubitPauliGroupElement (numQubits L) :=
+  ⟨0, (((NQubitPauliOperator.identity (numQubits L)).set (hEdge L x y) PauliOperator.X
+    |>.set (hEdge L x (next L y)) PauliOperator.X
+    |>.set (vEdge L x y) PauliOperator.X)
+    |>.set (vEdge L (next L x) y) PauliOperator.X)⟩
+
+/-- X-type generator family indexed by faces. -/
 def XGenerators (L : ℕ) [Fact (0 < L)] : Set (NQubitPauliGroupElement (numQubits L)) :=
-  Set.range (fun p : Fin L × Fin L => vertexStab L p.1 p.2)
-
-/-- Z-type generator family indexed by faces. -/
-def ZGenerators (L : ℕ) [Fact (0 < L)] : Set (NQubitPauliGroupElement (numQubits L)) :=
   Set.range (fun p : Fin L × Fin L => faceStab L p.1 p.2)
+
+/-- Z-type generator family indexed by vertices. -/
+def ZGenerators (L : ℕ) [Fact (0 < L)] : Set (NQubitPauliGroupElement (numQubits L)) :=
+  Set.range (fun p : Fin L × Fin L => vertexStab L p.1 p.2)
 
 /-- Full toric generator set. -/
 def generators (L : ℕ) [Fact (0 < L)] : Set (NQubitPauliGroupElement (numQubits L)) :=
@@ -174,11 +174,11 @@ lemma mem_coords (L : ℕ) (p : Fin L × Fin L) : p ∈ coords L := by
 
 /-- Z generators as a canonical list. -/
 def generatorsListZ (L : ℕ) [Fact (0 < L)] : List (NQubitPauliGroupElement (numQubits L)) :=
-  (coords L).map (fun p => faceStab L p.1 p.2)
+  (coords L).map (fun p => vertexStab L p.1 p.2)
 
 /-- X generators as a canonical list. -/
 def generatorsListX (L : ℕ) [Fact (0 < L)] : List (NQubitPauliGroupElement (numQubits L)) :=
-  (coords L).map (fun p => vertexStab L p.1 p.2)
+  (coords L).map (fun p => faceStab L p.1 p.2)
 
 /-- Full generator list (all Z generators then all X generators). -/
 def generatorsList (L : ℕ) [Fact (0 < L)] : List (NQubitPauliGroupElement (numQubits L)) :=
@@ -189,14 +189,14 @@ lemma listToSet_generatorsListZ (L : ℕ) [Fact (0 < L)] :
     NQubitPauliGroupElement.listToSet (generatorsListZ L) = ZGenerators L := by
   simpa [generatorsListZ, coords, ZGenerators] using
     (GeneratorListLemmas.listToSet_map_product_finRange_eq_range
-      (n := numQubits L) (L := L) (f := fun p => faceStab L p.1 p.2))
+      (n := numQubits L) (L := L) (f := fun p => vertexStab L p.1 p.2))
 
 /-- The X-generator list has exactly the X-generator set as elements. -/
 lemma listToSet_generatorsListX (L : ℕ) [Fact (0 < L)] :
     NQubitPauliGroupElement.listToSet (generatorsListX L) = XGenerators L := by
   simpa [generatorsListX, coords, XGenerators] using
     (GeneratorListLemmas.listToSet_map_product_finRange_eq_range
-      (n := numQubits L) (L := L) (f := fun p => vertexStab L p.1 p.2))
+      (n := numQubits L) (L := L) (f := fun p => faceStab L p.1 p.2))
 
 /-- The full generator list has exactly the union generator set as elements. -/
 lemma listToSet_generatorsList (L : ℕ) [Fact (0 < L)] :
@@ -237,46 +237,46 @@ private lemma XType_commutes {n : ℕ} {g h : NQubitPauliGroupElement n}
     g * h = h * g := by
   exact CSSCommutationLemmas.XType_commutes hg hh
 
-/-- Every face stabilizer is Z-type. -/
-lemma faceStab_is_ZType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
-    NQubitPauliGroupElement.IsZTypeElement (faceStab L x y) := by
-  refine ⟨rfl, ?_⟩
-  let op0 : NQubitPauliOperator (numQubits L) := NQubitPauliOperator.identity (numQubits L)
-  let op1 : NQubitPauliOperator (numQubits L) := op0.set (hEdge L x y) PauliOperator.Z
-  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L x (next L y)) PauliOperator.Z
-  let op3 : NQubitPauliOperator (numQubits L) := op2.set (vEdge L x y) PauliOperator.Z
-  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L (next L x) y) PauliOperator.Z
-  have h0 : NQubitPauliOperator.IsZType op0 := by
-    simpa [op0] using (NQubitPauliOperator.IsZType_identity (n := numQubits L))
-  have h1 : NQubitPauliOperator.IsZType op1 := by
-    simpa [op1] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op0 (hEdge L x y) h0
-  have h2 : NQubitPauliOperator.IsZType op2 := by
-    simpa [op2] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op1 (hEdge L x (next L y)) h1
-  have h3 : NQubitPauliOperator.IsZType op3 := by
-    simpa [op3] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op2 (vEdge L x y) h2
-  have h4 : NQubitPauliOperator.IsZType op4 := by
-    simpa [op4] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op3 (vEdge L (next L x) y) h3
-  simpa [faceStab, op0, op1, op2, op3, op4] using h4
-
-/-- Every vertex stabilizer is X-type. -/
-lemma vertexStab_is_XType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
-    NQubitPauliGroupElement.IsXTypeElement (vertexStab L x y) := by
+/-- Every face stabilizer is X-type. -/
+lemma faceStab_is_XType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
+    NQubitPauliGroupElement.IsXTypeElement (faceStab L x y) := by
   refine ⟨rfl, ?_⟩
   let op0 : NQubitPauliOperator (numQubits L) := NQubitPauliOperator.identity (numQubits L)
   let op1 : NQubitPauliOperator (numQubits L) := op0.set (hEdge L x y) PauliOperator.X
-  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L (prev L x) y) PauliOperator.X
+  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L x (next L y)) PauliOperator.X
   let op3 : NQubitPauliOperator (numQubits L) := op2.set (vEdge L x y) PauliOperator.X
-  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L x (prev L y)) PauliOperator.X
+  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L (next L x) y) PauliOperator.X
   have h0 : NQubitPauliOperator.IsXType op0 := by
     simpa [op0] using (NQubitPauliOperator.IsXType_identity (n := numQubits L))
   have h1 : NQubitPauliOperator.IsXType op1 := by
     simpa [op1] using NQubitPauliOperator.IsXType_set_X_of_IsXType op0 (hEdge L x y) h0
   have h2 : NQubitPauliOperator.IsXType op2 := by
-    simpa [op2] using NQubitPauliOperator.IsXType_set_X_of_IsXType op1 (hEdge L (prev L x) y) h1
+    simpa [op2] using NQubitPauliOperator.IsXType_set_X_of_IsXType op1 (hEdge L x (next L y)) h1
   have h3 : NQubitPauliOperator.IsXType op3 := by
     simpa [op3] using NQubitPauliOperator.IsXType_set_X_of_IsXType op2 (vEdge L x y) h2
   have h4 : NQubitPauliOperator.IsXType op4 := by
-    simpa [op4] using NQubitPauliOperator.IsXType_set_X_of_IsXType op3 (vEdge L x (prev L y)) h3
+    simpa [op4] using NQubitPauliOperator.IsXType_set_X_of_IsXType op3 (vEdge L (next L x) y) h3
+  simpa [faceStab, op0, op1, op2, op3, op4] using h4
+
+/-- Every vertex stabilizer is Z-type. -/
+lemma vertexStab_is_ZType (L : ℕ) [Fact (0 < L)] (x y : Fin L) :
+    NQubitPauliGroupElement.IsZTypeElement (vertexStab L x y) := by
+  refine ⟨rfl, ?_⟩
+  let op0 : NQubitPauliOperator (numQubits L) := NQubitPauliOperator.identity (numQubits L)
+  let op1 : NQubitPauliOperator (numQubits L) := op0.set (hEdge L x y) PauliOperator.Z
+  let op2 : NQubitPauliOperator (numQubits L) := op1.set (hEdge L (prev L x) y) PauliOperator.Z
+  let op3 : NQubitPauliOperator (numQubits L) := op2.set (vEdge L x y) PauliOperator.Z
+  let op4 : NQubitPauliOperator (numQubits L) := op3.set (vEdge L x (prev L y)) PauliOperator.Z
+  have h0 : NQubitPauliOperator.IsZType op0 := by
+    simpa [op0] using (NQubitPauliOperator.IsZType_identity (n := numQubits L))
+  have h1 : NQubitPauliOperator.IsZType op1 := by
+    simpa [op1] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op0 (hEdge L x y) h0
+  have h2 : NQubitPauliOperator.IsZType op2 := by
+    simpa [op2] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op1 (hEdge L (prev L x) y) h1
+  have h3 : NQubitPauliOperator.IsZType op3 := by
+    simpa [op3] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op2 (vEdge L x y) h2
+  have h4 : NQubitPauliOperator.IsZType op4 := by
+    simpa [op4] using NQubitPauliOperator.IsZType_set_Z_of_IsZType op3 (vEdge L x (prev L y)) h3
   simpa [vertexStab, op0, op1, op2, op3, op4] using h4
 
 /-- All Z generators are Z-type. -/
@@ -284,14 +284,14 @@ lemma ZGenerators_are_ZType (L : ℕ) [Fact (0 < L)] :
     ∀ g, g ∈ ZGenerators L → NQubitPauliGroupElement.IsZTypeElement g := by
   intro g hg
   rcases hg with ⟨⟨x, y⟩, rfl⟩
-  exact faceStab_is_ZType L x y
+  exact vertexStab_is_ZType L x y
 
 /-- All X generators are X-type. -/
 lemma XGenerators_are_XType (L : ℕ) [Fact (0 < L)] :
     ∀ g, g ∈ XGenerators L → NQubitPauliGroupElement.IsXTypeElement g := by
   intro g hg
   rcases hg with ⟨⟨x, y⟩, rfl⟩
-  exact vertexStab_is_XType L x y
+  exact faceStab_is_XType L x y
 
 /-- Any two Z generators commute. -/
 lemma ZGenerators_commute (L : ℕ) [Fact (0 < L)] :
@@ -379,16 +379,16 @@ lemma anticommutesAt_face_vertex_iff_mem_support_both
     NQubitPauliGroupElement.anticommutesAt
       (faceStab L xf yf).operators (vertexStab L xv yv).operators i
       ↔ i ∈ (faceStab L xf yf).operators.support ∧ i ∈ (vertexStab L xv yv).operators.support := by
-  exact NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_ZXType
-    (faceStab_is_ZType L xf yf).2 (vertexStab_is_XType L xv yv).2 i
+  exact NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_XZType
+    (faceStab_is_XType L xf yf).2 (vertexStab_is_ZType L xv yv).2 i
 
 /-- Any Z generator commutes with any X generator. -/
 lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
     ∀ z ∈ ZGenerators L, ∀ x ∈ XGenerators L, z * x = x * z := by
   classical
   intro z hz x hx
-  rcases hz with ⟨⟨xf, yf⟩, rfl⟩
-  rcases hx with ⟨⟨xv, yv⟩, rfl⟩
+  rcases hz with ⟨⟨xv, yv⟩, rfl⟩
+  rcases hx with ⟨⟨xf, yf⟩, rfl⟩
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)⟩
   let C : Prop := (xv = xf ∨ xv = next L xf) ∧ (yv = yf ∨ yv = next L yf)
   let hh : Fin (numQubits L) := hEdge L xf yv
@@ -498,7 +498,7 @@ lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
   · have hfilter :
       (Finset.univ.filter
             (NQubitPauliGroupElement.anticommutesAt
-              (faceStab L xf yf).operators (vertexStab L xv yv).operators)) =
+              (vertexStab L xv yv).operators (faceStab L xf yf).operators)) =
         ({hh, vv} : Finset (Fin (numQubits L))) := by
       ext i
       constructor
@@ -506,9 +506,18 @@ lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
         have hanti : C ∧ (i = hh ∨ i = vv) := by
           have hi' :
               NQubitPauliGroupElement.anticommutesAt
-                (faceStab L xf yf).operators (vertexStab L xv yv).operators i :=
+                (vertexStab L xv yv).operators (faceStab L xf yf).operators i :=
             (Finset.mem_filter.mp hi).2
-          rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i] at hi'
+          have hi'' :
+              i ∈ (faceStab L xf yf).operators.support ∧
+                i ∈ (vertexStab L xv yv).operators.support := by
+            have hiZX :
+                i ∈ (vertexStab L xv yv).operators.support ∧
+                  i ∈ (faceStab L xf yf).operators.support := by
+              exact (NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_ZXType
+                (vertexStab_is_ZType L xv yv).2 (faceStab_is_XType L xf yf).2 i).1 hi'
+            exact ⟨hiZX.2, hiZX.1⟩
+          exact (hboth i).1 hi''
         simpa [Finset.mem_insert, Finset.mem_singleton] using hanti.2
       · intro hi
         refine Finset.mem_filter.mpr ?_
@@ -516,7 +525,14 @@ lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
         have hi' : i = hh ∨ i = vv := by
           simpa [Finset.mem_insert, Finset.mem_singleton] using hi
         have hanti : C ∧ (i = hh ∨ i = vv) := ⟨hC, hi'⟩
-        rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i]
+        have hi'' :
+            i ∈ (faceStab L xf yf).operators.support ∧
+              i ∈ (vertexStab L xv yv).operators.support := (hboth i).2 hanti
+        have hiZX :
+            i ∈ (vertexStab L xv yv).operators.support ∧
+              i ∈ (faceStab L xf yf).operators.support := ⟨hi''.2, hi''.1⟩
+        exact (NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_ZXType
+          (vertexStab_is_ZType L xv yv).2 (faceStab_is_XType L xf yf).2 i).2 hiZX
     rw [hfilter]
     have hhv : hh ≠ vv := by
       simpa [hh, vv] using (hEdge_ne_vEdge L xf yv xv yf)
@@ -527,7 +543,7 @@ lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
   · have hfilter :
       (Finset.univ.filter
             (NQubitPauliGroupElement.anticommutesAt
-              (faceStab L xf yf).operators (vertexStab L xv yv).operators)) =
+              (vertexStab L xv yv).operators (faceStab L xf yf).operators)) =
         (∅ : Finset (Fin (numQubits L))) := by
       ext i
       constructor
@@ -536,9 +552,18 @@ lemma ZGenerators_commute_XGenerators (L : ℕ) [Fact (2 ≤ L)] :
         have hanti : C ∧ (i = hh ∨ i = vv) := by
           have hi' :
               NQubitPauliGroupElement.anticommutesAt
-                (faceStab L xf yf).operators (vertexStab L xv yv).operators i :=
+                (vertexStab L xv yv).operators (faceStab L xf yf).operators i :=
             (Finset.mem_filter.mp hi).2
-          rwa [anticommutesAt_face_vertex_iff_mem_support_both, hboth i] at hi'
+          have hi'' :
+              i ∈ (faceStab L xf yf).operators.support ∧
+                i ∈ (vertexStab L xv yv).operators.support := by
+            have hiZX :
+                i ∈ (vertexStab L xv yv).operators.support ∧
+                  i ∈ (faceStab L xf yf).operators.support := by
+              exact (NQubitPauliGroupElement.anticommutesAt_iff_mem_support_both_of_ZXType
+                (vertexStab_is_ZType L xv yv).2 (faceStab_is_XType L xf yf).2 i).1 hi'
+            exact ⟨hiZX.2, hiZX.1⟩
+          exact (hboth i).1 hi''
         exact hC hanti.1
       · intro hi
         exact False.elim (Finset.notMem_empty i hi)
@@ -660,13 +685,13 @@ lemma vEdge_L2_vals :
     ((vEdge 2 0 0).val = 4) ∧ ((vEdge 2 1 0).val = 5) ∧
     ((vEdge 2 0 1).val = 6) ∧ ((vEdge 2 1 1).val = 7) := by decide
 
-/-- At `L=2`, the face stabilizer at `(0,0)` has the same support as `ToricCode8.B00`. -/
+/-- At `L=2`, the face stabilizer at `(0,0)` has the same operators as `ToricCode8.B00`. -/
 lemma faceStab00_L2_support :
     (faceStab 2 0 0).operators = ToricCode8.B00.operators := by
   ext i
   fin_cases i <;> decide
 
-/-- At `L=2`, the vertex stabilizer at `(0,0)` has the same support as `ToricCode8.A00`. -/
+/-- At `L=2`, the vertex stabilizer at `(0,0)` has the same operators as `ToricCode8.A00`. -/
 lemma vertexStab00_L2_support :
     (vertexStab 2 0 0).operators = ToricCode8.A00.operators := by
   ext i

@@ -20,9 +20,12 @@ import QEC.Stabilizer.PauliGroup.NQubitOperator
 # [8, 2, 2] toric code
 
 Formalization of the [8, 2, 2] toric code: 8 physical qubits, 2 logical qubits, distance 2.
-Includes 8 standard generators (4 vertex X-type, 4 face Z-type), an independent subset of 6
+Includes 8 standard generators (4 vertex Z-type, 4 face X-type), an independent subset of 6
 generators, logical operators for both logical qubits, and proofs of commutation, anticommutation,
 and CSS structure. Constructs a `StabilizerCode 8 2` instance.
+
+Convention: face/plaquette checks are X-type and vertex/star checks are Z-type,
+matching the convention in `distance_proof.md`.
 -/
 
 namespace Quantum
@@ -31,57 +34,57 @@ open scoped BigOperators
 namespace StabilizerGroup
 namespace ToricCode8
 
-/-- Vertex operator A00: X on qubits {0, 1, 4, 6}. -/
+/-- Vertex operator A00: Z on qubits {0, 1, 4, 6}. -/
 def A00 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 1 PauliOperator.X).set 4
-    PauliOperator.X).set 6 PauliOperator.X⟩
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 1 PauliOperator.Z).set 4
+    PauliOperator.Z).set 6 PauliOperator.Z⟩
 
-/-- Vertex operator A01: X on qubits {0, 1, 5, 7}. -/
+/-- Vertex operator A01: Z on qubits {0, 1, 5, 7}. -/
 def A01 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 1 PauliOperator.X).set 5
-    PauliOperator.X).set 7 PauliOperator.X⟩
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 1 PauliOperator.Z).set 5
+    PauliOperator.Z).set 7 PauliOperator.Z⟩
 
-/-- Vertex operator A10: X on qubits {2, 3, 4, 6}. -/
+/-- Vertex operator A10: Z on qubits {2, 3, 4, 6}. -/
 def A10 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 2 PauliOperator.X).set 3 PauliOperator.X).set 4
-    PauliOperator.X).set 6 PauliOperator.X⟩
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 2 PauliOperator.Z).set 3 PauliOperator.Z).set 4
+    PauliOperator.Z).set 6 PauliOperator.Z⟩
 
-/-- Vertex operator A11: X on qubits {2, 3, 5, 7}. -/
+/-- Vertex operator A11: Z on qubits {2, 3, 5, 7}. -/
 def A11 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 2 PauliOperator.X).set 3 PauliOperator.X).set 5
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 2 PauliOperator.Z).set 3 PauliOperator.Z).set 5
+    PauliOperator.Z).set 7 PauliOperator.Z⟩
+
+/-- Face operator B00: X on qubits {0, 2, 4, 5}. -/
+def B00 : NQubitPauliGroupElement 8 :=
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 2 PauliOperator.X).set 4
+    PauliOperator.X).set 5 PauliOperator.X⟩
+
+/-- Face operator B01: X on qubits {1, 3, 4, 5}. -/
+def B01 : NQubitPauliGroupElement 8 :=
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 1 PauliOperator.X).set 3 PauliOperator.X).set 4
+    PauliOperator.X).set 5 PauliOperator.X⟩
+
+/-- Face operator B10: X on qubits {0, 2, 6, 7}. -/
+def B10 : NQubitPauliGroupElement 8 :=
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 2 PauliOperator.X).set 6
     PauliOperator.X).set 7 PauliOperator.X⟩
 
-/-- Face operator B00: Z on qubits {0, 2, 4, 5}. -/
-def B00 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 2 PauliOperator.Z).set 4
-    PauliOperator.Z).set 5 PauliOperator.Z⟩
-
-/-- Face operator B01: Z on qubits {1, 3, 4, 5}. -/
-def B01 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 1 PauliOperator.Z).set 3 PauliOperator.Z).set 4
-    PauliOperator.Z).set 5 PauliOperator.Z⟩
-
-/-- Face operator B10: Z on qubits {0, 2, 6, 7}. -/
-def B10 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 2 PauliOperator.Z).set 6
-    PauliOperator.Z).set 7 PauliOperator.Z⟩
-
-/-- Face operator B11: Z on qubits {1, 3, 6, 7}. -/
+/-- Face operator B11: X on qubits {1, 3, 6, 7}. -/
 def B11 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((((NQubitPauliOperator.identity 8).set 1 PauliOperator.Z).set 3 PauliOperator.Z).set 6
-    PauliOperator.Z).set 7 PauliOperator.Z⟩
+  ⟨0, ((((NQubitPauliOperator.identity 8).set 1 PauliOperator.X).set 3 PauliOperator.X).set 6
+    PauliOperator.X).set 7 PauliOperator.X⟩
 
-/-- The list of all 8 generators (4 Z-face, 4 X-vertex). -/
+/-- The list of all 8 generators (4 X-face, 4 Z-vertex). -/
 def generatorsList : List (NQubitPauliGroupElement 8) :=
   [B00, B01, B10, B11, A00, A01, A10, A11]
 
-/-- The set of Z-type (face) generators. -/
+/-- The set of Z-type (vertex) generators. -/
 def ZGenerators : Set (NQubitPauliGroupElement 8) :=
-  {B00, B01, B10, B11}
-
-/-- The set of X-type (vertex) generators. -/
-def XGenerators : Set (NQubitPauliGroupElement 8) :=
   {A00, A01, A10, A11}
+
+/-- The set of X-type (face) generators. -/
+def XGenerators : Set (NQubitPauliGroupElement 8) :=
+  {B00, B01, B10, B11}
 
 /-- The full generator set. -/
 def generators : Set (NQubitPauliGroupElement 8) :=
@@ -111,13 +114,13 @@ private lemma XType_commutes {g h : NQubitPauliGroupElement 8}
 lemma ZGenerators_are_ZType :
     ∀ g, g ∈ ZGenerators → NQubitPauliGroupElement.IsZTypeElement g := by
   unfold ZGenerators; simp +decide [NQubitPauliGroupElement.IsZTypeElement]
-  unfold NQubitPauliOperator.IsZType; simp +decide [B00, B01, B10, B11, PauliOperator.IsZType]
+  unfold NQubitPauliOperator.IsZType; simp +decide [A00, A01, A10, A11, PauliOperator.IsZType]
 
 /-- All X-generators are X-type elements. -/
 lemma XGenerators_are_XType :
     ∀ g, g ∈ XGenerators → NQubitPauliGroupElement.IsXTypeElement g := by
   unfold XGenerators; simp +decide [NQubitPauliGroupElement.IsXTypeElement]
-  unfold NQubitPauliOperator.IsXType; simp +decide [A00, A01, A10, A11, PauliOperator.IsXType]
+  unfold NQubitPauliOperator.IsXType; simp +decide [B00, B01, B10, B11, PauliOperator.IsXType]
 
 /-- All Z-generators commute with each other. -/
 lemma ZGenerators_commute :
@@ -165,21 +168,21 @@ theorem negIdentity_not_mem :
     CSS.negIdentity_not_mem_closure_union ZGenerators XGenerators
       ZGenerators_are_ZType XGenerators_are_XType ZGenerators_commute_XGenerators
 
-/-- Logical X₁: X on qubits {0, 2}. -/
+/-- Logical X₁: X on qubits {0, 1} (horizontal loop). -/
 def logicalX1 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 2 PauliOperator.X⟩
+  ⟨0, ((NQubitPauliOperator.identity 8).set 0 PauliOperator.X).set 1 PauliOperator.X⟩
 
-/-- Logical Z₁: Z on qubits {0, 1}. -/
+/-- Logical Z₁: Z on qubits {0, 2}. -/
 def logicalZ1 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 1 PauliOperator.Z⟩
+  ⟨0, ((NQubitPauliOperator.identity 8).set 0 PauliOperator.Z).set 2 PauliOperator.Z⟩
 
-/-- Logical X₂: X on qubits {4, 5}. -/
+/-- Logical X₂: X on qubits {4, 6} (vertical loop). -/
 def logicalX2 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((NQubitPauliOperator.identity 8).set 4 PauliOperator.X).set 5 PauliOperator.X⟩
+  ⟨0, ((NQubitPauliOperator.identity 8).set 4 PauliOperator.X).set 6 PauliOperator.X⟩
 
-/-- Logical Z₂: Z on qubits {4, 6}. -/
+/-- Logical Z₂: Z on qubits {4, 5}. -/
 def logicalZ2 : NQubitPauliGroupElement 8 :=
-  ⟨0, ((NQubitPauliOperator.identity 8).set 4 PauliOperator.Z).set 6 PauliOperator.Z⟩
+  ⟨0, ((NQubitPauliOperator.identity 8).set 4 PauliOperator.Z).set 5 PauliOperator.Z⟩
 
 /-- logicalX1 is an X-type element. -/
 lemma logicalX1_is_XType :
@@ -213,13 +216,13 @@ lemma logicalZ2_is_ZType :
 lemma logicalX1_commutes_ZGenerators :
     ∀ z ∈ ZGenerators, logicalX1 * z = z * logicalX1 := by
   rintro z (rfl | rfl | rfl | rfl)
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, B00]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, A00]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, B01]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, A01]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, B10]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, A10]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, B11]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX1, A11]
     ext <;> [rfl; decide +revert]
 
 /-- logicalX1 commutes with all X-generators. -/
@@ -233,13 +236,13 @@ lemma logicalX1_commutes_XGenerators :
 lemma logicalX2_commutes_ZGenerators :
     ∀ z ∈ ZGenerators, logicalX2 * z = z * logicalX2 := by
   rintro z (rfl | rfl | rfl | rfl)
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, B00]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, A00]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, B01]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, A01]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, B10]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, A10]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, B11]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalX2, A11]
     ext <;> [rfl; decide +revert]
 
 /-- logicalX2 commutes with all X-generators. -/
@@ -261,13 +264,13 @@ lemma logicalZ1_commutes_XGenerators :
     ∀ x ∈ XGenerators, logicalZ1 * x = x * logicalZ1 := by
   intro x hx; simp only [XGenerators] at hx
   rcases hx with rfl | rfl | rfl | rfl
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, A00]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, B00]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, A01]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, B01]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, A10]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, B10]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, A11]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ1, B11]
     ext <;> [rfl; decide +revert]
 
 /-- logicalZ2 commutes with all Z-generators. -/
@@ -282,13 +285,13 @@ lemma logicalZ2_commutes_XGenerators :
     ∀ x ∈ XGenerators, logicalZ2 * x = x * logicalZ2 := by
   intro x hx; simp only [XGenerators] at hx
   rcases hx with rfl | rfl | rfl | rfl
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, A00]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, B00]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, A01]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, B01]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, A10]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, B10]
     ext <;> [rfl; decide +revert]
-  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, A11]
+  · simp only [NQubitPauliGroupElement.mul_eq, NQubitPauliGroupElement.mul, logicalZ2, B11]
     ext <;> [rfl; decide +revert]
 
 /-- Logical operators for different logical qubits commute. -/
@@ -322,7 +325,7 @@ theorem logicalX2_anticommutes_logicalZ2 :
   decide
 
 /-- Independent generating list: 6 generators (B00, B01, B10, A00, A01, A10).
-    B11 and A11 are products of the first three Z and first three X respectively. -/
+    B11 and A11 are products of the first three X and first three Z respectively. -/
 def generatorsList6 : List (NQubitPauliGroupElement 8) :=
   [B00, B01, B10, A00, A01, A10]
 
@@ -348,12 +351,12 @@ lemma generatorsList6_subset_generators :
     List.mem_cons, List.mem_cons, List.mem_cons, List.mem_cons, List.mem_cons] at hg
   rw [List.mem_cons, List.mem_nil_iff, or_false] at hg
   rcases hg with rfl | rfl | rfl | rfl | rfl | rfl
-  · exact Or.inl (Set.mem_insert B00 _)
-  · exact Or.inl (Set.mem_insert_of_mem _ (Set.mem_insert B01 _))
-  · exact Or.inl (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ (Set.mem_insert B10 _)))
-  · exact Or.inr (Set.mem_insert A00 _)
-  · exact Or.inr (Set.mem_insert_of_mem _ (Set.mem_insert A01 _))
-  · exact Or.inr (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ (Set.mem_insert A10 _)))
+  · exact Or.inr (Set.mem_insert B00 _)
+  · exact Or.inr (Set.mem_insert_of_mem _ (Set.mem_insert B01 _))
+  · exact Or.inr (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ (Set.mem_insert B10 _)))
+  · exact Or.inl (Set.mem_insert A00 _)
+  · exact Or.inl (Set.mem_insert_of_mem _ (Set.mem_insert A01 _))
+  · exact Or.inl (Set.mem_insert_of_mem _ (Set.mem_insert_of_mem _ (Set.mem_insert A10 _)))
 
 /-- The stabilizer subgroup equals the closure of the 6 independent generators. -/
 lemma subgroup_eq_closure_generatorsList6 :
@@ -367,7 +370,7 @@ lemma subgroup_eq_closure_generatorsList6 :
     · intro s hs
       rw [Set.mem_union] at hs
       rcases hs with hz | hx
-      · -- hz : s ∈ ZGenerators
+      · -- hz : s ∈ ZGenerators = {A00, A01, A10, A11}
         simp only [ZGenerators, Set.mem_insert_iff] at hz
         rcases hz with rfl | rfl | rfl | rfl
         · exact Subgroup.subset_closure (
@@ -376,7 +379,7 @@ lemma subgroup_eq_closure_generatorsList6 :
             by simp [NQubitPauliGroupElement.listToSet, generatorsList6])
         · exact Subgroup.subset_closure (
             by simp [NQubitPauliGroupElement.listToSet, generatorsList6])
-        · rw [B11_eq_mul]
+        · rw [A11_eq_mul]
           exact Subgroup.mul_mem _ (Subgroup.mul_mem _
             (Subgroup.subset_closure (
               by simp [NQubitPauliGroupElement.listToSet, generatorsList6]))
@@ -384,7 +387,7 @@ lemma subgroup_eq_closure_generatorsList6 :
               by simp [NQubitPauliGroupElement.listToSet, generatorsList6])))
             (Subgroup.subset_closure (
               by simp [NQubitPauliGroupElement.listToSet, generatorsList6]))
-      · -- hx : s ∈ XGenerators
+      · -- hx : s ∈ XGenerators = {B00, B01, B10, B11}
         simp only [XGenerators, Set.mem_insert_iff] at hx
         rcases hx with rfl | rfl | rfl | rfl
         · exact Subgroup.subset_closure (
@@ -393,7 +396,7 @@ lemma subgroup_eq_closure_generatorsList6 :
             by simp [NQubitPauliGroupElement.listToSet, generatorsList6])
         · exact Subgroup.subset_closure (
             by simp [NQubitPauliGroupElement.listToSet, generatorsList6])
-        · rw [A11_eq_mul]
+        · rw [B11_eq_mul]
           exact Subgroup.mul_mem _ (Subgroup.mul_mem _
             (Subgroup.subset_closure (
               by simp [NQubitPauliGroupElement.listToSet, generatorsList6]))
