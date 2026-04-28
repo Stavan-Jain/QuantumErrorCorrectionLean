@@ -3,16 +3,12 @@ import QEC.Stabilizer.Core.StabilizerGroup
 import QEC.Stabilizer.PauliGroup
 import QEC.Stabilizer.PauliGroup.Representation
 
-set_option linter.style.openClassical false
-set_option linter.style.longLine false
-set_option linter.style.multiGoal false
 
 namespace Quantum
 namespace StabilizerGroup
 
 variable {n : ℕ}
 open Matrix
-open Classical
 open scoped BigOperators
 
 /-!
@@ -24,6 +20,9 @@ nonzero and projects onto the codespace, and proves the codespace is non-empty.
 -/
 
 noncomputable section
+
+attribute [local instance] Classical.decEq
+attribute [local instance] Classical.decPred
 
 instance : Fintype PauliOperator where
   elems := {PauliOperator.I, PauliOperator.X, PauliOperator.Y, PauliOperator.Z}
@@ -47,28 +46,28 @@ noncomputable def stabilizerSum (S : StabilizerGroup n) :
 lemma eq_one_of_mem_stabilizer_and_is_scalar (S : StabilizerGroup n) (g : NQubitPauliGroupElement n)
     (hg : g ∈ S.toSubgroup) (h_scalar : g.operators = NQubitPauliOperator.identity n) :
     g = 1 := by
-      obtain ⟨k, hk⟩ : ∃ k : Fin 4, g = ⟨k, (NQubitPauliOperator.identity n)⟩ := by
-        exact ⟨ g.phasePower, by cases g; aesop ⟩;
-      fin_cases k <;> simp_all +decide;
-      · convert S.no_neg_identity ?_;
-        convert S.toSubgroup.mul_mem hg hg using 1;
-        ext <;> norm_num [ Quantum.NQubitPauliGroupElement.mul ];
-        · erw [show (NQubitPauliOperator.identity n *ₚ NQubitPauliOperator.identity n).phasePower = 0
-            from ?_]; norm_num
-          · decide +revert
-          · exact NQubitPauliGroupElement.mulOp_identity_left_phase (NQubitPauliOperator.identity n)
-        · exact?
-      · exact S.no_neg_identity hg;
-      · have h_contra : (g * g) ∈ S.toSubgroup := by
-          exact S.toSubgroup.mul_mem ( hk ▸ hg ) ( hk ▸ hg );
-        convert S.neg_identity_not_mem _;
-        convert h_contra using 1;
-        ext <;> simp +decide [*, NQubitPauliGroupElement.mul]
-        · erw [show (NQubitPauliOperator.identity n *ₚ NQubitPauliOperator.identity n).phasePower = 0
-            from ?_]
-          · norm_num
-          exact?
-        · exact rfl
+  obtain ⟨k, hk⟩ : ∃ k : Fin 4, g = ⟨k, (NQubitPauliOperator.identity n)⟩ := by
+    exact ⟨g.phasePower, by cases g; aesop⟩
+  fin_cases k <;> simp_all +decide
+  · convert S.no_neg_identity ?_
+    convert S.toSubgroup.mul_mem hg hg using 1
+    ext <;> norm_num [Quantum.NQubitPauliGroupElement.mul]
+    · have hphase :
+          (NQubitPauliOperator.identity n *ₚ NQubitPauliOperator.identity n).phasePower = 0 :=
+        NQubitPauliGroupElement.mulOp_identity_left_phase (NQubitPauliOperator.identity n)
+      simp [hphase]
+    · exact rfl
+  · exact S.no_neg_identity hg
+  · have h_contra : (g * g) ∈ S.toSubgroup := by
+      exact S.toSubgroup.mul_mem (hk ▸ hg) (hk ▸ hg)
+    convert S.neg_identity_not_mem _
+    convert h_contra using 1
+    ext <;> simp +decide [*, NQubitPauliGroupElement.mul]
+    · have hphase :
+          (NQubitPauliOperator.identity n *ₚ NQubitPauliOperator.identity n).phasePower = 0 :=
+        NQubitPauliGroupElement.mulOp_identity_left_phase (NQubitPauliOperator.identity n)
+      simp [hphase]
+    · exact rfl
 
 /-- The trace of a Pauli group element is non-zero only if it is proportional to the identity. -/
 lemma trace_eq_zero_of_ne_identity (g : NQubitPauliGroupElement n)
@@ -79,12 +78,14 @@ lemma trace_eq_zero_of_ne_identity (g : NQubitPauliGroupElement n)
     intros p hp_ne_I
     have h_trace_zero : (p.toMatrix * (NQubitPauliOperator.identity n).toMatrix).trace = 0 := by
       have h_trace_zero : (p.toMatrix * (NQubitPauliOperator.identity n).toMatrix).trace =
-          if p = NQubitPauliOperator.identity n then (2 : ℂ)^n else 0 := by exact?
+          if p = NQubitPauliOperator.identity n then (2 : ℂ)^n else 0 := by
+          exact
+          NQubitPauliGroupElement.NQubitPauliOperator.trace_mul p  (NQubitPauliOperator.identity n)
       rw [h_trace_zero, if_neg hp_ne_I]
     convert h_trace_zero using 1
     rw [show (NQubitPauliOperator.identity n |> NQubitPauliOperator.toMatrix) = 1 from ?_]
     · norm_num
-    · exact?
+    · exact NQubitPauliOperator.identity_toMatrix n
   unfold NQubitPauliGroupElement.toMatrix; aesop
 
 /-- The trace of the stabilizer sum is 2^n. -/
@@ -94,7 +95,8 @@ lemma trace_stabilizerSum (S : StabilizerGroup n) : (stabilizerSum S).trace = (2
         ∑ g ∈ S.toSubgroup.carrier.toFinset, if g = 1 then 2 ^ n else 0 := by
       apply Finset.sum_congr rfl
       intro g hg
-      by_cases h : g.operators = NQubitPauliOperator.identity n <;> simp_all +decide [trace_eq_zero_of_ne_identity]
+      by_cases h : g.operators = NQubitPauliOperator.identity n
+      <;> simp_all +decide [trace_eq_zero_of_ne_identity]
       · rw [if_pos]
         · rw [eq_one_of_mem_stabilizer_and_is_scalar S g hg h]
           norm_num [NQubitPauliGroupElement.toMatrix_one]
@@ -121,12 +123,14 @@ lemma stabilizerSum_ne_zero (S : StabilizerGroup n) : stabilizerSum S ≠ 0 := b
 lemma mul_stabilizerSum_eq (S : StabilizerGroup n) (g : NQubitPauliGroupElement n)
     (hg : g ∈ S.toSubgroup) : g.toMatrix * stabilizerSum S = stabilizerSum S := by
   have h_mul : ∀ h ∈ S.toSubgroup, g * h ∈ S.toSubgroup := fun h hh => S.toSubgroup.mul_mem hg hh
-  have h_bij : Finset.image (fun h => g * h) (Finset.univ.filter (fun h => h ∈ S.toSubgroup)) =
-      Finset.univ.filter (fun h => h ∈ S.toSubgroup) := by
+  have h_bij :
+      Finset.image (fun h => g * h) (Finset.univ.filter (fun h => h ∈ S.toSubgroup)) =
+        Finset.univ.filter (fun h => h ∈ S.toSubgroup) := by
     refine Finset.eq_of_subset_of_card_le (Finset.image_subset_iff.mpr fun h hh => by aesop) ?_
     rw [Finset.card_image_of_injective _ fun x y hxy => mul_left_cancel hxy]
-  have h_sum_eq : ∑ h ∈ Finset.univ.filter (fun h => h ∈ S.toSubgroup), (g * h).toMatrix =
-      ∑ h ∈ Finset.univ.filter (fun h => h ∈ S.toSubgroup), h.toMatrix := by
+  have h_sum_eq :
+      ∑ h ∈ Finset.univ.filter (fun h => h ∈ S.toSubgroup), (g * h).toMatrix =
+        ∑ h ∈ Finset.univ.filter (fun h => h ∈ S.toSubgroup), h.toMatrix := by
     conv_rhs => rw [← h_bij, Finset.sum_image (Finset.card_image_iff.mp <| by aesop)]
   convert h_sum_eq using 1
   simp only [stabilizerSum, Finset.mul_sum _ _ _]
@@ -134,7 +138,8 @@ lemma mul_stabilizerSum_eq (S : StabilizerGroup n) (g : NQubitPauliGroupElement 
 
 /-- The codespace of a stabilizer group is always non-empty. -/
 lemma exists_codespace_state (S : StabilizerGroup n) : ∃ ψ : NQubitState n, IsInCodespace ψ S := by
-  obtain ⟨v, hv⟩ : ∃ v : NQubitVec n, v ≠ 0 ∧ ∀ g ∈ S.toSubgroup, Matrix.mulVec g.toMatrix v = v := by
+  obtain ⟨v, hv⟩ :
+      ∃ v : NQubitVec n, v ≠ 0 ∧ ∀ g ∈ S.toSubgroup, Matrix.mulVec g.toMatrix v = v := by
     have h_stabilizer_sum_nonzero : stabilizerSum S ≠ 0 := stabilizerSum_ne_zero S
     obtain ⟨v, hv⟩ : ∃ v : NQubitVec n, (stabilizerSum S).mulVec v ≠ 0 := by
       contrapose! h_stabilizer_sum_nonzero with h_stabilizer_sum_zero
@@ -148,10 +153,14 @@ lemma exists_codespace_state (S : StabilizerGroup n) : ∃ ψ : NQubitState n, I
   refine ⟨⟨fun i => v i / Real.sqrt (∑ i, ‖v i‖ ^ 2), ?_⟩, ?_⟩
   · unfold Quantum.norm
     simp +decide [div_pow, Real.sq_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _)]
-    rw [← Finset.sum_div, div_self (ne_of_gt (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _)
-      (Ne.symm (by intro h; exact hv.1 (funext fun i => by
-        have hi := (Finset.sum_eq_zero_iff_of_nonneg (fun _ _ => sq_nonneg _)).1 h i (Finset.mem_univ i)
-        simpa [h] using hi)))))]
+    rw [← Finset.sum_div, div_self (ne_of_gt (lt_of_le_of_ne
+      (Finset.sum_nonneg fun _ _ => sq_nonneg _)
+      (Ne.symm (by
+        intro h
+        exact hv.1 (funext fun i => by
+          have hi := (Finset.sum_eq_zero_iff_of_nonneg (fun _ _ => sq_nonneg _)).1 h i
+            (Finset.mem_univ i)
+          simpa [h] using hi)))))]
   · intro g hg
     specialize hv
     have := hv.2 g hg

@@ -4,6 +4,7 @@ import QEC.Stabilizer.Lattice.ToricHomology
 import QEC.Stabilizer.Codes.ToricCodeN
 import QEC.Stabilizer.Core.LogicalOperators
 
+
 namespace Quantum
 namespace Stabilizer
 namespace Lattice
@@ -33,7 +34,7 @@ lemma mem_support_toricXOperatorOfChain_edgeToQubitIdx_iff
       ⟨e, rfl, he1⟩
     have hX : (toricXOperatorOfChain L c).operators (edgeToQubitIdx L e) = PauliOperator.X := by
       simp [toricXOperatorOfChain, hex]
-    simpa [NQubitPauliOperator.support, hX]
+    simp [NQubitPauliOperator.support, hX]
 
 /-- Predicate: encoded X-chain operator commutes with every Z-check (vertex) generator. -/
 def xCommutesWithZChecks (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) : Prop :=
@@ -97,9 +98,11 @@ theorem anticommutesAt_vertexStab_toricX_iff_oneOfFour
         (toricXOperatorOfChain L c).operators i
       ↔
         (i = incidentQubitIdx1 L xv yv ∧ c (EdgeIdx.h xv yv) = 1) ∨
-        (i = incidentQubitIdx2 L xv yv ∧ c (EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv) = 1) ∨
+        (i = incidentQubitIdx2 L xv yv ∧
+          c (EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv) = 1) ∨
         (i = incidentQubitIdx3 L xv yv ∧ c (EdgeIdx.v xv yv) = 1) ∨
-        (i = incidentQubitIdx4 L xv yv ∧ c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)) = 1) := by
+        (i = incidentQubitIdx4 L xv yv ∧
+          c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)) = 1) := by
   have hL0 : 0 < L := Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)
   haveI : Fact (0 < L) := ⟨hL0⟩
   rw [anticommutesAt_vertexStab_toricX_iff]
@@ -189,28 +192,49 @@ Mid-level API: cardinality of the four-point anticommutation filter equals the
 sum of the corresponding edge-indicators.
 -/
 set_option maxHeartbeats 1000000 in
+-- The distinct-incident-edge case split is arithmetic-heavy and needs extra heartbeats.
 theorem four_filter_card_eq_indicator_sum
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
-    (Finset.univ.filter (fun i : Fin (StabilizerGroup.ToricCodeN.numQubits L) =>
+    (Finset.univ.filter
+      (fun i : Fin (StabilizerGroup.ToricCodeN.numQubits L) =>
       (i = incidentQubitIdx1 L xv yv ∧ c (EdgeIdx.h xv yv) = 1) ∨
-      (i = incidentQubitIdx2 L xv yv ∧ c (EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv) = 1) ∨
+      (i = incidentQubitIdx2 L xv yv ∧
+        c (EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv) = 1) ∨
       (i = incidentQubitIdx3 L xv yv ∧ c (EdgeIdx.v xv yv) = 1) ∨
-      (i = incidentQubitIdx4 L xv yv ∧ c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)) = 1))).card
+      (i = incidentQubitIdx4 L xv yv ∧
+        c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)) = 1))).card
       =
     (((if c (EdgeIdx.h xv yv) = 1 then 1 else 0) +
       (if c (EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv) = 1 then 1 else 0) +
       (if c (EdgeIdx.v xv yv) = 1 then 1 else 0) +
       (if c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)) = 1 then 1 else 0)) : ℕ) := by
-  have h_distinct : incidentQubitIdx1 L xv yv ≠ incidentQubitIdx2 L xv yv ∧ incidentQubitIdx1 L xv yv ≠ incidentQubitIdx3 L xv yv ∧ incidentQubitIdx1 L xv yv ≠ incidentQubitIdx4 L xv yv ∧ incidentQubitIdx2 L xv yv ≠ incidentQubitIdx3 L xv yv ∧ incidentQubitIdx2 L xv yv ≠ incidentQubitIdx4 L xv yv ∧ incidentQubitIdx3 L xv yv ≠ incidentQubitIdx4 L xv yv := by
-    refine' ⟨ _, _, _, _, _, _ ⟩ <;> intro h <;> simp_all +decide [ Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge, StabilizerGroup.ToricCodeN.vEdge ];
-    any_goals nlinarith [ Fin.is_lt xv, Fin.is_lt yv, Nat.sub_add_cancel ( by linarith [ Fact.out ( p := 2 ≤ L ) ] : 1 ≤ L ), Nat.zero_le ( ( xv + ( L - 1 ) ) % L ), Nat.zero_le ( ( yv + ( L - 1 ) ) % L ), Nat.mod_lt ( xv + ( L - 1 ) ) ( by linarith [ Fact.out ( p := 2 ≤ L ) ] : 0 < L ), Nat.mod_lt ( yv + ( L - 1 ) ) ( by linarith [ Fact.out ( p := 2 ≤ L ) ] : 0 < L ) ];
+  have h_distinct :
+      incidentQubitIdx1 L xv yv ≠ incidentQubitIdx2 L xv yv ∧
+      incidentQubitIdx1 L xv yv ≠ incidentQubitIdx3 L xv yv ∧
+      incidentQubitIdx1 L xv yv ≠ incidentQubitIdx4 L xv yv ∧
+      incidentQubitIdx2 L xv yv ≠ incidentQubitIdx3 L xv yv ∧
+      incidentQubitIdx2 L xv yv ≠ incidentQubitIdx4 L xv yv ∧
+      incidentQubitIdx3 L xv yv ≠ incidentQubitIdx4 L xv yv := by
+    refine' ⟨_, _, _, _, _, _⟩
+      <;> intro h
+      <;> simp_all +decide
+        [Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge, StabilizerGroup.ToricCodeN.vEdge]
+    any_goals
+      nlinarith
+        [ Fin.is_lt xv,
+          Fin.is_lt yv,
+          Nat.sub_add_cancel (by linarith [Fact.out (p := 2 ≤ L)] : 1 ≤ L),
+          Nat.zero_le ((xv + (L - 1)) % L),
+          Nat.zero_le ((yv + (L - 1)) % L),
+          Nat.mod_lt (xv + (L - 1)) (by linarith [Fact.out (p := 2 ≤ L)] : 0 < L),
+          Nat.mod_lt (yv + (L - 1)) (by linarith [Fact.out (p := 2 ≤ L)] : 0 < L) ]
     · rw [ eq_comm, Nat.mod_eq_of_lt ] at h;
       · linarith [ Nat.sub_pos_of_lt ( Fact.out : 2 ≤ L ) ];
       · contrapose! h;
         rw [ Nat.mod_eq_sub_mod h ];
         rw [ Nat.mod_eq_of_lt ] <;> omega;
-    · rcases L with ( _ | _ | L ) <;> simp_all +decide [ Nat.mod_eq_of_lt ];
-      rcases yv with ⟨ _ | yv, hyv ⟩ <;> simp_all +arith +decide [ Nat.mod_eq_of_lt ];
+    · rcases L with ( _ | _ | L ) <;> simp_all +decide;
+      rcases yv with ⟨ _ | yv, hyv ⟩ <;> simp_all +arith +decide;
       norm_num [ ( by ring : L + yv + 2 = L + 2 + yv ) ] at h;
       rw [ Nat.mod_eq_of_lt ] at h <;> linarith;
   split_ifs <;> simp_all +decide [ Finset.filter_eq', Finset.filter_or ];
@@ -278,7 +302,9 @@ theorem xCommutesWithZChecks_iff_boundary1_pointwise_zero
   constructor
   · intro h v
     rcases v with ⟨xv, yv⟩
-    have hz : StabilizerGroup.ToricCodeN.vertexStab L xv yv ∈ StabilizerGroup.ToricCodeN.ZGenerators L := by
+    have hz :
+        StabilizerGroup.ToricCodeN.vertexStab L xv yv ∈
+          StabilizerGroup.ToricCodeN.ZGenerators L := by
       exact ⟨(xv, yv), rfl⟩
     have hcomm := h (StabilizerGroup.ToricCodeN.vertexStab L xv yv) hz
     exact (vertexCheckCommutes_iff_boundary1_zero_at L c xv yv).mp hcomm
@@ -293,7 +319,7 @@ theorem boundary1_pointwise_zero_iff_mem_toricCycles
     (∀ v : VtxIdx L, toricBoundary1 (L := L) c v = 0) ↔ c ∈ toricCycles (L := L) := by
   constructor
   · intro h
-    show toricBoundary1 (L := L) c = 0
+    change toricBoundary1 (L := L) c = 0
     ext v
     exact h v
   · intro h v
@@ -318,10 +344,11 @@ lemma toricXOperatorOfChain_zero (L : ℕ) :
 `toricXOperatorOfChain` maps chain addition to Pauli multiplication (ZMod 2 ↔ X²=I).
 -/
 set_option maxHeartbeats 1000000 in
+-- This pointwise-to-global proof unfolds many dependent equalities and case splits.
 lemma toricXOperatorOfChain_add (L : ℕ) (c c' : C1 L) :
     toricXOperatorOfChain L (c + c') =
       toricXOperatorOfChain L c * toricXOperatorOfChain L c' := by
-  -- By definition of toricXOperatorOfChain, the operators are determined by the presence of 1s in the input.
+  -- By definition of toricXOperatorOfChain, the operators are determined by input 1-entries.
   simp [toricXOperatorOfChain] at *;
   simp +decide [ NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp ];
   constructor;
@@ -342,10 +369,12 @@ lemma toricXOperatorOfChain_add (L : ℕ) (c c' : C1 L) :
             have h_eq' : b = d := by
               exact Fin.ext ( by nlinarith [ Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d ] );
             aesop;
-          · rename_i a b c d;
-            exact absurd h_eq' ( by nlinarith only [ Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d ] );
-          · rename_i a b c d;
-            exact absurd h_eq' ( by nlinarith [ Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d ] );
+          · rename_i a b c d
+            exact absurd h_eq'
+              (by nlinarith only [Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d])
+          · rename_i a b c d
+            exact absurd h_eq'
+              (by nlinarith [Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d])
           · rename_i a b c d;
             have h_eq' : b = d := by
               exact Fin.ext ( by nlinarith [ Fin.is_lt a, Fin.is_lt b, Fin.is_lt c, Fin.is_lt d ] );
@@ -365,7 +394,9 @@ lemma toricXOperatorOfChain_boundary_singleFace (L : ℕ) [Fact (2 ≤ L)] (x y 
   unfold toricXOperatorOfChain StabilizerGroup.ToricCodeN.faceStab;
   congr with q;
   split_ifs <;> simp_all +decide [ NQubitPauliOperator.set ];
-  · rename_i h; obtain ⟨ e, rfl, he ⟩ := h; rcases e with ( _ | _ ) <;> simp_all +decide [ toricBoundary2, singleFace ] ;
+  · rename_i h
+    obtain ⟨e, rfl, he⟩ := h
+    rcases e with (_ | _) <;> simp_all +decide [toricBoundary2, singleFace]
     · unfold edgeToQubitIdx; split_ifs at he <;> simp_all +decide [ Fin.ext_iff ] ;
     · split_ifs at he <;> simp_all +decide [ Fin.ext_iff, StabilizerGroup.ToricCodeN.next ];
   · split_ifs <;> simp_all +decide [ toricNumQubits ];
@@ -386,7 +417,7 @@ lemma toricXOperatorOfChain_boundary_singleFace (L : ℕ) [Fact (2 ≤ L)] (x y 
       use EdgeIdx.h x (StabilizerGroup.ToricCodeN.next L y); simp +decide [ edgeToQubitIdx ] ;
       unfold StabilizerGroup.ToricCodeN.next; simp +decide [ Fin.ext_iff ] ;
       by_cases hy : y.val = L - 1;
-      · rcases L with ( _ | _ | L ) <;> simp_all +decide [ Nat.mod_eq_of_lt ];
+      · rcases L with ( _ | _ | L ) <;> simp_all +decide;
         exact absurd ( Fact.out ( p := 2 ≤ 0 + 1 ) ) ( by decide );
       · rw [ Nat.mod_eq_of_lt ] <;> omega;
     · rename_i h₁ h₂ h₃ h₄ h₅;
@@ -413,23 +444,37 @@ Stabilizer criterion: X-chain is plaquette product iff it is a boundary.
 theorem xIsPlaquetteProduct_iff_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     xIsPlaquetteProduct L c ↔ c ∈ toricBoundaries (L := L) := by
   constructor <;> intro hc <;> simp_all +decide [ xIsPlaquetteProduct, toricBoundaries ];
-  · have h_closure : ∀ g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L), ∃ f : C2 L, toricXOperatorOfChain L (toricBoundary2 (L := L) f) = g := by
+  · have h_closure :
+        ∀ g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L),
+          ∃ f : C2 L, toricXOperatorOfChain L (toricBoundary2 (L := L) f) = g := by
       intro g hg
       induction' hg using Subgroup.closure_induction with g hg ih;
-      · rcases hg with ⟨ ⟨ x, y ⟩, rfl ⟩ ; exact ⟨ singleFace ( x, y ), toricXOperatorOfChain_boundary_singleFace L x y ⟩ ;
+      · rcases hg with ⟨⟨x, y⟩, rfl⟩
+        exact ⟨singleFace (x, y), toricXOperatorOfChain_boundary_singleFace L x y⟩
       · use 0; simp [toricXOperatorOfChain_zero];
-      · rename_i h₁ h₂ h₃ h₄;
-        obtain ⟨ f₁, hf₁ ⟩ := h₃; obtain ⟨ f₂, hf₂ ⟩ := h₄; use f₁ + f₂; simp +decide [ hf₁, hf₂, toricXOperatorOfChain_add ] ;
-      · obtain ⟨ f, hf ⟩ := ‹_›; use f; simp_all +decide [ toricXOperatorOfChain ] ;
-        rw [ ← hf ] ; ext <;> simp +decide [ NQubitPauliGroupElement.inv ] ;
+      · rename_i h₁ h₂ h₃ h₄
+        obtain ⟨f₁, hf₁⟩ := h₃
+        obtain ⟨f₂, hf₂⟩ := h₄
+        use f₁ + f₂
+        simp +decide [hf₁, hf₂, toricXOperatorOfChain_add]
+      · obtain ⟨f, hf⟩ := ‹_›
+        use f
+        simp_all +decide [toricXOperatorOfChain]
+        rw [← hf]
+        ext <;> simp +decide [NQubitPauliGroupElement.inv]
     have := @chainOfXOperator_toricXOperatorOfChain L;
     grind +splitImp;
   · obtain ⟨ f, rfl ⟩ := hc;
     rw [ c2_eq_sum_singleFace L f ];
-    induction' ( Finset.univ.filter fun p : FaceIdx L => f p = 1 ) using Finset.induction <;> simp_all +decide [ Finset.sum_insert, Finset.sum_singleton ];
+    induction' (Finset.univ.filter fun p : FaceIdx L => f p = 1) using Finset.induction <;>
+      simp_all +decide [Finset.sum_insert]
     · rw [ toricXOperatorOfChain_zero ] ; exact OneMemClass.one_mem _;
     · rw [ toricXOperatorOfChain_add ];
-      exact Subgroup.mul_mem _ ( by rw [ toricXOperatorOfChain_boundary_singleFace ] ; exact Subgroup.subset_closure <| Set.mem_range_self _ ) ‹_›
+      exact Subgroup.mul_mem _
+        (by
+          rw [toricXOperatorOfChain_boundary_singleFace]
+          exact Subgroup.subset_closure <| Set.mem_range_self _)
+        ‹_›
 
 /-
 X-type operators commute with the toric X-type chain encoding.
@@ -438,14 +483,19 @@ lemma toricXOperatorOfChain_commutes_faceStab
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xf yf : Fin L) :
     StabilizerGroup.ToricCodeN.faceStab L xf yf * toricXOperatorOfChain L c =
       toricXOperatorOfChain L c * StabilizerGroup.ToricCodeN.faceStab L xf yf := by
-  -- Since both faceStab and toricXOperatorOfChain are X-type operators, they commute with each other.
-  have h_comm : ∀ (g h : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L)), NQubitPauliGroupElement.IsXTypeElement g → NQubitPauliGroupElement.IsXTypeElement h → g * h = h * g := by
+  -- Both `faceStab` and `toricXOperatorOfChain` are X-type, so they commute.
+  have h_comm :
+      ∀ (g h : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L)),
+        NQubitPauliGroupElement.IsXTypeElement g →
+        NQubitPauliGroupElement.IsXTypeElement h →
+        g * h = h * g := by
     exact fun g h a a_1 ↦ StabilizerGroup.CSSCommutationLemmas.XType_commutes a a_1;
   apply h_comm;
   · exact StabilizerGroup.ToricCodeN.faceStab_is_XType L xf yf;
   · -- By definition of toricXOperatorOfChain, it is an X-type operator.
     simp [NQubitPauliGroupElement.IsXTypeElement, toricXOperatorOfChain];
-    intro q; by_cases h : ∃ e : EdgeIdx L, edgeToQubitIdx L e = q ∧ c e = 1 <;> simp +decide [ h ] ;
+    intro q
+    by_cases h : ∃ e : EdgeIdx L, edgeToQubitIdx L e = q ∧ c e = 1 <;> simp +decide [h]
     · exact PauliOperator.IsXType_X;
     · exact PauliOperator.IsXType_I
 
@@ -455,27 +505,35 @@ Centralizer membership for X-chain operator is equivalent to cycle membership.
 lemma toricXOperatorOfChain_mem_centralizer_iff_cycle
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     toricXOperatorOfChain L c ∈
-      StabilizerGroup.centralizer (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
+    StabilizerGroup.centralizer (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
         c ∈ toricCycles (L := L) := by
   constructor;
   · intro h;
     apply (xCommutesWithZChecks_iff_mem_toricCycles L c).mp;
     intro z hz;
     apply h;
-    exact Subgroup.subset_closure ( by rw [ StabilizerGroup.ToricCodeN.listToSet_generatorsList ] ; exact Set.mem_union_left _ hz );
+    exact Subgroup.subset_closure
+      (by
+        rw [StabilizerGroup.ToricCodeN.listToSet_generatorsList]
+        exact Set.mem_union_left _ hz)
   · intro hc;
     -- Since $c \in \text{toricCycles } L$, we have that $xCommutesWithZChecks L c$ holds.
     have h_comm : xCommutesWithZChecks L c := by
       exact?;
     intro g hg;
-    -- Since $g \in \text{stabilizerGroup } L$, we have that $g$ is in the closure of the generators.
-    have h_closure : g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.generators L) := by
-      exact hg |> fun h => by rw [ StabilizerGroup.ToricCodeN.stabilizerGroup_toSubgroup_eq ] at h; exact h;
+    -- Since `g ∈ stabilizerGroup L`, we have `g` in the closure of generators.
+    have h_closure :
+        g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.generators L) := by
+      exact hg |>
+        fun h => by
+          rw [StabilizerGroup.ToricCodeN.stabilizerGroup_toSubgroup_eq] at h
+          exact h
     refine' Subgroup.closure_induction ( fun x hx => _ ) _ _ _ h_closure;
-    · cases' hx with hx hx;
-      · exact h_comm x hx;
-      · obtain ⟨ p, rfl ⟩ := hx;
-        exact toricXOperatorOfChain_commutes_faceStab L c p.1 p.2;
+    · cases hx with
+      | inl hx => exact h_comm x hx
+      | inr hx =>
+          obtain ⟨ p, rfl ⟩ := hx
+          exact toricXOperatorOfChain_commutes_faceStab L c p.1 p.2
     · norm_num;
     · grind;
     · simp_all +decide [ NQubitPauliGroupElement.mul, NQubitPauliGroupElement.inv ];
@@ -486,36 +544,49 @@ Any X-type element of the full toric stabilizer group lies in
     `Subgroup.closure (XGenerators L)`.
 -/
 set_option maxHeartbeats 1000000 in
+-- The closure decomposition over mixed Z/X generators needs extra heartbeats.
 lemma xType_in_stabilizerGroup_implies_in_XClosure
     (L : ℕ) [Fact (2 ≤ L)] (g : NQubitPauliGroupElement
       (StabilizerGroup.ToricCodeN.numQubits L))
     (hg : g ∈ (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup)
     (hxt : NQubitPauliGroupElement.IsXTypeElement g) :
     g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L) := by
-  -- By stabilizerGroup_toSubgroup_eq, g ∈ Subgroup.closure (generators L) = Subgroup.closure (ZGenerators ∪ XGenerators).
-  have hg_closure : g ∈ Subgroup.closure ((StabilizerGroup.ToricCodeN.ZGenerators L) ∪ (StabilizerGroup.ToricCodeN.XGenerators L)) := by
+  -- By `stabilizerGroup_toSubgroup_eq`, `g` lies in closure of `ZGenerators ∪ XGenerators`.
+  have hg_closure :
+      g ∈ Subgroup.closure
+        ((StabilizerGroup.ToricCodeN.ZGenerators L) ∪
+          (StabilizerGroup.ToricCodeN.XGenerators L)) := by
     -- By definition of the stabilizer group, we know that g is in the closure of the generators.
     have h_closure : g ∈ (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup := by
       exact hg;
     rw [ StabilizerGroup.ToricCodeN.stabilizerGroup_toSubgroup_eq ] at h_closure;
     exact h_closure;
-  -- By mem_closure_union_exists_mul_of_commute_generators, g = z * x with z ∈ closure(ZGenerators) and x ∈ closure(XGenerators).
-  obtain ⟨z, hz, x, hx, rfl⟩ : ∃ z ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.ZGenerators L), ∃ x ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L), g = z * x := by
+  -- Decompose `g = z * x` with `z` in Z-closure and `x` in X-closure.
+  obtain ⟨z, hz, x, hx, rfl⟩ :
+      ∃ z ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.ZGenerators L),
+      ∃ x ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L),
+        g = z * x := by
     apply Subgroup.mem_closure_union_exists_mul_of_commute_generators;
-    · exact fun s a t a_1 ↦ StabilizerGroup.ToricCodeN.ZGenerators_commute_XGenerators L s a t a_1;
+    · exact fun s a t a_1 ↦
+        StabilizerGroup.ToricCodeN.ZGenerators_commute_XGenerators L s a t a_1
     · exact hg_closure;
   have hz_id : z.IsXTypeElement := by
     have hz_id : x.IsXTypeElement := by
-      exact NQubitPauliGroupElement.IsXTypeElement_of_mem_closure (StabilizerGroup.ToricCodeN.XGenerators_are_XType L) x hx;
+      exact NQubitPauliGroupElement.IsXTypeElement_of_mem_closure
+        (StabilizerGroup.ToricCodeN.XGenerators_are_XType L) x hx
     have hz_id : z = (z * x) * x⁻¹ := by
       exact eq_mul_inv_of_mul_eq rfl;
-    exact hz_id.symm ▸ NQubitPauliGroupElement.IsXTypeElement_mul hxt ( by
-      (expose_names; exact NQubitPauliGroupElement.IsXTypeElement_inv hz_id_1) );
+    exact hz_id.symm ▸ NQubitPauliGroupElement.IsXTypeElement_mul hxt
+      (by
+        expose_names
+        exact NQubitPauliGroupElement.IsXTypeElement_inv hz_id_1)
   have hz_id : z.IsZTypeElement := by
-    exact NQubitPauliGroupElement.IsZTypeElement_of_mem_closure (StabilizerGroup.ToricCodeN.ZGenerators_are_ZType L) z hz;
+    exact NQubitPauliGroupElement.IsZTypeElement_of_mem_closure
+      (StabilizerGroup.ToricCodeN.ZGenerators_are_ZType L) z hz
   have hz_id : z = 1 := by
-    (expose_names;
-      exact NQubitPauliGroupElement.eq_one_of_IsZTypeElement_and_IsXTypeElement hz_id hz_id_1);
+    expose_names
+    exact NQubitPauliGroupElement.eq_one_of_IsZTypeElement_and_IsXTypeElement
+      hz_id hz_id_1
   rw [hz_id]; norm_num; assumption
 
 /-- Any element of the stabilizer with X/I-only operators is X-type (phasePower = 0). -/
@@ -532,8 +603,9 @@ lemma xTypeOps_in_stabilizer_has_phase_zero
     rw [StabilizerGroup.ToricCodeN.stabilizerGroup_toSubgroup_eq] at hs
     exact hs
   -- CSS decompose: s = z * x
-  obtain ⟨z, hz, x, hx, hzx⟩ := Subgroup.mem_closure_union_exists_mul_of_commute_generators
-    (StabilizerGroup.ToricCodeN.ZGenerators_commute_XGenerators L) s hs_cl
+  obtain ⟨z, hz, x, hx, hzx⟩ :=
+    Subgroup.mem_closure_union_exists_mul_of_commute_generators
+      (StabilizerGroup.ToricCodeN.ZGenerators_commute_XGenerators L) s hs_cl
   have hz_ty : NQubitPauliGroupElement.IsZTypeElement z :=
     NQubitPauliGroupElement.IsZTypeElement_of_mem_closure
       (StabilizerGroup.ToricCodeN.ZGenerators_are_ZType L) z hz
@@ -595,6 +667,7 @@ lemma stabilizer_same_ops_implies_boundary
 X nontrivial logical iff corresponding chain is cycle-not-boundary.
 -/
 set_option maxHeartbeats 1000000 in
+-- This theorem combines closure induction with nontrivial-coset conditions.
 theorem xNontrivialLogical_iff_cycle_not_boundary (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     StabilizerGroup.IsNontrivialLogicalOperator
         (toricXOperatorOfChain L c) (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
@@ -603,11 +676,18 @@ theorem xNontrivialLogical_iff_cycle_not_boundary (L : ℕ) [Fact (2 ≤ L)] (c 
   · constructor;
     · exact toricXOperatorOfChain_mem_centralizer_iff_cycle L c |>.1 h.1;
     · intro hc
-      have h_plaquette : toricXOperatorOfChain L c ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L) := by
+      have h_plaquette :
+          toricXOperatorOfChain L c ∈
+            Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L) := by
         exact xIsPlaquetteProduct_iff_mem_toricBoundaries L c |>.2 hc
-      have h_in_stabilizer : toricXOperatorOfChain L c ∈ (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup := by
+      have h_in_stabilizer :
+          toricXOperatorOfChain L c ∈
+            (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup := by
         refine' Subgroup.closure_induction ( fun x hx => _ ) _ _ _ h_plaquette;
-        · exact Subgroup.subset_closure ( by rw [ StabilizerGroup.ToricCodeN.listToSet_generatorsList ] ; exact Set.mem_union_right _ hx );
+        · exact Subgroup.subset_closure
+            (by
+              rw [StabilizerGroup.ToricCodeN.listToSet_generatorsList]
+              exact Set.mem_union_right _ hx)
         · exact OneMemClass.one_mem _;
         · exact fun x y hx hy hx' hy' => Subgroup.mul_mem _ hx' hy';
         · exact fun x hx₁ hx₂ => Subgroup.inv_mem _ hx₂

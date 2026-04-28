@@ -1,5 +1,6 @@
 import Mathlib.Tactic
 
+
 namespace Quantum
 namespace Stabilizer
 namespace Lattice
@@ -11,10 +12,13 @@ lemma rowMajor_injective (L : ℕ) [Fact (0 < L)] :
   rcases p with ⟨x₁, y₁⟩
   rcases q with ⟨x₂, y₂⟩
   have hxval : x₁.val = x₂.val := by
-    have hmod : (y₁.val * L + x₁.val) % L = (y₂.val * L + x₂.val) % L := congrArg (fun n => n % L) hpq
-    simpa [Nat.add_mod, Nat.mul_mod_right, Nat.mod_eq_of_lt x₁.isLt, Nat.mod_eq_of_lt x₂.isLt] using hmod
+    have hmod : (y₁.val * L + x₁.val) % L = (y₂.val * L + x₂.val) % L :=
+      congrArg (fun n => n % L) hpq
+    simpa [Nat.add_mod, Nat.mul_mod_right, Nat.mod_eq_of_lt x₁.isLt,
+      Nat.mod_eq_of_lt x₂.isLt] using hmod
   have hyval : y₁.val = y₂.val := by
-    have hdiv : (y₁.val * L + x₁.val) / L = (y₂.val * L + x₂.val) / L := congrArg (fun n => n / L) hpq
+    have hdiv : (y₁.val * L + x₁.val) / L = (y₂.val * L + x₂.val) / L :=
+      congrArg (fun n => n / L) hpq
     have hy1 : (y₁.val * L + x₁.val) / L = y₁.val := by
       rw [Nat.add_comm, Nat.add_mul_div_right]
       simp [Nat.div_eq_of_lt x₁.isLt]

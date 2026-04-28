@@ -498,6 +498,7 @@ theorem no_weight_1_logical (g : NQubitPauliGroupElement 9)
 -- each checking commutation with generators and existence of span coefficients.
 set_option maxRecDepth 16384 in
 set_option maxHeartbeats 4000000 in
+-- The finite exhaustive search over weight-2 cases requires a large heartbeat budget.
 private lemma weight_2_pairs_span_coeffs :
     ∀ (i j : Fin 9), i ≠ j → ∀ (pi pj : PauliOperator), pi ≠ .I → pj ≠ .I →
     let op : NQubitPauliOperator 9 := fun k => if k = i then pi else if k = j then pj else .I

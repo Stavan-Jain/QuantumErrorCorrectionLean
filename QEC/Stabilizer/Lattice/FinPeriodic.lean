@@ -1,5 +1,6 @@
 import Mathlib.Tactic
 
+
 namespace Quantum
 namespace Stabilizer
 namespace Lattice
@@ -34,7 +35,7 @@ def prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L :=
   · have hL : 0 < L := Fact.out
     have hmod : (((0 + (L - 1)) % L + 1) % L) = 0 := by
       have hm1 : L - 1 < L := by omega
-      simp [Nat.zero_add, Nat.mod_eq_of_lt hm1]
+      simp [Nat.mod_eq_of_lt hm1]
       have : (L - 1) + 1 = L := by omega
       rw [this, Nat.mod_self]
     simpa [next, prev, h0] using hmod
@@ -57,7 +58,7 @@ def prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L :=
   apply Fin.ext
   have hL : 0 < L := Fact.out
   by_cases hlast : i.val + 1 = L
-  · have hmod0 : (i.val + 1) % L = 0 := by simpa [hlast] using Nat.mod_self L
+  · have hmod0 : (i.val + 1) % L = 0 := by simp [hlast]
     have hi : i.val = L - 1 := by omega
     have hm1 : L - 1 < L := by omega
     have hcalc : (((i.val + 1) % L + (L - 1)) % L) = i.val := by
@@ -79,12 +80,12 @@ def prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L :=
   constructor
   · intro h
     calc
-      a = next L (prev L a) := by simpa using (next_prev L a).symm
-      _ = next L b := by simpa [h]
+      a = next L (prev L a) := by simp
+      _ = next L b := by simp [h]
   · intro h
     calc
-      prev L a = prev L (next L b) := by simpa [h]
-      _ = b := by simpa using (prev_next L b)
+      prev L a = prev L (next L b) := by simp [h]
+      _ = b := by simp
 
 /-- Rewriting `a = prev b` as `next a = b`. -/
 @[simp] lemma eq_prev_iff_next_eq (L : ℕ) [Fact (0 < L)] (a b : Fin L) :
@@ -92,12 +93,12 @@ def prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L :=
   constructor
   · intro h
     calc
-      next L a = next L (prev L b) := by simpa [h]
-      _ = b := by simpa using (next_prev L b)
+      next L a = next L (prev L b) := by simp [h]
+      _ = b := by simp
   · intro h
     calc
-      a = prev L (next L a) := by simpa using (prev_next L a).symm
-      _ = prev L b := by simpa [h]
+      a = prev L (next L a) := by simp
+      _ = prev L b := by simp [h]
 
 /-- On nontrivial cyclic indices (`2 ≤ L`), `next` has no fixed points. -/
 lemma next_ne_self (L : ℕ) [Fact (2 ≤ L)] (i : Fin L) : next L i ≠ i := by
@@ -106,7 +107,7 @@ lemma next_ne_self (L : ℕ) [Fact (2 ≤ L)] (i : Fin L) : next L i ≠ i := by
   have h2 : 2 ≤ L := Fact.out
   have hval : (i.val + 1) % L = i.val := congrArg Fin.val h
   by_cases htop : i.val + 1 = L
-  · have hmod : (i.val + 1) % L = 0 := by simpa [htop] using Nat.mod_self L
+  · have hmod : (i.val + 1) % L = 0 := by simp [htop]
     have hi0 : i.val = 0 := by simpa [hmod] using hval.symm
     have hiLast : i.val = L - 1 := by omega
     omega

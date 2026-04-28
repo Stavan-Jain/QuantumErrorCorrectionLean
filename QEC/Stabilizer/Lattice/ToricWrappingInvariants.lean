@@ -2,6 +2,7 @@ import Mathlib.Tactic
 import QEC.Stabilizer.Lattice.ToricHomology
 import QEC.Stabilizer.Lattice.ToricH1Dimension
 
+
 namespace Quantum
 namespace Stabilizer
 namespace Lattice
@@ -74,59 +75,85 @@ theorem hAt_independent_on_cycles (c : toricCycles (L := L)) (x0 x1 : Fin L) :
     hAt (L := L) x0 c.1 = hAt (L := L) x1 c.1 := by
   have hAt_indep : ∀ x : Fin L, hAt L x c.1 = hAt L (prev L x) c.1 := by
     intro x
-    have h_sum_zero : ∑ y : Fin L, (c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev L x) y) + c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev L y))) = 0 := by
-      have h_diff : ∀ y : Fin L, c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev L x) y) + c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev L y)) = 0 := by
+    have h_sum_zero :
+        ∑ y : Fin L,
+          (c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev L x) y) +
+            c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev L y))) = 0 := by
+      have h_diff : ∀ y : Fin L,
+          c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev L x) y) +
+            c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev L y)) = 0 := by
         intro y
         have h_cycle : toricBoundary1 (L := L) c.val (x, y) = 0 := by
           exact c.2 |> fun h => by simp ;
         convert h_cycle using 1;
       aesop;
     simp_all +decide [ Finset.sum_add_distrib, hAt ];
-    have h_sum_zero : ∑ y : Fin L, c.val (EdgeIdx.v x (prev L y)) = ∑ y : Fin L, c.val (EdgeIdx.v x y) := by
+    have h_sum_zero :
+        ∑ y : Fin L, c.val (EdgeIdx.v x (prev L y)) =
+          ∑ y : Fin L, c.val (EdgeIdx.v x y) := by
       apply Finset.sum_bij (fun y _ => prev L y);
       · simp;
       · exact fun a₁ _ a₂ _ h => by simpa using congr_arg ( fun x => next L x ) h;
       · exact fun y _ => ⟨ next L y, Finset.mem_univ _, by simp +decide ⟩;
       · exact fun _ _ => rfl;
     grind;
-  -- By induction on the difference between $x0$ and $x1$, we can show that $hAt L x0 c = hAt L x1 c$.
-  have h_ind : ∀ k : ℕ, hAt L (Fin.mk ((x0.val + k) % L) (Nat.mod_lt _ Fact.out)) c.1 = hAt L x0 c.1 := by
+  -- Induct on the modular offset from `x0` to `x1`.
+  have h_ind :
+      ∀ k : ℕ,
+        hAt L (Fin.mk ((x0.val + k) % L) (Nat.mod_lt _ Fact.out)) c.1 = hAt L x0 c.1 := by
     intro k;
-    induction' k with k ih;
-    · norm_num [ Nat.mod_eq_of_lt ];
-    · convert ih using 1;
-      convert hAt_indep _ using 2;
-      unfold prev; norm_num [ add_assoc, Nat.mod_eq_of_lt ] ;
-      rw [ show 1 + ( L - 1 ) = L by rw [ add_tsub_cancel_of_le ( by linarith [ Fin.is_lt x0, Fact.out ( p := 0 < L ) ] ) ] ] ; norm_num [ Nat.add_mod ];
+    induction k with
+    | zero =>
+        norm_num [Nat.mod_eq_of_lt]
+    | succ k ih =>
+        convert ih using 1
+        convert hAt_indep _ using 2
+        unfold prev
+        norm_num [add_assoc, Nat.mod_eq_of_lt]
+        rw [show 1 + (L - 1) = L by
+          rw [add_tsub_cancel_of_le (by linarith [Fin.is_lt x0, Fact.out (p := 0 < L)])]]
+        norm_num [Nat.add_mod]
   convert h_ind ( x1.val + L - x0.val ) |> Eq.symm using 2;
-  norm_num [ add_tsub_cancel_of_le ( show ( x0 : ℕ ) ≤ x1 + L from by linarith [ Fin.is_lt x0, Fin.is_lt x1 ] ), Nat.mod_eq_of_lt ]
+  norm_num [add_tsub_cancel_of_le
+    (show (x0 : ℕ) ≤ x1 + L from by linarith [Fin.is_lt x0, Fin.is_lt x1]), Nat.mod_eq_of_lt]
 
 /-- `vAt` is independent of the chosen row on cycles. -/
 theorem vAt_independent_on_cycles (c : toricCycles (L := L)) (y0 y1 : Fin L) :
     vAt (L := L) y0 c.1 = vAt (L := L) y1 c.1 := by
   have h_B1_gen : ∀ y : Fin L, vAt (L := L) y (c.1) = vAt (L := L) (prev (L := L) y) (c.1) := by
     intro y
-    have h_sum_eq : ∑ x : Fin L, (c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev (L := L) x) y) + c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev (L := L) y))) = 0 := by
-      have h_sum_eq : ∀ x : Fin L, c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev (L := L) x) y) + c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev (L := L) y)) = 0 := by
+    have h_sum_eq :
+        ∑ x : Fin L,
+          (c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev (L := L) x) y) +
+            c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev (L := L) y))) = 0 := by
+      have h_sum_eq : ∀ x : Fin L,
+          c.val (EdgeIdx.h x y) + c.val (EdgeIdx.h (prev (L := L) x) y) +
+            c.val (EdgeIdx.v x y) + c.val (EdgeIdx.v x (prev (L := L) y)) = 0 := by
         intro x; have := c.2; simp_all +decide [ toricCycles ] ;
         convert congr_arg ( fun f => f ( x, y ) ) c.2 using 1;
       aesop;
     simp_all +decide [ Finset.sum_add_distrib, vAt ];
-    rw [ show ∑ x : Fin L, ( c : EdgeIdx L → ZMod 2 ) ( EdgeIdx.h ( prev L x ) y ) = ∑ x : Fin L, ( c : EdgeIdx L → ZMod 2 ) ( EdgeIdx.h x y ) from ?_ ] at h_sum_eq;
+    rw [show ∑ x : Fin L, (c : EdgeIdx L → ZMod 2) (EdgeIdx.h (prev L x) y) =
+        ∑ x : Fin L, (c : EdgeIdx L → ZMod 2) (EdgeIdx.h x y) from ?_] at h_sum_eq
     · grind +splitImp;
     · apply Finset.sum_bij (fun x _ => prev (L := L) x);
       · simp;
       · exact fun x _ y _ h => by simpa using congr_arg ( fun z => next L z ) h;
       · exact fun x _ => ⟨ next L x, Finset.mem_univ _, by simp +decide ⟩;
       · exact fun _ _ => rfl;
-  -- By induction on the difference between y0 and y1, we can show that vAt is independent of the row.
-  have h_ind : ∀ k : ℕ, ∀ y : Fin L, vAt (L := L) y (c.1) = vAt (L := L) (Fin.mk ((y.val + k) % L) (Nat.mod_lt _ (Fact.out : 0 < L))) (c.1) := by
-    intro k y; induction' k with k ih <;> simp +decide [ Nat.add_mod, Nat.mod_eq_of_lt ] ;
-    simp +decide [ ← Nat.add_mod, ih ];
-    convert h_B1_gen _ |> Eq.symm using 2 ; norm_num [ add_assoc, Nat.mod_eq_of_lt ];
-    norm_num [ ← add_assoc, next ];
+  -- Induct on the modular offset from `y0` to `y1`.
+  have h_ind : ∀ k : ℕ, ∀ y : Fin L,
+      vAt (L := L) y (c.1) =
+        vAt (L := L) (Fin.mk ((y.val + k) % L) (Nat.mod_lt _ (Fact.out : 0 < L))) (c.1) := by
+    intro k y
+    induction' k with k ih <;> simp +decide [Nat.add_mod, Nat.mod_eq_of_lt]
+    simp +decide [ih]
+    convert h_B1_gen _ |> Eq.symm using 2
+    norm_num [add_assoc, Nat.mod_eq_of_lt]
+    norm_num [← add_assoc, next]
   convert h_ind ( y1.val + L - y0.val ) y0 using 1;
-  simp +decide [ add_tsub_cancel_of_le ( show ( y0 : ℕ ) ≤ y1 + L from by linarith [ Fin.is_lt y0, Fin.is_lt y1 ] ), Nat.mod_eq_of_lt ]
+  simp +decide [add_tsub_cancel_of_le
+    (show (y0 : ℕ) ≤ y1 + L from by linarith [Fin.is_lt y0, Fin.is_lt y1]), Nat.mod_eq_of_lt]
 
 /-- Boundaries have trivial `h` invariant. -/
 theorem h_boundary_zero (b : toricBoundaries (L := L)) :
@@ -224,12 +251,21 @@ theorem phi_surjective :
   unfold phi;
   intro x;
   rcases x with ⟨ x, y ⟩;
-  -- Consider the cycle $c$ defined by setting all horizontal edges at $y=0$ to $x$ and all vertical edges at $x=0$ to $y$.
-  obtain ⟨c, hc⟩ : ∃ c : C1 L, (∀ x' : Fin L, ∀ y' : Fin L, c (EdgeIdx.h x' y') = if y' = zeroCoord L then x else 0) ∧ (∀ x' : Fin L, ∀ y' : Fin L, c (EdgeIdx.v x' y') = if x' = zeroCoord L then y else 0) ∧ toricBoundary1 (L := L) c = 0 := by
-    refine' ⟨ fun e => match e with | EdgeIdx.h x' y' => if y' = zeroCoord L then x else 0 | EdgeIdx.v x' y' => if x' = zeroCoord L then y else 0, _, _, _ ⟩ <;> simp +decide [ toricBoundary1 ];
+  -- Build a cycle with horizontal strip value `x` and vertical strip value `y`.
+  obtain ⟨c, hc⟩ : ∃ c : C1 L,
+      (∀ x' : Fin L, ∀ y' : Fin L, c (EdgeIdx.h x' y') = if y' = zeroCoord L then x else 0) ∧
+      (∀ x' : Fin L, ∀ y' : Fin L, c (EdgeIdx.v x' y') = if x' = zeroCoord L then y else 0) ∧
+      toricBoundary1 (L := L) c = 0 := by
+    refine ⟨
+      (fun e =>
+        match e with
+        | EdgeIdx.h x' y' => if y' = zeroCoord L then x else 0
+        | EdgeIdx.v x' y' => if x' = zeroCoord L then y else 0),
+      ?_, ?_, ?_⟩ <;>
+      simp +decide [toricBoundary1]
     ext ⟨ x, y ⟩ ; ring;
     aesop;
-  refine' ⟨ Submodule.Quotient.mk ⟨ c, hc.2.2 ⟩, _ ⟩;
+  refine ⟨Submodule.Quotient.mk ⟨c, hc.2.2⟩, ?_⟩
   simp +decide [ hAt, vAt, hc ]
 
 /-- phi as an explicit linear map. -/
