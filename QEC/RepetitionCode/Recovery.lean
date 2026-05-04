@@ -173,7 +173,6 @@ lemma norm_recoverVec_X_q1_3_encodeVec (v : QubitVec) :
   Quantum.maj0_amp, Quantum.maj1_amp ]
   ring_nf
   erw [ Finset.sum_eq_add ( ( 0, 0, 0 ) ) ( ( 1, 1, 1 ) ) ] <;> norm_num
-  grind only [cases Or]
 
 /-- For a normalized qubit state ψ, the recovered vector after a single X error on qubit 1
     has norm 1. -/

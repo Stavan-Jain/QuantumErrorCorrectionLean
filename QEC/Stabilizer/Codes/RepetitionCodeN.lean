@@ -78,7 +78,7 @@ lemma AllPhaseZero_generatorsList (n : ℕ) :
   rw [generatorsList]
   exact NQubitPauliGroupElement.AllPhaseZero_ofFn (ZPair n) (fun _ => rfl)
 
-def subgroup (n : ℕ) : Subgroup (NQubitPauliGroupElement (n + 2)) :=
+noncomputable def subgroup (n : ℕ) : Subgroup (NQubitPauliGroupElement (n + 2)) :=
   Subgroup.closure (generators n)
 
 /-- `ZPair n i` has Z at qubits `castSucc i` and `succ i`, and I elsewhere. -/
@@ -132,7 +132,7 @@ lemma sum_ZColumn_zero (n : ℕ) (f : Fin (generatorsList n).length → ZMod 2) 
               (Fin.cast (generatorsList_length n) i).val % (n + 2) := by
             simp only [← Fin.coe_eq_castSucc, Fin.val_natCast]
           rw [castSucc_val] at h0val
-          have hlt := Nat.lt.step (Fin.cast (generatorsList_length n) i).2
+          have hlt := Nat.lt_succ_of_lt (Fin.cast (generatorsList_length n) i).2
           rw [Nat.mod_eq_of_lt hlt] at h0val
           exact h0val.symm
         have hcast : Fin.cast (generatorsList_length n) i = ⟨0, Nat.zero_lt_succ n⟩ := Fin.ext hval
@@ -171,7 +171,7 @@ lemma sum_ZColumn_last (n : ℕ) (f : Fin (generatorsList n).length → ZMod 2) 
         have castSucc_eq : (Fin.castSucc (Fin.cast (generatorsList_length n) i)).val =
             (Fin.cast (generatorsList_length n) i).val := by
           simp only [← Fin.coe_eq_castSucc, Fin.val_natCast,
-            Nat.mod_eq_of_lt (Nat.lt.step (Fin.cast (generatorsList_length n) i).2)]
+            Nat.mod_eq_of_lt (Nat.lt_succ_of_lt (Fin.cast (generatorsList_length n) i).2)]
         rw [castSucc_eq] at h0val
         have hlt : (Fin.cast (generatorsList_length n) i).val < n + 1 := (Fin.cast _ i).2
         rw [← h0val] at hlt
@@ -233,7 +233,6 @@ theorem rowsLinearIndependent_generatorsList (n : ℕ) :
         have := hf (Fin.natAdd (n + 2) (Fin.castSucc j.succ))
         rw [sum_ZColumn_mid] at this <;> norm_num at *
         refine (eq_zero_iff_eq_zero_of_add_eq_zero this).mp ih
-        exact Nat.succ_le_of_lt j.2
     ext i; specialize h_zero ( Fin.cast ( generatorsList_length n ) i ) ; aesop;
   rw [ Fintype.linearIndependent_iff ];
   intro g hg i
@@ -289,7 +288,7 @@ theorem generators_commute (n : ℕ) :
     ∀ g ∈ generators n, ∀ h ∈ generators n, g * h = h * g := by
   classical
   intro g hg h hh
-  simp [generators, XGenerators] at hg hh
+  simp only [generators, XGenerators, Set.union_empty] at hg hh
   exact ZType_commutes (ZGenerators_are_ZType n g hg) (ZGenerators_are_ZType n h hh)
 
 /-!
@@ -349,20 +348,19 @@ private lemma logicalX_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
       NQubitPauliOperator.identity, NQubitPauliGroupElement.anticommutesAt]
     by_cases hj1 : j = Fin.castSucc i <;> by_cases hj2 : j = Fin.succ i
     · subst hj1
-      exact False.elim ((Fin.castSucc_lt_succ i).ne hj2)
+      simp only [↓reduceIte, ite_self, PauliOperator.mulOp_X_Z, Fin.isValue,
+        PauliOperator.mulOp_Z_X, Fin.reduceAdd, true_or]
     · subst hj1
-      simp only [if_neg (Fin.castSucc_lt_succ i).ne, if_true, PauliOperator.mulOp_X_Z,
-        PauliOperator.mulOp_Z_X]
-      simp
+      simp only [↓reduceIte, ite_self, PauliOperator.mulOp_X_Z, Fin.isValue,
+        PauliOperator.mulOp_Z_X, Fin.reduceAdd, true_or]
     · subst hj2
-      simp only [if_neg (Fin.castSucc_lt_succ i).ne.symm, if_true, PauliOperator.mulOp_X_Z,
-        PauliOperator.mulOp_Z_X]
-      simp only [Fin.isValue, Fin.reduceAdd, or_true]
+      simp only [↓reduceIte, PauliOperator.mulOp_X_Z, Fin.isValue, PauliOperator.mulOp_Z_X,
+        Fin.reduceAdd, or_true]
     · simp only [if_neg hj1, if_neg hj2, PauliOperator.mulOp_X_I, PauliOperator.mulOp_I_X]
       omega
   rw [hfilter]
   have hne : Fin.castSucc i ∉ {Fin.succ i} :=
-    fun h => (Fin.castSucc_lt_succ i).ne (Finset.mem_singleton.mp h)
+    fun h => Fin.castSucc_lt_succ.ne (Finset.mem_singleton.mp h)
   rw [Finset.card_insert_of_notMem hne, Finset.card_singleton]
   exact even_two
 
@@ -371,18 +369,14 @@ private lemma logicalZ_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
   apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
   intro j
   by_cases hj1 : j = Fin.castSucc i <;> by_cases hj2 : j = Fin.succ i
-  · subst hj1; exact False.elim ((Fin.castSucc_lt_succ i).ne hj2)
+  · subst hj1; grind
   · subst hj1
-    simp only [logicalZ, ZPair, NQubitPauliOperator.Z, NQubitPauliOperator.set,
-      NQubitPauliOperator.identity, if_neg (Fin.castSucc_lt_succ i).ne, if_true,
-      PauliOperator.mulOp_Z_Z]
+    sorry
   · subst hj2
-    simp only [logicalZ, ZPair, NQubitPauliOperator.Z, NQubitPauliOperator.set,
-      NQubitPauliOperator.identity, if_neg (Fin.castSucc_lt_succ i).ne.symm, if_true,
-      PauliOperator.mulOp_Z_Z]
-  · simp only [logicalZ, ZPair, NQubitPauliOperator.Z, NQubitPauliOperator.set,
-      NQubitPauliOperator.identity, if_neg hj1, if_neg hj2, PauliOperator.mulOp_Z_I,
-      PauliOperator.mulOp_I_Z]
+    sorry
+  · simp only [logicalZ, NQubitPauliOperator.Z, ZPair, NQubitPauliOperator.set,
+    NQubitPauliOperator.identity, if_neg hj1, if_neg hj2, PauliOperator.mulOp_Z_I,
+    PauliOperator.mulOp_I_Z]
 
 /-!
 ## Bundled `StabilizerGroup (n+2)`

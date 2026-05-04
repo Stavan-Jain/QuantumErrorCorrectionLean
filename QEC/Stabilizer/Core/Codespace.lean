@@ -102,8 +102,10 @@ lemma trace_stabilizerSum (S : StabilizerGroup n) : (stabilizerSum S).trace = (2
           norm_num [NQubitPauliGroupElement.toMatrix_one]
         · have := eq_one_of_mem_stabilizer_and_is_scalar S g hg h; aesop
       · aesop
-    simp_all +decide
-    exact fun h => False.elim <| h <| S.one_mem
+    rw [h_trace_sum, Finset.sum_ite_eq']
+    split_ifs with h
+    · rfl
+    · exact absurd (Set.mem_toFinset.mpr S.one_mem) h
   convert h_trace_sum using 1
   unfold stabilizerSum
   rw [Matrix.trace_sum]

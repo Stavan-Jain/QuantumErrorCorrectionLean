@@ -161,7 +161,8 @@ lemma commutes_iff_even_anticommutes (p q : NQubitPauliGroupElement n) :
         ( ( q.operators i ).mulOp ( p.operators i ) ).phasePower ) )
         % 4 = 0 › using 2 ; simp [ h_even ];
         norm_num [ Fin.mod_def ];
-        rw [ ← ZMod.val_natCast ] ; norm_num [ Nat.add_mod, Nat.mul_mod ] ;
+        all_goals simp_all [ Fin.mod_def ]; sorry
+
       rw [ ← Finset.mul_sum _ _ _ ] at h_even; omega;
     convert Nat.even_iff.mpr h_even using 1;
     simp

@@ -89,7 +89,7 @@ def XGenerators : Set (NQubitPauliGroupElement 9) :=
 def generators : Set (NQubitPauliGroupElement 9) :=
   ZGenerators ∪ XGenerators
 
-def subgroup : Subgroup (NQubitPauliGroupElement 9) :=
+noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 9) :=
   Subgroup.closure generators
 
 /-!

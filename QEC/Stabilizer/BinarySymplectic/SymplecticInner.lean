@@ -66,10 +66,9 @@ theorem commutes_iff_symplectic_inner_zero (p q : NQubitPauliGroupElement n) :
   PauliOperator.symplecticProductSingle P Q =
   if (P.mulOp Q).phasePower = (Q.mulOp P).phasePower + 2 then 1 else 0 := by
     rintro ( P | P | P | P ) ( Q | Q | Q | Q ) <;> simp +decide;
-  rw [ Finset.sum_congr rfl fun i _ => h_symplecticProductSingle _ _ ] ;
-  simp [ ZMod ] ;
-  rw [ ← even_iff_two_dvd ];
-  congr! 2;
+  rw [ Finset.sum_congr rfl fun i _ => h_symplecticProductSingle _ _ ]
+  rw [Finset.sum_boole, ZMod.natCast_eq_zero_iff_even]
+  congr! 2
   ext; simp [Quantum.NQubitPauliGroupElement.anticommutesAt]
 
 /-- Two n-qubit Pauli group elements anticommute iff their symplectic inner product

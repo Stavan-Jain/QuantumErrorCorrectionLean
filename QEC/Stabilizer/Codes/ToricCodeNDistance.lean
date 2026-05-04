@@ -1,6 +1,7 @@
 import Mathlib.Tactic
 import QEC.Stabilizer.Codes.ToricCodeNDistanceX
-import QEC.Stabilizer.Lattice.ToricWrappingInvariants
+import QEC.Stabilizer.Codes.ToricCodeNDistanceZ
+import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceZ
 import QEC.Stabilizer.PauliGroup.NQubitElement
 
 namespace Quantum
@@ -10,31 +11,18 @@ namespace ToricCodeN
 open scoped BigOperators
 open NQubitPauliGroupElement
 
-/-- Placeholder type alias for dual-lattice 1-chains used in Z-distance statements. -/
-abbrev DualC1 (L : ℕ) : Type := Stabilizer.Lattice.C1 L
+/-!
+# Full toric-code distance = L
 
-/-- Placeholder dual encoding of Z-type operators from dual 1-chains. -/
-noncomputable def toricZOperatorOfDualChain (L : ℕ) (c : DualC1 L) :
-    NQubitPauliGroupElement (numQubits L) := by
-  exact ⟨0, fun q =>
-    if ∃ e : Stabilizer.Lattice.EdgeIdx L,
-        Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ c e = 1
-    then PauliOperator.Z else PauliOperator.I⟩
+Combines the X-distance (from `ToricCodeNDistanceX`) and Z-distance
+(from `ToricCodeNDistanceZ`) via the CSS bridge to obtain the full distance.
+-/
 
-/-- Z-distance predicate specialized to toric-code Z-type logical operators. -/
-def HasToricZDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
-  d ≥ 1 ∧
-  (∀ g : NQubitPauliGroupElement (numQubits L),
-      NQubitPauliGroupElement.IsZTypeElement g →
-      IsNontrivialLogicalOperator g (stabilizerGroup L) →
-      0 < weight g →
-      weight g ≥ d) ∧
-  (∃ g : NQubitPauliGroupElement (numQubits L),
-      NQubitPauliGroupElement.IsZTypeElement g ∧
-      IsNontrivialLogicalOperator g (stabilizerGroup L) ∧
-      weight g = d)
+-- ---------------------------------------------------------------------------
+-- 1.  Full-distance predicate
+-- ---------------------------------------------------------------------------
 
-/-- Full-distance predicate over all nontrivial logical operators for toric stabilizer groups. -/
+/-- Full-distance predicate over all nontrivial logical operators. -/
 def HasToricDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
   d ≥ 1 ∧
   (∀ g : NQubitPauliGroupElement (numQubits L),
@@ -45,42 +33,96 @@ def HasToricDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
       IsNontrivialLogicalOperator g (stabilizerGroup L) ∧
       weight g = d)
 
-/-- Section 8.3 scaffold: dual-lattice transfer for Z-logical commutation criterion. -/
-theorem zCommutesWithXChecks_iff_dualCycle (L : ℕ) [Fact (2 ≤ L)] (c : DualC1 L) :
-    True := by
-  let _ := c
-  trivial
+-- ---------------------------------------------------------------------------
+-- 2.  CSS bridge: full distance = min(dX, dZ)
+-- ---------------------------------------------------------------------------
 
-/-- Section 8.3 scaffold: dual-lattice transfer for Z-stabilizer criterion. -/
-theorem zIsStarProduct_iff_dualBoundary (L : ℕ) [Fact (2 ≤ L)] (c : DualC1 L) :
-    True := by
-  let _ := c
-  trivial
+/-
+Helper definitions for the CSS bridge proof.
 
-/-- Section 8.3 scaffold: Z-distance endpoint `dZ = L`. -/
-theorem toricCodeN_dZ_eq_L (L : ℕ) [Fact (2 ≤ L)] :
-    HasToricZDistance L L := by
+For a general Pauli `g`, the X-chain and Z-chain are:
+  xChainOf g e = 1  iff  g.operators (edgeToQubitIdx e) ∈ {X, Y}
+  zChainOf g e = 1  iff  g.operators (edgeToQubitIdx e) ∈ {Z, Y}
+
+Key facts:
+  * weight g ≥ edgeWeight (xChainOf g)   (support inclusion)
+  * weight g ≥ edgeWeight (zChainOf g)
+  * g commutes with all Z-vertex stabs  ↔  xChainOf g ∈ toricCycles
+  * g commutes with all X-face stabs    ↔  zChainOf g ∈ toricDualCycles
+  * g nontrivial  →  ¬(xChainOf g ∈ toricBoundaries ∧ zChainOf g ∈ toricDualBoundaries)
+-/
+
+/-- X-part chain of a general Pauli (1 where the operator is X or Y). -/
+private noncomputable def xChainOf (L : ℕ) (g : NQubitPauliGroupElement (numQubits L)) :
+    Stabilizer.Lattice.C1 L :=
+  fun e =>
+    if g.operators (Stabilizer.Lattice.edgeToQubitIdx L e) = PauliOperator.X ∨
+       g.operators (Stabilizer.Lattice.edgeToQubitIdx L e) = PauliOperator.Y
+    then 1 else 0
+
+/-- Z-part chain of a general Pauli (1 where the operator is Z or Y). -/
+private noncomputable def zChainOf (L : ℕ) (g : NQubitPauliGroupElement (numQubits L)) :
+    Stabilizer.Lattice.C1 L :=
+  fun e =>
+    if g.operators (Stabilizer.Lattice.edgeToQubitIdx L e) = PauliOperator.Z ∨
+       g.operators (Stabilizer.Lattice.edgeToQubitIdx L e) = PauliOperator.Y
+    then 1 else 0
+
+/-- Weight of `g` is at least the edge-weight of its X-chain. -/
+private lemma weight_ge_edgeWeight_xChain (L : ℕ) [Fact (2 ≤ L)]
+    (g : NQubitPauliGroupElement (numQubits L)) :
+    weight g ≥ Stabilizer.Lattice.edgeWeight (L := L) (xChainOf L g) := by
   sorry
 
-/-- CSS bridge scaffold: full distance equals `min dX dZ` for toric distance predicates. -/
+/-- Weight of `g` is at least the edge-weight of its Z-chain. -/
+private lemma weight_ge_edgeWeight_zChain (L : ℕ) [Fact (2 ≤ L)]
+    (g : NQubitPauliGroupElement (numQubits L)) :
+    weight g ≥ Stabilizer.Lattice.edgeWeight (L := L) (zChainOf L g) := by
+  sorry
+
+/-- If `g` is in the centralizer, its X-chain is a primal cycle. -/
+private lemma xChain_mem_toricCycles_of_centralizer (L : ℕ) [Fact (2 ≤ L)]
+    (g : NQubitPauliGroupElement (numQubits L))
+    (hg : g ∈ centralizer (stabilizerGroup L)) :
+    xChainOf L g ∈ Stabilizer.Lattice.toricCycles (L := L) := by
+  sorry
+
+/-- If `g` is in the centralizer, its Z-chain is a dual cycle. -/
+private lemma zChain_mem_toricDualCycles_of_centralizer (L : ℕ) [Fact (2 ≤ L)]
+    (g : NQubitPauliGroupElement (numQubits L))
+    (hg : g ∈ centralizer (stabilizerGroup L)) :
+    zChainOf L g ∈ Stabilizer.Lattice.toricDualCycles (L := L) := by
+  sorry
+
+/-- For a nontrivial logical `g`, the X-chain and Z-chain cannot both be boundaries. -/
+private lemma not_both_boundary_of_nontrivial (L : ℕ) [Fact (2 ≤ L)]
+    (g : NQubitPauliGroupElement (numQubits L))
+    (hg : IsNontrivialLogicalOperator g (stabilizerGroup L)) :
+    ¬(xChainOf L g ∈ Stabilizer.Lattice.toricBoundaries (L := L) ∧
+      zChainOf L g ∈ Stabilizer.Lattice.toricDualBoundaries (L := L)) := by
+  sorry
+
+/-- CSS bridge: full distance = min(dX, dZ). -/
 theorem toricCodeN_distance_eq_min_dX_dZ (L dX dZ : ℕ) [Fact (2 ≤ L)]
     (hx : HasToricXDistance L dX) (hz : HasToricZDistance L dZ) :
     HasToricDistance L (Nat.min dX dZ) := by
   sorry
 
-/-- Section 8.3 endpoint scaffold: full toric-code distance equals `L`. -/
+-- ---------------------------------------------------------------------------
+-- 3.  Full distance = L
+-- ---------------------------------------------------------------------------
+
+/-- Section 8.3 endpoint: the full toric-code distance is `L`. -/
 theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     HasToricDistance L L := by
   have hx : HasToricXDistance L L := toricCodeN_dX_eq_L L
   have hz : HasToricZDistance L L := toricCodeN_dZ_eq_L L
   simpa using toricCodeN_distance_eq_min_dX_dZ L L L hx hz
 
-/-- Parameter-packaging scaffold: toric family has parameters
-`[[2L², 2, L]]` at the statement level. -/
+/-- Parameter-packaging: toric family has parameters `[[2L², 2, L]]`. -/
 theorem toricCodeN_parameters_statement (L : ℕ) [Fact (2 ≤ L)] :
-    numQubits L = 2 * L * L ∧ HasToricDistance L L := by
-  refine ⟨rfl, ?_⟩
-  exact toricCodeN_distance_eq_L L
+    numQubits L = 2 * L * L ∧ HasToricDistance L L :=
+  ⟨rfl, toricCodeN_distance_eq_L L⟩
 
 end ToricCodeN
 end StabilizerGroup

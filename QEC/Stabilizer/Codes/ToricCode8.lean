@@ -158,7 +158,7 @@ theorem generators_commute :
   · exact XGenerators_commute g hgX h hhX
 
 /-- The stabilizer subgroup: closure of the 8 generators. -/
-def subgroup : Subgroup (NQubitPauliGroupElement 8) :=
+noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 8) :=
   Subgroup.closure generators
 
 /-- -I is not in the stabilizer subgroup. -/

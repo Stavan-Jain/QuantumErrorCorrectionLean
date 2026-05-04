@@ -261,7 +261,7 @@ def generators : Set (NQubitPauliGroupElement (2 ^ r - 1)) :=
   ZGenerators r ∪ XGenerators r
 
 /-- The quantum Hamming stabilizer subgroup: closure of the 2r generators. -/
-def subgroup : Subgroup (NQubitPauliGroupElement (2 ^ r - 1)) :=
+noncomputable def subgroup : Subgroup (NQubitPauliGroupElement (2 ^ r - 1)) :=
   Subgroup.closure (generators r)
 
 /-!

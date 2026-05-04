@@ -192,7 +192,7 @@ lemma XGenerators_are_XType :
 /-
 The stabilizer subgroup: closure of the 8 generators.
 -/
-def subgroup : Subgroup (NQubitPauliGroupElement 9) :=
+noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 9) :=
   Subgroup.closure generators
 
 /-

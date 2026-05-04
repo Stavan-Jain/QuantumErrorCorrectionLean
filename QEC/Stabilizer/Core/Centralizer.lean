@@ -21,7 +21,7 @@ stabilizer groups (no -I), the centralizer coincides with the normalizer.
 
 /-- The centralizer of a stabilizer group: all Pauli elements that commute with
     every element of S. Equivalently, operators that preserve the codespace. -/
-def centralizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
+noncomputable def centralizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
   Subgroup.centralizer (S.toSubgroup : Set (NQubitPauliGroupElement n))
 
 /-- The centralizer depends only on the underlying subgroup. -/
@@ -31,8 +31,8 @@ lemma centralizer_eq_of_toSubgroup_eq (S T : StabilizerGroup n) (h : S.toSubgrou
 
 /-- The normalizer of S in the n-qubit Pauli group: Pauli elements g such that
     conjugation sends S to itself (g⁻¹ * s * g ∈ S for all s ∈ S). -/
-def pauliNormalizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
-  S.toSubgroup.normalizer
+noncomputable def pauliNormalizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
+  Subgroup.normalizer S.toSubgroup
 
 /-- For a stabilizer group (abelian, no -I), the normalizer of S in the Pauli group
     equals the centralizer of S in the Pauli group. -/
