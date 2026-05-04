@@ -8,5 +8,13 @@ docs/
 # Cursor local state and continual-learning index
 .cursor/
 
+# Claude Code local state
+.claude/
+
 # Learned preferences/facts (optional: keep local only)
 AGENTS.md
+
+# Personal toolchain-upgrade runbook (not part of published docs)
+TOOLCHAIN_UPGRADE.md
+
+project_aristotle

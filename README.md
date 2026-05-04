@@ -31,7 +31,7 @@ Import the whole development via `QEC` (or `QEC.Foundations.Foundations`, `QEC.R
 
 ### Prerequisites
 
-- [Lean 4](https://lean-lang.org/) (this repo uses `leanprover/lean4:v4.24.0-rc1`; see `lean-toolchain`)
+- [Lean 4](https://lean-lang.org/) (this repo uses `leanprover/lean4:v4.30.0-rc2`; see `lean-toolchain`)
 - [Lake](https://github.com/leanprover/lake) (bundled with Lean) and mathlib (pulled automatically by Lake)
 
 ### Building

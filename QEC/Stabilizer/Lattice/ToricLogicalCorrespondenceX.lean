@@ -436,7 +436,9 @@ lemma c2_eq_sum_singleFace (L : ℕ) (f : C2 L) :
     f = ∑ p ∈ Finset.univ.filter (fun p : FaceIdx L => f p = 1), singleFace p := by
   ext p;
   unfold singleFace;
-  cases Fin.exists_fin_two.mp ⟨ f p, rfl ⟩ <;> simp +decide [ * ]
+  cases Fin.exists_fin_two.mp ⟨ f p, rfl ⟩ <;> simp +decide [ * ] <;>
+    split_ifs <;> simp_all (config := {decide := true}) <;>
+    first | rfl | exact absurd rfl ‹_›
 
 /-
 Stabilizer criterion: X-chain is plaquette product iff it is a boundary.

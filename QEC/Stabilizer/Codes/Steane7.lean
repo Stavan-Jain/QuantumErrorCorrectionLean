@@ -94,7 +94,7 @@ def generators : Set (NQubitPauliGroupElement 7) :=
   ZGenerators ∪ XGenerators
 
 /-- The Steane stabilizer subgroup: closure of the six generators. -/
-def subgroup : Subgroup (NQubitPauliGroupElement 7) :=
+noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 7) :=
   Subgroup.closure generators
 
 /-!

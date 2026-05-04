@@ -196,23 +196,27 @@ private lemma maps_to_codespace_of_conjugation (U : NQubitGate n) (S : Stabilize
       simp_all +decide
       convert congr_arg (fun x : NQubitVec n => (Real.sqrt (∑ i, ‖v i‖ ^ 2)) • x) this using 1 <;>
         norm_num [Matrix.mulVec_smul, smul_smul]
-      · rw
-          [mul_inv_cancel₀
-            (ne_of_gt
-              (Real.sqrt_pos.mpr
-                (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv)))),
-            one_smul]
-      · rw
-          [mul_inv_cancel₀
-            (ne_of_gt
-              (Real.sqrt_pos.mpr
-                (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv)))),
-            one_smul]
+      · rw [show ∀ (M : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) (b : ℝ) (w : NQubitVec n),
+                M.mulVec (b • w) = b • M.mulVec w from fun _ _ _ => Matrix.mulVec_smul _ _ _,
+            show ∀ (a b : ℝ) (x : NQubitVec n), a • b • x = (a * b) • x from
+              fun _ _ _ => smul_smul _ _ _,
+            mul_inv_cancel₀ (ne_of_gt (Real.sqrt_pos.mpr
+              (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv))))]
+        exact (one_smul ℝ _).symm
+      · rw [show ∀ (M : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) (b : ℝ) (w : NQubitVec n),
+                M.mulVec (b • w) = b • M.mulVec w from fun _ _ _ => Matrix.mulVec_smul _ _ _,
+            show ∀ (a b : ℝ) (x : NQubitVec n), a • b • x = (a * b) • x from
+              fun _ _ _ => smul_smul _ _ _,
+            mul_inv_cancel₀ (ne_of_gt (Real.sqrt_pos.mpr
+              (lt_of_le_of_ne (Finset.sum_nonneg fun _ _ => sq_nonneg _) (Ne.symm hv))))]
+        exact (one_smul ℝ _).symm
     · intro g hg
       specialize hv₁ g hg
       simp_all +decide
       simp_all +decide [ IsStabilizedBy, IsStabilizedVec ];
-      rw [ Matrix.mulVec_smul, hv₁ ]
+      rw [show ∀ (M : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) (b : ℝ) (w : NQubitVec n),
+              M.mulVec (b • w) = b • M.mulVec w from fun _ _ _ => Matrix.mulVec_smul _ _ _,
+          hv₁]
 
 /-- The logical gate group for S: unitaries that map the codespace to itself. -/
 def logicalGateGroup (S : StabilizerGroup n) : Subgroup (NQubitGate n) where

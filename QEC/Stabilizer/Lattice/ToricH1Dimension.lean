@@ -106,8 +106,10 @@ theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
         (Finset.image (fun x : Fin L × Fin L => EdgeIdx.h x.1 x.2) (Finset.univ ×ˢ Finset.univ) ∪
           Finset.image (fun x : Fin L × Fin L => EdgeIdx.v x.1 x.2) (Finset.univ ×ˢ Finset.univ)))];
     · rw [ Finset.sum_union ];
-      · rw [ Finset.sum_image, Finset.sum_image ] <;> simp +decide [ Finset.sum_add_distrib ];
-        · rfl;
+      · rw [ Finset.sum_image, Finset.sum_image ] <;> simp +decide [ Finset.sum_add_distrib ]
+        · rfl
+        · exact fun a b hab => by cases a; cases b; simp_all [EdgeIdx.v.injEq]
+        · exact fun a b hab => by cases a; cases b; simp_all [EdgeIdx.h.injEq]
       · simp +decide [ Finset.disjoint_left ];
         aesop;
     · intro x hx hx'; rcases x with ( _ | _ ) <;> simp +decide at hx' ⊢;

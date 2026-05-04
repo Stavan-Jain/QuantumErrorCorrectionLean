@@ -59,7 +59,7 @@ The stabilizer is defined as the closure of the generator list (single source of
 
 /-- Build a stabilizer group from a list of generators that pairwise commute and whose
     closure does not contain -I. -/
-def mkStabilizerFromGenerators (n : ℕ) (L : List (NQubitPauliGroupElement n))
+noncomputable def mkStabilizerFromGenerators (n : ℕ) (L : List (NQubitPauliGroupElement n))
     (h_comm : ∀ g ∈ NQubitPauliGroupElement.listToSet L,
       ∀ h ∈ NQubitPauliGroupElement.listToSet L, g * h = h * g)
     (h_no_neg : negIdentity n ∉ Subgroup.closure (NQubitPauliGroupElement.listToSet L)) :
@@ -107,7 +107,7 @@ structure StabilizerCode (n k : ℕ) where
 namespace StabilizerCode
 
 /-- The stabilizer group of the code (derived from the generator list). -/
-def toStabilizerGroup (C : StabilizerCode n k) : StabilizerGroup n :=
+noncomputable def toStabilizerGroup (C : StabilizerCode n k) : StabilizerGroup n :=
   mkStabilizerFromGenerators n C.generatorsList C.generators_commute C.closure_no_neg_identity
 
 /-- Logical X for logical qubit ℓ. -/

@@ -607,7 +607,7 @@ noncomputable def stabilizerGroup (L : ℕ) [Fact (2 ≤ L)] :
 /-- The bundled stabilizer subgroup equals `subgroup L`. -/
 lemma stabilizerGroup_toSubgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
     (stabilizerGroup L).toSubgroup = subgroup L := by
-  simp [stabilizerGroup, subgroup, StabilizerGroup.mkStabilizerFromGenerators]
+  simp only [stabilizerGroup, mkStabilizerFromGenerators, subgroup]
   rw [listToSet_generatorsList]
 
 /-!
