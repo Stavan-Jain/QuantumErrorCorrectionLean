@@ -2,8 +2,9 @@
 .gauss/
 .DS_Store
 
-# Docs (Aristotle prompts, evaluations, guides)
-docs/
+# Docs (Aristotle prompts, evaluations, guides) — but keep the published proof.
+docs/*
+!docs/distance_proof.md
 
 # Cursor local state and continual-learning index
 .cursor/
