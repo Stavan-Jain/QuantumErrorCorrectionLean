@@ -1,8 +1,11 @@
 # Quantum Error Correction in Lean
 
+[![Lean V4](https://img.shields.io/badge/Lean-V4-blueviolet)](https://lean-lang.org/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 This project formalizes foundational concepts in quantum error correction using the Lean 4 proof assistant, with the long-term goal of a broad formalization of Stabilizer Codes.
 
-Along the way, it develops **definitions and lemmas** for reasoning about qubits, quantum states, and unitary operations, contributing toward a verified foundation for quantum computing in Lean.
+Along the way, it develops **definitions and lemmas** for reasoning about qubits, quantum states, and unitary operations, contributing toward a verified foundation for quantum computing and fault tolerance in Lean.
 
 ## Overview
 
@@ -104,3 +107,13 @@ Contributions are welcome! If you add new modules or definitions, please:
 ## Acknowledgments
 
 Built using [Lean 4](https://lean-lang.org/) and [mathlib](https://github.com/leanprover-community/mathlib4).
+
+## License
+
+Released under the [Apache License 2.0](LICENSE).
+
+## Maintainer
+
+**Stavan Jain**
+
+A project from the **University of Wisconsin–Madison**.
