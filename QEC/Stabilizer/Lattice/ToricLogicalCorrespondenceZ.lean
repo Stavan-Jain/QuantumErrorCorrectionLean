@@ -268,8 +268,15 @@ theorem faceCheckCommutes_iff_dualBoundaryAt
         (if c (EdgeIdx.h x (StabilizerGroup.ToricCodeN.next L y)) = 1 then 1 else 0) +
         (if c (EdgeIdx.v x y) = 1 then 1 else 0) +
         (if c (EdgeIdx.v (StabilizerGroup.ToricCodeN.next L x) y) = 1 then 1 else 0)) : ℕ) := by
+    obtain ⟨hd1, hd2, hd3, hd4, hd5, hd6⟩ := h_distinct
+    have hd1' := hd1.symm; have hd2' := hd2.symm; have hd3' := hd3.symm
+    have hd4' := hd4.symm; have hd5' := hd5.symm; have hd6' := hd6.symm
     simp_rw [hfilt_eq]
-    split_ifs <;> simp_all <;> sorry
+    clear hfilt_eq hanti_iff
+    split_ifs <;>
+      simp_all +decide [Finset.filter_eq', Finset.filter_or, Finset.card_insert_of_notMem,
+        Finset.mem_insert, Finset.mem_singleton,
+        hd1, hd2, hd3, hd4, hd5, hd6, hd1', hd2', hd3', hd4', hd5', hd6']
   -- Parity bridge: even indicator sum ↔ ZMod 2 sum = 0
   have hbridge : ∀ (a b c d : ZMod 2),
       Even (((if a = 1 then 1 else 0) + (if b = 1 then 1 else 0) +
@@ -378,8 +385,9 @@ private lemma c0_eq_sum_singleVtx (L : ℕ) (s : C0 L) :
     s = ∑ v ∈ Finset.univ.filter (fun v : VtxIdx L => s v = 1), singleVtx v := by
   ext v
   unfold singleVtx
-  -- cases Fin.exists_fin_two.mp ⟨s v, rfl⟩ <;> simp +decide [*]
-  sorry
+  cases Fin.exists_fin_two.mp ⟨s v, rfl⟩ <;> simp +decide [*] <;>
+    split_ifs <;> simp_all (config := {decide := true}) <;>
+    first | rfl | exact absurd rfl ‹_›
 
 set_option maxHeartbeats 800000 in
 /-- `toricZOperatorOfChain` applied to `toricVertexCutMap (singleVtx (xv, yv))`
@@ -396,15 +404,93 @@ lemma toricZOperatorOfChain_cutMap_singleVtx (L : ℕ) [Fact (2 ≤ L)]
   · rename_i h
     obtain ⟨e, rfl, he⟩ := h
     rcases e with ⟨ex, ey⟩ | ⟨ex, ey⟩
-    · simp_all +decide [toricVertexCutMap, singleVtx]
-      unfold edgeToQubitIdx
-      split_ifs at he <;> simp_all +decide [Fin.ext_iff] <;> sorry
-    · simp_all +decide [toricVertexCutMap, singleVtx]
-      split_ifs at he <;>
-        simp_all +decide [Fin.ext_iff, StabilizerGroup.ToricCodeN.prev] <;>
-        first | omega | sorry
+    · -- h-edge case: cutMap (singleVtx (xv,yv)) at h(ex,ey) = 1 means
+      -- ((ex,ey) = (xv,yv)) XOR (next L ex = xv ∧ ey = yv)
+      simp only [toricVertexCutMap, singleVtx] at he
+      have hxL : (xv : ℕ) < L := xv.isLt
+      have hyL : (yv : ℕ) < L := yv.isLt
+      have hexL : (ex : ℕ) < L := ex.isLt
+      have heyL : (ey : ℕ) < L := ey.isLt
+      -- he is essentially Σ over the 2 disjuncts, but in ZMod 2.
+      -- Decompose into cases by `decide`.
+      by_cases h1 : (ex, ey) = (xv, yv)
+      · obtain ⟨hex, hey⟩ := Prod.mk_inj.mp h1
+        subst hex; subst hey
+        unfold edgeToQubitIdx
+        simp_all +decide [Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge,
+          StabilizerGroup.ToricCodeN.vEdge, StabilizerGroup.ToricCodeN.prev,
+          NQubitPauliOperator.identity]
+      · by_cases h2 : (StabilizerGroup.ToricCodeN.next L ex, ey) = (xv, yv)
+        · obtain ⟨hnex, hey⟩ := Prod.mk_inj.mp h2
+          subst hey
+          have hex_eq : ex = StabilizerGroup.ToricCodeN.prev L xv :=
+            (Stabilizer.Lattice.eq_prev_iff_next_eq L ex xv).mpr hnex
+          subst hex_eq
+          unfold edgeToQubitIdx
+          simp_all +decide [Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge,
+            StabilizerGroup.ToricCodeN.vEdge, StabilizerGroup.ToricCodeN.prev,
+            NQubitPauliOperator.identity]
+        · exfalso
+          simp [h1, h2] at he
+    · -- v-edge case: cutMap (singleVtx (xv,yv)) at v(ex,ey) = 1 means
+      -- ((ex,ey) = (xv,yv)) XOR (ex = xv ∧ next L ey = yv)
+      simp only [toricVertexCutMap, singleVtx] at he
+      have hxL : (xv : ℕ) < L := xv.isLt
+      have hyL : (yv : ℕ) < L := yv.isLt
+      have hexL : (ex : ℕ) < L := ex.isLt
+      have heyL : (ey : ℕ) < L := ey.isLt
+      by_cases h1 : (ex, ey) = (xv, yv)
+      · obtain ⟨hex, hey⟩ := Prod.mk_inj.mp h1
+        subst hex; subst hey
+        unfold edgeToQubitIdx
+        simp_all +decide [Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge,
+          StabilizerGroup.ToricCodeN.vEdge, StabilizerGroup.ToricCodeN.prev,
+          NQubitPauliOperator.identity]
+      · by_cases h2 : (ex, StabilizerGroup.ToricCodeN.next L ey) = (xv, yv)
+        · obtain ⟨hex, hney⟩ := Prod.mk_inj.mp h2
+          subst hex
+          have hey_eq : ey = StabilizerGroup.ToricCodeN.prev L yv :=
+            (Stabilizer.Lattice.eq_prev_iff_next_eq L ey yv).mpr hney
+          subst hey_eq
+          unfold edgeToQubitIdx
+          simp_all +decide [Fin.ext_iff, StabilizerGroup.ToricCodeN.hEdge,
+            StabilizerGroup.ToricCodeN.vEdge, StabilizerGroup.ToricCodeN.prev,
+            NQubitPauliOperator.identity]
+        · exfalso
+          simp [h1, h2] at he
   · -- neg case: q not in support of cutMap(singleVtx), must show vertexStab q = I
-    sorry
+    split_ifs <;> simp_all +decide [toricNumQubits]
+    · rename_i h₁ h₂
+      contrapose! h₁
+      refine ⟨EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv), ?_, ?_⟩
+      · rfl
+      · have hne : (StabilizerGroup.ToricCodeN.prev L yv) ≠ yv :=
+          Stabilizer.Lattice.prev_ne_self L yv
+        simp [toricVertexCutMap, singleVtx, StabilizerGroup.ToricCodeN.prev,
+          Stabilizer.Lattice.next_prev, hne, hne.symm]
+    · rename_i h₁ h₂ h₃
+      contrapose! h₁
+      refine ⟨EdgeIdx.v xv yv, ?_, ?_⟩
+      · rfl
+      · have hne : StabilizerGroup.ToricCodeN.next L yv ≠ yv :=
+          Stabilizer.Lattice.next_ne_self L yv
+        simp [toricVertexCutMap, singleVtx, hne, hne.symm]
+    · rename_i h₁ h₂ h₃ h₄
+      contrapose! h₁
+      refine ⟨EdgeIdx.h (StabilizerGroup.ToricCodeN.prev L xv) yv, ?_, ?_⟩
+      · rfl
+      · have hne : (StabilizerGroup.ToricCodeN.prev L xv) ≠ xv :=
+          Stabilizer.Lattice.prev_ne_self L xv
+        simp [toricVertexCutMap, singleVtx, StabilizerGroup.ToricCodeN.prev,
+          Stabilizer.Lattice.next_prev, hne, hne.symm]
+    · rename_i h₁ h₂ h₃ h₄ h₅
+      contrapose! h₁
+      refine ⟨EdgeIdx.h xv yv, ?_, ?_⟩
+      · rfl
+      · have hne : StabilizerGroup.ToricCodeN.next L xv ≠ xv :=
+          Stabilizer.Lattice.next_ne_self L xv
+        simp [toricVertexCutMap, singleVtx, hne, hne.symm]
+    · unfold NQubitPauliOperator.identity; aesop
 
 /-- Z-chain is a star product iff the chain is a dual boundary. -/
 theorem zIsStarProduct_iff_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :

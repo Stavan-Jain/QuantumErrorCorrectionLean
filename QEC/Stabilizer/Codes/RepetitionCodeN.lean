@@ -371,9 +371,11 @@ private lemma logicalZ_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
   by_cases hj1 : j = Fin.castSucc i <;> by_cases hj2 : j = Fin.succ i
   · subst hj1; grind
   · subst hj1
-    sorry
+    simp only [logicalZ, NQubitPauliOperator.Z, ZPair, NQubitPauliOperator.set,
+      ↓reduceIte, ite_self]
   · subst hj2
-    sorry
+    simp only [logicalZ, NQubitPauliOperator.Z, ZPair, NQubitPauliOperator.set,
+      ↓reduceIte]
   · simp only [logicalZ, NQubitPauliOperator.Z, ZPair, NQubitPauliOperator.set,
     NQubitPauliOperator.identity, if_neg hj1, if_neg hj2, PauliOperator.mulOp_Z_I,
     PauliOperator.mulOp_I_Z]
