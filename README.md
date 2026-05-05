@@ -22,17 +22,24 @@ Modules are written in Lean 4 and rely on [mathlib](https://github.com/leanprove
 
 ## Headline result
 
-The `L × L` toric code, for every `L ≥ 2`, is a verified `[[2L², 2, L]]` stabilizer code:
+For every `L ≥ 2`, the `L × L` toric code is a verified `[[2L², 2, L]]` stabilizer code:
 
 ```lean
-toricStabilizerCode L : StabilizerCode (numQubits L) 2     -- n = 2L², k = 2
-                                                            -- (numQubits L = 2 * L * L by definition)
-
-theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :  -- d = L
+theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     HasCodeDistance (toricStabilizerCode L) L
 ```
 
-The `n` and `k` parameters are part of the type. The distance is the theorem above. Every step of the homological distance argument — chain complex, `∂₁ ∘ ∂₂ = 0`, `dim(H₁) = 2`, the wrapping invariants `h, v`, the isomorphism `H₁ ≅ 𝔽₂²`, the lower bound `|c| ≥ L` for non-trivial cycles, and the CSS bridge `d = min(d_X, d_Z)` — is checked by Lean with no `sorry`s. The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
+Here `toricStabilizerCode L : StabilizerCode (numQubits L) 2` carries `n = 2L²` and `k = 2` in its type (`numQubits L` unfolds to `2 * L * L`); the theorem above supplies `d = L`.
+
+Every step of the homological distance argument is mechanized — no `sorry`s anywhere in the proof:
+
+- **Chain complex.** `∂₁ ∘ ∂₂ = 0` over `𝔽₂`.
+- **Homology.** `dim(H₁) = 2` via rank-nullity on `∂₁` and `∂₂`.
+- **Wrapping invariants.** `h(c)`, `v(c)` are well-defined on cycles, vanish on boundaries, and give an isomorphism `H₁ ≅ 𝔽₂²`.
+- **Distance lower bound.** Any non-trivial cycle has weight `≥ L` (one of `h`, `v` is `1`, forcing one edge per slice across `L` disjoint slices).
+- **CSS bridge.** `d = min(d_X, d_Z)`; both equal `L` by symmetry.
+
+The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
 
 ## Project Structure
 
