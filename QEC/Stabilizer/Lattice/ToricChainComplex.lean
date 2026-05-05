@@ -100,6 +100,31 @@ theorem toricHomologicalCode_chainXOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 
 theorem toricHomologicalCode_chainZOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 L) :
     (toricHomologicalCode L).chainZOperator c = toricZOperatorOfChain L c := rfl
 
+/-! ## Notes on the further toric file slim
+
+Remaining bridges still needed for slimming the existing toric files
+(`ToricLogicalCorrespondenceX/Z.lean`, `ToricCodeNDistance.lean`,
+`ToricCodeNStabilizerCode.lean`):
+
+  * `(toricHomologicalCode L).cutMap = toricVertexCutMap`
+    Non-trivial: abstract `cutMap` is defined as `∑ v, s v * ∂₁(δ_e)(v)`
+    while toric is defined by explicit edge match. Equal pointwise but
+    requires expanding the sum and case-splitting on edge type.
+  * `(toricHomologicalCode L).faceStabOf (x, y) = faceStab L x y`
+    Follows from cutMap-eq + chainXOperator-eq + the existing toric
+    `toricXOperatorOfChain_boundary_singleFace`.
+  * `(toricHomologicalCode L).vertexStabOf (x, y) = vertexStab L x y`
+    Similar via `toricZOperatorOfChain_cutMap_singleVtx`.
+  * Set equalities `(toricHomologicalCode L).XGenerators = XGenerators L` etc.
+  * Stabilizer-group equality.
+
+With these bridges, each toric file's end-of-file iff theorems become
+1-line applications of the generic `chainXOperator_*_iff_*` /
+`chainZOperator_*_iff_*` theorems, plus a `rw` against the bridge.
+The full §B.3 symplectic-LI lift is independent of these bridges and is
+its own follow-up.
+-/
+
 end Lattice
 end Stabilizer
 end Quantum
