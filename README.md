@@ -114,6 +114,6 @@ Released under the [Apache License 2.0](LICENSE).
 
 ## Maintainer
 
-**Stavan Jain**
+Maintained by Stavan Jain
 
 A project from the **University of Wisconsin–Madison**.
