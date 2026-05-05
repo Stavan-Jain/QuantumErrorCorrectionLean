@@ -14,6 +14,9 @@ docs/
 # Learned preferences/facts (optional: keep local only)
 AGENTS.md
 
+# Agent-facing project orientation (kept local)
+CLAUDE.md
+
 # Personal toolchain-upgrade runbook (not part of published docs)
 TOOLCHAIN_UPGRADE.md
 
