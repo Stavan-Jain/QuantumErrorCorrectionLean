@@ -122,7 +122,7 @@ With the boundary maps in hand, we can now name the two kinds of edge-sets that 
 
 **Definition.**
 - The space of *1-cycles* is $Z_1 = \ker(\partial_1) \subseteq C_1$: the set of edge-subsets such that every vertex is incident to an even number of edges in the subset.
-- The space of *1-boundaries* is $B_1 = \operatorname{im}(\partial_2) \subseteq C_1$: the set of edge-subsets that arise as the boundary of some set of faces.
+- The space of *1-boundaries* is $B_1 = \mathrm{im}(\partial_2) \subseteq C_1$: the set of edge-subsets that arise as the boundary of some set of faces.
 
 **Example.** We illustrate these definitions on a 3×3 torus.
 
@@ -162,7 +162,7 @@ The overlap $|c \cap \text{supp}(v)|$ is exactly the number of edges in $c$ inci
 
 **Claim 4.2.** An X-type operator on edge-set $c$ is a product of plaquette stabilizers if and only if $c \in B_1$.
 
-*Proof.* Each plaquette stabilizer for face $f$ is the X-type operator on $\partial_2(f)$ (the four boundary edges of $f$). Since the toric code is defined over $\mathbb{F}_2$ (applying the same Pauli twice gives the identity), a product of plaquette stabilizers for a face-set $\mathcal{F}$ is the X-type operator on $\sum_{f \in \mathcal{F}} \partial_2(f) = \partial_2(\mathcal{F})$. Conversely, every element of $B_1 = \operatorname{im}(\partial_2)$ is $\partial_2(\mathcal{F})$ for some $\mathcal{F}$, and the corresponding X-type operator is the product of those plaquettes. $\square$
+*Proof.* Each plaquette stabilizer for face $f$ is the X-type operator on $\partial_2(f)$ (the four boundary edges of $f$). Since the toric code is defined over $\mathbb{F}_2$ (applying the same Pauli twice gives the identity), a product of plaquette stabilizers for a face-set $\mathcal{F}$ is the X-type operator on $\sum_{f \in \mathcal{F}} \partial_2(f) = \partial_2(\mathcal{F})$. Conversely, every element of $B_1 = \mathrm{im}(\partial_2)$ is $\partial_2(\mathcal{F})$ for some $\mathcal{F}$, and the corresponding X-type operator is the product of those plaquettes. $\square$
 
 Combining these:
 
@@ -206,13 +206,13 @@ Since $H_1 = Z_1 / B_1$ is a quotient of finite-dimensional vector spaces and $B
 
 **Theorem (Rank-nullity).** Let $T: V \to W$ be a linear map between finite-dimensional vector spaces. Then:
 
-$$\dim(V) = \dim(\ker(T)) + \operatorname{rank}(T)$$
+$$\dim(V) = \dim(\ker(T)) + \mathrm{rank}(T)$$
 
-where $\ker(T) = \{v \in V : T(v) = 0\}$ is the kernel and $\operatorname{rank}(T) = \dim(\operatorname{im}(T))$ is the rank. In other words: the dimension of the domain splits into two pieces — the dimension of what $T$ kills (the kernel) and the dimension of what survives in the image.
+where $\ker(T) = \{v \in V : T(v) = 0\}$ is the kernel and $\mathrm{rank}(T) = \dim(\mathrm{im}(T))$ is the rank. In other words: the dimension of the domain splits into two pieces — the dimension of what $T$ kills (the kernel) and the dimension of what survives in the image.
 
 We will also use one fact about transpose maps over $\mathbb{F}_2$. Recall that a linear map $T: V \to W$ between finite-dimensional $\mathbb{F}_2$-vector spaces can be represented by a matrix $M$ (with entries in $\mathbb{F}_2$). The *transpose* $T^T: W \to V$ is the linear map represented by $M^T$. The key property we need is:
 
-**Fact.** $\operatorname{rank}(T) = \operatorname{rank}(T^T)$.
+**Fact.** $\mathrm{rank}(T) = \mathrm{rank}(T^T)$.
 
 This follows because the rank of a matrix equals the rank of its transpose (over any field), since both equal the size of the largest nonsingular square submatrix.
 
@@ -220,11 +220,11 @@ This follows because the rank of a matrix equals the rank of its transpose (over
 
 Recall that $Z_1 = \ker(\partial_1)$, where $\partial_1: C_1 \to C_0$ maps edge-sets to their "boundary" vertex-sets. By rank-nullity applied to $\partial_1$:
 
-$$\dim(C_1) = \dim(\ker(\partial_1)) + \operatorname{rank}(\partial_1)$$
+$$\dim(C_1) = \dim(\ker(\partial_1)) + \mathrm{rank}(\partial_1)$$
 
-$$2L^2 = \dim(Z_1) + \operatorname{rank}(\partial_1)$$
+$$2L^2 = \dim(Z_1) + \mathrm{rank}(\partial_1)$$
 
-So we need $\operatorname{rank}(\partial_1)$. Rather than computing this directly, it turns out to be easier to compute $\operatorname{rank}(\partial_1^T)$ (which equals $\operatorname{rank}(\partial_1)$ by the Fact above) and then find $\dim(\ker(\partial_1^T))$ using rank-nullity.
+So we need $\mathrm{rank}(\partial_1)$. Rather than computing this directly, it turns out to be easier to compute $\mathrm{rank}(\partial_1^T)$ (which equals $\mathrm{rank}(\partial_1)$ by the Fact above) and then find $\dim(\ker(\partial_1^T))$ using rank-nullity.
 
 **What does $\partial_1^T$ do?** Since $\partial_1: C_1 \to C_0$ is a linear map from edge-space to vertex-space, its transpose $\partial_1^T: C_0 \to C_1$ is a linear map from vertex-space to edge-space. Concretely, $\partial_1$ is represented by a matrix $M$ whose rows are indexed by vertices and columns by edges, with $M_{v,e} = 1$ if vertex $v$ is an endpoint of edge $e$. The transpose $M^T$ has rows indexed by edges and columns by vertices, with $M^T_{e,v} = 1$ if $v$ is an endpoint of $e$.
 
@@ -236,23 +236,23 @@ So $\partial_1^T$ maps a subset of vertices $S \subseteq V$ to the set of edges 
 
 Since the lattice is connected (there is a path of edges between any two vertices), this forces $S$ to be either the empty set or the set of all vertices. These are the only two elements of $\ker(\partial_1^T)$, so $\dim(\ker(\partial_1^T)) = 1$. $\square$
 
-**Corollary 5.2.** $\operatorname{rank}(\partial_1) = L^2 - 1$.
+**Corollary 5.2.** $\mathrm{rank}(\partial_1) = L^2 - 1$.
 
 *Proof.* By rank-nullity applied to $\partial_1^T: C_0 \to C_1$:
 
-$$\operatorname{rank}(\partial_1^T) = \dim(C_0) - \dim(\ker(\partial_1^T)) = L^2 - 1$$
+$$\mathrm{rank}(\partial_1^T) = \dim(C_0) - \dim(\ker(\partial_1^T)) = L^2 - 1$$
 
-Since $\operatorname{rank}(\partial_1) = \operatorname{rank}(\partial_1^T)$, we have $\operatorname{rank}(\partial_1) = L^2 - 1$. $\square$
+Since $\mathrm{rank}(\partial_1) = \mathrm{rank}(\partial_1^T)$, we have $\mathrm{rank}(\partial_1) = L^2 - 1$. $\square$
 
 **Corollary 5.3.** $\dim(Z_1) = L^2 + 1$.
 
-*Proof.* $\dim(Z_1) = \dim(C_1) - \operatorname{rank}(\partial_1) = 2L^2 - (L^2 - 1) = L^2 + 1$. $\square$
+*Proof.* $\dim(Z_1) = \dim(C_1) - \mathrm{rank}(\partial_1) = 2L^2 - (L^2 - 1) = L^2 + 1$. $\square$
 
 ### 5.3 Computing $\dim(B_1)$
 
-Recall that $B_1 = \operatorname{im}(\partial_2)$, where $\partial_2: C_2 \to C_1$ maps face-sets to their boundary edge-sets. We have $\dim(B_1) = \operatorname{rank}(\partial_2)$. By rank-nullity applied to $\partial_2$:
+Recall that $B_1 = \mathrm{im}(\partial_2)$, where $\partial_2: C_2 \to C_1$ maps face-sets to their boundary edge-sets. We have $\dim(B_1) = \mathrm{rank}(\partial_2)$. By rank-nullity applied to $\partial_2$:
 
-$$\dim(C_2) = \dim(\ker(\partial_2)) + \operatorname{rank}(\partial_2)$$
+$$\dim(C_2) = \dim(\ker(\partial_2)) + \mathrm{rank}(\partial_2)$$
 
 $$L^2 = \dim(\ker(\partial_2)) + \dim(B_1)$$
 
@@ -270,7 +270,7 @@ Therefore $\ker(\partial_2) = \{\emptyset, \text{all faces}\}$, and $\dim(\ker(\
 
 **Corollary 5.5.** $\dim(B_1) = L^2 - 1$.
 
-*Proof.* $\dim(B_1) = \operatorname{rank}(\partial_2) = \dim(C_2) - \dim(\ker(\partial_2)) = L^2 - 1$. $\square$
+*Proof.* $\dim(B_1) = \mathrm{rank}(\partial_2) = \dim(C_2) - \dim(\ker(\partial_2)) = L^2 - 1$. $\square$
 
 ### 5.4 The dimension of $H_1$
 
@@ -454,12 +454,12 @@ The distance of the code is $d = \min(d_X, d_Z)$. We now justify this claim and 
 
 *Proof.* The distance is the minimum weight of any non-trivial logical operator. We show that every non-trivial logical has weight $\geq \min(d_X, d_Z)$, and that there exists one with weight exactly $\min(d_X, d_Z)$.
 
-**Decomposition.** Any $n$-qubit Pauli operator $P$ can be written (up to a global phase $\pm 1, \pm i$) as $P = X^a Z^b$, where $a, b \in \mathbb{F}_2^n$ and $X^a = X_1^{a_1} \otimes \cdots \otimes X_n^{a_n}$ (and similarly for $Z^b$). Write $\operatorname{supp}(a) = \{i : a_i = 1\}$ for the *support* of $a$ — the set of qubits on which $X^a$ acts non-trivially. The weight of $P$ (the number of qubits on which $P$ acts non-trivially) is $|\operatorname{supp}(a) \cup \operatorname{supp}(b)|$, since $P$ acts as identity on qubit $i$ only when $a_i = b_i = 0$.
+**Decomposition.** Any $n$-qubit Pauli operator $P$ can be written (up to a global phase $\pm 1, \pm i$) as $P = X^a Z^b$, where $a, b \in \mathbb{F}_2^n$ and $X^a = X_1^{a_1} \otimes \cdots \otimes X_n^{a_n}$ (and similarly for $Z^b$). Write $\mathrm{supp}(a) = \{i : a_i = 1\}$ for the *support* of $a$ — the set of qubits on which $X^a$ acts non-trivially. The weight of $P$ (the number of qubits on which $P$ acts non-trivially) is $|\mathrm{supp}(a) \cup \mathrm{supp}(b)|$, since $P$ acts as identity on qubit $i$ only when $a_i = b_i = 0$.
 
 **Commutation.** In a CSS code, every stabilizer generator is either purely X-type or purely Z-type. We use two facts about Pauli commutation:
 
-- $X^a Z^b$ commutes with an X-type operator $X^s$ if and only if $|\operatorname{supp}(b) \cap \operatorname{supp}(s)|$ is even. (The $X^a$ part always commutes with $X^s$; the $Z^b$ part anticommutes on each qubit where both act, contributing $(-1)^{|\operatorname{supp}(b) \cap \operatorname{supp}(s)|}$.)
-- $X^a Z^b$ commutes with a Z-type operator $Z^t$ if and only if $|\operatorname{supp}(a) \cap \operatorname{supp}(t)|$ is even. (By the symmetric argument.)
+- $X^a Z^b$ commutes with an X-type operator $X^s$ if and only if $|\mathrm{supp}(b) \cap \mathrm{supp}(s)|$ is even. (The $X^a$ part always commutes with $X^s$; the $Z^b$ part anticommutes on each qubit where both act, contributing $(-1)^{|\mathrm{supp}(b) \cap \mathrm{supp}(s)|}$.)
+- $X^a Z^b$ commutes with a Z-type operator $Z^t$ if and only if $|\mathrm{supp}(a) \cap \mathrm{supp}(t)|$ is even. (By the symmetric argument.)
 
 Therefore, $P = X^a Z^b$ commutes with all stabilizers if and only if two **independent** conditions hold: $a$ commutes with all Z-type stabilizers (i.e., $a \in Z_1$), and $b$ commutes with all X-type stabilizers (i.e., $b \in Z_1^*$, where $Z_1^*$ denotes the space of cycles in the dual lattice). This decoupling of conditions on $a$ and $b$ is specific to CSS codes.
 
@@ -467,7 +467,7 @@ Therefore, $P = X^a Z^b$ commutes with all stabilizers if and only if two **inde
 
 Taking the contrapositive: $P$ is a non-trivial logical if and only if $P$ commutes with all stabilizers and at least one of the following holds: $a \in Z_1 \setminus B_1$ (the X-part is non-trivial), or $b \in Z_1^* \setminus B_1^*$ (the Z-part is non-trivial).
 
-**Lower bound.** If $a \in Z_1 \setminus B_1$, then $|a| \geq d_X$, so $\operatorname{wt}(P) = |\operatorname{supp}(a) \cup \operatorname{supp}(b)| \geq |a| \geq d_X$. If $b \in Z_1^* \setminus B_1^*$, then $|b| \geq d_Z$, so $\operatorname{wt}(P) \geq |b| \geq d_Z$. Since at least one holds, $\operatorname{wt}(P) \geq \min(d_X, d_Z)$.
+**Lower bound.** If $a \in Z_1 \setminus B_1$, then $|a| \geq d_X$, so $\mathrm{wt}(P) = |\mathrm{supp}(a) \cup \mathrm{supp}(b)| \geq |a| \geq d_X$. If $b \in Z_1^* \setminus B_1^*$, then $|b| \geq d_Z$, so $\mathrm{wt}(P) \geq |b| \geq d_Z$. Since at least one holds, $\mathrm{wt}(P) \geq \min(d_X, d_Z)$.
 
 **Upper bound.** A minimum-weight non-trivial X-type logical has weight $d_X$ and is a valid non-trivial logical, so $d \leq d_X$. Similarly $d \leq d_Z$. Therefore $d \leq \min(d_X, d_Z)$.
 
