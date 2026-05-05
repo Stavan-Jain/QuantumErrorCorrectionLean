@@ -5,7 +5,7 @@
 
 This project formalizes foundational concepts in quantum error correction using the Lean 4 proof assistant, with the long-term goal of a broad formalization of Stabilizer Codes.
 
-Along the way, it develops **definitions and lemmas** for reasoning about qubits, quantum states, and unitary operations, contributing toward a verified foundation for quantum computing and fault tolerance in Lean.
+Along the way, it develops definitions and lemmas for reasoning about qubits, quantum states, and unitary operations, contributing toward a verified foundation for quantum computing and fault tolerance in Lean.
 
 ## Overview
 
