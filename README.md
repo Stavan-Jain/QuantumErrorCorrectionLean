@@ -20,7 +20,7 @@ Modules are written in Lean 4 and rely on [mathlib](https://github.com/leanprove
 - **Stabilizer Formalism**: Single-qubit and n-qubit Pauli groups, commutation (including tactics), matrix representations, stabilizer groups, CSS structure, centralizer, and logical operators
 - **Binary Symplectic Representation**: Check matrices, symplectic inner product, symplectic span, and equivalence with independent generators
 - **Concrete Codes**: surface codes, 3-qubit repetition code, n-qubit repetition code, Steane 7-qubit code, Shor 9-qubit code, and quantum Hamming code
-- **Toric Code, end-to-end**: For every `L ≥ 2`, the `L × L` toric code is verified as a `StabilizerCode (2L²) 2` with **distance exactly `L`**. The chain complex, `H₁ ≅ 𝔽₂²` isomorphism, `(h, v)` wrapping invariants, and CSS distance bridge are all mechanized — see [`docs/distance_proof.md`](docs/distance_proof.md) for the math and `QEC/Stabilizer/Lattice/` + `QEC/Stabilizer/Codes/ToricCodeN*.lean` for the Lean.
+- **Toric Code, end-to-end**: For every `L ≥ 2`, the `L × L` toric code is verified as a `StabilizerCode (2L²) 2` with **distance exactly `L`**. The chain complex, `H₁ ≅ 𝔽₂²` isomorphism, `(h, v)` wrapping invariants, and CSS distance bridge are all mechanized — see the [interactive write-up](https://stavan-jain.github.io/DistanceBlog/) (or [`docs/distance_proof.md`](docs/distance_proof.md) for the in-repo version) for the math, and `QEC/Stabilizer/Lattice/` + `QEC/Stabilizer/Codes/ToricCodeN*.lean` for the Lean.
 - **Verified Properties**: Mechanized proofs of key properties, including the obligations used to instantiate `StabilizerCode` instances (generator count/independence/commutation, exclusion of `-I`, and logical-operator centralizer + anticommutation conditions), along with distance theorems.
 
 ## Headline result
@@ -42,7 +42,7 @@ Every step of the homological distance argument is mechanized — no `sorry`s an
 - **Distance lower bound.** Any non-trivial cycle has weight `≥ L` (one of `h`, `v` is `1`, forcing one edge per slice across `L` disjoint slices).
 - **CSS bridge.** `d = min(d_X, d_Z)`; both equal `L` by symmetry.
 
-The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
+The accompanying expository proof is available as an [interactive write-up](https://stavan-jain.github.io/DistanceBlog/) with diagrams (or [`docs/distance_proof.md`](docs/distance_proof.md) for the in-repo version).
 
 ## Project Structure
 
