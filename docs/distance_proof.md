@@ -69,7 +69,7 @@ Our goal is to reason algebraically about subsets of edges — which ones form c
 
 The lattice has three kinds of objects, which we organize by dimension: vertices (0-dimensional), edges (1-dimensional), and faces (2-dimensional). We call these *0-cells*, *1-cells*, and *2-cells* respectively.
 
-To reason about them algebraically, we represent subsets of each as vectors over $`\mathbb{F}_2 = \{0, 1\}`$ (arithmetic mod 2). A *$k$-chain* is a subset of $k$-cells, where addition corresponds to symmetric difference. The space of $k$-chains is:
+To reason about them algebraically, we represent subsets of each as vectors over $`\mathbb{F}_2 = \{0, 1\}`$ (arithmetic mod 2). A $k$-chain is a subset of $k$-cells, where addition corresponds to symmetric difference. The space of $k$-chains is:
 - $`C_0 = \mathbb{F}_2^{L^2}`$: subsets of vertices.
 - $`C_1 = \mathbb{F}_2^{2L^2}`$: subsets of edges.
 - $`C_2 = \mathbb{F}_2^{L^2}`$: subsets of faces.
