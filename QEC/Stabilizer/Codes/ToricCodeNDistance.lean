@@ -602,10 +602,9 @@ theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :
   have hz : HasToricZDistance L L := toricCodeN_dZ_eq_L L
   simpa using toricCodeN_distance_eq_min_dX_dZ L L L hx hz
 
-/-- Parameter-packaging: toric family has parameters `[[2L², 2, L]]`. -/
-theorem toricCodeN_parameters_statement (L : ℕ) [Fact (2 ≤ L)] :
-    numQubits L = 2 * L * L ∧ HasCodeDistance (toricStabilizerCode L) L :=
-  ⟨rfl, toricCodeN_distance_eq_L L⟩
+-- (Parameter packaging: `n = 2L²` is the unfolding of `numQubits L`,
+-- `k = 2` is encoded in `toricStabilizerCode L : StabilizerCode _ 2`,
+-- and `d = L` is `toricCodeN_distance_eq_L`. No separate alias needed.)
 
 end ToricCodeN
 end StabilizerGroup

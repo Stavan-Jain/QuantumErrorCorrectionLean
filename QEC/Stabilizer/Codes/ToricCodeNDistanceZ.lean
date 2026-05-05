@@ -413,6 +413,121 @@ theorem toricCodeN_dZ_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     exact nontrivial_z_logical_weight_ge_L L g hgZ hgLogical
   · exact exists_nontrivial_z_logical_weight_eq_L L
 
+-- ---------------------------------------------------------------------------
+-- Horizontal Z-row: the column-0 sister of `verticalVRowChain`/`verticalVRowZOperator`
+-- ---------------------------------------------------------------------------
+
+/-- Horizontal Z-row chain: H-edges along column `x = zeroCoord`. -/
+def horizontalHRowChain (L : ℕ) [Fact (0 < L)] : Stabilizer.Lattice.C1 L :=
+  fun e =>
+    match e with
+    | Stabilizer.Lattice.EdgeIdx.h x _ =>
+        if x = Stabilizer.Lattice.zeroCoord L then (1 : ZMod 2) else 0
+    | Stabilizer.Lattice.EdgeIdx.v _ _ => 0
+
+/-- Z-type Pauli operator encoded by the horizontal H-row chain. -/
+def horizontalHRowZOperator (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement (Stabilizer.Lattice.toricNumQubits L) :=
+  Stabilizer.Lattice.toricZOperatorOfChain L (horizontalHRowChain L)
+
+/-- The horizontal Z-row chain is a dual cycle. -/
+theorem horizontalHRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
+    horizontalHRowChain L ∈ Stabilizer.Lattice.toricDualCycles (L := L) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  unfold Stabilizer.Lattice.toricDualCycles
+  rw [LinearMap.mem_ker]
+  ext ⟨x, y⟩
+  simp only [Stabilizer.Lattice.toricDualBoundary, LinearMap.coe_mk, AddHom.coe_mk,
+    horizontalHRowChain]
+  by_cases hx : x = Stabilizer.Lattice.zeroCoord L
+  · subst hx
+    show (1 : ZMod 2) + 1 + 0 + 0 = 0
+    decide
+  · simp [hx]
+
+/-- The horizontal Z-row chain is not a dual boundary (its `hRowAt` invariant is 1). -/
+theorem horizontalHRowChain_not_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] :
+    horizontalHRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries (L := L) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  intro h
+  have h_hRowAt : Stabilizer.Lattice.hRowAt (L := L) (Stabilizer.Lattice.zeroCoord L)
+      (horizontalHRowChain L) = 0 :=
+    Stabilizer.Lattice.hRowAt_dualBoundary_zero (L := L)
+      ⟨horizontalHRowChain L, h⟩
+  have h_compute : Stabilizer.Lattice.hRowAt (L := L) (Stabilizer.Lattice.zeroCoord L)
+      (horizontalHRowChain L) = 1 := by
+    unfold Stabilizer.Lattice.hRowAt horizontalHRowChain
+    rw [Finset.sum_eq_single (Stabilizer.Lattice.zeroCoord L)]
+    · simp
+    · intro b _ hbne
+      simp [hbne]
+    · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
+  rw [h_compute] at h_hRowAt
+  exact absurd h_hRowAt (by decide)
+
+/-- The horizontal Z-row chain has edge weight `L`. -/
+theorem horizontalHRowChain_edgeWeight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
+    Stabilizer.Lattice.edgeWeight (L := L) (horizontalHRowChain L) = L := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  let z0 : Fin L := Stabilizer.Lattice.zeroCoord L
+  let horizCol : Finset (Stabilizer.Lattice.EdgeIdx L) :=
+    (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y))
+  have hsupport :
+      Stabilizer.Lattice.edgeSupport (L := L) (horizontalHRowChain L) = horizCol := by
+    ext e
+    constructor
+    · intro he
+      have hne : horizontalHRowChain L e ≠ 0 := by
+        simpa [Stabilizer.Lattice.mem_edgeSupport] using he
+      cases e with
+      | h x y =>
+          by_cases hx : x = z0
+          · subst hx
+            refine Finset.mem_image.mpr ?_
+            exact ⟨y, Finset.mem_univ y, rfl⟩
+          · have hx' : x = z0 := by simpa [horizontalHRowChain] using hne
+            exact (hx hx').elim
+      | v x y => simp [horizontalHRowChain] at hne
+    · intro he
+      rcases Finset.mem_image.mp he with ⟨y, -, hy⟩
+      subst hy
+      simp [Stabilizer.Lattice.mem_edgeSupport, horizontalHRowChain, z0]
+  have hinj : Function.Injective (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y) := by
+    intro a b h; cases h; rfl
+  have hcard : horizCol.card = L := by
+    calc
+      horizCol.card
+          = (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y)).card := rfl
+      _ = (Finset.univ : Finset (Fin L)).card := by
+          exact Finset.card_image_of_injective
+            (s := (Finset.univ : Finset (Fin L)))
+            (f := fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y)
+            (by intro a b hab; exact hinj hab)
+      _ = L := by simp
+  calc
+    Stabilizer.Lattice.edgeWeight (L := L) (horizontalHRowChain L)
+        = (Stabilizer.Lattice.edgeSupport (L := L) (horizontalHRowChain L)).card := rfl
+    _ = horizCol.card := by rw [hsupport]
+    _ = L := hcard
+
+/-- The horizontal Z-row operator is Z-type. -/
+theorem horizontalHRowZOperator_isZType (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement.IsZTypeElement (horizontalHRowZOperator L) := by
+  unfold horizontalHRowZOperator NQubitPauliGroupElement.IsZTypeElement
+  refine ⟨rfl, fun q => ?_⟩
+  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ horizontalHRowChain L e = 1
+  · right; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
+  · left; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
+
+/-- The vertical V-row Z-operator is Z-type. -/
+theorem verticalVRowZOperator_isZType (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement.IsZTypeElement (verticalVRowZOperator L) := by
+  unfold verticalVRowZOperator NQubitPauliGroupElement.IsZTypeElement
+  refine ⟨rfl, fun q => ?_⟩
+  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ verticalVRowChain L e = 1
+  · right; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
+  · left; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
+
 end ToricCodeN
 end StabilizerGroup
 end Quantum

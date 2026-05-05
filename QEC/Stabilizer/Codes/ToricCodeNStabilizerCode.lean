@@ -521,233 +521,14 @@ lemma negIdentity_not_mem_packaged (L : ℕ) [Fact (2 ≤ L)] :
   exact negIdentity_not_mem L
 
 -- ---------------------------------------------------------------------------
--- Phase 2: Logical loop operators
+-- Phase 2: Logical operators (with logical-qubit-ops construction)
 -- ---------------------------------------------------------------------------
 
-/-- Vertical X-loop chain: V-edges along column `x = zeroCoord`. -/
-def verticalLoopChain (L : ℕ) [Fact (0 < L)] : Stabilizer.Lattice.C1 L :=
-  fun e =>
-    match e with
-    | Stabilizer.Lattice.EdgeIdx.h _ _ => 0
-    | Stabilizer.Lattice.EdgeIdx.v x _ =>
-        if x = Stabilizer.Lattice.zeroCoord L then (1 : ZMod 2) else 0
-
-/-- X-type Pauli operator encoded by the vertical loop chain. -/
-def verticalLoopXOperator (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement (Stabilizer.Lattice.toricNumQubits L) :=
-  Stabilizer.Lattice.toricXOperatorOfChain L (verticalLoopChain L)
-
-/-- Horizontal Z-row chain: H-edges along column `x = zeroCoord`. -/
-def horizontalHRowChain (L : ℕ) [Fact (0 < L)] : Stabilizer.Lattice.C1 L :=
-  fun e =>
-    match e with
-    | Stabilizer.Lattice.EdgeIdx.h x _ =>
-        if x = Stabilizer.Lattice.zeroCoord L then (1 : ZMod 2) else 0
-    | Stabilizer.Lattice.EdgeIdx.v _ _ => 0
-
-/-- Z-type Pauli operator encoded by the horizontal H-row chain. -/
-def horizontalHRowZOperator (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement (Stabilizer.Lattice.toricNumQubits L) :=
-  Stabilizer.Lattice.toricZOperatorOfChain L (horizontalHRowChain L)
-
-/-- The vertical X-loop chain is a primal cycle. -/
-theorem verticalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
-    verticalLoopChain L ∈ Stabilizer.Lattice.toricCycles (L := L) := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  unfold Stabilizer.Lattice.toricCycles
-  rw [LinearMap.mem_ker]
-  ext ⟨xv, yv⟩
-  simp only [Stabilizer.Lattice.toricBoundary1, LinearMap.coe_mk, AddHom.coe_mk,
-    verticalLoopChain]
-  by_cases hx : xv = Stabilizer.Lattice.zeroCoord L
-  · subst hx
-    show (0 : ZMod 2) + 0 + 1 + 1 = 0
-    decide
-  · simp [hx]
-
-/-- The vertical X-loop chain is not a primal boundary (its `vAt` invariant is 1). -/
-theorem verticalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    verticalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries (L := L) := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  intro h
-  have h_vAt : Stabilizer.Lattice.vAt (L := L) (Stabilizer.Lattice.zeroCoord L)
-      (verticalLoopChain L) = 0 :=
-    Stabilizer.Lattice.v_boundary_zero (L := L) ⟨verticalLoopChain L, h⟩
-  have h_compute : Stabilizer.Lattice.vAt (L := L) (Stabilizer.Lattice.zeroCoord L)
-      (verticalLoopChain L) = 1 := by
-    unfold Stabilizer.Lattice.vAt verticalLoopChain
-    rw [Finset.sum_eq_single (Stabilizer.Lattice.zeroCoord L)]
-    · simp
-    · intro b _ hbne
-      simp [hbne]
-    · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
-  rw [h_compute] at h_vAt
-  exact absurd h_vAt (by decide)
-
-/-- The vertical X-loop chain has edge weight `L`. -/
-theorem verticalLoopChain_edgeWeight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
-    Stabilizer.Lattice.edgeWeight (L := L) (verticalLoopChain L) = L := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  let z0 : Fin L := Stabilizer.Lattice.zeroCoord L
-  let vertCol : Finset (Stabilizer.Lattice.EdgeIdx L) :=
-    (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y))
-  have hsupport :
-      Stabilizer.Lattice.edgeSupport (L := L) (verticalLoopChain L) = vertCol := by
-    ext e
-    constructor
-    · intro he
-      have hne : verticalLoopChain L e ≠ 0 := by
-        simpa [Stabilizer.Lattice.mem_edgeSupport] using he
-      cases e with
-      | h x y => simp [verticalLoopChain] at hne
-      | v x y =>
-          by_cases hx : x = z0
-          · subst hx
-            refine Finset.mem_image.mpr ?_
-            exact ⟨y, Finset.mem_univ y, rfl⟩
-          · have hx' : x = z0 := by simpa [verticalLoopChain] using hne
-            exact (hx hx').elim
-    · intro he
-      rcases Finset.mem_image.mp he with ⟨y, -, hy⟩
-      subst hy
-      simp [Stabilizer.Lattice.mem_edgeSupport, verticalLoopChain, z0]
-  have hinj : Function.Injective (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y) := by
-    intro a b h; cases h; rfl
-  have hcard : vertCol.card = L := by
-    calc
-      vertCol.card
-          = (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y)).card := rfl
-      _ = (Finset.univ : Finset (Fin L)).card := by
-          exact Finset.card_image_of_injective
-            (s := (Finset.univ : Finset (Fin L)))
-            (f := fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y)
-            (by intro a b hab; exact hinj hab)
-      _ = L := by simp
-  calc
-    Stabilizer.Lattice.edgeWeight (L := L) (verticalLoopChain L)
-        = (Stabilizer.Lattice.edgeSupport (L := L) (verticalLoopChain L)).card := rfl
-    _ = vertCol.card := by rw [hsupport]
-    _ = L := hcard
-
-/-- The horizontal Z-row chain is a dual cycle. -/
-theorem horizontalHRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalHRowChain L ∈ Stabilizer.Lattice.toricDualCycles (L := L) := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  unfold Stabilizer.Lattice.toricDualCycles
-  rw [LinearMap.mem_ker]
-  ext ⟨x, y⟩
-  simp only [Stabilizer.Lattice.toricDualBoundary, LinearMap.coe_mk, AddHom.coe_mk,
-    horizontalHRowChain]
-  by_cases hx : x = Stabilizer.Lattice.zeroCoord L
-  · subst hx
-    show (1 : ZMod 2) + 1 + 0 + 0 = 0
-    decide
-  · simp [hx]
-
-/-- The horizontal Z-row chain is not a dual boundary (its `hRowAt` invariant is 1). -/
-theorem horizontalHRowChain_not_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalHRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries (L := L) := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  intro h
-  have h_hRowAt : Stabilizer.Lattice.hRowAt (L := L) (Stabilizer.Lattice.zeroCoord L)
-      (horizontalHRowChain L) = 0 :=
-    Stabilizer.Lattice.hRowAt_dualBoundary_zero (L := L)
-      ⟨horizontalHRowChain L, h⟩
-  have h_compute : Stabilizer.Lattice.hRowAt (L := L) (Stabilizer.Lattice.zeroCoord L)
-      (horizontalHRowChain L) = 1 := by
-    unfold Stabilizer.Lattice.hRowAt horizontalHRowChain
-    rw [Finset.sum_eq_single (Stabilizer.Lattice.zeroCoord L)]
-    · simp
-    · intro b _ hbne
-      simp [hbne]
-    · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
-  rw [h_compute] at h_hRowAt
-  exact absurd h_hRowAt (by decide)
-
-/-- The horizontal Z-row chain has edge weight `L`. -/
-theorem horizontalHRowChain_edgeWeight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
-    Stabilizer.Lattice.edgeWeight (L := L) (horizontalHRowChain L) = L := by
-  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
-  let z0 : Fin L := Stabilizer.Lattice.zeroCoord L
-  let horizCol : Finset (Stabilizer.Lattice.EdgeIdx L) :=
-    (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y))
-  have hsupport :
-      Stabilizer.Lattice.edgeSupport (L := L) (horizontalHRowChain L) = horizCol := by
-    ext e
-    constructor
-    · intro he
-      have hne : horizontalHRowChain L e ≠ 0 := by
-        simpa [Stabilizer.Lattice.mem_edgeSupport] using he
-      cases e with
-      | h x y =>
-          by_cases hx : x = z0
-          · subst hx
-            refine Finset.mem_image.mpr ?_
-            exact ⟨y, Finset.mem_univ y, rfl⟩
-          · have hx' : x = z0 := by simpa [horizontalHRowChain] using hne
-            exact (hx hx').elim
-      | v x y => simp [horizontalHRowChain] at hne
-    · intro he
-      rcases Finset.mem_image.mp he with ⟨y, -, hy⟩
-      subst hy
-      simp [Stabilizer.Lattice.mem_edgeSupport, horizontalHRowChain, z0]
-  have hinj : Function.Injective (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y) := by
-    intro a b h; cases h; rfl
-  have hcard : horizCol.card = L := by
-    calc
-      horizCol.card
-          = (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y)).card := rfl
-      _ = (Finset.univ : Finset (Fin L)).card := by
-          exact Finset.card_image_of_injective
-            (s := (Finset.univ : Finset (Fin L)))
-            (f := fun y : Fin L => Stabilizer.Lattice.EdgeIdx.h z0 y)
-            (by intro a b hab; exact hinj hab)
-      _ = L := by simp
-  calc
-    Stabilizer.Lattice.edgeWeight (L := L) (horizontalHRowChain L)
-        = (Stabilizer.Lattice.edgeSupport (L := L) (horizontalHRowChain L)).card := rfl
-    _ = horizCol.card := by rw [hsupport]
-    _ = L := hcard
-
-/-- The vertical X-loop operator is X-type. -/
-theorem verticalLoopXOperator_isXType (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement.IsXTypeElement (verticalLoopXOperator L) := by
-  unfold verticalLoopXOperator NQubitPauliGroupElement.IsXTypeElement
-  refine ⟨rfl, fun q => ?_⟩
-  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ verticalLoopChain L e = 1
-  · right; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
-  · left; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
-
-/-- The horizontal Z-row operator is Z-type. -/
-theorem horizontalHRowZOperator_isZType (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement.IsZTypeElement (horizontalHRowZOperator L) := by
-  unfold horizontalHRowZOperator NQubitPauliGroupElement.IsZTypeElement
-  refine ⟨rfl, fun q => ?_⟩
-  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ horizontalHRowChain L e = 1
-  · right; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
-  · left; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
-
-/-- The horizontal X-loop operator is X-type. -/
-theorem horizontalLoopXOperator_isXType (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement.IsXTypeElement (horizontalLoopXOperator L) := by
-  unfold horizontalLoopXOperator NQubitPauliGroupElement.IsXTypeElement
-  refine ⟨rfl, fun q => ?_⟩
-  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ horizontalLoopChain L e = 1
-  · right; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
-  · left; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
-
-/-- The vertical V-row Z-operator is Z-type. -/
-theorem verticalVRowZOperator_isZType (L : ℕ) [Fact (0 < L)] :
-    NQubitPauliGroupElement.IsZTypeElement (verticalVRowZOperator L) := by
-  unfold verticalVRowZOperator NQubitPauliGroupElement.IsZTypeElement
-  refine ⟨rfl, fun q => ?_⟩
-  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ verticalVRowChain L e = 1
-  · right; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
-  · left; simp [Stabilizer.Lattice.toricZOperatorOfChain, h]
-
--- ---------------------------------------------------------------------------
--- Phase 2 / 3: Logical operators and independence
--- ---------------------------------------------------------------------------
+-- The four chain operators (`horizontalLoopXOperator`, `verticalLoopXOperator`,
+-- `verticalVRowZOperator`, `horizontalHRowZOperator`) and their cycle / boundary /
+-- edge-weight / IsXType / IsZType lemmas live in
+-- `ToricCodeNDistanceX.lean` / `ToricCodeNDistanceZ.lean` alongside the existing
+-- distance witnesses. They're used here to build the `LogicalQubitOps` records.
 
 /-- The packaged stabilizer subgroup, used to type `LogicalQubitOps`. -/
 private noncomputable def packagedStabilizerGroup (L : ℕ) [Fact (2 ≤ L)] :
@@ -800,20 +581,8 @@ private lemma horizontalHRowChain_verticalVRowChain_supports_disjoint (L : ℕ) 
   | h x y => simp [verticalVRowChain]
   | v x y => simp [horizontalHRowChain]
 
-/-- The X-operator-of-chain at qubit `q` is `X` if some edge mapping to `q` has `c e = 1`,
-else `I`. -/
-private lemma toricXOperatorOfChain_op_at (L : ℕ)
-    (c : Stabilizer.Lattice.C1 L) (q : Fin (Stabilizer.Lattice.toricNumQubits L)) :
-    (Stabilizer.Lattice.toricXOperatorOfChain L c).operators q =
-      if ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ c e = 1
-        then PauliOperator.X else PauliOperator.I := rfl
-
-/-- The Z-operator-of-chain at qubit `q`. -/
-private lemma toricZOperatorOfChain_op_at (L : ℕ)
-    (c : Stabilizer.Lattice.C1 L) (q : Fin (Stabilizer.Lattice.toricNumQubits L)) :
-    (Stabilizer.Lattice.toricZOperatorOfChain L c).operators q =
-      if ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ c e = 1
-        then PauliOperator.Z else PauliOperator.I := rfl
+-- (`toricXOperatorOfChain_op_at` and `toricZOperatorOfChain_op_at` live in
+-- `ToricLogicalCorrespondenceX.lean` / `ToricLogicalCorrespondenceZ.lean`.)
 
 /-- If two chains have disjoint supports, then their Pauli operators (X-type, Z-type)
 commute. -/
@@ -826,7 +595,7 @@ private lemma toricXZ_commute_of_disjoint_supports (L : ℕ) [Fact (0 < L)]
         Stabilizer.Lattice.toricXOperatorOfChain L cX := by
   apply NQubitPauliGroupElement.commutes_of_componentwise_commutes
   intro q
-  rw [toricXOperatorOfChain_op_at, toricZOperatorOfChain_op_at]
+  rw [Stabilizer.Lattice.toricXOperatorOfChain_op_at, Stabilizer.Lattice.toricZOperatorOfChain_op_at]
   by_cases hX : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ cX e = 1
   · by_cases hZ : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ cZ e = 1
     · -- both X and Z at q: derive contradiction from disjoint supports
@@ -892,7 +661,7 @@ private theorem horizontalLoopX_anticommute_horizontalHRowZ (L : ℕ) [Fact (2 �
     simp only [Finset.mem_filter, Finset.mem_singleton, Finset.mem_univ, true_and]
     unfold NQubitPauliGroupElement.anticommutesAt
     unfold horizontalLoopXOperator horizontalHRowZOperator
-    rw [toricXOperatorOfChain_op_at, toricZOperatorOfChain_op_at]
+    rw [Stabilizer.Lattice.toricXOperatorOfChain_op_at, Stabilizer.Lattice.toricZOperatorOfChain_op_at]
     by_cases hX : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ horizontalLoopChain L e = 1
     · by_cases hZ : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧
           horizontalHRowChain L e = 1
@@ -957,7 +726,7 @@ private theorem verticalLoopX_anticommute_verticalVRowZ (L : ℕ) [Fact (2 ≤ L
     simp only [Finset.mem_filter, Finset.mem_singleton, Finset.mem_univ, true_and]
     unfold NQubitPauliGroupElement.anticommutesAt
     unfold verticalLoopXOperator verticalVRowZOperator
-    rw [toricXOperatorOfChain_op_at, toricZOperatorOfChain_op_at]
+    rw [Stabilizer.Lattice.toricXOperatorOfChain_op_at, Stabilizer.Lattice.toricZOperatorOfChain_op_at]
     by_cases hX : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ verticalLoopChain L e = 1
     · by_cases hZ : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧
           verticalVRowChain L e = 1
@@ -1113,7 +882,17 @@ private theorem toric_logical_commute_cross (L : ℕ) [Fact (2 ≤ L)] :
     · exact absurd (hℓ1.trans hℓ'1.symm) hne
 
 -- ---------------------------------------------------------------------------
--- Phase 3.B: Edge ↔ qubit bijection
+-- Phase 3: Symplectic linear independence (block-anti-diagonal argument)
+--
+-- The check matrix splits into a Z-block (rows = vertex stabs, only Z-half
+-- nonzero) and an X-block (rows = face stabs, only X-half nonzero). LI of the
+-- whole list reduces to LI of each block, each of which is reduced to the
+-- 1-dim kernel of `toricVertexCutMap` / `toricBoundary2` (spanned by the
+-- constant-1 chain) and the fact that trimmed singleVtx/singleFace sums
+-- can never equal a constant (the origin is excluded).
+-- ---------------------------------------------------------------------------
+
+-- §B  edge ↔ qubit bijection
 -- ---------------------------------------------------------------------------
 
 /-- Cardinality match: `card(EdgeIdx L) = numQubits L = 2L²`. -/
@@ -1144,8 +923,7 @@ private lemma qubitToEdgeIdx_edgeToQubitIdx (L : ℕ) [Fact (0 < L)]
   apply (edgeToQubitIdx_bijective L).1
   exact edgeToQubitIdx_qubitToEdgeIdx L (Stabilizer.Lattice.edgeToQubitIdx L e)
 
--- ---------------------------------------------------------------------------
--- Phase 3.C: Symplectic-half identification lemmas
+-- §C  symplectic ↔ chain-complex bridges
 -- ---------------------------------------------------------------------------
 
 /-- Helper: a `ZMod 2` value is either `0` or `1`. -/
@@ -1187,7 +965,7 @@ private lemma toSymplectic_vertexStab_Z_eq (L : ℕ) [Fact (2 ≤ L)]
   rw [show vertexStab L p.1 p.2 = Stabilizer.Lattice.toricZOperatorOfChain L
         (Stabilizer.Lattice.toricVertexCutMap (L := L) (Stabilizer.Lattice.singleVtx p)) from
     (Stabilizer.Lattice.toricZOperatorOfChain_cutMap_singleVtx L p.1 p.2).symm]
-  rw [toricZOperatorOfChain_op_at]
+  rw [Stabilizer.Lattice.toricZOperatorOfChain_op_at]
   set v := Stabilizer.Lattice.toricVertexCutMap (L := L)
     (Stabilizer.Lattice.singleVtx p) (qubitToEdgeIdx L i) with hv
   rcases zmod2_zero_or_one v with h0 | h1
@@ -1221,7 +999,7 @@ private lemma toSymplectic_faceStab_X_eq (L : ℕ) [Fact (2 ≤ L)]
   rw [show faceStab L p.1 p.2 = Stabilizer.Lattice.toricXOperatorOfChain L
         (Stabilizer.Lattice.toricBoundary2 (L := L) (Stabilizer.Lattice.singleFace p)) from
     (Stabilizer.Lattice.toricXOperatorOfChain_boundary_singleFace L p.1 p.2).symm]
-  rw [toricXOperatorOfChain_op_at]
+  rw [Stabilizer.Lattice.toricXOperatorOfChain_op_at]
   set v := Stabilizer.Lattice.toricBoundary2 (L := L)
     (Stabilizer.Lattice.singleFace p) (qubitToEdgeIdx L i) with hv
   rcases zmod2_zero_or_one v with h0 | h1
@@ -1239,8 +1017,7 @@ private lemma toSymplectic_faceStab_X_eq (L : ℕ) [Fact (2 ≤ L)]
     · refine ⟨qubitToEdgeIdx L i, edgeToQubitIdx_qubitToEdgeIdx L i, ?_⟩
       rw [← hv]; exact h1
 
--- ---------------------------------------------------------------------------
--- Phase 3.D: Indexing lemmas for generatorsListPackaged
+-- §D  indexing lemmas for generatorsListPackaged
 -- ---------------------------------------------------------------------------
 
 /-- Length of the Z-trimmed list equals coordsTrimmed length. -/
@@ -1292,8 +1069,7 @@ private lemma get_packaged_X (L : ℕ) [Fact (0 < L)]
     (simp only [show (generatorsListZTrimmed L).length = (coordsTrimmed L).length from
       generatorsListZTrimmed_length L])
 
--- ---------------------------------------------------------------------------
--- Phase 3.E: Block kernel-collapse lemmas
+-- §E  block kernel-collapse lemmas
 -- ---------------------------------------------------------------------------
 
 /-- `coordsTrimmed L` is `Nodup`. -/
@@ -1417,8 +1193,7 @@ private lemma trimmed_combo_singleFace_eq_zero (L : ℕ) [Fact (0 < L)]
     ring
   · intro hcontra; exact absurd (Finset.mem_univ j) hcontra
 
--- ---------------------------------------------------------------------------
--- Phase 3.F: Main theorem
+-- §F  main theorem
 -- ---------------------------------------------------------------------------
 
 /-- Symplectic linear independence of the trimmed generator list. -/

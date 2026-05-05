@@ -99,6 +99,13 @@ lemma mem_support_toricZOperatorOfChain_edgeToQubitIdx_iff
       simp [toricZOperatorOfChain, hex]
     simp [NQubitPauliOperator.support, hZ]
 
+/-- The Z-operator-of-chain at qubit `q` is `Z` if some edge mapping to `q` has `c e = 1`,
+else `I`. -/
+lemma toricZOperatorOfChain_op_at (L : ℕ) (c : C1 L) (q : Fin (toricNumQubits L)) :
+    (toricZOperatorOfChain L c).operators q =
+      if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1
+        then PauliOperator.Z else PauliOperator.I := rfl
+
 -- ---------------------------------------------------------------------------
 -- 2.  Dual cycle map and submodules
 -- ---------------------------------------------------------------------------

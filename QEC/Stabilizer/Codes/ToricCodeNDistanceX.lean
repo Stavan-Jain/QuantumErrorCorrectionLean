@@ -371,6 +371,120 @@ theorem toricCodeN_dX_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     HasToricXDistance L L := by
   simpa using toricCodeN_hasXDistance_L L
 
+-- ---------------------------------------------------------------------------
+-- Vertical X-loop: the column-0 sister of `horizontalLoopChain`/`horizontalLoopXOperator`
+-- ---------------------------------------------------------------------------
+
+/-- Vertical X-loop chain: V-edges along column `x = zeroCoord`. -/
+def verticalLoopChain (L : ℕ) [Fact (0 < L)] : Stabilizer.Lattice.C1 L :=
+  fun e =>
+    match e with
+    | Stabilizer.Lattice.EdgeIdx.h _ _ => 0
+    | Stabilizer.Lattice.EdgeIdx.v x _ =>
+        if x = Stabilizer.Lattice.zeroCoord L then (1 : ZMod 2) else 0
+
+/-- X-type Pauli operator encoded by the vertical loop chain. -/
+def verticalLoopXOperator (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement (Stabilizer.Lattice.toricNumQubits L) :=
+  Stabilizer.Lattice.toricXOperatorOfChain L (verticalLoopChain L)
+
+/-- The vertical X-loop chain is a primal cycle. -/
+theorem verticalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
+    verticalLoopChain L ∈ Stabilizer.Lattice.toricCycles (L := L) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  unfold Stabilizer.Lattice.toricCycles
+  rw [LinearMap.mem_ker]
+  ext ⟨xv, yv⟩
+  simp only [Stabilizer.Lattice.toricBoundary1, LinearMap.coe_mk, AddHom.coe_mk,
+    verticalLoopChain]
+  by_cases hx : xv = Stabilizer.Lattice.zeroCoord L
+  · subst hx
+    show (0 : ZMod 2) + 0 + 1 + 1 = 0
+    decide
+  · simp [hx]
+
+/-- The vertical X-loop chain is not a primal boundary (its `vAt` invariant is 1). -/
+theorem verticalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
+    verticalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries (L := L) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  intro h
+  have h_vAt : Stabilizer.Lattice.vAt (L := L) (Stabilizer.Lattice.zeroCoord L)
+      (verticalLoopChain L) = 0 :=
+    Stabilizer.Lattice.v_boundary_zero (L := L) ⟨verticalLoopChain L, h⟩
+  have h_compute : Stabilizer.Lattice.vAt (L := L) (Stabilizer.Lattice.zeroCoord L)
+      (verticalLoopChain L) = 1 := by
+    unfold Stabilizer.Lattice.vAt verticalLoopChain
+    rw [Finset.sum_eq_single (Stabilizer.Lattice.zeroCoord L)]
+    · simp
+    · intro b _ hbne
+      simp [hbne]
+    · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
+  rw [h_compute] at h_vAt
+  exact absurd h_vAt (by decide)
+
+/-- The vertical X-loop chain has edge weight `L`. -/
+theorem verticalLoopChain_edgeWeight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
+    Stabilizer.Lattice.edgeWeight (L := L) (verticalLoopChain L) = L := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  let z0 : Fin L := Stabilizer.Lattice.zeroCoord L
+  let vertCol : Finset (Stabilizer.Lattice.EdgeIdx L) :=
+    (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y))
+  have hsupport :
+      Stabilizer.Lattice.edgeSupport (L := L) (verticalLoopChain L) = vertCol := by
+    ext e
+    constructor
+    · intro he
+      have hne : verticalLoopChain L e ≠ 0 := by
+        simpa [Stabilizer.Lattice.mem_edgeSupport] using he
+      cases e with
+      | h x y => simp [verticalLoopChain] at hne
+      | v x y =>
+          by_cases hx : x = z0
+          · subst hx
+            refine Finset.mem_image.mpr ?_
+            exact ⟨y, Finset.mem_univ y, rfl⟩
+          · have hx' : x = z0 := by simpa [verticalLoopChain] using hne
+            exact (hx hx').elim
+    · intro he
+      rcases Finset.mem_image.mp he with ⟨y, -, hy⟩
+      subst hy
+      simp [Stabilizer.Lattice.mem_edgeSupport, verticalLoopChain, z0]
+  have hinj : Function.Injective (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y) := by
+    intro a b h; cases h; rfl
+  have hcard : vertCol.card = L := by
+    calc
+      vertCol.card
+          = (Finset.univ.image (fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y)).card := rfl
+      _ = (Finset.univ : Finset (Fin L)).card := by
+          exact Finset.card_image_of_injective
+            (s := (Finset.univ : Finset (Fin L)))
+            (f := fun y : Fin L => Stabilizer.Lattice.EdgeIdx.v z0 y)
+            (by intro a b hab; exact hinj hab)
+      _ = L := by simp
+  calc
+    Stabilizer.Lattice.edgeWeight (L := L) (verticalLoopChain L)
+        = (Stabilizer.Lattice.edgeSupport (L := L) (verticalLoopChain L)).card := rfl
+    _ = vertCol.card := by rw [hsupport]
+    _ = L := hcard
+
+/-- The vertical X-loop operator is X-type. -/
+theorem verticalLoopXOperator_isXType (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement.IsXTypeElement (verticalLoopXOperator L) := by
+  unfold verticalLoopXOperator NQubitPauliGroupElement.IsXTypeElement
+  refine ⟨rfl, fun q => ?_⟩
+  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ verticalLoopChain L e = 1
+  · right; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
+  · left; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
+
+/-- The horizontal X-loop operator is X-type. -/
+theorem horizontalLoopXOperator_isXType (L : ℕ) [Fact (0 < L)] :
+    NQubitPauliGroupElement.IsXTypeElement (horizontalLoopXOperator L) := by
+  unfold horizontalLoopXOperator NQubitPauliGroupElement.IsXTypeElement
+  refine ⟨rfl, fun q => ?_⟩
+  by_cases h : ∃ e, Stabilizer.Lattice.edgeToQubitIdx L e = q ∧ horizontalLoopChain L e = 1
+  · right; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
+  · left; simp [Stabilizer.Lattice.toricXOperatorOfChain, h]
+
 end ToricCodeN
 end StabilizerGroup
 end Quantum

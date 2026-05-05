@@ -36,6 +36,13 @@ lemma mem_support_toricXOperatorOfChain_edgeToQubitIdx_iff
       simp [toricXOperatorOfChain, hex]
     simp [NQubitPauliOperator.support, hX]
 
+/-- The X-operator-of-chain at qubit `q` is `X` if some edge mapping to `q` has `c e = 1`,
+else `I`. -/
+lemma toricXOperatorOfChain_op_at (L : ℕ) (c : C1 L) (q : Fin (toricNumQubits L)) :
+    (toricXOperatorOfChain L c).operators q =
+      if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1
+        then PauliOperator.X else PauliOperator.I := rfl
+
 /-- Predicate: encoded X-chain operator commutes with every Z-check (vertex) generator. -/
 def xCommutesWithZChecks (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) : Prop :=
   let g := toricXOperatorOfChain L c

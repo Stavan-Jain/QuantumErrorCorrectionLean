@@ -25,11 +25,14 @@ Modules are written in Lean 4 and rely on [mathlib](https://github.com/leanprove
 The `L × L` toric code, for every `L ≥ 2`, is a verified `[[2L², 2, L]]` stabilizer code:
 
 ```lean
-theorem toricCodeN_parameters_statement (L : ℕ) [Fact (2 ≤ L)] :
-    numQubits L = 2 * L * L ∧ HasCodeDistance (toricStabilizerCode L) L
+toricStabilizerCode L : StabilizerCode (numQubits L) 2     -- n = 2L², k = 2
+                                                            -- (numQubits L = 2 * L * L by definition)
+
+theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :  -- d = L
+    HasCodeDistance (toricStabilizerCode L) L
 ```
 
-Every step of the homological distance argument — chain complex, `∂₁ ∘ ∂₂ = 0`, `dim(H₁) = 2`, the wrapping invariants `h, v`, the isomorphism `H₁ ≅ 𝔽₂²`, the lower bound `|c| ≥ L` for non-trivial cycles, and the CSS bridge `d = min(d_X, d_Z)` — is checked by Lean with no `sorry`s. The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
+The `n` and `k` parameters are part of the type. The distance is the theorem above. Every step of the homological distance argument — chain complex, `∂₁ ∘ ∂₂ = 0`, `dim(H₁) = 2`, the wrapping invariants `h, v`, the isomorphism `H₁ ≅ 𝔽₂²`, the lower bound `|c| ≥ L` for non-trivial cycles, and the CSS bridge `d = min(d_X, d_Z)` — is checked by Lean with no `sorry`s. The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
 
 ## Project Structure
 
