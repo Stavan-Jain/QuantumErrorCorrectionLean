@@ -5,6 +5,13 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Cancel any in-progress run on the same ref when a new push lands.
+# Prevents the pile-up we saw where 6 concurrent runs all churned through
+# docgen for ~2h each.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read # Read access to repository contents
@@ -18,7 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
-      - uses: leanprover-community/docgen-action@v1
+      # docgen rebuilds API docs for the project + all of mathlib (~1-2h with
+      # no cache). Skip it on every push/PR; only run on tag pushes or manual
+      # dispatch so day-to-day CI stays fast.
+      - if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        uses: leanprover-community/docgen-action@v1
         with:
           # Point `homepage` at a directory that does not exist in the repo.
           # The action's `Check for ${homepage} folder` step then sets
