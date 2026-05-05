@@ -1,6 +1,8 @@
 import QEC.Stabilizer.Homological
 import QEC.Stabilizer.Lattice.ToricHomology
 import QEC.Stabilizer.Lattice.ToricH1Dimension
+import QEC.Stabilizer.Lattice.ToricOperatorChains
+import QEC.Stabilizer.Codes.ToricCodeN
 
 /-!
 # §E — Toric chain complex as an instance of `HomologicalCode`
@@ -25,9 +27,26 @@ namespace Quantum
 namespace Stabilizer
 namespace Lattice
 
+/-- The toric edge-to-qubit equiv, built from `edgeToQubitIdx` (which is injective
+between equinumerous finite types) and the `Fintype.card (EdgeIdx L) = 2L²`
+identity.  Designed so that `(toricHomologicalCode L).edgeEquiv e` agrees with
+`edgeToQubitIdx L e` at the qubit-index level. -/
+noncomputable def toricEdgeEquiv (L : ℕ) [Fact (0 < L)] :
+    EdgeIdx L ≃ Fin (Fintype.card (EdgeIdx L)) := by
+  have hbij : Function.Bijective
+      (Quantum.Stabilizer.Lattice.edgeToQubitIdx L) := by
+    rw [Fintype.bijective_iff_injective_and_card]
+    refine ⟨Quantum.Stabilizer.Lattice.edgeToQubitIdx_injective L, ?_⟩
+    simp [Quantum.Stabilizer.Lattice.toricNumQubits, card_edgeIdx]
+  refine (Equiv.ofBijective (Quantum.Stabilizer.Lattice.edgeToQubitIdx L) hbij).trans
+    (Equiv.cast ?_)
+  congr 1
+  simp [Quantum.Stabilizer.Lattice.toricNumQubits, card_edgeIdx]
+
 /-- The toric chain complex as a `HomologicalCode`.  The 0-cells are vertices,
 1-cells are edges, 2-cells are faces.  The boundary maps and the chain-complex
-law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`. -/
+law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`.  The qubit indexing
+is the same `edgeToQubitIdx` used elsewhere in the toric files. -/
 noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
     Quantum.Stabilizer.Homological.HomologicalCode where
   C0 := VtxIdx L
@@ -42,6 +61,7 @@ noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
   boundary1 := toricBoundary1 (L := L)
   boundary2 := toricBoundary2 (L := L)
   boundary_comp := toricBoundary_comp_zero (L := L)
+  edgeEquiv := toricEdgeEquiv L
 
 /-- The toric cycle submodule equals the generic version on `toricHomologicalCode L`. -/
 theorem toricHomologicalCode_cycles_eq (L : ℕ) [Fact (0 < L)] :
@@ -63,9 +83,14 @@ theorem toricHomologicalCode_boundaries_le_cycles (L : ℕ) [Fact (0 < L)] :
 /-- The number of qubits in the toric code equals the generic `numQubits` of its
 chain complex (= `Fintype.card (EdgeIdx L) = 2L²`). -/
 theorem toricHomologicalCode_numQubits (L : ℕ) [Fact (0 < L)] :
-    (toricHomologicalCode L).numQubits = 2 * L * L := by
-  show Fintype.card (EdgeIdx L) = 2 * L * L
-  exact card_edgeIdx L
+    (toricHomologicalCode L).numQubits = 2 * L * L :=
+  card_edgeIdx L
+
+/-- Definitional bridge: the abstract `numQubits` is the toric `numQubits`. -/
+theorem toricHomologicalCode_numQubits_eq (L : ℕ) [Fact (0 < L)] :
+    (toricHomologicalCode L).numQubits =
+      Quantum.StabilizerGroup.ToricCodeN.numQubits L :=
+  card_edgeIdx L
 
 end Lattice
 end Stabilizer

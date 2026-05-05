@@ -55,6 +55,11 @@ structure HomologicalCode where
   boundary2 : (C2 → ZMod 2) →ₗ[ZMod 2] (C1 → ZMod 2)
   /-- Chain-complex law: `∂₁ ∘ ∂₂ = 0`. -/
   boundary_comp : boundary1.comp boundary2 = 0
+  /-- A chosen bijection between 1-cells and qubit indices `Fin (Fintype.card C₁)`.
+  Each instance is free to choose its own qubit indexing — the toric instance
+  uses `edgeToQubitIdx`, for example.  Generic theorems work with whatever
+  bijection the instance provides. -/
+  edgeEquiv : @Equiv C1 (Fin (@Fintype.card C1 fin1))
 
 namespace HomologicalCode
 

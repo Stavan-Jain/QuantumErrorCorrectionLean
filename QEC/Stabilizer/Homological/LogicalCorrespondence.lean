@@ -377,6 +377,306 @@ theorem chainXOperator_isNontrivialLogical_iff (c : X.C1 → ZMod 2) :
     · intro s hs hEq
       exact hc_nb (stabilizer_same_ops_implies_boundary c s hs hEq)
 
+/-! ## Z-side mirror
+
+The four iffs above are mirrored on the Z-side via the dual cycles/boundaries.
+The roles of primal and dual structures swap:
+
+  primal cycles   (ker ∂₁)  ←→  dual boundaries  (im cutMap = im ∂₁ᵀ)
+  primal boundary (im ∂₂)   ←→  dual cycles      (ker ∂₂ᵀ = ker dualBoundary)
+
+The proofs run by the same template, replacing X-type with Z-type and using the
+transpose relation `boundary2_dualBoundary_transpose` from the head of this file.
+-/
+
+/-- `chainZOperator (cutMap (singleVtx v)) = vertexStabOf v` (mirror of the X side). -/
+@[simp] lemma chainZOperator_cutMap_singleVtx (v : X.C0) :
+    X.chainZOperator (X.cutMap (X.singleVtx v)) = X.vertexStabOf v := rfl
+
+/-- `chainZOperator c` is its own inverse. -/
+lemma chainZOperator_inv (c : X.C1 → ZMod 2) :
+    (X.chainZOperator c)⁻¹ = X.chainZOperator c := by
+  apply NQubitPauliGroupElement.ext
+  · show (-(0 : Fin 4)) = 0
+    decide
+  · rfl
+
+/-- Every 0-chain decomposes as a sum over its support (ZMod 2 dichotomy). -/
+private lemma c0_eq_sum_singleVtx_filter (s : X.C0 → ZMod 2) :
+    s = ∑ v ∈ (Finset.univ.filter (fun v : X.C0 => s v = 1)),
+      X.singleVtx v := by
+  ext q
+  rw [Finset.sum_apply]
+  by_cases hq : s q = 1
+  · rw [Finset.sum_eq_single q]
+    · simp [singleVtx, hq]
+    · intros r _ hne
+      simp [singleVtx, Pi.single_apply, hne.symm]
+    · intro hcontra
+      exact absurd (Finset.mem_filter.mpr ⟨Finset.mem_univ q, hq⟩) hcontra
+  · have hq0 : s q = 0 := (zmod2_dichotomy_local (s q)).resolve_right hq
+    rw [hq0]
+    refine (Finset.sum_eq_zero ?_).symm
+    intros r hr
+    rw [Finset.mem_filter] at hr
+    have hne : r ≠ q := fun heq => hq (heq ▸ hr.2)
+    simp [singleVtx, Pi.single_apply, hne]
+
+/-- For any 0-chain `s`, `chainZOperator (cutMap s)` is in the Z-closure. -/
+lemma chainZOperator_cutMap_mem_ZClosure (s : X.C0 → ZMod 2) :
+    X.chainZOperator (X.cutMap s) ∈ Subgroup.closure X.ZGenerators := by
+  classical
+  rw [c0_eq_sum_singleVtx_filter s]
+  rw [map_sum]
+  induction (Finset.univ.filter fun v : X.C0 => s v = 1) using Finset.induction with
+  | empty => simpa using OneMemClass.one_mem _
+  | insert v sset hv ih =>
+      rw [Finset.sum_insert hv, chainZOperator_add]
+      exact Subgroup.mul_mem _
+        (Subgroup.subset_closure (Set.mem_range_self _)) ih
+
+/-- `chainZOperator c ∈ closure(ZGenerators)` whenever `c ∈ dualBoundaries`. -/
+lemma chainZOperator_mem_ZClosure_of_mem_dualBoundaries
+    (c : X.C1 → ZMod 2) (hc : c ∈ X.dualBoundaries) :
+    X.chainZOperator c ∈ Subgroup.closure X.ZGenerators := by
+  rcases hc with ⟨s, rfl⟩
+  exact chainZOperator_cutMap_mem_ZClosure s
+
+/-- `chainZOperator c` commutes with the face stab at `f` iff `dualBoundary c f = 0`. -/
+theorem chainZOperator_commutes_faceStabOf_iff
+    (c : X.C1 → ZMod 2) (f : X.C2) :
+    X.chainZOperator c * X.faceStabOf f = X.faceStabOf f * X.chainZOperator c
+    ↔ X.dualBoundary c f = 0 := by
+  unfold faceStabOf
+  rw [eq_comm,
+      chainXOperator_commutes_chainZOperator_iff,
+      chainInnerProduct_boundary2_singleFace_eq_dualBoundary]
+
+/-- `chainZOperator c` commutes with every X-generator iff `c ∈ dualCycles`. -/
+theorem chainZOperator_commutes_XGenerators_iff_mem_dualCycles (c : X.C1 → ZMod 2) :
+    (∀ x ∈ X.XGenerators, x * X.chainZOperator c = X.chainZOperator c * x)
+    ↔ c ∈ X.dualCycles := by
+  constructor
+  · intro h
+    rw [show X.dualCycles = LinearMap.ker X.dualBoundary from rfl, LinearMap.mem_ker]
+    ext f
+    have h_f := h _ ⟨f, rfl⟩
+    have := (chainZOperator_commutes_faceStabOf_iff c f).mp h_f.symm
+    simpa using this
+  · intro hc x hx
+    rcases hx with ⟨f, rfl⟩
+    have hbd : X.dualBoundary c f = 0 := by
+      have h_ker : c ∈ LinearMap.ker X.dualBoundary := hc
+      rw [LinearMap.mem_ker] at h_ker
+      exact congr_fun h_ker f
+    exact ((chainZOperator_commutes_faceStabOf_iff c f).mpr hbd).symm
+
+/-- `chainZOperator c ∈ closure(ZGenerators)` iff `c ∈ dualBoundaries`. -/
+theorem chainZOperator_mem_ZClosure_iff_mem_dualBoundaries (c : X.C1 → ZMod 2) :
+    X.chainZOperator c ∈ Subgroup.closure X.ZGenerators ↔ c ∈ X.dualBoundaries := by
+  constructor
+  · intro hc
+    have h_closure :
+        ∀ g ∈ Subgroup.closure X.ZGenerators,
+          ∃ s : X.C0 → ZMod 2,
+            X.chainZOperator (X.cutMap s) = g := by
+      intro g hg
+      refine Subgroup.closure_induction
+        (p := fun y _ => ∃ s : X.C0 → ZMod 2, X.chainZOperator (X.cutMap s) = y)
+        ?_ ?_ ?_ ?_ hg
+      · rintro y ⟨v, rfl⟩
+        exact ⟨X.singleVtx v, rfl⟩
+      · exact ⟨0, by simp⟩
+      · intros g₁ g₂ _ _ ih1 ih2
+        obtain ⟨s₁, hs₁⟩ := ih1
+        obtain ⟨s₂, hs₂⟩ := ih2
+        refine ⟨s₁ + s₂, ?_⟩
+        rw [map_add, chainZOperator_add, hs₁, hs₂]
+      · intros g _ ih
+        obtain ⟨s, hs⟩ := ih
+        refine ⟨s, ?_⟩
+        rw [← hs, chainZOperator_inv]
+    obtain ⟨s, hs⟩ := h_closure _ hc
+    have h_eq : X.cutMap s = c := by
+      have hr := congrArg X.chainOfZOperator hs
+      rw [chainOfZOperator_chainZOperator] at hr
+      rw [chainOfZOperator_chainZOperator] at hr
+      exact hr
+    rw [show X.dualBoundaries = LinearMap.range X.cutMap from rfl]
+    exact ⟨s, h_eq⟩
+  · rintro ⟨s, rfl⟩
+    exact chainZOperator_cutMap_mem_ZClosure s
+
+/-- A Z-type chain operator commutes with all vertex stabs (Z-Z case). -/
+lemma chainZOperator_commutes_vertexStabOf
+    (c : X.C1 → ZMod 2) (v : X.C0) :
+    X.vertexStabOf v * X.chainZOperator c = X.chainZOperator c * X.vertexStabOf v :=
+  Quantum.StabilizerGroup.CSSCommutationLemmas.ZType_commutes
+    (vertexStabOf_isZType v) (chainZOperator_isZType c)
+
+/-- Z-type elements of the stabilizer come from the Z-closure (CSS decomposition). -/
+lemma zType_in_stabilizer_implies_in_ZClosure
+    (g : NQubitPauliGroupElement X.numQubits)
+    (hg : g ∈ X.homologicalStabilizerGroup.toSubgroup)
+    (hzt : NQubitPauliGroupElement.IsZTypeElement g) :
+    g ∈ Subgroup.closure X.ZGenerators := by
+  have hg_cl :
+      g ∈ Subgroup.closure (X.ZGenerators ∪ X.XGenerators) := hg
+  obtain ⟨z, hz, x, hx, rfl⟩ :=
+    Subgroup.mem_closure_union_exists_mul_of_commute_generators
+      ZGenerators_commute_XGenerators g hg_cl
+  have hz_zt : NQubitPauliGroupElement.IsZTypeElement z :=
+    NQubitPauliGroupElement.IsZTypeElement_of_mem_closure ZGenerators_isZType z hz
+  have hx_xt : NQubitPauliGroupElement.IsXTypeElement x :=
+    NQubitPauliGroupElement.IsXTypeElement_of_mem_closure XGenerators_isXType x hx
+  -- x must be Z-type (its operators must be I where g's are I or Z)
+  have hx_zt : NQubitPauliGroupElement.IsZTypeElement x := by
+    refine ⟨hx_xt.1, fun i => ?_⟩
+    rcases hx_xt.2 i with hI | hX
+    · exact Or.inl hI
+    · exfalso
+      rcases hz_zt.2 i with hz_I | hz_Z
+      · have hgi := hzt.2 i
+        simp [NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp] at hgi
+        rw [hz_I, hX] at hgi
+        cases hgi with
+        | inl h => simp [PauliOperator.mulOp] at h
+        | inr h => simp [PauliOperator.mulOp] at h
+      · have hgi := hzt.2 i
+        simp [NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp] at hgi
+        rw [hz_Z, hX] at hgi
+        cases hgi with
+        | inl h => simp [PauliOperator.mulOp] at h
+        | inr h => simp [PauliOperator.mulOp] at h
+  have hx_id : x = 1 :=
+    NQubitPauliGroupElement.eq_one_of_IsZTypeElement_and_IsXTypeElement hx_zt hx_xt
+  rw [hx_id, mul_one]
+  exact hz
+
+/-- Centralizer membership ↔ dual cycle. -/
+lemma chainZOperator_mem_centralizer_iff_mem_dualCycles
+    (c : X.C1 → ZMod 2) :
+    X.chainZOperator c ∈ Quantum.StabilizerGroup.centralizer X.homologicalStabilizerGroup
+    ↔ c ∈ X.dualCycles := by
+  constructor
+  · intro h
+    apply (chainZOperator_commutes_XGenerators_iff_mem_dualCycles c).mp
+    intro x hx
+    apply h
+    exact Subgroup.subset_closure (Set.mem_union_right _ hx)
+  · intro hc
+    have h_commX :
+        ∀ x ∈ X.XGenerators, x * X.chainZOperator c = X.chainZOperator c * x :=
+      (chainZOperator_commutes_XGenerators_iff_mem_dualCycles c).mpr hc
+    intro g hg
+    have hg_cl : g ∈ Subgroup.closure (X.ZGenerators ∪ X.XGenerators) := hg
+    refine Subgroup.closure_induction (p := fun y _ => y * X.chainZOperator c =
+        X.chainZOperator c * y) ?_ ?_ ?_ ?_ hg_cl
+    · rintro y (hy | hy)
+      · rcases hy with ⟨v, rfl⟩
+        exact chainZOperator_commutes_vertexStabOf c v
+      · exact h_commX y hy
+    · show (1 : NQubitPauliGroupElement X.numQubits) * X.chainZOperator c =
+        X.chainZOperator c * 1
+      rw [one_mul, mul_one]
+    · intros y₁ y₂ _ _ hy₁ hy₂
+      calc (y₁ * y₂) * X.chainZOperator c
+          = y₁ * (y₂ * X.chainZOperator c) := mul_assoc _ _ _
+        _ = y₁ * (X.chainZOperator c * y₂) := by rw [hy₂]
+        _ = (y₁ * X.chainZOperator c) * y₂ := (mul_assoc _ _ _).symm
+        _ = (X.chainZOperator c * y₁) * y₂ := by rw [hy₁]
+        _ = X.chainZOperator c * (y₁ * y₂) := mul_assoc _ _ _
+    · intros y _ hy
+      have hcomm : Commute y (X.chainZOperator c) := hy
+      exact hcomm.inv_left.eq
+
+/-- If `s ∈ stab` has the same operators as `chainZOperator c`, then
+    `c ∈ dualBoundaries`. -/
+lemma stabilizer_same_ops_implies_dualBoundary
+    (c : X.C1 → ZMod 2)
+    (s : NQubitPauliGroupElement X.numQubits)
+    (hs : s ∈ X.homologicalStabilizerGroup.toSubgroup)
+    (heq : s.operators = (X.chainZOperator c).operators) :
+    c ∈ X.dualBoundaries := by
+  have hops : ∀ i, s.operators i = PauliOperator.Z ∨ s.operators i = PauliOperator.I := by
+    intro i
+    rw [heq]
+    rcases (chainZOperator_isZType c).2 i with h | h
+    · right; exact h
+    · left; exact h
+  have hs_zt : NQubitPauliGroupElement.IsZTypeElement s := by
+    have hs_cl : s ∈ Subgroup.closure (X.ZGenerators ∪ X.XGenerators) := hs
+    obtain ⟨z, hz, x, hx, hzx⟩ :=
+      Subgroup.mem_closure_union_exists_mul_of_commute_generators
+        ZGenerators_commute_XGenerators s hs_cl
+    have hz_zt : NQubitPauliGroupElement.IsZTypeElement z :=
+      NQubitPauliGroupElement.IsZTypeElement_of_mem_closure ZGenerators_isZType z hz
+    have hx_xt : NQubitPauliGroupElement.IsXTypeElement x :=
+      NQubitPauliGroupElement.IsXTypeElement_of_mem_closure XGenerators_isXType x hx
+    -- x must be I (since s's ops are Z or I, and z*x has to match)
+    have hx_id : x = 1 := by
+      have hx_ops_I : ∀ i, x.operators i = PauliOperator.I := by
+        intro i
+        have hsi := hops i
+        rw [hzx] at hsi
+        rcases hz_zt.2 i with hz_I | hz_Z
+        · rcases hx_xt.2 i with hx_I | hx_X
+          · exact hx_I
+          · exfalso
+            simp [NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp,
+              hz_I, hx_X, PauliOperator.mulOp] at hsi
+        · rcases hx_xt.2 i with hx_I | hx_X
+          · exact hx_I
+          · exfalso
+            simp [NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp,
+              hz_Z, hx_X, PauliOperator.mulOp] at hsi
+      exact NQubitPauliGroupElement.ext x 1 hx_xt.1
+        (by ext i; simp [NQubitPauliOperator.identity, hx_ops_I i])
+    rw [hzx, hx_id, mul_one]
+    exact hz_zt
+  have hzcl : s ∈ Subgroup.closure X.ZGenerators :=
+    zType_in_stabilizer_implies_in_ZClosure s hs hs_zt
+  have h_eq : s = X.chainZOperator c := by
+    apply NQubitPauliGroupElement.ext
+    · rw [hs_zt.1, (chainZOperator_isZType c).1]
+    · ext i; exact congrFun heq i
+  rw [h_eq] at hzcl
+  exact (chainZOperator_mem_ZClosure_iff_mem_dualBoundaries c).mp hzcl
+
+/-- Z-side main: nontrivial logical iff dual cycle ∧ ¬ dual boundary. -/
+theorem chainZOperator_isNontrivialLogical_iff (c : X.C1 → ZMod 2) :
+    Quantum.StabilizerGroup.IsNontrivialLogicalOperator
+        (X.chainZOperator c) X.homologicalStabilizerGroup ↔
+      c ∈ X.dualCycles ∧ c ∉ X.dualBoundaries := by
+  rw [Quantum.StabilizerGroup.IsNontrivialLogicalOperator_iff]
+  constructor
+  · rintro ⟨h_centralizer, h_not_stab, _⟩
+    refine ⟨?_, ?_⟩
+    · exact (chainZOperator_mem_centralizer_iff_mem_dualCycles c).mp h_centralizer
+    · intro hc_b
+      have hclosure :
+          X.chainZOperator c ∈ Subgroup.closure X.ZGenerators :=
+        (chainZOperator_mem_ZClosure_iff_mem_dualBoundaries c).mpr hc_b
+      have h_in_stab :
+          X.chainZOperator c ∈ X.homologicalStabilizerGroup.toSubgroup := by
+        refine Subgroup.closure_induction
+          (p := fun y _ => y ∈ X.homologicalStabilizerGroup.toSubgroup) ?_ ?_ ?_ ?_ hclosure
+        · intro y hy
+          exact Subgroup.subset_closure (Set.mem_union_left _ hy)
+        · exact Subgroup.one_mem _
+        · intros y₁ y₂ _ _ hy₁ hy₂
+          exact Subgroup.mul_mem _ hy₁ hy₂
+        · intros y _ hy
+          exact Subgroup.inv_mem _ hy
+      exact h_not_stab h_in_stab
+  · rintro ⟨hc_c, hc_nb⟩
+    refine ⟨?_, ?_, ?_⟩
+    · exact (chainZOperator_mem_centralizer_iff_mem_dualCycles c).mpr hc_c
+    · intro hg
+      exact hc_nb (stabilizer_same_ops_implies_dualBoundary c (X.chainZOperator c) hg rfl)
+    · intro s hs hEq
+      exact hc_nb (stabilizer_same_ops_implies_dualBoundary c s hs hEq)
+
 end HomologicalCode
 
 end Homological
