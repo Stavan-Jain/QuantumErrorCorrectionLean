@@ -10,4 +10,5 @@ import QEC.Stabilizer.Lattice.ToricOperatorChains
 import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceX
 import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceZ
 import QEC.Stabilizer.Lattice.ToricDualWrappingInvariants
+import QEC.Stabilizer.Lattice.ToricChainComplex
 
