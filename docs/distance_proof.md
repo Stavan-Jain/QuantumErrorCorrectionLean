@@ -99,17 +99,23 @@ and extends linearly. For a subset of edges $E$, vertex $v$ is in $\partial_1(E)
 First, $\partial_1$ applied to a single edge: $\partial_1(H(0,0)) = (0,0) + (1,0)$. The two endpoints are the only vertices in the boundary.
 
 Next, $\partial_2$ applied to a single face $F(0,0)$:
+
 $$\partial_2(F(0,0)) = H(0,0) + H(0,1) + V(0,0) + V(1,0)$$
+
 This is the set of four edges forming the perimeter of the face.
 
 Now consider $\partial_2$ applied to two adjacent faces $F(0,0)$ and $F(1,0)$ (side by side horizontally). Their shared boundary edge is $V(1,0)$. Over $\mathbb{F}_2$:
+
 $$\partial_2(F(0,0)) + \partial_2(F(1,0)) = H(0,0) + H(0,1) + V(0,0) + V(1,0) + H(1,0) + H(1,1) + V(1,0) + V(2,0)$$
+
 The edge $V(1,0)$ appears twice and cancels, leaving six edges forming the outer perimeter of the two-face rectangle. This illustrates the general principle: shared (interior) edges always cancel, so $\partial_2(\mathcal{F})$ is the outer boundary of $\mathcal{F}$.
 
 **Lemma 2.1.** $\partial_1 \circ \partial_2 = 0$.
 
 *Proof.* It suffices to check on a single face $F(x,y)$:
+
 $$\partial_1(\partial_2(F(x,y))) = \partial_1(H(x,y)) + \partial_1(H(x,y+1)) + \partial_1(V(x,y)) + \partial_1(V(x+1,y))$$
+
 $$= [(x,y)+(x+1,y)] + [(x,y+1)+(x+1,y+1)] + [(x,y)+(x,y+1)] + [(x+1,y)+(x+1,y+1)]$$
 
 Each of the four corner vertices $(x,y)$, $(x+1,y)$, $(x,y+1)$, $(x+1,y+1)$ appears exactly twice in this sum. Over $\mathbb{F}_2$, each cancels, giving $0$. $\square$
