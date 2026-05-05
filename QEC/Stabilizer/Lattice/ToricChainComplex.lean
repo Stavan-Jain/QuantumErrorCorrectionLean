@@ -1,6 +1,9 @@
 import QEC.Stabilizer.Homological
 import QEC.Stabilizer.Lattice.ToricHomology
 import QEC.Stabilizer.Lattice.ToricH1Dimension
+import QEC.Stabilizer.Lattice.ToricOperatorChains
+import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceZ
+import QEC.Stabilizer.Codes.ToricCodeN
 
 /-!
 # §E — Toric chain complex as an instance of `HomologicalCode`
@@ -25,9 +28,23 @@ namespace Quantum
 namespace Stabilizer
 namespace Lattice
 
+/-- The toric edge-to-qubit equiv, built from `edgeToQubitIdx` (which is injective
+between equinumerous finite types). Returns an `EdgeIdx L ≃ Fin (toricNumQubits L)`
+so the abstract chain operator and the existing `toricXOperatorOfChain L` end up
+in the same `NQubitPauliGroupElement (2 * L * L)` type. -/
+noncomputable def toricEdgeEquiv (L : ℕ) [Fact (0 < L)] :
+    EdgeIdx L ≃ Fin (Quantum.Stabilizer.Lattice.toricNumQubits L) := by
+  have hbij : Function.Bijective
+      (Quantum.Stabilizer.Lattice.edgeToQubitIdx L) := by
+    rw [Fintype.bijective_iff_injective_and_card]
+    refine ⟨Quantum.Stabilizer.Lattice.edgeToQubitIdx_injective L, ?_⟩
+    simp [Quantum.Stabilizer.Lattice.toricNumQubits, card_edgeIdx]
+  exact Equiv.ofBijective (Quantum.Stabilizer.Lattice.edgeToQubitIdx L) hbij
+
 /-- The toric chain complex as a `HomologicalCode`.  The 0-cells are vertices,
 1-cells are edges, 2-cells are faces.  The boundary maps and the chain-complex
-law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`. -/
+law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`.  The qubit indexing
+is the same `edgeToQubitIdx` used elsewhere in the toric files. -/
 noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
     Quantum.Stabilizer.Homological.HomologicalCode where
   C0 := VtxIdx L
@@ -42,6 +59,9 @@ noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
   boundary1 := toricBoundary1 (L := L)
   boundary2 := toricBoundary2 (L := L)
   boundary_comp := toricBoundary_comp_zero (L := L)
+  numQubits := Quantum.Stabilizer.Lattice.toricNumQubits L
+  numQubits_eq := card_edgeIdx L
+  edgeEquiv := toricEdgeEquiv L
 
 /-- The toric cycle submodule equals the generic version on `toricHomologicalCode L`. -/
 theorem toricHomologicalCode_cycles_eq (L : ℕ) [Fact (0 < L)] :
@@ -60,12 +80,50 @@ theorem toricHomologicalCode_boundaries_le_cycles (L : ℕ) [Fact (0 < L)] :
     toricBoundaries (L := L) ≤ toricCycles (L := L) :=
   (toricHomologicalCode L).boundaries_le_cycles
 
-/-- The number of qubits in the toric code equals the generic `numQubits` of its
-chain complex (= `Fintype.card (EdgeIdx L) = 2L²`). -/
+/-- The toric `HomologicalCode`'s `numQubits` is definitionally `2 * L * L`. -/
 theorem toricHomologicalCode_numQubits (L : ℕ) [Fact (0 < L)] :
-    (toricHomologicalCode L).numQubits = 2 * L * L := by
-  show Fintype.card (EdgeIdx L) = 2 * L * L
-  exact card_edgeIdx L
+    (toricHomologicalCode L).numQubits = 2 * L * L := rfl
+
+/-- Definitional bridge: the abstract `numQubits` is the toric `numQubits`. -/
+theorem toricHomologicalCode_numQubits_eq (L : ℕ) [Fact (0 < L)] :
+    (toricHomologicalCode L).numQubits =
+      Quantum.StabilizerGroup.ToricCodeN.numQubits L := rfl
+
+/-- The abstract `chainXOperator` of the toric chain complex is the existing
+`toricXOperatorOfChain`.  This holds because both operators are defined by the
+same `if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1 then X else I` formula, and the
+toric instance's `edgeEquiv` is `Equiv.ofBijective (edgeToQubitIdx L) _`. -/
+theorem toricHomologicalCode_chainXOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 L) :
+    (toricHomologicalCode L).chainXOperator c = toricXOperatorOfChain L c := rfl
+
+/-- Same for Z. -/
+theorem toricHomologicalCode_chainZOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 L) :
+    (toricHomologicalCode L).chainZOperator c = toricZOperatorOfChain L c := rfl
+
+/-! ## Notes on the further toric file slim
+
+Remaining bridges still needed for slimming the existing toric files
+(`ToricLogicalCorrespondenceX/Z.lean`, `ToricCodeNDistance.lean`,
+`ToricCodeNStabilizerCode.lean`):
+
+  * `(toricHomologicalCode L).cutMap = toricVertexCutMap`
+    Non-trivial: abstract `cutMap` is defined as `∑ v, s v * ∂₁(δ_e)(v)`
+    while toric is defined by explicit edge match. Equal pointwise but
+    requires expanding the sum and case-splitting on edge type.
+  * `(toricHomologicalCode L).faceStabOf (x, y) = faceStab L x y`
+    Follows from cutMap-eq + chainXOperator-eq + the existing toric
+    `toricXOperatorOfChain_boundary_singleFace`.
+  * `(toricHomologicalCode L).vertexStabOf (x, y) = vertexStab L x y`
+    Similar via `toricZOperatorOfChain_cutMap_singleVtx`.
+  * Set equalities `(toricHomologicalCode L).XGenerators = XGenerators L` etc.
+  * Stabilizer-group equality.
+
+With these bridges, each toric file's end-of-file iff theorems become
+1-line applications of the generic `chainXOperator_*_iff_*` /
+`chainZOperator_*_iff_*` theorems, plus a `rw` against the bridge.
+The full §B.3 symplectic-LI lift is independent of these bridges and is
+its own follow-up.
+-/
 
 end Lattice
 end Stabilizer

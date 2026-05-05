@@ -27,12 +27,7 @@ namespace HomologicalCode
 
 variable (X : HomologicalCode)
 
-/-- Number of physical qubits = number of 1-cells. -/
-abbrev numQubits : ℕ := Fintype.card X.C1
-
-/-- Canonical equiv between 1-cells and `Fin numQubits`, used to index qubits. -/
-noncomputable def edgeEquiv : X.C1 ≃ Fin X.numQubits :=
-  Fintype.equivFin X.C1
+-- `numQubits` is now a field of `HomologicalCode` (see `Code.lean`).
 
 /-- Encode a 1-chain as an X-type Pauli element. -/
 noncomputable def chainXOperator (c : X.C1 → ZMod 2) :

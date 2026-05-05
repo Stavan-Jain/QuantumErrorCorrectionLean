@@ -55,6 +55,19 @@ structure HomologicalCode where
   boundary2 : (C2 → ZMod 2) →ₗ[ZMod 2] (C1 → ZMod 2)
   /-- Chain-complex law: `∂₁ ∘ ∂₂ = 0`. -/
   boundary_comp : boundary1.comp boundary2 = 0
+  /-- The number of physical qubits.  Each instance specifies this explicitly
+  (e.g. the toric code uses `2 * L * L`); we relate it to `Fintype.card C₁`
+  via `numQubits_eq` below.  Making this a field rather than a derived
+  `abbrev` lets each instance use its own canonical Nat representation,
+  which keeps the resulting `NQubitPauliGroupElement numQubits` type
+  defeq to whatever the existing instance code uses. -/
+  numQubits : ℕ
+  /-- The number of qubits is `Fintype.card C₁`. -/
+  numQubits_eq : @Fintype.card C1 fin1 = numQubits
+  /-- A chosen bijection between 1-cells and qubit indices `Fin numQubits`.
+  Each instance is free to choose its own qubit indexing — the toric instance
+  uses `edgeToQubitIdx`, for example. -/
+  edgeEquiv : C1 ≃ Fin numQubits
 
 namespace HomologicalCode
 

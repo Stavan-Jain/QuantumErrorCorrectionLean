@@ -201,50 +201,12 @@ lemma chainZOperator_zChainOf_op_at
     push_neg
     exact hzy
 
-/-! ## Z-side closure helper (mirror of §C's X-side)-/
+/-! ## not_both_boundary_of_nontrivial
 
-/-- Every 0-chain decomposes as a sum over its support. -/
-private lemma c0_eq_sum_singleVtx_filter (s : X.C0 → ZMod 2) :
-    s = ∑ v ∈ (Finset.univ.filter (fun v : X.C0 => s v = 1)),
-      X.singleVtx v := by
-  ext q
-  rw [Finset.sum_apply]
-  by_cases hq : s q = 1
-  · rw [Finset.sum_eq_single q]
-    · simp [singleVtx, hq]
-    · intros r _ hne
-      simp [singleVtx, Pi.single_apply, hne.symm]
-    · intro hcontra
-      exact absurd (Finset.mem_filter.mpr ⟨Finset.mem_univ q, hq⟩) hcontra
-  · have hq0 : s q = 0 := (zmod2_dichotomy_local (s q)).resolve_right hq
-    rw [hq0]
-    refine (Finset.sum_eq_zero ?_).symm
-    intros r hr
-    rw [Finset.mem_filter] at hr
-    have hne : r ≠ q := fun heq => hq (heq ▸ hr.2)
-    simp [singleVtx, Pi.single_apply, hne]
-
-/-- For any 0-chain `s`, `chainZOperator (cutMap s)` is in the Z-closure. -/
-lemma chainZOperator_cutMap_mem_ZClosure (s : X.C0 → ZMod 2) :
-    X.chainZOperator (X.cutMap s) ∈ Subgroup.closure X.ZGenerators := by
-  classical
-  rw [c0_eq_sum_singleVtx_filter s]
-  rw [map_sum]
-  induction (Finset.univ.filter fun v : X.C0 => s v = 1) using Finset.induction with
-  | empty => simpa using OneMemClass.one_mem _
-  | insert v sset hv ih =>
-      rw [Finset.sum_insert hv, chainZOperator_add]
-      exact Subgroup.mul_mem _
-        (Subgroup.subset_closure (Set.mem_range_self _)) ih
-
-/-- `chainZOperator c ∈ closure(ZGenerators)` whenever `c ∈ dualBoundaries`. -/
-lemma chainZOperator_mem_ZClosure_of_mem_dualBoundaries
-    (c : X.C1 → ZMod 2) (hc : c ∈ X.dualBoundaries) :
-    X.chainZOperator c ∈ Subgroup.closure X.ZGenerators := by
-  rcases hc with ⟨s, rfl⟩
-  exact chainZOperator_cutMap_mem_ZClosure s
-
-/-! ## not_both_boundary_of_nontrivial -/
+Note: the Z-side closure helpers (`chainZOperator_cutMap_mem_ZClosure`,
+`chainZOperator_mem_ZClosure_of_mem_dualBoundaries`) live alongside their X-side
+mirrors in `LogicalCorrespondence.lean`.
+-/
 
 /-- Helper: combining the X-only and Z-only encodings of `g` (their operator part)
 recovers `g.operators` qubit-by-qubit. -/
