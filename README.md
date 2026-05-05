@@ -60,7 +60,7 @@ Import the whole development via `QEC` (or `QEC.Foundations.Foundations`, `QEC.R
 
 ```bash
 git clone <repository-url>
-cd QuantumErrorCorrectionLean
+cd QECLean
 lake build
 ```
 
