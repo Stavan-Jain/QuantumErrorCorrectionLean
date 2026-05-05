@@ -1,8 +1,10 @@
 import Mathlib.Tactic
 import QEC.Stabilizer.Codes.ToricCodeNDistanceX
 import QEC.Stabilizer.Codes.ToricCodeNDistanceZ
+import QEC.Stabilizer.Codes.ToricCodeNStabilizerCode
 import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceZ
 import QEC.Stabilizer.PauliGroup.NQubitElement
+import QEC.Stabilizer.Core.CodeDistance
 
 namespace Quantum
 namespace StabilizerGroup
@@ -19,22 +21,7 @@ Combines the X-distance (from `ToricCodeNDistanceX`) and Z-distance
 -/
 
 -- ---------------------------------------------------------------------------
--- 1.  Full-distance predicate
--- ---------------------------------------------------------------------------
-
-/-- Full-distance predicate over all nontrivial logical operators. -/
-def HasToricDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
-  d ≥ 1 ∧
-  (∀ g : NQubitPauliGroupElement (numQubits L),
-      IsNontrivialLogicalOperator g (stabilizerGroup L) →
-      0 < weight g →
-      weight g ≥ d) ∧
-  (∃ g : NQubitPauliGroupElement (numQubits L),
-      IsNontrivialLogicalOperator g (stabilizerGroup L) ∧
-      weight g = d)
-
--- ---------------------------------------------------------------------------
--- 2.  CSS bridge: full distance = min(dX, dZ)
+-- 1.  CSS bridge: full distance = min(dX, dZ)
 -- ---------------------------------------------------------------------------
 
 /-
@@ -477,13 +464,20 @@ private lemma not_both_boundary_of_nontrivial (L : ℕ) [Fact (2 ≤ L)]
 /-- CSS bridge: full distance = min(dX, dZ). -/
 theorem toricCodeN_distance_eq_min_dX_dZ (L dX dZ : ℕ) [Fact (2 ≤ L)]
     (hx : HasToricXDistance L dX) (hz : HasToricZDistance L dZ) :
-    HasToricDistance L (Nat.min dX dZ) := by
+    HasCodeDistance (toricStabilizerCode L) (Nat.min dX dZ) := by
   have hL0 : 0 < L := Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)
   haveI : Fact (0 < L) := ⟨hL0⟩
   obtain ⟨hdXpos, hxLB, hxWit⟩ := hx
   obtain ⟨hdZpos, hzLB, hzWit⟩ := hz
+  -- Translate `IsNontrivialLogicalOperator g (toricStabilizerCode L).toStabilizerGroup`
+  -- to `IsNontrivialLogicalOperator g (stabilizerGroup L)` via the subgroup equality.
+  have h_subgroup_eq := toricStabilizerCode_subgroup_eq L
+  have h_iff : ∀ g, IsNontrivialLogicalOperator g (toricStabilizerCode L).toStabilizerGroup ↔
+      IsNontrivialLogicalOperator g (stabilizerGroup L) :=
+    fun g => IsNontrivialLogicalOperator_of_toSubgroup_eq g h_subgroup_eq
   refine ⟨le_min hdXpos hdZpos, ?_, ?_⟩
-  · intro g hgLogical hgwpos
+  · intro g hgLogical' hgwpos
+    have hgLogical := (h_iff g).mp hgLogical'
     have h_not_both := not_both_boundary_of_nontrivial L g hgLogical
     have hg_cent : g ∈ centralizer (stabilizerGroup L) :=
       (IsNontrivialLogicalOperator_iff g (stabilizerGroup L)).mp hgLogical |>.1
@@ -590,11 +584,11 @@ theorem toricCodeN_distance_eq_min_dX_dZ (L dX dZ : ℕ) [Fact (2 ≤ L)]
   · -- Witness
     by_cases hle : dX ≤ dZ
     · obtain ⟨g, _, hg_logical, hg_weight⟩ := hxWit
-      refine ⟨g, hg_logical, ?_⟩
+      refine ⟨g, (h_iff g).mpr hg_logical, ?_⟩
       rw [hg_weight]; exact (Nat.min_eq_left hle).symm
     · push_neg at hle
       obtain ⟨g, _, hg_logical, hg_weight⟩ := hzWit
-      refine ⟨g, hg_logical, ?_⟩
+      refine ⟨g, (h_iff g).mpr hg_logical, ?_⟩
       rw [hg_weight]; exact (Nat.min_eq_right (le_of_lt hle)).symm
 
 -- ---------------------------------------------------------------------------
@@ -603,14 +597,14 @@ theorem toricCodeN_distance_eq_min_dX_dZ (L dX dZ : ℕ) [Fact (2 ≤ L)]
 
 /-- Section 8.3 endpoint: the full toric-code distance is `L`. -/
 theorem toricCodeN_distance_eq_L (L : ℕ) [Fact (2 ≤ L)] :
-    HasToricDistance L L := by
+    HasCodeDistance (toricStabilizerCode L) L := by
   have hx : HasToricXDistance L L := toricCodeN_dX_eq_L L
   have hz : HasToricZDistance L L := toricCodeN_dZ_eq_L L
   simpa using toricCodeN_distance_eq_min_dX_dZ L L L hx hz
 
 /-- Parameter-packaging: toric family has parameters `[[2L², 2, L]]`. -/
 theorem toricCodeN_parameters_statement (L : ℕ) [Fact (2 ≤ L)] :
-    numQubits L = 2 * L * L ∧ HasToricDistance L L :=
+    numQubits L = 2 * L * L ∧ HasCodeDistance (toricStabilizerCode L) L :=
   ⟨rfl, toricCodeN_distance_eq_L L⟩
 
 end ToricCodeN
