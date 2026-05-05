@@ -184,15 +184,11 @@ theorem toric_rank_boundary1_eq_rank_cutMap :
     convert a.pi_apply_eq_sum_univ _ using 1;
     simp +decide [ eq_comm, mul_comm ]
 
-/-- Kernel-dimension placeholder for the cut-map connectivity argument. -/
-theorem toric_finrank_ker_cutMap_eq_one :
-    Module.finrank (ZMod 2) (LinearMap.ker (toricVertexCutMap (L := L))) = 1 := by
-  have h_span :
-      ∀ s : C0 L, s ∈ LinearMap.ker (toricVertexCutMap (L := L)) ↔
-        ∃ c : ZMod 2, s = fun _ => c := by
-    intro s
-    constructor
-    intro hs
+/-- The kernel of the toric vertex cut map consists exactly of the constant 0-chains. -/
+theorem mem_ker_cutMap_iff (s : C0 L) :
+    s ∈ LinearMap.ker (toricVertexCutMap (L := L)) ↔ ∃ c : ZMod 2, s = fun _ => c := by
+  constructor
+  · intro hs
     have h_const : ∀ x y : Fin L, s (x, y) = s (next L x, y) ∧ s (x, y) = s (x, next L y) := by
       intro x y
       have h_eq :
@@ -237,21 +233,29 @@ theorem toric_finrank_ker_cutMap_eq_one :
           grind
       exact h_const_x x ▸ h_const_y y ▸ rfl
     obtain ⟨c, hc⟩ := h_const_val
-    use c
-    funext p
-    simp [hc];
-    rintro ⟨ c, rfl ⟩ ; ext e; cases e <;> simp +decide ;
-    · exact show c + c = 0 from by fin_cases c <;> rfl;
-    · exact show ( c + c : ZMod 2 ) = 0 from by have := Fin.exists_fin_two.mp ⟨ c, rfl ⟩ ; aesop;
-  rw [show LinearMap.ker (toricVertexCutMap L) =
-      Submodule.span (ZMod 2) {fun _ => 1} from _]
-  · rw [ finrank_span_singleton ] ; norm_num;
-    exact fun h => by simpa using congr_fun h ( ⟨ 0, Fact.out ⟩, ⟨ 0, Fact.out ⟩ ) ;
-  · ext s; specialize h_span s; simp_all +decide [ Submodule.mem_span_singleton ] ;
-    exact ⟨
-      (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩),
-      (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩)
-    ⟩
+    exact ⟨c, funext fun p => by simp [hc]⟩
+  · rintro ⟨ c, rfl ⟩
+    rw [LinearMap.mem_ker]
+    ext e
+    cases e <;> simp +decide
+    · exact show c + c = 0 from by fin_cases c <;> rfl
+    · exact show (c + c : ZMod 2) = 0 from by have := Fin.exists_fin_two.mp ⟨c, rfl⟩; aesop
+
+/-- The kernel of the toric vertex cut map equals `span{constant 1}`. -/
+theorem ker_toricVertexCutMap_eq_span_one :
+    LinearMap.ker (toricVertexCutMap (L := L)) =
+      Submodule.span (ZMod 2) ({fun _ => 1} : Set (C0 L)) := by
+  ext s
+  rw [mem_ker_cutMap_iff, Submodule.mem_span_singleton]
+  exact ⟨
+    (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩),
+    (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩)⟩
+
+/-- Kernel-dimension result for the cut-map connectivity argument. -/
+theorem toric_finrank_ker_cutMap_eq_one :
+    Module.finrank (ZMod 2) (LinearMap.ker (toricVertexCutMap (L := L))) = 1 := by
+  rw [ker_toricVertexCutMap_eq_span_one, finrank_span_singleton]
+  exact fun h => by simpa using congr_fun h (⟨0, Fact.out⟩, ⟨0, Fact.out⟩)
 
 /-- Target rank formula for `∂₁`. -/
 theorem toric_rank_boundary1 :
@@ -289,12 +293,11 @@ theorem toric_finrank_cycles :
     exact hEq.trans hsplit.symm
   exact Nat.add_right_cancel this
 
-/-- Kernel-dimension placeholder for `∂₂`. -/
-theorem toric_finrank_ker_boundary2_eq_one :
-    Module.finrank (ZMod 2) (LinearMap.ker (toricBoundary2 (L := L))) = 1 := by
-  have h_span :
-      ∀ f ∈ LinearMap.ker (toricBoundary2 (L := L)), ∃ c : ZMod 2, f = fun _ => c := by
-    intro f hf
+/-- The kernel of `∂₂` consists exactly of the constant 2-chains. -/
+theorem mem_ker_boundary2_iff (f : C2 L) :
+    f ∈ LinearMap.ker (toricBoundary2 (L := L)) ↔ ∃ c : ZMod 2, f = fun _ => c := by
+  constructor
+  · intro hf
     have h_const : ∀ x y, f (x, next L y) = f (x, y) := by
       intro x y
       have := congr_fun hf (EdgeIdx.h x (next L y))
@@ -304,7 +307,6 @@ theorem toric_finrank_ker_boundary2_eq_one :
           (show f (x, y) + f (x, y) = 0 from by
             rw [← two_smul (ZMod 2) _]
             simp +decide)]
-    -- By induction on $y$, we can show that $f(x, y) = f(x, 0)$ for all $x$ and $y$.
     have h_ind : ∀ x y, f (x, y) = f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) := by
       intro x y; induction' y with y ih;
       induction' y with y ih;
@@ -331,7 +333,6 @@ theorem toric_finrank_ker_boundary2_eq_one :
         simp +decide at this
         exact this
       grind;
-    -- By induction on $x$, we can show that $f(x, 0) = f(0, 0)$ for all $x$.
     have h_ind_x :
         ∀ x, f (x, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩) =
           f (⟨0, by linarith [Fact.out (p := 0 < L)]⟩,
@@ -346,13 +347,28 @@ theorem toric_finrank_ker_boundary2_eq_one :
     exact
       ⟨f (⟨0, by linarith [Fact.out (p := 0 < L)]⟩, ⟨0, by linarith [Fact.out (p := 0 < L)]⟩),
         funext fun x => by aesop⟩
-  refine finrank_eq_one_iff'.mpr ?_
-  refine ⟨⟨fun _ => 1, ?_⟩, ?_, ?_⟩ <;> norm_num
-  · ext e; cases e <;> simp +decide [ toricBoundary2 ] ;
-    · grind;
-    · grind +qlia;
-  · exact fun h => by simpa using congr_fun h ( ⟨ 0, Fact.out ⟩, ⟨ 0, Fact.out ⟩ ) ;
-  · intro f hf; obtain ⟨ c, rfl ⟩ := h_span f hf; exact ⟨ c, by ext; simp +decide ⟩ ;
+  · rintro ⟨c, rfl⟩
+    rw [LinearMap.mem_ker]
+    ext e
+    cases e <;> simp +decide [toricBoundary2]
+    · exact show (c + c : ZMod 2) = 0 from by have := Fin.exists_fin_two.mp ⟨c, rfl⟩; aesop
+    · exact show (c + c : ZMod 2) = 0 from by have := Fin.exists_fin_two.mp ⟨c, rfl⟩; aesop
+
+/-- The kernel of `∂₂` equals `span{constant 1}`. -/
+theorem ker_toricBoundary2_eq_span_one :
+    LinearMap.ker (toricBoundary2 (L := L)) =
+      Submodule.span (ZMod 2) ({fun _ => 1} : Set (C2 L)) := by
+  ext f
+  rw [mem_ker_boundary2_iff, Submodule.mem_span_singleton]
+  exact ⟨
+    (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩),
+    (fun ⟨c, hc⟩ => ⟨c, hc ▸ by ext; simp +decide⟩)⟩
+
+/-- Kernel-dimension result for `∂₂`. -/
+theorem toric_finrank_ker_boundary2_eq_one :
+    Module.finrank (ZMod 2) (LinearMap.ker (toricBoundary2 (L := L))) = 1 := by
+  rw [ker_toricBoundary2_eq_span_one, finrank_span_singleton]
+  exact fun h => by simpa using congr_fun h (⟨0, Fact.out⟩, ⟨0, Fact.out⟩)
 
 /-- Target boundary-space dimension formula. -/
 theorem toric_finrank_boundaries :

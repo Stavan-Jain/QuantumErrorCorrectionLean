@@ -13,15 +13,16 @@ import QEC.Stabilizer.Lattice.ToricLogicalCorrespondenceZ
 Upgrades the toric stabilizer family to a full `StabilizerCode (numQubits L) 2`,
 encoding 2 logical qubits.
 
-Status:
+Status: **All sub-lemmas proven.**
   * `dropped_vertex_in_closure_remaining`, `dropped_face_in_closure_remaining` —
-    the homological identities. **Proven.**
-  * `closure_packaged_eq_full` — closure equality. **Proven.**
+    the homological identities.
+  * `closure_packaged_eq_full` — closure equality.
   * `toric_logicalOps`, `toric_logical_commute_cross` — the four logical loop
-    operators and their commutation matrix. **Proven.**
+    operators and their commutation matrix.
   * `generators_independent_packaged` — symplectic linear independence of the
-    `2L² - 2` trimmed rows (the toric rank theorem). **One named sorry remains;
-    proof sketch in the docstring.**
+    `2L² - 2` trimmed rows (the toric rank theorem). Proven via block-anti-diagonal
+    structure of the check matrix and the kernel characterizations
+    `mem_ker_cutMap_iff` / `mem_ker_boundary2_iff`.
 -/
 
 namespace Quantum
@@ -1111,38 +1112,601 @@ private theorem toric_logical_commute_cross (L : ℕ) [Fact (2 ≤ L)] :
       refine ⟨h_01.1.symm, h_01.2.2.1.symm, h_01.2.1.symm, h_01.2.2.2.symm⟩
     · exact absurd (hℓ1.trans hℓ'1.symm) hne
 
-/-- Symplectic linear independence of the trimmed generator list — the toric rank
-theorem (Phase 3).
+-- ---------------------------------------------------------------------------
+-- Phase 3.B: Edge ↔ qubit bijection
+-- ---------------------------------------------------------------------------
 
-**Mathematical content** (block-anti-diagonal structure of the check matrix):
+/-- Cardinality match: `card(EdgeIdx L) = numQubits L = 2L²`. -/
+private lemma card_edgeIdx_eq_numQubits (L : ℕ) :
+    Fintype.card (Stabilizer.Lattice.EdgeIdx L) = numQubits L := by
+  simp [numQubits]
 
-The packaged list has `2L² - 2` elements, split as `L² - 1` Z-rows (vertex stabs)
-followed by `L² - 1` X-rows (face stabs). In the symplectic representation:
+/-- `edgeToQubitIdx` is a bijection (injection between equal-size finite types). -/
+private lemma edgeToQubitIdx_bijective (L : ℕ) [Fact (0 < L)] :
+    Function.Bijective (Stabilizer.Lattice.edgeToQubitIdx L) := by
+  rw [Fintype.bijective_iff_injective_and_card]
+  refine ⟨Stabilizer.Lattice.edgeToQubitIdx_injective L, ?_⟩
+  simp [numQubits, Stabilizer.Lattice.toricNumQubits]
 
-- Z-rows have X-half = 0 and Z-half = `cutMap(singleVtx p) ∘ edgeFromQubitIdx`.
-- X-rows have Z-half = 0 and X-half = `∂₂(singleFace p) ∘ edgeFromQubitIdx`.
+/-- The right-inverse of `edgeToQubitIdx`: maps a qubit back to its edge. -/
+private noncomputable def qubitToEdgeIdx (L : ℕ) [Fact (0 < L)] :
+    Fin (numQubits L) → Stabilizer.Lattice.EdgeIdx L :=
+  Function.surjInv (edgeToQubitIdx_bijective L).2
 
-Since the two blocks live in disjoint column ranges, total linear independence reduces
-to independence of each block.
+private lemma edgeToQubitIdx_qubitToEdgeIdx (L : ℕ) [Fact (0 < L)]
+    (q : Fin (numQubits L)) :
+    Stabilizer.Lattice.edgeToQubitIdx L (qubitToEdgeIdx L q) = q :=
+  Function.surjInv_eq (edgeToQubitIdx_bijective L).2 q
 
-**Z-block independence** via the kernel argument:
-Suppose `∑ p ∈ trimmed, c_p · cutMap(singleVtx p) = 0`. By linearity,
-`cutMap(∑ p, c_p · singleVtx p) = 0`, so `∑ p, c_p · singleVtx p ∈ ker(cutMap) =
-span{constant 1}` (via [`toric_finrank_ker_cutMap_eq_one`](QEC/Stabilizer/Lattice/ToricH1Dimension.lean)).
-Two cases:
-- Sum = 0: at each `q ∈ trimmed`, `c_q = (∑ p, c_p · singleVtx p) q = 0`.
-- Sum = constant 1: at origin (∉ trimmed), sum = 0 ≠ 1, contradiction.
-So all `c_p = 0`, giving block independence.
+private lemma qubitToEdgeIdx_edgeToQubitIdx (L : ℕ) [Fact (0 < L)]
+    (e : Stabilizer.Lattice.EdgeIdx L) :
+    qubitToEdgeIdx L (Stabilizer.Lattice.edgeToQubitIdx L e) = e := by
+  apply (edgeToQubitIdx_bijective L).1
+  exact edgeToQubitIdx_qubitToEdgeIdx L (Stabilizer.Lattice.edgeToQubitIdx L e)
 
-**X-block** is symmetric via `toricBoundary2` and `toric_finrank_ker_boundary2_eq_one`.
+-- ---------------------------------------------------------------------------
+-- Phase 3.C: Symplectic-half identification lemmas
+-- ---------------------------------------------------------------------------
 
-This requires substantial new infrastructure to bridge the symplectic representation
-with the chain complex (specifically, identifying `Fin (numQubits L) ≃ EdgeIdx L`
-and showing the symplectic Z-half of `vertexStab L p` equals the cutMap chain image).
-Total: ~250–400 new lines. -/
+/-- Helper: a `ZMod 2` value is either `0` or `1`. -/
+private lemma zmod2_zero_or_one (a : ZMod 2) : a = 0 ∨ a = 1 := by
+  rcases Fin.exists_fin_two.mp ⟨a, rfl⟩ with h | h
+  · exact Or.inl h
+  · exact Or.inr h
+
+/-- Z-type elements have X-half symplectic component identically zero. -/
+private lemma toSymplectic_ZType_X_zero {n : ℕ}
+    (g : NQubitPauliGroupElement n) (hg : NQubitPauliGroupElement.IsZTypeElement g)
+    (i : Fin n) :
+    NQubitPauliOperator.toSymplectic g.operators (Fin.castAdd n i) = 0 := by
+  rw [NQubitPauliOperator.toSymplectic_X_part]
+  rcases hg.2 i with hI | hZ
+  · rw [hI]; rfl
+  · rw [hZ]; rfl
+
+/-- X-type elements have Z-half symplectic component identically zero. -/
+private lemma toSymplectic_XType_Z_zero {n : ℕ}
+    (g : NQubitPauliGroupElement n) (hg : NQubitPauliGroupElement.IsXTypeElement g)
+    (i : Fin n) :
+    NQubitPauliOperator.toSymplectic g.operators (Fin.natAdd n i) = 0 := by
+  rw [NQubitPauliOperator.toSymplectic_Z_part]
+  rcases hg.2 i with hI | hX
+  · rw [hI]; rfl
+  · rw [hX]; rfl
+
+/-- The Z-half symplectic value of `vertexStab L x y` at qubit `i` equals
+`cutMap(singleVtx (x,y))` evaluated at the edge corresponding to `i`. -/
+private lemma toSymplectic_vertexStab_Z_eq (L : ℕ) [Fact (2 ≤ L)]
+    (p : Fin L × Fin L) (i : Fin (numQubits L)) :
+    NQubitPauliOperator.toSymplectic (vertexStab L p.1 p.2).operators
+        (Fin.natAdd (numQubits L) i) =
+      Stabilizer.Lattice.toricVertexCutMap (L := L)
+        (Stabilizer.Lattice.singleVtx p) (qubitToEdgeIdx L i) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  rw [NQubitPauliOperator.toSymplectic_Z_part]
+  rw [show vertexStab L p.1 p.2 = Stabilizer.Lattice.toricZOperatorOfChain L
+        (Stabilizer.Lattice.toricVertexCutMap (L := L) (Stabilizer.Lattice.singleVtx p)) from
+    (Stabilizer.Lattice.toricZOperatorOfChain_cutMap_singleVtx L p.1 p.2).symm]
+  rw [toricZOperatorOfChain_op_at]
+  set v := Stabilizer.Lattice.toricVertexCutMap (L := L)
+    (Stabilizer.Lattice.singleVtx p) (qubitToEdgeIdx L i) with hv
+  rcases zmod2_zero_or_one v with h0 | h1
+  · -- v = 0: no edge index has chain value 1 at i; symplectic = 0.
+    rw [if_neg ?_]
+    · rw [h0]; rfl
+    · rintro ⟨e', heq, hone⟩
+      -- e' = qubitToEdgeIdx L i (by injectivity), so v = chain at e' = 1 ≠ 0
+      have h_inj : e' = qubitToEdgeIdx L i := by
+        apply (edgeToQubitIdx_bijective L).1
+        rw [heq, edgeToQubitIdx_qubitToEdgeIdx]
+      rw [← h_inj] at hv
+      rw [hv] at h0
+      exact absurd hone (h0 ▸ (by decide : (0 : ZMod 2) ≠ 1))
+  · -- v = 1: edge `qubitToEdgeIdx L i` has chain value 1; symplectic = 1.
+    rw [if_pos ?_]
+    · rw [h1]; rfl
+    · refine ⟨qubitToEdgeIdx L i, edgeToQubitIdx_qubitToEdgeIdx L i, ?_⟩
+      rw [← hv]; exact h1
+
+/-- The X-half symplectic value of `faceStab L x y` at qubit `i` equals
+`boundary2(singleFace (x,y))` evaluated at the edge corresponding to `i`. -/
+private lemma toSymplectic_faceStab_X_eq (L : ℕ) [Fact (2 ≤ L)]
+    (p : Fin L × Fin L) (i : Fin (numQubits L)) :
+    NQubitPauliOperator.toSymplectic (faceStab L p.1 p.2).operators
+        (Fin.castAdd (numQubits L) i) =
+      Stabilizer.Lattice.toricBoundary2 (L := L)
+        (Stabilizer.Lattice.singleFace p) (qubitToEdgeIdx L i) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  rw [NQubitPauliOperator.toSymplectic_X_part]
+  rw [show faceStab L p.1 p.2 = Stabilizer.Lattice.toricXOperatorOfChain L
+        (Stabilizer.Lattice.toricBoundary2 (L := L) (Stabilizer.Lattice.singleFace p)) from
+    (Stabilizer.Lattice.toricXOperatorOfChain_boundary_singleFace L p.1 p.2).symm]
+  rw [toricXOperatorOfChain_op_at]
+  set v := Stabilizer.Lattice.toricBoundary2 (L := L)
+    (Stabilizer.Lattice.singleFace p) (qubitToEdgeIdx L i) with hv
+  rcases zmod2_zero_or_one v with h0 | h1
+  · rw [if_neg ?_]
+    · rw [h0]; rfl
+    · rintro ⟨e', heq, hone⟩
+      have h_inj : e' = qubitToEdgeIdx L i := by
+        apply (edgeToQubitIdx_bijective L).1
+        rw [heq, edgeToQubitIdx_qubitToEdgeIdx]
+      rw [← h_inj] at hv
+      rw [hv] at h0
+      exact absurd hone (h0 ▸ (by decide : (0 : ZMod 2) ≠ 1))
+  · rw [if_pos ?_]
+    · rw [h1]; rfl
+    · refine ⟨qubitToEdgeIdx L i, edgeToQubitIdx_qubitToEdgeIdx L i, ?_⟩
+      rw [← hv]; exact h1
+
+-- ---------------------------------------------------------------------------
+-- Phase 3.D: Indexing lemmas for generatorsListPackaged
+-- ---------------------------------------------------------------------------
+
+/-- Length of the Z-trimmed list equals coordsTrimmed length. -/
+private lemma generatorsListZTrimmed_length (L : ℕ) [Fact (0 < L)] :
+    (generatorsListZTrimmed L).length = (coordsTrimmed L).length := by
+  simp [generatorsListZTrimmed]
+
+/-- Length of the X-trimmed list equals coordsTrimmed length. -/
+private lemma generatorsListXTrimmed_length (L : ℕ) [Fact (0 < L)] :
+    (generatorsListXTrimmed L).length = (coordsTrimmed L).length := by
+  simp [generatorsListXTrimmed]
+
+/-- The packaged list at a Z-block index equals a vertex stab. -/
+private lemma get_packaged_Z (L : ℕ) [Fact (0 < L)]
+    (k : Fin (coordsTrimmed L).length)
+    (hk : k.val < (generatorsListPackaged L).length) :
+    (generatorsListPackaged L).get ⟨k.val, hk⟩ =
+      vertexStab L ((coordsTrimmed L).get k).1 ((coordsTrimmed L).get k).2 := by
+  show (generatorsListZTrimmed L ++ generatorsListXTrimmed L).get ⟨k.val, hk⟩ = _
+  have h_lt : k.val < (generatorsListZTrimmed L).length := by
+    rw [generatorsListZTrimmed_length]; exact k.isLt
+  rw [List.get_eq_getElem, List.getElem_append_left h_lt]
+  show (generatorsListZTrimmed L)[k.val]'h_lt = _
+  unfold generatorsListZTrimmed
+  rw [List.getElem_map]
+  rfl
+
+/-- The packaged list at an X-block index `j` (with `j ≥ nZ`) equals a face stab at
+the `(j - nZ)`-th trimmed coord. -/
+private lemma get_packaged_X (L : ℕ) [Fact (0 < L)]
+    (j : ℕ) (hj : j < (generatorsListPackaged L).length)
+    (hge : (coordsTrimmed L).length ≤ j)
+    (hsub : j - (coordsTrimmed L).length < (coordsTrimmed L).length) :
+    (generatorsListPackaged L).get ⟨j, hj⟩ =
+      faceStab L ((coordsTrimmed L)[j - (coordsTrimmed L).length]'hsub).1
+                 ((coordsTrimmed L)[j - (coordsTrimmed L).length]'hsub).2 := by
+  show (generatorsListZTrimmed L ++ generatorsListXTrimmed L).get ⟨j, hj⟩ = _
+  have hZge : (generatorsListZTrimmed L).length ≤ j := by
+    rw [generatorsListZTrimmed_length]; exact hge
+  rw [List.get_eq_getElem, List.getElem_append_right hZge]
+  -- Goal: (generatorsListXTrimmed L)[j - (generatorsListZTrimmed L).length]'_ = _
+  unfold generatorsListXTrimmed
+  rw [List.getElem_map]
+  -- Goal: faceStab L (coordsTrimmed L)[j - (generatorsListZTrimmed L).length].1 ... = ...
+  --     where the LHS index has subtraction by generatorsListZTrimmed.length
+  --     and the RHS by (coordsTrimmed L).length.
+  -- These are equal due to generatorsListZTrimmed_length.
+  congr 2 <;>
+    (simp only [show (generatorsListZTrimmed L).length = (coordsTrimmed L).length from
+      generatorsListZTrimmed_length L])
+
+-- ---------------------------------------------------------------------------
+-- Phase 3.E: Block kernel-collapse lemmas
+-- ---------------------------------------------------------------------------
+
+/-- `coordsTrimmed L` is `Nodup`. -/
+private lemma coordsTrimmed_nodup (L : ℕ) [Fact (0 < L)] :
+    (coordsTrimmed L).Nodup := by
+  unfold coordsTrimmed
+  apply List.Nodup.filter
+  show ((List.finRange L).product (List.finRange L)).Nodup
+  exact List.Nodup.product (List.nodup_finRange L) (List.nodup_finRange L)
+
+/-- `coordsTrimmed L` does not contain the origin. -/
+private lemma coordsTrimmed_not_mem_origin (L : ℕ) [Fact (0 < L)] :
+    originCoord L ∉ coordsTrimmed L := by
+  intro h
+  unfold coordsTrimmed at h
+  rcases List.mem_filter.mp h with ⟨_, h2⟩
+  simp at h2
+
+/-- Vertex-side block kernel collapse: a linear combination of `singleVtx` over the
+trimmed coords whose `cutMap` is `0` must have all-zero coefficients. -/
+private lemma trimmed_combo_singleVtx_eq_zero (L : ℕ) [Fact (0 < L)]
+    (c : Fin (coordsTrimmed L).length → ZMod 2)
+    (hker : (∑ i, c i • Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get i)) ∈
+        LinearMap.ker (Stabilizer.Lattice.toricVertexCutMap (L := L))) :
+    ∀ i, c i = 0 := by
+  classical
+  rw [Stabilizer.Lattice.mem_ker_cutMap_iff] at hker
+  obtain ⟨k, hk⟩ := hker
+  -- Evaluate at origin: sum is 0 (origin ∉ trimmed), so k = 0.
+  have h_orig : (∑ i, c i • Stabilizer.Lattice.singleVtx (L := L)
+      ((coordsTrimmed L).get i)) (originCoord L) = 0 := by
+    rw [Finset.sum_apply]
+    apply Finset.sum_eq_zero
+    intro i _
+    have h_get_ne : (coordsTrimmed L).get i ≠ originCoord L := by
+      have := List.get_mem (coordsTrimmed L) i
+      intro heq
+      rw [heq] at this
+      exact coordsTrimmed_not_mem_origin L this
+    show c i * Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get i)
+        (originCoord L) = 0
+    rw [Stabilizer.Lattice.singleVtx_apply_ne (Ne.symm h_get_ne)]
+    ring
+  have hk_zero : k = 0 := by
+    have := congr_fun hk (originCoord L)
+    rw [h_orig] at this
+    exact this.symm
+  -- So the sum is identically 0.
+  have h_sum_zero : (∑ i, c i • Stabilizer.Lattice.singleVtx (L := L)
+      ((coordsTrimmed L).get i)) = 0 := by
+    rw [hk]; ext; simp [hk_zero]
+  -- Extract each c j = 0 by evaluating at (coordsTrimmed L).get j.
+  intro j
+  have h_at_j : (∑ i, c i • Stabilizer.Lattice.singleVtx (L := L)
+      ((coordsTrimmed L).get i)) ((coordsTrimmed L).get j) = 0 := by
+    rw [h_sum_zero]; rfl
+  rw [Finset.sum_apply] at h_at_j
+  rw [Finset.sum_eq_single j] at h_at_j
+  · show c j = 0
+    have : c j * Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get j)
+        ((coordsTrimmed L).get j) = 0 := h_at_j
+    rw [Stabilizer.Lattice.singleVtx_apply_self] at this
+    simpa using this
+  · intro i _ hij
+    have hne : (coordsTrimmed L).get i ≠ (coordsTrimmed L).get j := by
+      intro heq
+      exact hij (List.nodup_iff_injective_get.mp (coordsTrimmed_nodup L) heq)
+    show c i * Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get i)
+        ((coordsTrimmed L).get j) = 0
+    rw [Stabilizer.Lattice.singleVtx_apply_ne (Ne.symm hne)]
+    ring
+  · intro hcontra; exact absurd (Finset.mem_univ j) hcontra
+
+/-- Face-side block kernel collapse: same as Z-side but for `singleFace` and `boundary2`. -/
+private lemma trimmed_combo_singleFace_eq_zero (L : ℕ) [Fact (0 < L)]
+    (c : Fin (coordsTrimmed L).length → ZMod 2)
+    (hker : (∑ i, c i • Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get i)) ∈
+        LinearMap.ker (Stabilizer.Lattice.toricBoundary2 (L := L))) :
+    ∀ i, c i = 0 := by
+  classical
+  rw [Stabilizer.Lattice.mem_ker_boundary2_iff] at hker
+  obtain ⟨k, hk⟩ := hker
+  have h_orig : (∑ i, c i • Stabilizer.Lattice.singleFace (L := L)
+      ((coordsTrimmed L).get i)) (originCoord L) = 0 := by
+    rw [Finset.sum_apply]
+    apply Finset.sum_eq_zero
+    intro i _
+    have h_get_ne : (coordsTrimmed L).get i ≠ originCoord L := by
+      have := List.get_mem (coordsTrimmed L) i
+      intro heq
+      rw [heq] at this
+      exact coordsTrimmed_not_mem_origin L this
+    show c i * Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get i)
+        (originCoord L) = 0
+    rw [Stabilizer.Lattice.singleFace_apply_ne (Ne.symm h_get_ne)]
+    ring
+  have hk_zero : k = 0 := by
+    have := congr_fun hk (originCoord L)
+    rw [h_orig] at this
+    exact this.symm
+  have h_sum_zero : (∑ i, c i • Stabilizer.Lattice.singleFace (L := L)
+      ((coordsTrimmed L).get i)) = 0 := by
+    rw [hk]; ext; simp [hk_zero]
+  intro j
+  have h_at_j : (∑ i, c i • Stabilizer.Lattice.singleFace (L := L)
+      ((coordsTrimmed L).get i)) ((coordsTrimmed L).get j) = 0 := by
+    rw [h_sum_zero]; rfl
+  rw [Finset.sum_apply] at h_at_j
+  rw [Finset.sum_eq_single j] at h_at_j
+  · have : c j * Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get j)
+        ((coordsTrimmed L).get j) = 0 := h_at_j
+    rw [Stabilizer.Lattice.singleFace_apply_self] at this
+    simpa using this
+  · intro i _ hij
+    have hne : (coordsTrimmed L).get i ≠ (coordsTrimmed L).get j := by
+      intro heq
+      exact hij (List.nodup_iff_injective_get.mp (coordsTrimmed_nodup L) heq)
+    show c i * Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get i)
+        ((coordsTrimmed L).get j) = 0
+    rw [Stabilizer.Lattice.singleFace_apply_ne (Ne.symm hne)]
+    ring
+  · intro hcontra; exact absurd (Finset.mem_univ j) hcontra
+
+-- ---------------------------------------------------------------------------
+-- Phase 3.F: Main theorem
+-- ---------------------------------------------------------------------------
+
+/-- Symplectic linear independence of the trimmed generator list. -/
+private theorem rowsLinearIndependent_generatorsListPackaged (L : ℕ) [Fact (2 ≤ L)] :
+    NQubitPauliGroupElement.rowsLinearIndependent (generatorsListPackaged L) := by
+  haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
+  unfold NQubitPauliGroupElement.rowsLinearIndependent
+  rw [Fintype.linearIndependent_iff]
+  intro f hsum j
+  -- hsum : ∑ k, f k • checkMatrix _ k = 0
+  -- (this is a function equation in Fin (numQubits L + numQubits L) → ZMod 2)
+  -- Step 1: the Z-block coefficients (j.val < L²-1) vanish via Z-half columns.
+  -- Step 2: the X-block coefficients (j.val ≥ L²-1) vanish via X-half columns.
+  -- Define the Z-block coefficient function
+  let cZ : Fin (coordsTrimmed L).length → ZMod 2 := fun i =>
+    f ⟨i.val, by
+      have : (coordsTrimmed L).length ≤ (generatorsListPackaged L).length := by
+        unfold generatorsListPackaged
+        rw [List.length_append]
+        simp [generatorsListZTrimmed]
+      omega⟩
+  -- The Z-half of the sum at each edge yields the chain combination.
+  have h_chain_Z : (∑ i, cZ i • Stabilizer.Lattice.singleVtx (L := L)
+      ((coordsTrimmed L).get i)) ∈
+      LinearMap.ker (Stabilizer.Lattice.toricVertexCutMap (L := L)) := by
+    rw [LinearMap.mem_ker]
+    ext e
+    -- Specialize hsum at column Fin.natAdd (numQubits L) (edgeToQubitIdx L e).
+    have h_col := congr_fun hsum (Fin.natAdd (numQubits L)
+      (Stabilizer.Lattice.edgeToQubitIdx L e))
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at h_col
+    -- Reindex via Fin (n+m) ≃ Fin n ⊕ Fin m.
+    -- Total length = 2 * (coordsTrimmed L).length.
+    have hlen : (generatorsListPackaged L).length =
+        (coordsTrimmed L).length + (coordsTrimmed L).length := by
+      unfold generatorsListPackaged
+      rw [List.length_append]
+      simp [generatorsListZTrimmed, generatorsListXTrimmed]
+    have hsum_split :
+        ∑ k : Fin (generatorsListPackaged L).length,
+          f k * NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L) k
+            (Fin.natAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) =
+        ∑ k : Fin (coordsTrimmed L).length,
+          f ⟨k.val, by have := k.isLt; omega⟩ *
+            NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L)
+              ⟨k.val, by have := k.isLt; omega⟩
+              (Fin.natAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) := by
+      -- The X-block rows (k.val ≥ trimmed.length) contribute 0 in the Z-half.
+      let nZ := (coordsTrimmed L).length
+      have hpartition : (Finset.univ : Finset (Fin (generatorsListPackaged L).length)) =
+          (Finset.univ.filter (fun k => k.val < nZ)) ∪
+          (Finset.univ.filter (fun k => ¬ k.val < nZ)) := by
+        rw [Finset.filter_union_filter_neg_eq]
+      have hdisj : Disjoint
+          ((Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter (fun k => k.val < nZ))
+          (Finset.univ.filter (fun k => ¬ k.val < nZ)) :=
+        Finset.disjoint_filter_filter_neg _ _ _
+      rw [hpartition, Finset.sum_union hdisj]
+      -- The "right" sum (X-block) is 0.
+      have hX_zero : ∑ k ∈ (Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter
+          (fun k => ¬ k.val < nZ),
+          f k * NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L) k
+            (Fin.natAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) = 0 := by
+        apply Finset.sum_eq_zero
+        intro k hk
+        rw [Finset.mem_filter] at hk
+        have hk_ge : nZ ≤ k.val := Nat.le_of_not_lt hk.2
+        have hk_sub : k.val - nZ < nZ := by have := k.isLt; omega
+        have hp_eq := get_packaged_X L k.val k.isLt hk_ge hk_sub
+        set p := (coordsTrimmed L)[k.val - nZ]'hk_sub with hp_def
+        unfold NQubitPauliGroupElement.checkMatrix
+        rw [show k = ⟨k.val, k.isLt⟩ from rfl, hp_eq]
+        rw [toSymplectic_XType_Z_zero (faceStab L p.1 p.2) (faceStab_is_XType L p.1 p.2)]
+        ring
+      rw [hX_zero, add_zero]
+      -- Convert the Z-block sum (filter by k.val < nZ) to a sum over Fin nZ.
+      apply Finset.sum_bij (fun (k : Fin (generatorsListPackaged L).length)
+        (hk : k ∈ (Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter
+          (fun k => k.val < nZ)) => (⟨k.val, (Finset.mem_filter.mp hk).2⟩ : Fin nZ))
+      · intros; exact Finset.mem_univ _
+      · intros a ha b hb hab
+        rcases a with ⟨a, ha2⟩; rcases b with ⟨b, hb2⟩
+        simp at hab
+        exact Fin.ext hab
+      · intros b _
+        refine ⟨⟨b.val, ?_⟩, ?_, by simp [Fin.ext_iff]⟩
+        · have hb_lt := b.isLt
+          have : nZ + nZ = (generatorsListPackaged L).length := hlen.symm
+          omega
+        · rw [Finset.mem_filter]
+          exact ⟨Finset.mem_univ _, b.isLt⟩
+      · intro a ha
+        rfl
+    rw [hsum_split] at h_col
+    -- Now h_col equates the Z-block sum (over Fin nZ) at the Z-half column to 0.
+    -- Convert checkMatrix entries to chain values via toSymplectic_vertexStab_Z_eq.
+    have h_eq : ∀ k : Fin (coordsTrimmed L).length,
+        NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L)
+          ⟨k.val, by have := k.isLt; omega⟩
+          (Fin.natAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) =
+        Stabilizer.Lattice.toricVertexCutMap (L := L)
+          (Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get k)) e := by
+      intro k
+      have hp_eq := get_packaged_Z L k (by have := k.isLt; omega)
+      unfold NQubitPauliGroupElement.checkMatrix
+      rw [hp_eq, toSymplectic_vertexStab_Z_eq, qubitToEdgeIdx_edgeToQubitIdx]
+    have h_col' : ∑ k : Fin (coordsTrimmed L).length, cZ k *
+        Stabilizer.Lattice.toricVertexCutMap (L := L)
+          (Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get k)) e = 0 := by
+      rw [← h_col]
+      apply Finset.sum_congr rfl
+      intro k _
+      rw [h_eq]
+    -- Goal: (toricVertexCutMap (∑ i, cZ i • singleVtx ...)) e = 0
+    rw [map_sum]
+    rw [Finset.sum_apply]
+    convert h_col' using 1
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [LinearMap.map_smul]
+    show cZ k • Stabilizer.Lattice.toricVertexCutMap (L := L)
+        (Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get k)) e =
+      cZ k * Stabilizer.Lattice.toricVertexCutMap (L := L)
+        (Stabilizer.Lattice.singleVtx (L := L) ((coordsTrimmed L).get k)) e
+    rw [smul_eq_mul]
+  -- Now apply Z-block kernel collapse to get cZ = 0.
+  have hZ_zero : ∀ i, cZ i = 0 := trimmed_combo_singleVtx_eq_zero L cZ h_chain_Z
+  -- Symmetric: define cX and apply face-side kernel collapse.
+  let cX : Fin (coordsTrimmed L).length → ZMod 2 := fun i =>
+    f ⟨(coordsTrimmed L).length + i.val, by
+      have hlen : (generatorsListPackaged L).length =
+          (coordsTrimmed L).length + (coordsTrimmed L).length := by
+        unfold generatorsListPackaged
+        rw [List.length_append]
+        simp [generatorsListZTrimmed, generatorsListXTrimmed]
+      have := i.isLt
+      omega⟩
+  have h_chain_X : (∑ i, cX i • Stabilizer.Lattice.singleFace (L := L)
+      ((coordsTrimmed L).get i)) ∈
+      LinearMap.ker (Stabilizer.Lattice.toricBoundary2 (L := L)) := by
+    rw [LinearMap.mem_ker]
+    ext e
+    have h_col := congr_fun hsum (Fin.castAdd (numQubits L)
+      (Stabilizer.Lattice.edgeToQubitIdx L e))
+    simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at h_col
+    let nZ := (coordsTrimmed L).length
+    have hlen : (generatorsListPackaged L).length = nZ + nZ := by
+      unfold generatorsListPackaged
+      rw [List.length_append, generatorsListZTrimmed_length, generatorsListXTrimmed_length]
+    have hsum_split :
+        ∑ k : Fin (generatorsListPackaged L).length,
+          f k * NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L) k
+            (Fin.castAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) =
+        ∑ k : Fin (coordsTrimmed L).length,
+          f ⟨nZ + k.val, by have := k.isLt; omega⟩ *
+            NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L)
+              ⟨nZ + k.val, by have := k.isLt; omega⟩
+              (Fin.castAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) := by
+      have hpartition : (Finset.univ : Finset (Fin (generatorsListPackaged L).length)) =
+          (Finset.univ.filter (fun k => k.val < nZ)) ∪
+          (Finset.univ.filter (fun k => ¬ k.val < nZ)) := by
+        rw [Finset.filter_union_filter_neg_eq]
+      have hdisj : Disjoint
+          ((Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter (fun k => k.val < nZ))
+          (Finset.univ.filter (fun k => ¬ k.val < nZ)) :=
+        Finset.disjoint_filter_filter_neg _ _ _
+      rw [hpartition, Finset.sum_union hdisj]
+      -- The "left" sum (Z-block) is 0 in X-half.
+      have hZ_zero : ∑ k ∈ (Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter
+          (fun k => k.val < nZ),
+          f k * NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L) k
+            (Fin.castAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) = 0 := by
+        apply Finset.sum_eq_zero
+        intro k hk
+        rw [Finset.mem_filter] at hk
+        have hk_lt : k.val < nZ := hk.2
+        have hp_eq := get_packaged_Z L ⟨k.val, hk_lt⟩ k.isLt
+        set p := (coordsTrimmed L).get ⟨k.val, hk_lt⟩ with hp_def
+        unfold NQubitPauliGroupElement.checkMatrix
+        rw [show k = ⟨k.val, k.isLt⟩ from rfl, hp_eq]
+        rw [toSymplectic_ZType_X_zero (vertexStab L p.1 p.2) (vertexStab_is_ZType L p.1 p.2)]
+        ring
+      rw [hZ_zero, zero_add]
+      apply Finset.sum_bij (fun (k : Fin (generatorsListPackaged L).length)
+        (hk : k ∈ (Finset.univ : Finset (Fin (generatorsListPackaged L).length)).filter
+          (fun k => ¬ k.val < nZ)) =>
+        (⟨k.val - nZ, by
+          have hk_ge : nZ ≤ k.val := Nat.le_of_not_lt (Finset.mem_filter.mp hk).2
+          have := k.isLt
+          omega⟩ : Fin nZ))
+      · intros; exact Finset.mem_univ _
+      · intros a ha b hb hab
+        have ha_ge : nZ ≤ a.val := Nat.le_of_not_lt (Finset.mem_filter.mp ha).2
+        have hb_ge : nZ ≤ b.val := Nat.le_of_not_lt (Finset.mem_filter.mp hb).2
+        have h_val : a.val - nZ = b.val - nZ := Fin.mk.inj_iff.mp hab
+        apply Fin.ext
+        omega
+      · intros b _
+        refine ⟨⟨nZ + b.val, by have := b.isLt; have := hlen; omega⟩, ?_, ?_⟩
+        · rw [Finset.mem_filter]
+          refine ⟨Finset.mem_univ _, ?_⟩
+          have := b.isLt
+          simp only [not_lt]
+          exact Nat.le_add_right _ _
+        · apply Fin.ext
+          simp
+      · intros a ha
+        have ha_ge : nZ ≤ a.val := Nat.le_of_not_lt (Finset.mem_filter.mp ha).2
+        have h_fin_eq : (⟨nZ + (a.val - nZ), by have := a.isLt; omega⟩ :
+            Fin (generatorsListPackaged L).length) = a := by
+          apply Fin.ext
+          show nZ + (a.val - nZ) = a.val
+          omega
+        rw [h_fin_eq]
+    rw [hsum_split] at h_col
+    have h_eq : ∀ k : Fin (coordsTrimmed L).length,
+        NQubitPauliGroupElement.checkMatrix (generatorsListPackaged L)
+          ⟨nZ + k.val, by have := k.isLt; omega⟩
+          (Fin.castAdd (numQubits L) (Stabilizer.Lattice.edgeToQubitIdx L e)) =
+        Stabilizer.Lattice.toricBoundary2 (L := L)
+          (Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get k)) e := by
+      intro k
+      have hge : nZ ≤ nZ + k.val := Nat.le_add_right _ _
+      have hsub : nZ + k.val - nZ < nZ := by
+        rw [Nat.add_sub_cancel_left]; exact k.isLt
+      have hp_eq := get_packaged_X L (nZ + k.val)
+        (by have := k.isLt; omega) hge hsub
+      unfold NQubitPauliGroupElement.checkMatrix
+      rw [hp_eq, toSymplectic_faceStab_X_eq, qubitToEdgeIdx_edgeToQubitIdx]
+      -- Align indices: nZ + k.val - nZ = k.val.
+      have hidx_eq : (⟨nZ + k.val - nZ, hsub⟩ : Fin nZ) = k := by
+        apply Fin.ext
+        simp [Nat.add_sub_cancel_left]
+      have hcoord_eq : (coordsTrimmed L)[nZ + k.val - nZ]'hsub = (coordsTrimmed L).get k := by
+        rw [List.get_eq_getElem]
+        congr 1
+        omega
+      rw [hcoord_eq]
+    have h_col' : ∑ k : Fin (coordsTrimmed L).length, cX k *
+        Stabilizer.Lattice.toricBoundary2 (L := L)
+          (Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get k)) e = 0 := by
+      rw [← h_col]
+      apply Finset.sum_congr rfl
+      intro k _
+      rw [h_eq]
+    rw [map_sum]
+    rw [Finset.sum_apply]
+    convert h_col' using 1
+    apply Finset.sum_congr rfl
+    intro k _
+    rw [LinearMap.map_smul]
+    show cX k • Stabilizer.Lattice.toricBoundary2 (L := L)
+        (Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get k)) e =
+      cX k * Stabilizer.Lattice.toricBoundary2 (L := L)
+        (Stabilizer.Lattice.singleFace (L := L) ((coordsTrimmed L).get k)) e
+    rw [smul_eq_mul]
+  have hX_zero : ∀ i, cX i = 0 := trimmed_combo_singleFace_eq_zero L cX h_chain_X
+  -- Combine: f = 0.
+  by_cases h : j.val < (coordsTrimmed L).length
+  · -- Z-block index
+    have hzj := hZ_zero ⟨j.val, h⟩
+    show f j = 0
+    have hj_eq : (⟨j.val, j.isLt⟩ : Fin (generatorsListPackaged L).length) = j := Fin.ext rfl
+    rw [← hj_eq]
+    exact hzj
+  · -- X-block index
+    push_neg at h
+    have hlen : (generatorsListPackaged L).length =
+        (coordsTrimmed L).length + (coordsTrimmed L).length := by
+      unfold generatorsListPackaged
+      rw [List.length_append, generatorsListZTrimmed_length, generatorsListXTrimmed_length]
+    have hjlt : j.val - (coordsTrimmed L).length < (coordsTrimmed L).length := by
+      have := j.isLt; omega
+    have hxj := hX_zero ⟨j.val - (coordsTrimmed L).length, hjlt⟩
+    show f j = 0
+    have hj_eq : (⟨(coordsTrimmed L).length + (j.val - (coordsTrimmed L).length),
+        by have := j.isLt; omega⟩ : Fin (generatorsListPackaged L).length) = j := by
+      apply Fin.ext
+      show (coordsTrimmed L).length + (j.val - (coordsTrimmed L).length) = j.val
+      omega
+    rw [← hj_eq]
+    exact hxj
+
+/-- The trimmed generator list is an independent generating set. -/
 private theorem generators_independent_packaged (L : ℕ) [Fact (2 ≤ L)] :
-    StabilizerGroup.GeneratorsIndependent (numQubits L) (generatorsListPackaged L) := by
-  sorry  -- TODO(toric-rank): block-anti-diagonal symplectic LI; see docstring
+    StabilizerGroup.GeneratorsIndependent (numQubits L) (generatorsListPackaged L) :=
+  StabilizerGroup.GeneratorsIndependent_of_rowsLinearIndependent (numQubits L)
+    (generatorsListPackaged L) (rowsLinearIndependent_generatorsListPackaged L)
 
 -- ---------------------------------------------------------------------------
 -- Phase 4: Final assembly
