@@ -245,7 +245,7 @@ theorem phi_liftQ_eq (c : toricCycles (L := L)) :
       (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1) := by
   simp only [phi, Submodule.liftQ_apply, LinearMap.coe_mk, AddHom.coe_mk]
 
-/-- Surjectivity scaffold for `φ`. -/
+/-- `φ : H₁ → (ZMod 2)²` is surjective: every `(h, v)` value is realized by some cycle. -/
 theorem phi_surjective :
     Function.Surjective (phi (L := L)) := by
   unfold phi;
@@ -296,7 +296,8 @@ theorem phi_eq_phiLinearMap (x : toricH1 (L := L)) :
     phi (L := L) x = phiLinearMap (L := L) x := by
   convert rfl
 
-/-- Injectivity scaffold for `φ`. -/
+/-- `φ : H₁ → (ZMod 2)²` is injective: two cycles with the same `(h, v)` invariants
+are homologous. Combined with surjectivity, this yields the isomorphism `H₁ ≅ (ZMod 2)²`. -/
 theorem phi_injective :
     Function.Injective (phi (L := L)) := by
   have h1 : Function.Injective (⇑(phiLinearMap (L := L))) ↔

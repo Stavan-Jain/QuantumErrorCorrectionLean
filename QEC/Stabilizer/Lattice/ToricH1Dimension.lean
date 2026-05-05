@@ -62,7 +62,10 @@ theorem toric_rank_nullity_boundary2 :
   simpa [toricBoundaries, add_comm, add_left_comm, add_assoc] using
     (LinearMap.finrank_range_add_finrank_ker (toricBoundary2 (L := L))).symm
 
-/-- Auxiliary map placeholder for the transpose/cut-map route used to compute `rank(∂₁)`. -/
+/-- The vertex cut map: sends a 0-chain `s` to the 1-chain whose value at edge `e`
+is the parity-difference of `s` at the two endpoints of `e`. This is the transpose
+of `∂₁` and the linear map whose image is exactly the `B₁` boundary subspace, used
+to compute `rank(∂₁)` via `toric_rank_boundary1_eq_rank_cutMap`. -/
 noncomputable def toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L := by
   refine
     { toFun := fun s =>
@@ -148,7 +151,7 @@ theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
   simp_all +decide [ Finset.sum_add_distrib, mul_add, add_mul ];
   simp +decide only [← Finset.sum_product'] ; ring!;)))
 
-/-- Bridge theorem placeholder between `∂₁` rank and cut-map rank. -/
+/-- `∂₁` and `toricVertexCutMap` are mutual transposes, so they have equal rank. -/
 theorem toric_rank_boundary1_eq_rank_cutMap :
     Module.finrank (ZMod 2) (LinearMap.range (toricBoundary1 (L := L))) =
       Module.finrank (ZMod 2) (LinearMap.range (toricVertexCutMap (L := L))) := by

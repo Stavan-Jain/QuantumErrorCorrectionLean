@@ -249,10 +249,8 @@ theorem four_filter_card_eq_indicator_sum
 
 
 
-/-
-Step 1a scaffold: commutation with a fixed vertex check equals even overlap on its four
-incident edges.
--/
+/-- Commutation with a fixed vertex check equals even overlap on its four
+incident edges. -/
 theorem vertexCheckCommutes_iff_evenIncidentOverlap
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
     StabilizerGroup.ToricCodeN.vertexStab L xv yv * toricXOperatorOfChain L c =
@@ -275,8 +273,7 @@ lemma even_indicator_sum4_iff_zmod2_zero (a b c d : ZMod 2) :
       (if d = 1 then 1 else 0)) : ℕ) ↔ a + b + c + d = 0 := by
   fin_cases a <;> fin_cases b <;> fin_cases c <;> fin_cases d <;> decide
 
-/-- Step 1b scaffold: even overlap on incident edges is equivalent to vanishing `∂₁` at that
-vertex. -/
+/-- Even overlap on incident edges is equivalent to vanishing `∂₁` at that vertex. -/
 theorem evenIncidentOverlap_iff_boundary1_zero_at
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
     Even
