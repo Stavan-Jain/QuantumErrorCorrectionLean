@@ -17,7 +17,19 @@ Modules are written in Lean 4 and rely on [mathlib](https://github.com/leanprove
 - **Stabilizer Formalism**: Single-qubit and n-qubit Pauli groups, commutation (including tactics), matrix representations, stabilizer groups, CSS structure, centralizer, and logical operators
 - **Binary Symplectic Representation**: Check matrices, symplectic inner product, symplectic span, and equivalence with independent generators
 - **Concrete Codes**: surface codes, 3-qubit repetition code, n-qubit repetition code, Steane 7-qubit code, Shor 9-qubit code, and quantum Hamming code
+- **Toric Code, end-to-end**: For every `L ≥ 2`, the `L × L` toric code is verified as a `StabilizerCode (2L²) 2` with **distance exactly `L`**. The chain complex, `H₁ ≅ 𝔽₂²` isomorphism, `(h, v)` wrapping invariants, and CSS distance bridge are all mechanized — see [`docs/distance_proof.md`](docs/distance_proof.md) for the math and `QEC/Stabilizer/Lattice/` + `QEC/Stabilizer/Codes/ToricCodeN*.lean` for the Lean.
 - **Verified Properties**: Mechanized proofs of key properties, including the obligations used to instantiate `StabilizerCode` instances (generator count/independence/commutation, exclusion of `-I`, and logical-operator centralizer + anticommutation conditions), along with distance theorems.
+
+## Headline result
+
+The `L × L` toric code, for every `L ≥ 2`, is a verified `[[2L², 2, L]]` stabilizer code:
+
+```lean
+theorem toricCodeN_parameters_statement (L : ℕ) [Fact (2 ≤ L)] :
+    numQubits L = 2 * L * L ∧ HasCodeDistance (toricStabilizerCode L) L
+```
+
+Every step of the homological distance argument — chain complex, `∂₁ ∘ ∂₂ = 0`, `dim(H₁) = 2`, the wrapping invariants `h, v`, the isomorphism `H₁ ≅ 𝔽₂²`, the lower bound `|c| ≥ L` for non-trivial cycles, and the CSS bridge `d = min(d_X, d_Z)` — is checked by Lean with no `sorry`s. The accompanying expository proof is in [`docs/distance_proof.md`](docs/distance_proof.md).
 
 ## Project Structure
 
@@ -69,9 +81,9 @@ Contributions are welcome! If you add new modules or definitions, please:
 
 ### Near-Term Goals
 
-- Formalize surface codes end-to-end in Lean
-- Prove code-distance results for surface-code families
 - Continue strengthening reusable stabilizer and binary-symplectic APIs needed by larger code families
+- Formalize the planar / rotated surface code distance (different boundary conditions, `H₁ ≅ 𝔽₂`)
+- Generalize the homological distance argument to arbitrary CW-complex cellulations
 
 ### Long-Term Goals
 
