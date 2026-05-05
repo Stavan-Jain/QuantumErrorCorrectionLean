@@ -186,15 +186,15 @@ i.e., the minimum weight of a non-trivial cycle (one that is not a boundary).
 By a completely analogous argument, Z-type logical operators correspond to non-trivial cycles of a *dual* chain complex. We now make this precise.
 
 **Definition (Dual lattice).** The *dual lattice* of our $L \times L$ torus is constructed by:
-- Placing a dual vertex $f^*$ at the center of each face $f$. There are $L^2$ dual vertices.
-- For each edge $e$ of the primal lattice, placing a dual edge $e^*$ connecting the dual vertices corresponding to the two faces that border $e$. There are $2L^2$ dual edges (one for each primal edge).
-- Each primal vertex $v$, which is surrounded by four faces, becomes a dual face $v^*$ bounded by the four dual edges corresponding to the primal edges incident to $v$.
+- Placing a dual vertex $`f^*`$ at the center of each face $f$. There are $L^2$ dual vertices.
+- For each edge $e$ of the primal lattice, placing a dual edge $`e^*`$ connecting the dual vertices corresponding to the two faces that border $e$. There are $2L^2$ dual edges (one for each primal edge).
+- Each primal vertex $v$, which is surrounded by four faces, becomes a dual face $`v^*`$ bounded by the four dual edges corresponding to the primal edges incident to $v$.
 
 The dual lattice is again an $L \times L$ square lattice on a torus: it has $L^2$ dual vertices, $2L^2$ dual edges, and $L^2$ dual faces, with the same local structure (every dual vertex has degree 4, every dual face has 4 boundary edges).
 
-**The key correspondence.** A Z-type operator on primal edge-set $c$ applies $Z$ to each edge in $c$. It commutes with all X-type (plaquette) stabilizers if and only if, for every face $f$, the number of edges of $c$ on the boundary of $f$ is even. Under the primal-to-dual correspondence $e \leftrightarrow e^*$, this is exactly the condition that the dual edge-set $c^* = \{e^* : e \in c\}$ has even degree at every dual vertex — i.e., $c^*$ is a cycle in the dual lattice.
+**The key correspondence.** A Z-type operator on primal edge-set $c$ applies $Z$ to each edge in $c$. It commutes with all X-type (plaquette) stabilizers if and only if, for every face $f$, the number of edges of $c$ on the boundary of $f$ is even. Under the primal-to-dual correspondence $`e \leftrightarrow e^*`$, this is exactly the condition that the dual edge-set $`c^* = \{e^* : e \in c\}`$ has even degree at every dual vertex — i.e., $`c^*`$ is a cycle in the dual lattice.
 
-Similarly, the Z-type operator on $c$ is a product of vertex stabilizers if and only if $c^*$ is a boundary in the dual lattice (since each primal vertex stabilizer corresponds to the boundary of a dual face).
+Similarly, the Z-type operator on $c$ is a product of vertex stabilizers if and only if $`c^*`$ is a boundary in the dual lattice (since each primal vertex stabilizer corresponds to the boundary of a dual face).
 
 Therefore, $`d_Z`$ equals the minimum weight of a non-trivial cycle in the dual lattice. We will return to this in Section 8.3.
 
