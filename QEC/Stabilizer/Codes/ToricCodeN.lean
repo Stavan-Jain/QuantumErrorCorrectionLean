@@ -20,8 +20,6 @@ import QEC.Stabilizer.PauliGroup.NQubitOperator
 import QEC.Stabilizer.Lattice.FinPeriodic
 import QEC.Stabilizer.Lattice.GridIndexing
 import QEC.Stabilizer.Lattice.ToricHomology
-import QEC.Stabilizer.Codes.ToricCode8
-
 /-!
 # Parametric toric code on an L×L torus
 
@@ -29,14 +27,10 @@ Formalizes the parametric toric code for an L×L lattice:
 - `numQubits L = 2·L·L` physical qubits placed on edges
 - Horizontal edges `H(x,y)` and vertical edges `V(x,y)` with periodic boundaries
 - Face stabilizers (X-type) and vertex stabilizers (Z-type)
-- All generators as lists for use in Steps 2–4
 
 Convention note: this file uses face=X and vertex=Z checks, matching the convention
 in `distance_proof.md`. Some expositions use the swapped convention (face=Z, vertex=X);
 both are equivalent via global Hadamard (X ↔ Z on every qubit).
-
-Step 1: qubit–edge bijection, generator definitions, and consistency check at L=2
-against the concrete `ToricCode8`.
 -/
 
 namespace Quantum
@@ -611,44 +605,12 @@ lemma stabilizerGroup_toSubgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
   rw [listToSet_generatorsList]
 
 /-!
-## 6. Deferred `StabilizerCode` packaging boundary
+## 6. Chain complex and homology aliases
 
-Part 1 exposes an explicit constructor boundary so independence/logical-operator packaging
-can be proved in a later milestone without refactoring the generator API.
--/
-
-/-- Data required to upgrade `ToricCodeN` to a full `StabilizerCode`. -/
-structure CodePackagingData (L : ℕ) [Fact (2 ≤ L)] where
-  generators_length : (generatorsList L).length = numQubits L - 2
-  generators_phaseZero : NQubitPauliGroupElement.AllPhaseZero (generatorsList L)
-  generators_independent : StabilizerGroup.GeneratorsIndependent (numQubits L) (generatorsList L)
-  logicalOps : Fin 2 → StabilizerGroup.LogicalQubitOps (numQubits L) (stabilizerGroup L)
-  logical_commute_cross : ∀ ℓ ℓ', ℓ ≠ ℓ' →
-    ((logicalOps ℓ).xOp * (logicalOps ℓ').xOp = (logicalOps ℓ').xOp * (logicalOps ℓ).xOp ∧
-      (logicalOps ℓ).xOp * (logicalOps ℓ').zOp = (logicalOps ℓ').zOp * (logicalOps ℓ).xOp ∧
-      (logicalOps ℓ).zOp * (logicalOps ℓ').xOp = (logicalOps ℓ').xOp * (logicalOps ℓ).zOp ∧
-      (logicalOps ℓ).zOp * (logicalOps ℓ').zOp = (logicalOps ℓ').zOp * (logicalOps ℓ).zOp)
-
-/-- Build a full `StabilizerCode` from already-established packaging data. -/
-noncomputable def stabilizerCodeOfData (L : ℕ) [Fact (2 ≤ L)] (D : CodePackagingData L) :
-    StabilizerGroup.StabilizerCode (numQubits L) 2 where
-  hk := by
-    have hL : 2 ≤ L := Fact.out
-    have hq : 2 ≤ numQubits L := by
-      dsimp [numQubits]
-      nlinarith
-    exact hq
-  generatorsList := generatorsList L
-  generators_length := D.generators_length
-  generators_phaseZero := D.generators_phaseZero
-  generators_independent := D.generators_independent
-  generators_commute := by rw [listToSet_generatorsList]; exact generators_commute L
-  closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem L
-  logicalOps := D.logicalOps
-  logical_commute_cross := D.logical_commute_cross
-
-/-!
-## Part 2 aliases (chain complex and homology)
+(The full `StabilizerCode (numQubits L) 2` packaging is built in
+`ToricCodeNStabilizerCode.lean`, which uses a *trimmed* generator list
+of length `numQubits L - 2`. The full `generatorsList L` here has length
+`2L²`, so it cannot directly populate `StabilizerCode.generators_length`.)
 -/
 
 /-- Alias for the toric `∂2` boundary map from the lattice chain-complex layer. -/
@@ -670,32 +632,6 @@ abbrev toricBoundaries (L : ℕ) [Fact (0 < L)] :=
 /-- Alias for toric first homology from the lattice homology layer. -/
 abbrev toricH1 (L : ℕ) [Fact (0 < L)] :=
   Stabilizer.Lattice.toricH1 (L := L)
-
-/-!
-## 7. `L = 2` compatibility checks against `ToricCode8`
--/
-
-/-- `hEdge` indexing at `L=2` matches the concrete qubit numbering used by `ToricCode8`. -/
-lemma hEdge_L2_vals :
-    ((hEdge 2 0 0).val = 0) ∧ ((hEdge 2 1 0).val = 1) ∧
-    ((hEdge 2 0 1).val = 2) ∧ ((hEdge 2 1 1).val = 3) := by decide
-
-/-- `vEdge` indexing at `L=2` matches the concrete qubit numbering used by `ToricCode8`. -/
-lemma vEdge_L2_vals :
-    ((vEdge 2 0 0).val = 4) ∧ ((vEdge 2 1 0).val = 5) ∧
-    ((vEdge 2 0 1).val = 6) ∧ ((vEdge 2 1 1).val = 7) := by decide
-
-/-- At `L=2`, the face stabilizer at `(0,0)` has the same operators as `ToricCode8.B00`. -/
-lemma faceStab00_L2_support :
-    (faceStab 2 0 0).operators = ToricCode8.B00.operators := by
-  ext i
-  fin_cases i <;> decide
-
-/-- At `L=2`, the vertex stabilizer at `(0,0)` has the same operators as `ToricCode8.A00`. -/
-lemma vertexStab00_L2_support :
-    (vertexStab 2 0 0).operators = ToricCode8.A00.operators := by
-  ext i
-  fin_cases i <;> decide
 
 end ToricCodeN
 end StabilizerGroup

@@ -182,16 +182,6 @@ theorem exists_nontrivial_x_logical_weight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
               horizontalLoopChain L x = 1 from ⟨b, rfl, hb1⟩)
         exact Stabilizer.Lattice.edgeToQubitIdx_injective L hspec.1
 
-/-- Section 8.1 scaffold: X-distance upper bound `dX ≤ L`. -/
-theorem xDistance_upper_bound (L : ℕ) [Fact (2 ≤ L)] :
-    ∃ g : NQubitPauliGroupElement (numQubits L),
-      NQubitPauliGroupElement.IsXTypeElement g ∧
-      IsNontrivialLogicalOperator g (stabilizerGroup L) ∧
-      weight g ≤ L := by
-  rcases exists_nontrivial_x_logical_weight_eq_L L with ⟨g, hgX, hgLogical, hgwt⟩
-  refine ⟨g, hgX, hgLogical, ?_⟩
-  simp [hgwt]
-
 set_option maxHeartbeats 1000000 in
 -- The lower-bound proof expands many finite sums and support decompositions.
 theorem nontrivial_x_logical_weight_ge_L (L : ℕ) [Fact (2 ≤ L)]
@@ -356,20 +346,15 @@ theorem nontrivial_x_logical_weight_ge_L (L : ℕ) [Fact (2 ≤ L)]
   · exact fun b x hx hx' => ⟨ x, by aesop ⟩
 
 
-/-- Section 8 endpoint scaffold: the toric X-distance is `L`. -/
-theorem toricCodeN_hasXDistance_L (L : ℕ) [Fact (2 ≤ L)] :
+/-- Section 8 endpoint: `dX = L` for the toric code. -/
+theorem toricCodeN_dX_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     HasToricXDistance L L := by
   refine ⟨?_, ?_, ?_⟩
   · have hL : 2 ≤ L := Fact.out
     omega
-  · intro g hgX hgLogical hgPos
+  · intro g hgX hgLogical _
     exact nontrivial_x_logical_weight_ge_L L g hgX hgLogical
   · exact exists_nontrivial_x_logical_weight_eq_L L
-
-/-- Section 8 endpoint alias: `dX = L` for the toric code. -/
-theorem toricCodeN_dX_eq_L (L : ℕ) [Fact (2 ≤ L)] :
-    HasToricXDistance L L := by
-  simpa using toricCodeN_hasXDistance_L L
 
 -- ---------------------------------------------------------------------------
 -- Vertical X-loop: the column-0 sister of `horizontalLoopChain`/`horizontalLoopXOperator`
