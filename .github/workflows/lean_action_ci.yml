@@ -19,3 +19,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
       - uses: leanprover-community/docgen-action@v1
+        with:
+          # Point `homepage` at a directory that does not exist in the repo.
+          # The action's `Check for ${homepage} folder` step then sets
+          # `DOCS_EXISTS=false`, so the Jekyll bundle/build steps are skipped
+          # (they require a `Gemfile` etc., and we don't track a Jekyll site
+          # in the repo — `docs/` is gitignored). API docs still build and
+          # upload to GitHub Pages.
+          homepage: _no_jekyll_site
