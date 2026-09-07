@@ -58,7 +58,7 @@ lemma norm_zero : norm (0 : Vector α) = 0 := by
 
 /-- The square of the norm equals the sum of squared magnitudes. -/
 lemma norm_sq_def {v : Vector α} : (norm v)^2 = ∑ i, ‖v i‖^2 := by
-  simp [norm]
+  simp only [norm_def]
   rw [Real.sq_sqrt]
   apply Finset.sum_nonneg
   intro i _
@@ -80,7 +80,7 @@ lemma norm_eq_iff_norm_sq_eq {v w : Vector α} :
 
 /-- Scaling a vector by a scalar scales its norm by the magnitude of the scalar. -/
 lemma norm_smul (c : ℂ) (v : Vector α) : norm (c • v) = ‖c‖ * norm v := by
-  simp [norm]
+  simp only [norm_def, Pi.smul_apply, smul_eq_mul, Complex.norm_mul]
   have h_factor : ∑ x : α, (‖c‖ * ‖v x‖)^2 = ‖c‖^2 * ∑ x : α, ‖v x‖^2 := by
     simp [mul_pow, Finset.mul_sum]
   rw [h_factor, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity)]
@@ -88,9 +88,6 @@ lemma norm_smul (c : ℂ) (v : Vector α) : norm (c • v) = ‖c‖ * norm v :=
 /-- Normalized vector: unit norm in the `norm` above (quantum state in Dirac notation). -/
 abbrev QuantumState (α : Type*) [Fintype α] [DecidableEq α] :=
   { v : Vector α // norm v = 1 }
-
-/-- Coerce a quantum state to its underlying amplitude vector. -/
-instance : CoeTC (QuantumState α) (Vector α) := ⟨Subtype.val⟩
 
 /-- The coercion of a quantum state to a vector is its `.val`. -/
 lemma QuantumState.coe_val (ψ : QuantumState α) : (ψ : Vector α) = ψ.val := rfl
@@ -260,32 +257,34 @@ noncomputable def nQubitBasisVec (n : ℕ) (b : NQubitBasis n) : NQubitVec n :=
 This creates a quantum state corresponding to a computational basis vector.
 -/
 noncomputable def nQubitKet (n : ℕ) (b : NQubitBasis n) : NQubitState n :=
-  ⟨nQubitBasisVec n b, by simpa using norm_basisVec b⟩
+  ⟨nQubitBasisVec n b, norm_basisVec b⟩
 
 /-- Two-qubit computational basis state |00⟩. -/
 noncomputable def ket00 : TwoQubitState :=
   ⟨ basisVec ((0, 0) : TwoQubitBasis),
-    by simpa using norm_basisVec ((0, 0) : TwoQubitBasis) ⟩
+    norm_basisVec ((0, 0) : TwoQubitBasis) ⟩
 
 /-- Two-qubit computational basis state |01⟩. -/
 noncomputable def ket01 : TwoQubitState :=
   ⟨ basisVec ((0, 1) : TwoQubitBasis),
-    by simpa using norm_basisVec ((0, 1) : TwoQubitBasis) ⟩
+    norm_basisVec ((0, 1) : TwoQubitBasis) ⟩
 
 /-- Two-qubit computational basis state |10⟩. -/
 noncomputable def ket10 : TwoQubitState :=
   ⟨ basisVec ((1, 0) : TwoQubitBasis),
-    by simpa using norm_basisVec ((1, 0) : TwoQubitBasis) ⟩
+    norm_basisVec ((1, 0) : TwoQubitBasis) ⟩
 
 /-- Two-qubit computational basis state |11⟩. -/
 noncomputable def ket11 : TwoQubitState :=
   ⟨ basisVec ((1, 1) : TwoQubitBasis),
-    by simpa using norm_basisVec ((1, 1) : TwoQubitBasis) ⟩
+    norm_basisVec ((1, 1) : TwoQubitBasis) ⟩
 
 /-- The `|+⟩` amplitude vector `(1/√2, 1/√2)` has unit norm. -/
 lemma ketPlusNorm1 : norm (![1 / (Real.sqrt 2), 1 / (Real.sqrt 2)]) = 1 := by
   have h : (2⁻¹ : ℝ) + 2⁻¹ = 1 := by norm_num
-  simp
+  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, one_div, norm_def, Fin.sum_univ_two,
+    cons_val_zero, norm_inv, Complex.norm_real, Real.norm_eq_abs, inv_pow, sq_abs, Nat.ofNat_nonneg,
+    Real.sq_sqrt, cons_val_one, cons_val_fin_one, Real.sqrt_eq_one]
   exact h
 
 /-- Hadamard-basis ket |+⟩ = (|0⟩ + |1⟩)/√2. -/
