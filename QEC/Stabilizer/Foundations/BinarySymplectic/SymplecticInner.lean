@@ -33,6 +33,42 @@ lemma symplecticProductSingle_eq_zero_iff_commute (P Q : PauliOperator) :
     simp [symplecticProductSingle]
   rfl
 
+/-! ### Single-qubit evaluations
+
+`toSymplecticSingle P = (x-bit, z-bit)`. Pairing against `Z` reads off the `X`-bit and pairing
+against `X` reads off the `Z`-bit — the single-qubit content of "a `Z`-check detects `X`-errors
+and an `X`-check detects `Z`-errors". -/
+
+@[simp] lemma symplecticProductSingle_I_left (Q : PauliOperator) :
+    symplecticProductSingle I Q = 0 := by
+  simp [symplecticProductSingle]
+
+@[simp] lemma symplecticProductSingle_I_right (P : PauliOperator) :
+    symplecticProductSingle P I = 0 := by
+  simp [symplecticProductSingle]
+
+/-- Against `Z`, the symplectic product reads off the `X`-bit of `P`. -/
+@[simp] lemma symplecticProductSingle_Z_right (P : PauliOperator) :
+    symplecticProductSingle P Z = P.toSymplecticSingle.1 := by
+  simp [symplecticProductSingle]
+
+/-- Against `X`, the symplectic product reads off the `Z`-bit of `P`. -/
+@[simp] lemma symplecticProductSingle_X_right (P : PauliOperator) :
+    symplecticProductSingle P X = P.toSymplecticSingle.2 := by
+  simp [symplecticProductSingle]
+
+/-- The `X`-bit of a single-qubit Pauli is `0` or `1`. -/
+lemma toSymplecticSingle_fst_eq_zero_or_one (P : PauliOperator) :
+    P.toSymplecticSingle.1 = 0 ∨ P.toSymplecticSingle.1 = 1 := by
+  cases P <;> decide
+
+/-- A non-identity Pauli with `X`-bit `0` is `Z`, so its `Z`-bit is `1`. -/
+lemma toSymplecticSingle_snd_eq_one_of_fst_eq_zero {P : PauliOperator} (hP : P ≠ I)
+    (h : P.toSymplecticSingle.1 = 0) : P.toSymplecticSingle.2 = 1 := by
+  cases P
+  · exact absurd rfl hP
+  all_goals first | rfl | exact absurd h (by decide)
+
 end PauliOperator
 
 namespace NQubitPauliOperator

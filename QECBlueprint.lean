@@ -444,6 +444,26 @@ attribute [blueprint "thm:css-distance-two"
     \cref{chap:codes}. -/)]
   Quantum.StabilizerGroup.hasCodeDistance_two_of_anticommute_witness
 
+attribute [blueprint "thm:css-distance-three"
+  (title := /-- A distance-three closer for CSS codes -/)
+  (statement := /-- Let a CSS code have $Z$-checks and $X$-checks supported on the
+    rows of two classical parity-check matrices. If both matrices have
+    nonzero, pairwise distinct columns --- both classical codes have distance
+    at least $3$ --- and some nontrivial logical operator of weight $3$ exists,
+    then the code has distance exactly $3$. -/)
+  (proof := /-- A weight-one Pauli at qubit $i$ is $Z$, detected by any $X$-row
+    through $i$, or carries an $X$-component, detected by any $Z$-row through
+    $i$; nonzero columns supply the rows. For a weight-two Pauli on qubits
+    $i \ne j$, the anticommutation with a check is the sum of the two
+    single-qubit symplectic products it sees: if exactly one qubit carries an
+    $X$-component a $Z$-row through it detects the pair, and if both (or
+    neither, so both are $Z$) do, a $Z$-row (resp.\ $X$-row) containing exactly
+    one of $i, j$ --- which exists because the columns are distinct --- sees a
+    single $1$. So no Pauli of weight one or two lies in the centralizer, and
+    the exhibited weight-three logical makes the minimum exactly three by
+    \cref{def:has-code-distance}. -/)]
+  Quantum.StabilizerGroup.hasCodeDistance_three_of_columns
+
 /-! ## Chapter 6 — The homological framework -/
 
 attribute [blueprint "def:homological-code"
@@ -778,8 +798,12 @@ attribute [blueprint "def:gross-code-with-distance"
 attribute [blueprint "def:steane7"
   (title := /-- The Steane $[[7,1,3]]$ code -/)
   (statement := /-- The CSS code built from the classical $[7,4,3]$ Hamming
-    code, with all-$X$ and all-$Z$ logical operators. -/)]
-  Quantum.StabilizerGroup.Steane7.stabilizerCode
+    code, with all-$X$ and all-$Z$ logical operators, packaged with its
+    distance. The Hamming check matrix has as columns the seven nonzero
+    vectors of $\F_2^3$, so \cref{thm:css-distance-three} applies with the same
+    three rows on both sides; $X$ on qubits $\{3,5,6\}$ is the weight-three
+    logical. -/)]
+  Quantum.StabilizerGroup.Steane7.stabilizerCodeWithDistance
 
 attribute [blueprint "def:shor9"
   (title := /-- The Shor $[[9,1,3]]$ code -/)

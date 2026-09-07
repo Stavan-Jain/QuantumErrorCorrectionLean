@@ -98,7 +98,8 @@ QEC/
 Everything under `Codes/` is `native_decide`-free. The instances that carried
 one are parked on branch `claude/z3z6-parked`:
 `BivariateBicycle/{Z3Z6,Z5Z15F2A6,BaseFloors}/`, `Codes/Concat/` (both Steane
-concatenations), `RotatedSurface/Three.lean`, and `Small/Steane7Distance.lean`.
+concatenations), and `RotatedSurface/Three.lean`. (`Small/Steane7Distance.lean` was
+de-nativized and is back on `main`.)
 `Framework/` keeps the abstract machinery they exercised — notably
 `Framework/Concatenation/`, which now has no concrete instance in this tree.
 
