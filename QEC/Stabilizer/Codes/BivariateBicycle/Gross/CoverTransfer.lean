@@ -36,8 +36,8 @@ set_option maxRecDepth 4096
 
 /-! ## Deck data on qubits (`C1 = GrossGroup × Fin 2`) -/
 
-/-- The deck involution on qubit indices: shift the group coordinate by
-`deckS`, keep the block. -/
+/-- The deck involution on qubit indices: shift the group coordinate by `deckS`,
+keep the block. -/
 def deckSigma1 : GrossGroup × Fin 2 → GrossGroup × Fin 2 :=
   fun p => (p.1 + deckS, p.2)
 
@@ -200,7 +200,7 @@ theorem coverPush1_eq_zero_iff (v : GrossGroup × Fin 2 → ZMod 2) :
   fiberSumFn_eq_zero_iff deckSigma1_ne coverPi_prodMap_fiber
     coverPi_prodMap_coverSec1 v
 
-/-- The chain identity `τ(p(v)) = v + σv` = `(1 + σ)v`.  This is how the deck
+/-- The chain identity `τ(p(v)) = v + σv` = `(1 + σ)v`. This is how the deck
 homotopy (R) enters the Phase-1 distance assembly. -/
 theorem coverPull1_coverPush1 (v : GrossGroup × Fin 2 → ZMod 2) :
     coverPull1 (coverPush1 v) = v + deckShift1 v := by
@@ -212,8 +212,8 @@ theorem coverPull1_coverPush1 (v : GrossGroup × Fin 2 → ZMod 2) :
 
 /-! ## Weight identity -/
 
-/-- The number of qubits in the support of `v` whose deck partner is also in
-the support.  Counts each doubly-covered fiber twice (matching the informal
+/-- The number of qubits in the support of `v` whose deck partner is also in the
+support. Counts each doubly-covered fiber twice (matching the informal
 `2 · overlap`). -/
 noncomputable def overlapCount (v : GrossGroup × Fin 2 → ZMod 2) : ℕ :=
   (Finset.univ.filter fun p : GrossGroup × Fin 2 =>
@@ -229,8 +229,8 @@ lemma bb72Complex_chainWeight_eq (u : BaseGroup × Fin 2 → ZMod 2) :
     bb72Complex.chainWeight u
       = (Finset.univ.filter fun p : BaseGroup × Fin 2 => u p ≠ 0).card := rfl
 
-/-- Weight identity for the gross → bb72 pushforward:
-`|v| = |p(v)| + overlap`. -/
+/-- Weight identity for the gross → bb72 pushforward: `|v| = |p(v)| + overlap`.
+-/
 theorem gross_chainWeight_eq (v : GrossGroup × Fin 2 → ZMod 2) :
     grossComplex.chainWeight v
       = bb72Complex.chainWeight (coverPush1 v) + overlapCount v := by

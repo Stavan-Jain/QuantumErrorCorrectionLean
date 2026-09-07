@@ -77,16 +77,16 @@ lemma grossCoverData_pull1 : grossCoverData.pull1 = coverPull1 := rfl
 
 /-! ## The five layer inputs, from the existing gross theorems -/
 
-/-- **`StrongBaseFloor 6`** — the small-cycle theorem (A4 Theorem A,
-boundaries included). -/
+/-- **`StrongBaseFloor 6`** — the small-cycle theorem (A4 Theorem A, boundaries
+included). -/
 theorem grossCoverData_strongBaseFloor : grossCoverData.StrongBaseFloor 6 := by
   intro u hcyc hne
   change 6 ≤ bb72Complex.chainWeight u
   rw [bb72Complex_chainWeight_eq]
   exact base_cycle_weight_ge_6 u hcyc hne
 
-/-- **`DangerousFloorNZ 12`** — (M) on the `b ≠ 0` rungs, unconditional via
-the light-stabilizer classification. -/
+/-- **`DangerousFloorNZ 12`** — (M) on the `b ≠ 0` rungs, unconditional via the
+light-stabilizer classification. -/
 theorem grossCoverData_dangerousFloorNZ : grossCoverData.DangerousFloorNZ 12 :=
   fun v hv hnb hb h0 => LightStab.dangerous_sector_unconditional v hv hnb hb h0
 
@@ -107,10 +107,10 @@ theorem grossCoverData_safeFloor_iff :
 
 /-! ## The layer-routed unconditional endpoints -/
 
-/-- **Unconditional chain-level `d(gross) = 12`, through the parametric
-layer**: 12 is the least weight of a nontrivial cycle of the gross complex.
-Statement-identical to `gross_chain_distance_eq_12_of_sectors` with the
-sector hypotheses discharged. -/
+/-- **Unconditional chain-level `d(gross) = 12`, through the parametric layer**:
+12 is the least weight of a nontrivial cycle of the gross complex.
+Statement-identical to `gross_chain_distance_eq_12_of_sectors` with the sector
+hypotheses discharged. -/
 theorem gross_chain_distance_eq_12 :
     IsLeast {w : ℕ | ∃ v : GrossGroup × Fin 2 → ZMod 2,
       v ∈ grossComplex.cycles ∧ v ∉ grossComplex.boundaries ∧
@@ -122,11 +122,10 @@ theorem gross_chain_distance_eq_12 :
   norm_num at h
   exact h
 
-/-- **Unconditional Pauli-level `d(gross) = 12`, through the parametric
-layer**: 12 is the least weight of a nontrivial logical operator of the gross
-homological stabilizer group.  Statement-identical to
-`gross_pauli_distance_eq_12_of_sectors` with the sector hypotheses
-discharged. -/
+/-- **Unconditional Pauli-level `d(gross) = 12`, through the parametric layer**:
+12 is the least weight of a nontrivial logical operator of the gross homological
+stabilizer group. Statement-identical to `gross_pauli_distance_eq_12_of_sectors`
+with the sector hypotheses discharged. -/
 theorem gross_pauli_distance_eq_12 :
     IsLeast {w : ℕ | ∃ g : NQubitPauliGroupElement grossComplex.numQubits,
       Quantum.StabilizerGroup.IsNontrivialLogicalOperator g

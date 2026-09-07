@@ -4,6 +4,6 @@ import QEC.Stabilizer.Codes.Repetition.N
 /-!
 # Repetition codes
 
-Classical repetition codes, embedded as degenerate distance-1 quantum
-stabilizer codes.
+Classical repetition codes, embedded as degenerate distance-1 quantum stabilizer
+codes.
 -/

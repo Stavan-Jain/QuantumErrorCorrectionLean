@@ -56,10 +56,10 @@ namespace BBDeckTower
 
 variable {S : Type*} [CommRing S]
 
-/-- **ε-freeness** (the annihilator shape of a free `𝔽₂[ε]/(ε^N)`-module):
-every element killed by `ε^t` is divisible by `ε^{N-t}`. Satisfied in the
-model `S = 𝔽₂[G]` with `ε = 1 + σ` of deck order `N`, since `S` is free over
-the chain ring `𝔽₂[⟨σ⟩]`. -/
+/-- **ε-freeness** (the annihilator shape of a free `𝔽₂[ε]/(ε^N)`-module): every
+element killed by `ε^t` is divisible by `ε^{N-t}`. Satisfied in the model
+`S = 𝔽₂[G]` with `ε = 1 + σ` of deck order `N`, since `S` is free over the chain
+ring `𝔽₂[⟨σ⟩]`. -/
 def EpsFree (ε : S) (N : ℕ) : Prop :=
   ∀ t, 1 ≤ t → t ≤ N → ∀ x : S, ε ^ t * x = 0 → ∃ y : S, x = ε ^ (N - t) * y
 
@@ -68,9 +68,9 @@ Koszul boundary. Over char two this is `ε · H₁ = 0`, i.e. `σ_* = id`. -/
 def DeckTrivial (ε A B : S) : Prop :=
   ∀ y₁ y₂ : S, A * y₁ + B * y₂ = 0 → ∃ z : S, ε * y₁ = B * z ∧ ε * y₂ = A * z
 
-/-- **One bootstrap pass** (pure commutative-ring algebra, no char or
-freeness): a tail `ε^{j+1}·S` is re-expressed with the strictly larger tail
-exponent `(j+1)+j`. Iterated, this walks the tail exponent past `N`. -/
+/-- **One bootstrap pass** (pure commutative-ring algebra, no char or freeness):
+a tail `ε^{j+1}·S` is re-expressed with the strictly larger tail exponent
+`(j+1)+j`. Iterated, this walks the tail exponent past `N`. -/
 theorem boost (ε A B : S) (j : ℕ)
     (h : ∃ p q v : S, ε = p * A + q * B + ε ^ (j + 1) * v) :
     ∃ p q v : S, ε = p * A + q * B + ε ^ (j + 1 + j) * v := by
@@ -79,8 +79,8 @@ theorem boost (ε A B : S) (j : ℕ)
     linear_combination (1 + ε ^ j * v) * hpqv⟩
 
 /-- **The tail-elimination iteration.** With `ε^N = 0`, any expression
-`ε = p·A + q·B + ε^m·v` with `2 ≤ m` collapses to `ε ∈ (A,B)`: repeated
-`boost` grows `m` until `ε^m = 0`. Fuel `k` bounds `N - m`. -/
+`ε = p·A + q·B + ε^m·v` with `2 ≤ m` collapses to `ε ∈ (A,B)`: repeated `boost`
+grows `m` until `ε^m = 0`. Fuel `k` bounds `N - m`. -/
 theorem iterate_aux (ε A B : S) (N : ℕ) (hN : ε ^ N = 0) :
     ∀ (k m : ℕ), 2 ≤ m → N ≤ m + k →
       (∃ p q v : S, ε = p * A + q * B + ε ^ m * v) → ε ∈ Ideal.span {A, B} := by
@@ -116,8 +116,8 @@ theorem iterate (ε A B : S) (N : ℕ) (hN : ε ^ N = 0) {m : ℕ} (hm : 2 ≤ m
 variable [CharP S 2]
 
 /-- **The descent step.** Given a membership witness `ε^t = f·A + g·B` at a
-level `1 ≤ t ≤ N-1` and deck-triviality, one deck application on the
-canonical cycle `ε^{N-t}·(f,g)` yields `ε = p·A + q·B + ε^{N-t}·v`. -/
+level `1 ≤ t ≤ N-1` and deck-triviality, one deck application on the canonical
+cycle `ε^{N-t}·(f,g)` yields `ε = p·A + q·B + ε^{N-t}·v`. -/
 theorem descent (ε A B : S) (N : ℕ) (hN : ε ^ N = 0)
     (hfree : EpsFree ε N) (hR : DeckTrivial ε A B)
     {t : ℕ} (h1 : 1 ≤ t) (h2 : t ≤ N - 1)
@@ -193,9 +193,9 @@ theorem descent (ε A B : S) (N : ℕ) (hN : ε ^ N = 0)
 /-- **A13, the hard direction (⟹).** For a free `ℤ_{2^r}` doubling cover
 (`ε = 1 + σ`, deck order `N`, `ε^N = 0`, `EpsFree`), deck-triviality on `H₁`
 forces the Bezout membership `ε ∈ (A, B)`. The entry `ε^m ∈ (A,B)` with
-`2 ≤ m ≤ N-2` is A12 applied to the top `ℤ₂`-step (`m = 2^{r-1}`; needs
-`r ≥ 2`, i.e. `N ≥ 4`). Combined with `deckTrivial_of_bezout` (the ⟸) this
-gives **deck-trivial ⟺ `ε ∈ (A,B)` ⟺ k constant along the tower**. -/
+`2 ≤ m ≤ N-2` is A12 applied to the top `ℤ₂`-step (`m = 2^{r-1}`; needs `r ≥ 2`,
+i.e. `N ≥ 4`). Combined with `deckTrivial_of_bezout` (the ⟸) this gives
+**deck-trivial ⟺ `ε ∈ (A,B)` ⟺ k constant along the tower**. -/
 theorem eps_mem_of_deckTrivial (ε A B : S) (N : ℕ) (hN : ε ^ N = 0)
     (hfree : EpsFree ε N) (hR : DeckTrivial ε A B)
     {m : ℕ} (hm2 : 2 ≤ m) (hmN : m ≤ N - 2)

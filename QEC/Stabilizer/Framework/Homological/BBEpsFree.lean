@@ -39,9 +39,9 @@ namespace BBEpsFree
 
 open Polynomial BBDeckTower
 
-/-- **Chain-ring `EpsFree`.** In `R[X]/(X^N)` with `ε = X`, an element
-killed by `ε^t` is divisible by `ε^{N-t}` — because `X^t` is monic, hence
-a non-zero-divisor, so it cancels. Works over any commutative base `R`. -/
+/-- **Chain-ring `EpsFree`.** In `R[X]/(X^N)` with `ε = X`, an element killed by
+`ε^t` is divisible by `ε^{N-t}` — because `X^t` is monic, hence a
+non-zero-divisor, so it cancels. Works over any commutative base `R`. -/
 theorem epsFree_quotXpow {R : Type*} [CommRing R] (N : ℕ) :
     EpsFree (Ideal.Quotient.mk (Ideal.span {(X : R[X]) ^ N}) X) N := by
   intro t _ htN x hx
@@ -58,13 +58,13 @@ theorem epsFree_quotXpow {R : Type*} [CommRing R] (N : ℕ) :
   have hp : p = X ^ (N - t) * r := (monic_X_pow t).isRegular.left hcancel
   exact ⟨Ideal.Quotient.mk _ r, by rw [hp, ← map_pow, ← map_mul]⟩
 
-/-- **Freeness transfer for `EpsFree`.** If `S` is a commutative
-`Λ`-algebra that is free as a `Λ`-module and `ε₀ ∈ Λ` satisfies `EpsFree`
-in `Λ`, then its image `ε = algebraMap ε₀` satisfies `EpsFree` in `S`.
+/-- **Freeness transfer for `EpsFree`.** If `S` is a commutative `Λ`-algebra
+that is free as a `Λ`-module and `ε₀ ∈ Λ` satisfies `EpsFree` in `Λ`, then its
+image `ε = algebraMap ε₀` satisfies `EpsFree` in `S`.
 
-Idea: expand `x` in a `Λ`-basis; `ε^t·x = 0` means every coordinate is
-killed by `ε₀^t` (linear independence), so `EpsFree` in `Λ` divides each
-coordinate by `ε₀^{N-t}`, and reassembling gives `x = ε^{N-t}·y`. -/
+Idea: expand `x` in a `Λ`-basis; `ε^t·x = 0` means every coordinate is killed by
+`ε₀^t` (linear independence), so `EpsFree` in `Λ` divides each coordinate by
+`ε₀^{N-t}`, and reassembling gives `x = ε^{N-t}·y`. -/
 theorem epsFree_of_free {Λ S : Type*} [CommRing Λ] [CommRing S] [Algebra Λ S]
     [Module.Free Λ S] {ε₀ : Λ} {N : ℕ} (hΛ : EpsFree ε₀ N) :
     EpsFree (algebraMap Λ S ε₀) N := by
@@ -89,11 +89,11 @@ theorem epsFree_of_free {Λ S : Type*} [CommRing Λ] [CommRing S] [Algebra Λ S]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hy i, mul_smul, Algebra.smul_def, map_pow]
 
-/-- **Bridge to `BocksteinLift`.** `EpsFree ε 4` (its `t = 1` slice) is
-exactly the annihilator hypothesis `Ann(ε) = (ε³)` that
-`BocksteinLift.bockstein_element_form` takes as `hann`. So the OQ1 tower
-line (`BBDeckTower`, which consumes the full `EpsFree`) and the OQ2
-element-form line (`BocksteinLift`) rest on the *same* ring input, and
+/-- **Bridge to `BocksteinLift`.** `EpsFree ε 4` (its `t = 1` slice) is exactly
+the annihilator hypothesis `Ann(ε) = (ε³)` that
+`BocksteinLift.bockstein_element_form` takes as `hann`. So the OQ1 tower line
+(`BBDeckTower`, which consumes the full `EpsFree`) and the OQ2 element-form line
+(`BocksteinLift`) rest on the *same* ring input, and
 `epsFree_quotXpow`/`epsFree_of_free` discharge it uniformly. -/
 theorem hann_of_epsFree {S : Type*} [CommRing S] {ε : S} (h : EpsFree ε 4) :
     ∀ w : S, ε * w = 0 → ∃ v, w = ε ^ 3 * v := by

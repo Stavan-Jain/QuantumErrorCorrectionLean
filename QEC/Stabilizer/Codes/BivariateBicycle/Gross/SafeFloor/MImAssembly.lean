@@ -49,10 +49,11 @@ set_option synthInstance.maxSize 4000 in
 -- The `Decidable` instance for the 63-way `∧` (63 function-equality leaves) is a
 -- term far larger than the default `synthInstance.maxSize` of 128; the search
 -- itself is cheap.
-/-- The 63 class-level covariance certificates `seamC z' = T_c (seamC zrep) + ∂₂ δ`
-consumed by `floor_kcombo`, bundled into a single kernel `decide`: every `seamC` is
-read through its packed mask (`seamC_kcombo_mask`) and every `∂₂` through its sparse
-form, so the 63 function equalities are 63 cheap `Nat` walks. -/
+/-- The 63 class-level covariance certificates
+`seamC z' = T_c (seamC zrep) + ∂₂ δ` consumed by `floor_kcombo`, bundled into a
+single kernel `decide`: every `seamC` is read through its packed mask
+(`seamC_kcombo_mask`) and every `∂₂` through its sparse form, so the 63 function
+equalities are 63 cheap `Nat` walks. -/
 private theorem transfer_covs :
     (seamC (kcombo 0 0 0 0 0 1)
           = translate1 ((1, 5) : BaseGroup) (seamC Y1.zrep)
@@ -255,9 +256,9 @@ private theorem transfer_covs :
   simp only [Y0.zrep, Y1.zrep, Y4.zrep, Y11.zrep, Y12.zrep, seamC_kcombo_mask, bb2_fun_sparse]
   decide +kernel
 
-/-- **The 2-D-orbit dispatch**: every `ker ∂₂` class, addressed by its six free-cell values, has
-safe-sector floor `≥ 12` (the zero class is vacuous; the rest transport to one of the 5
-full-orbit reps via `floor_transfer`). -/
+/-- **The 2-D-orbit dispatch**: every `ker ∂₂` class, addressed by its six
+free-cell values, has safe-sector floor `≥ 12` (the zero class is vacuous; the
+rest transport to one of the 5 full-orbit reps via `floor_transfer`). -/
 theorem floor_kcombo (c0 c1 c2 c3 c4 c5 : ZMod 2) (f : BaseGroup → ZMod 2)
     (hb : seamC (kcombo c0 c1 c2 c3 c4 c5) + bbBoundary2Fn baseA baseB f
       ∉ bb72Complex.boundaries) :
@@ -462,7 +463,8 @@ theorem floor_kcombo (c0 c1 c2 c3 c4 c5 : ZMod 2) (f : BaseGroup → ZMod 2)
       (mkZeta [(0,0),(0,3),(0,4),(0,5),(1,3),(1,5)])
       h63 Y1.floor f
 
-/-- **`MImBound` holds** — the last assumed `Prop` for unconditional `d(gross) = 12`. -/
+/-- **`MImBound` holds** — the last assumed `Prop` for unconditional
+`d(gross) = 12`. -/
 theorem mimBound_holds : MImBound := by
   intro ζ hζ f hb
   have h : ζ = kcombo (ζ (4,4)) (ζ (4,5)) (ζ (5,2)) (ζ (5,3)) (ζ (5,4)) (ζ (5,5)) :=

@@ -30,8 +30,8 @@ namespace Iceberg
 
 A parametric, self-complementary, self-dual CSS detection code on `n = 2m`
 physical qubits with `k = 2m − 2` logical qubits and distance `d = 2`.
-Originally analyzed in [Steane 1996, `arxiv:quant-ph/9605021`] and
-[Gottesman 1997, `arxiv:quant-ph/9702029`]; see also EC Zoo:
+Originally analyzed in [Steane 1996, `arxiv:quant-ph/9605021`] and [Gottesman
+1997, `arxiv:quant-ph/9702029`]; see also EC Zoo:
 `https://errorcorrectionzoo.org/c/iceberg`.
 
 ## Parameters
@@ -39,8 +39,7 @@ Originally analyzed in [Steane 1996, `arxiv:quant-ph/9605021`] and
 - Physical qubits: `n = 2m`
 - Logical qubits: `k = 2m − 2`
 - Distance: `d = 2`
-- Family: CSS, self-dual (X- and Z-stabilizers share the same full
-  support).
+- Family: CSS, self-dual (X- and Z-stabilizers share the same full support).
 - Parameter constraint: `[Fact (2 ≤ m)]` (`m = 1` would give a trivial
   `[[2, 0, 2]]` code with zero logical qubits, which we exclude).
 
@@ -54,10 +53,10 @@ S_X := X X X ... X   (X on all 2m qubits)
 ```
 
 They commute because the symplectic inner product `⟨S_X, S_Z⟩ = 2m mod 2 = 0`
-when `n = 2m` is even (this is the **defining property** of the iceberg
-family: the all-X / all-Z stabilizers commute precisely when `n` is even,
-which is why the iceberg is a `[[2m, *, *]]` rather than `[[2m+1, *, *]]`
-family — the odd-n version gives the Shor / Steane / repetition codes).
+when `n = 2m` is even (this is the **defining property** of the iceberg family:
+the all-X / all-Z stabilizers commute precisely when `n` is even, which is why
+the iceberg is a `[[2m, *, *]]` rather than `[[2m+1, *, *]]` family — the odd-n
+version gives the Shor / Steane / repetition codes).
 
 ## Logical operators (split-anchor convention)
 
@@ -82,18 +81,18 @@ This convention makes the (anti)commutation table clean:
 ## Relation to `Codes/Small/FourQubit_4_2_2.lean`
 
 This parametric family at `m = 2` is the **same code** as the existing
-`FourQubit_4_2_2.lean`, but uses a **different** logical-operator basis
-(see `qec-lab:pipeline/attempts/iceberg/informal_spec.md` § "Relation to
-FourQubit_4_2_2.lean"). Both formalizations coexist as separate Lean
-objects, mirroring the `RepetitionCode3.lean` / `RepetitionCodeN.lean`
-pattern: we do NOT prove equivalence between the two.
+`FourQubit_4_2_2.lean`, but uses a **different** logical-operator basis (see
+`qec-lab:pipeline/attempts/iceberg/informal_spec.md` § "Relation to
+FourQubit_4_2_2.lean"). Both formalizations coexist as separate Lean objects,
+mirroring the `RepetitionCode3.lean` / `RepetitionCodeN.lean` pattern: we do NOT
+prove equivalence between the two.
 
 ## File status
 
 **Stage-2 skeleton.** Every theorem ends in a `sorry` tagged
 `TODO(iceberg-T<n>): <one-line hint>`. Stage 4 closes them following the
-`FourQubit_4_2_2.lean` template, scaled up for parametric `m` and
-generalized for k = 2m − 2 logical qubits.
+`FourQubit_4_2_2.lean` template, scaled up for parametric `m` and generalized
+for k = 2m − 2 logical qubits.
 -/
 
 open NQubitPauliGroupElement
@@ -150,8 +149,8 @@ noncomputable def subgroup (m : ℕ) [Fact (2 ≤ m)] :
 
 /-! ## §3 — Z-type / X-type predicates -/
 
-/-- T1: the Z-generator `S_Z m` is Z-type (Z on every qubit, hence I-or-Z
-on every qubit trivially). -/
+/-- T1: the Z-generator `S_Z m` is Z-type (Z on every qubit, hence I-or-Z on
+every qubit trivially). -/
 lemma ZGenerators_are_ZType (m : ℕ) [Fact (2 ≤ m)] :
     ∀ g, g ∈ ZGenerators m → NQubitPauliGroupElement.IsZTypeElement g := by
   classical
@@ -173,9 +172,9 @@ lemma XGenerators_are_XType (m : ℕ) [Fact (2 ≤ m)] :
 
 /-! ## §4 — Cross-commutation (the iceberg-defining property)
 
-`S_Z m` and `S_X m` anticommute at every one of the `2m` qubits — count
-`2m`, even (since `2m = 2 * m`), so they **commute**. This is why the
-iceberg family lives on an even number of physical qubits.
+`S_Z m` and `S_X m` anticommute at every one of the `2m` qubits — count `2m`,
+even (since `2m = 2 * m`), so they **commute**. This is why the iceberg family
+lives on an even number of physical qubits.
 -/
 
 private lemma S_Z_comm_S_X (m : ℕ) [Fact (2 ≤ m)] :
@@ -231,8 +230,8 @@ theorem generators_commute (m : ℕ) [Fact (2 ≤ m)] :
 
 /-! ## §6 — `−I` is not in the stabilizer subgroup -/
 
-/-- T5: `−I` is not in the iceberg stabilizer subgroup (CSS argument with
-T1, T2, T3 + `CSS.negIdentity_not_mem_closure_union`). -/
+/-- T5: `−I` is not in the iceberg stabilizer subgroup (CSS argument with T1,
+T2, T3 + `CSS.negIdentity_not_mem_closure_union`). -/
 theorem negIdentity_not_mem (m : ℕ) [Fact (2 ≤ m)] :
     negIdentity (2 * m) ∉ subgroup m := by
   have hZX : ∀ z ∈ ZGenerators m, ∀ x ∈ XGenerators m, z * x = x * z :=
@@ -267,9 +266,9 @@ lemma AllPhaseZero_generatorsList (m : ℕ) [Fact (2 ≤ m)] :
 /-! ## §9 — Generator independence (linear independence of check-matrix rows)
 
 The check matrix of `[S_Z m, S_X m]` has 2 rows × 4m columns. Row 0 has
-all-zeros on the X-half and all-ones on the Z-half; row 1 is its mirror.
-Both nonzero, neither a `ZMod 2`-multiple of the other (the only nonzero
-multiple is itself; sum of the two has all-ones everywhere, also nonzero).
+all-zeros on the X-half and all-ones on the Z-half; row 1 is its mirror. Both
+nonzero, neither a `ZMod 2`-multiple of the other (the only nonzero multiple is
+itself; sum of the two has all-ones everywhere, also nonzero).
 -/
 
 /-- T8: the check-matrix rows of `[S_Z m, S_X m]` are linearly independent. -/
@@ -700,9 +699,9 @@ private lemma weightOneAt_Z_anticomm_S_X (m : ℕ) [Fact (2 ≤ m)] (i : Fin (2 
   rw [hfilter, Finset.card_singleton]
   decide
 
-/-- T17: every weight-1 single-qubit Pauli anticommutes with one of the
-two generators. Z-anchored Pauli at any qubit anticomms with `S_X m`;
-X- or Y-anchored Pauli at any qubit anticomms with `S_Z m`. -/
+/-- T17: every weight-1 single-qubit Pauli anticommutes with one of the two
+generators. Z-anchored Pauli at any qubit anticomms with `S_X m`; X- or
+Y-anchored Pauli at any qubit anticomms with `S_Z m`. -/
 private lemma weight_one_anticomm_witness (m : ℕ) [Fact (2 ≤ m)] :
     ∀ i : Fin (2 * m), ∀ P : PauliOperator, P ≠ PauliOperator.I →
       ∃ g ∈ generators m, NQubitPauliGroupElement.Anticommute

@@ -98,7 +98,8 @@ QEC/
 Everything under `Codes/` is `native_decide`-free. The instances that carried
 one are parked on branch `claude/z3z6-parked`:
 `BivariateBicycle/{Z3Z6,Z5Z15F2A6,BaseFloors}/`, `Codes/Concat/` (both Steane
-concatenations), `RotatedSurface/Three.lean`, and `Small/Steane7Distance.lean`.
+concatenations), and `RotatedSurface/Three.lean`. (`Small/Steane7Distance.lean` was
+de-nativized and is back on `main`.)
 `Framework/` keeps the abstract machinery they exercised — notably
 `Framework/Concatenation/`, which now has no concrete instance in this tree.
 
@@ -242,6 +243,17 @@ in a dedicated batch via the MCP union trick above.
 Codebase-wide style as of v4.30 (each is enforced by a corresponding
 mathlib linter; don't introduce new violations):
 
+- **Doc-comment prose wraps at 80 columns.** `linter.style.longLine` only
+  fails at 100, and code lines keep that 100-char budget — but prose inside
+  `/-- … -/` and `/-! … -/` is wrapped at **≤ 80**, so docstrings stay
+  readable in a narrow editor pane and in side-by-side diffs. Prose only:
+  fenced code blocks, markdown tables, and inline code spans that are
+  themselves longer than the budget are left intact (a couple of dozen lines
+  sit in the 81–100 band for that reason, which is fine — the linter limit is
+  what must hold).
+  **Avoid markdown tables in doc comments**: a table row cannot be wrapped at
+  all, so a table with any real content in its cells will blow straight past
+  100 and fail the linter. Use a bulleted list instead.
 - **`push Not at h`** instead of `push_neg at h`.
 - **`refine` with `?_` placeholders** instead of `refine'` with `_`. If
   the goal is the structure-builder shorthand `refine { .. }` and `refine`
@@ -623,7 +635,8 @@ The "global typeclass instance can change the synthesis path of unrelated
 `decide` / `native_decide` proofs" footgun is documented in the "Global vs.
 `local instance` discipline" bullet in the *Naming and style conventions*
 section above — that's the canonical location for the rule and its worked
-example (qec-lab's `pipeline/attempts/stab_5_1_3/result.md` § "Lessons learned").
+example (qec-lab's `pipeline/attempts/stab_5_1_3/result.md` § "Lessons
+learned").
 
 ## Formalization pipeline (lives in qec-lab)
 

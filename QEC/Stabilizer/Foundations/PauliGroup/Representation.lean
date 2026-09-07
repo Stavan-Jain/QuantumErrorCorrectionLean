@@ -19,29 +19,31 @@ namespace NQubitPauliGroupElement
 # Matrix and gate representation of n-qubit Pauli group elements
 
 Every `NQubitPauliGroupElement n` has a **matrix** on the computational basis
-`NQubitBasis n` and, when the matrix is unitary, a bundled **`QuantumGate`** view.
+`NQubitBasis n` and, when the matrix is unitary, a bundled **`QuantumGate`**
+view.
 
 ## What this file provides
 
-- **`toMatrix`**: group element → complex matrix (phase factor × tensor product of
-  single-qubit Pauli matrices). Lemmas such as `toMatrix_mul` show multiplication
-  in the Pauli group matches matrix multiplication.
-- **`toGate`**: same underlying matrix as a `QuantumGate` when unitary (Pauli matrices
-  are unitary, so every element gives a gate).
+- **`toMatrix`**: group element → complex matrix (phase factor × tensor product
+  of single-qubit Pauli matrices). Lemmas such as `toMatrix_mul` show
+  multiplication in the Pauli group matches matrix multiplication.
+- **`toGate`**: same underlying matrix as a `QuantumGate` when unitary (Pauli
+  matrices are unitary, so every element gives a gate).
 - **Phase handling**: e.g. `minusOne_toMatrix` — phase power 2 (−1) scales the
   identity matrix by −1.
-- Bridge lemmas between `toMatrix`, `toGate`, and stabilizer/code constructions that
-  conjugate or sum matrices (`stabilizerSum`, logical gates, etc.).
+- Bridge lemmas between `toMatrix`, `toGate`, and stabilizer/code constructions
+  that conjugate or sum matrices (`stabilizerSum`, logical gates, etc.).
 
-Use this module when you need to relate **abstract Pauli products** to **concrete
-matrices** acting on `NQubitState n` or on amplitude vectors.
+Use this module when you need to relate **abstract Pauli products** to
+**concrete matrices** acting on `NQubitState n` or on amplitude vectors.
 -/
 
 @[simp] lemma toMatrix_one (n : ℕ) :
   ((1 : NQubitPauliGroupElement n).toMatrix) = (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
   simp [toMatrix, NQubitPauliOperator.identity_toMatrix]
 
-/-- The matrix of -I (phase -1, identity on all qubits) is -1 times the identity matrix. -/
+/-- The matrix of -I (phase -1, identity on all qubits) is -1 times the identity
+matrix. -/
 @[simp] lemma minusOne_toMatrix (n : ℕ) :
   (minusOne n).toMatrix = (-1 : ℂ) • (1 : Matrix (NQubitBasis n) (NQubitBasis n) ℂ) := by
   rw [toMatrix, minusOne_operators, minusOne_phasePower, PauliGroupElement.phasePowerToComplex_2,
@@ -238,11 +240,12 @@ lemma NQubitPauliOperator.trace_mul (p q : NQubitPauliOperator n) :
     simp [hi]
 
 /-!
-If two `n`-qubit Pauli *group elements* have the same matrix representation, then they are equal.
+If two `n`-qubit Pauli *group elements* have the same matrix representation,
+then they are equal.
 
-In other words, the map `NQubitPauliGroupElement.toMatrix` is injective: the matrix uniquely
-determines both the underlying Pauli operator tensor (`operators`) and the global phase
-(`phasePower`).
+In other words, the map `NQubitPauliGroupElement.toMatrix` is injective: the
+matrix uniquely determines both the underlying Pauli operator tensor
+(`operators`) and the global phase (`phasePower`).
 -/
 lemma toMatrix_inj (p q : NQubitPauliGroupElement n)
 (h : toMatrix p = toMatrix q) : p = q := by
@@ -269,10 +272,11 @@ lemma toMatrix_inj (p q : NQubitPauliGroupElement n)
   cases p ; cases q ; simp_all
 
 /-!
-If two Pauli group elements induce the same gate (`toGate`), then they are equal.
+If two Pauli group elements induce the same gate (`toGate`), then they are
+equal.
 
-This is proved by first converting `toGate` equality into `toMatrix` equality (via
-`toMatrix_eq_iff_toGate_eq`), and then applying `toMatrix_inj`.
+This is proved by first converting `toGate` equality into `toMatrix` equality
+(via `toMatrix_eq_iff_toGate_eq`), and then applying `toMatrix_inj`.
 -/
 lemma toGate_inj (p q : NQubitPauliGroupElement n) (h : toGate p = toGate q) : p = q := by
   have h_toGate : p.toMatrix = q.toMatrix := by

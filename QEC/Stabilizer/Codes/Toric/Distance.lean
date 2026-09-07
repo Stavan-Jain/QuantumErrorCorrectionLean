@@ -19,14 +19,14 @@ open NQubitPauliGroupElement
 /-!
 # Full toric-code distance = L
 
-Combines the X-distance (from `ToricCodeNDistanceX`) and Z-distance
-(from `ToricCodeNDistanceZ`) via the abstract CSS bridge on
-`HomologicalCode` to obtain the full distance.
+Combines the X-distance (from `ToricCodeNDistanceX`) and Z-distance (from
+`ToricCodeNDistanceZ`) via the abstract CSS bridge on `HomologicalCode` to
+obtain the full distance.
 
-The entire CSS-bridge machinery — centralizer ⇒ cycles, weight bridges, and
-"not both boundary" — lives in `Stabilizer.Homological.Distance`.  This file
-just plugs the toric `HomologicalCode` instance into that machinery and
-combines the result with the toric X- / Z-distance witnesses.
+The entire CSS-bridge machinery — centralizer ⇒ cycles, weight bridges, and "not
+both boundary" — lives in `Stabilizer.Homological.Distance`. This file just
+plugs the toric `HomologicalCode` instance into that machinery and combines the
+result with the toric X- / Z-distance witnesses.
 -/
 
 variable (L : ℕ) [Fact (2 ≤ L)]

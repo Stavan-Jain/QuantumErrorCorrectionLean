@@ -8,17 +8,17 @@ import ProofWidgets.Component.HtmlDisplay
 /-!
 # Design tokens and stylesheet for the QEC widgets
 
-The single source of truth for how the widgets look: the palette, the
-`qecw-*` class stylesheet, and the shared card/header building blocks.
+The single source of truth for how the widgets look: the palette, the `qecw-*`
+class stylesheet, and the shared card/header building blocks.
 
-Styling is class-based rather than inline. That is what enables hover states
-and transitions (inline styles cannot express `:hover`), per-theme tuning
-(VS Code stamps `vscode-dark` / `vscode-light` / `vscode-high-contrast` on
-the webview body), and small RPC payloads (a 144-qubit strip carries one
-class name per cell instead of a repeated style object).
+Styling is class-based rather than inline. That is what enables hover states and
+transitions (inline styles cannot express `:hover`), per-theme tuning (VS Code
+stamps `vscode-dark` / `vscode-light` / `vscode-high-contrast` on the webview
+body), and small RPC payloads (a 144-qubit strip carries one class name per cell
+instead of a repeated style object).
 
-Every card embeds the stylesheet via `styleTag`; duplicate `<style>` tags in
-one webview are idempotent, so cards stay self-contained.
+Every card embeds the stylesheet via `styleTag`; duplicate `<style>` tags in one
+webview are idempotent, so cards stay self-contained.
 -/
 
 namespace QECWidgets
@@ -69,9 +69,9 @@ def badColor : String := "var(--vscode-errorForeground, #d16969)"
 /-- See `okColor`. -/
 def warnColor : String := "var(--vscode-editorWarning-foreground, #c98a1b)"
 
-/-- The `qecw-*` stylesheet. Type scale is 13 px for data, 11 px for meta,
-10 px for micro-labels; data is always in the editor (mono) font, labels in
-the UI font; numerals are tabular so indices align. -/
+/-- The `qecw-*` stylesheet. Type scale is 13 px for data, 11 px for meta, 10 px
+for micro-labels; data is always in the editor (mono) font, labels in the UI
+font; numerals are tabular so indices align. -/
 def qecwCss : String :=
   let css := "
 .qecw-card{display:flex;gap:10px;padding:10px 12px;margin:4px 0;
@@ -148,8 +148,8 @@ def styleTag : Html :=
   el "style" #[] #[.text qecwCss]
 
 /-- Card container shared by all widgets: stylesheet, state bar, body. The
-`accent` colors the bar (verdict green/red/amber, or an identity color);
-`none` leaves it neutral. -/
+`accent` colors the bar (verdict green/red/amber, or an identity color); `none`
+leaves it neutral. -/
 def card (children : Array Html) (accent : Option String := none) : Html :=
   let bar := match accent with
     | some c => cls "div" "qecw-bar" #[("style", json% { background: $(c) })]
@@ -166,8 +166,8 @@ def headerFact (label : String) (title : String := "")
      | none => #[])
   cls "span" "qecw-fact" attrs #[.text label]
 
-/-- Header line: dim name on the left, compact facts on the right. The name
-is `Html` so callers can pass an interactive expression (`exprName`). -/
+/-- Header line: dim name on the left, compact facts on the right. The name is
+`Html` so callers can pass an interactive expression (`exprName`). -/
 def headerHtml (name : Html) (facts : Array Html) : Html :=
   cls "div" "qecw-head" #[] (#[cls "span" "qecw-name" #[] #[name]] ++ facts)
 

@@ -24,8 +24,9 @@ namespace RepetitionCode3
 /-!
 # The 3-qubit repetition code (Z-stabilizer only)
 
-Stabilizer generators: Z₁Z₂ and Z₂Z₃ (Z on adjacent pairs). The code encodes one logical qubit;
-logical X = X₁X₂X₃, logical Z = Z₁Z₂Z₃. The subgroup is abelian and does not contain −I.
+Stabilizer generators: Z₁Z₂ and Z₂Z₃ (Z on adjacent pairs). The code encodes one
+logical qubit; logical X = X₁X₂X₃, logical Z = Z₁Z₂Z₃. The subgroup is abelian
+and does not contain −I.
 -/
 
 /-- Z₁Z₂: Z on qubits 0 and 1, I on qubit 2. -/
@@ -55,7 +56,8 @@ lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generat
   exact ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
     ⟨rfl, NQubitPauliGroupElement.AllPhaseZero_nil⟩⟩
 
-/-- The check-matrix rows of the repetition-code generators are linearly independent. -/
+/-- The check-matrix rows of the repetition-code generators are linearly
+independent. -/
 theorem rowsLinearIndependent_generatorsList :
     NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by decide
 
@@ -107,7 +109,8 @@ lemma generators_are_ZType :
           simp [PauliOperator.IsZType, Z1Z2, Z2Z3, NQubitPauliOperator.set,
             NQubitPauliOperator.identity]
 
-/-- The repetition-code subgroup does not contain −I (CSS lemma with empty X-generators). -/
+/-- The repetition-code subgroup does not contain −I (CSS lemma with empty
+X-generators). -/
 lemma negIdentity_not_mem :
     negIdentity 3 ∉ subgroup := by
   have hX : ∀ x, x ∈ (∅ : Set (NQubitPauliGroupElement 3)) → IsXTypeElement x := by
@@ -118,7 +121,8 @@ lemma negIdentity_not_mem :
     (CSS.negIdentity_not_mem_closure_union (n := 3) generators (∅ : Set (NQubitPauliGroupElement 3))
       generators_are_ZType hX hZX)
 
-/-- The 3-qubit repetition code as a stabilizer group (canonical: from generator list). -/
+/-- The 3-qubit repetition code as a stabilizer group (canonical: from generator
+list). -/
 noncomputable def stabilizerGroup : StabilizerGroup 3 :=
   mkStabilizerFromGenerators 3 generatorsList
     (by rw [listToSet_generatorsList]; exact generators_commute)
@@ -140,7 +144,8 @@ def logicalX : NQubitPauliGroupElement 3 :=
 def logicalZ : NQubitPauliGroupElement 3 :=
   ⟨0, NQubitPauliOperator.Z 3⟩
 
-/-- Logical X and logical Z anticommute: X₁X₂X₃ and Z₁Z₂Z₃ anticommute at every qubit. -/
+/-- Logical X and logical Z anticommute: X₁X₂X₃ and Z₁Z₂Z₃ anticommute at every
+qubit. -/
 theorem logicalX_anticommutes_logicalZ : NQubitPauliGroupElement.Anticommute logicalX logicalZ :=
   NQubitPauliOperator.allX_allZ_anticommute 3 (by decide)
 
@@ -213,7 +218,8 @@ private def logicalOpsRep3 : Fin 1 → LogicalQubitOps 3 stabilizerGroup :=
   fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
     logicalX_anticommutes_logicalZ⟩
 
-/-- The 3-qubit repetition code as a stabilizer code [[3, 1]]: one logical qubit. -/
+/-- The 3-qubit repetition code as a stabilizer code [[3, 1]]: one logical
+qubit. -/
 noncomputable def stabilizerCode : StabilizerCode 3 1 where
   hk := by decide
   generatorsList := generatorsList
@@ -228,8 +234,9 @@ noncomputable def stabilizerCode : StabilizerCode 3 1 where
 /-!
 ## Code distance [[3, 1, 1]]
 
-The repetition code has distance 1: a single Z on any physical qubit is a nontrivial logical
-(same coset as logical Z). So the minimum weight of a nontrivial logical is 1.
+The repetition code has distance 1: a single Z on any physical qubit is a
+nontrivial logical (same coset as logical Z). So the minimum weight of a
+nontrivial logical is 1.
 -/
 
 open NQubitPauliOperator NQubitPauliGroupElement
@@ -266,7 +273,8 @@ lemma Z_on_qubit2_mem_centralizer : Z_on_qubit2 ∈ centralizer stabilizerGroup 
   · exact Z_on_qubit2_commutes_Z1Z2.symm
   · exact Z_on_qubit2_commutes_Z2Z3.symm
 
-/-- Z_on_qubit2 anticommutes with logical X (overlap only on qubit 2, where X and Z anticommute). -/
+/-- Z_on_qubit2 anticommutes with logical X (overlap only on qubit 2, where X
+and Z anticommute). -/
 lemma Z_on_qubit2_anticommutes_logicalX :
     NQubitPauliGroupElement.Anticommute Z_on_qubit2 logicalX := by
   classical
@@ -282,13 +290,15 @@ lemma Z_on_qubit2_anticommutes_logicalX :
   rw [hfilter]
   decide
 
-/-- Z_on_qubit2 is not in the stabilizer: it anticommutes with logical X (in the centralizer). -/
+/-- Z_on_qubit2 is not in the stabilizer: it anticommutes with logical X (in the
+centralizer). -/
 lemma Z_on_qubit2_not_mem_subgroup : Z_on_qubit2 ∉ subgroup := by
   rw [← stabilizerGroup_toSubgroup_eq]
   exact not_mem_stabilizer_of_anticommutes_centralizer stabilizerGroup Z_on_qubit2 logicalX
     logicalX_mem_centralizer Z_on_qubit2_anticommutes_logicalX
 
-/-- No stabilizer element has the same operator part as Z_on_qubit2 (stabilizers are
+/-- No stabilizer element has the same operator part as Z_on_qubit2 (stabilizers
+are
     products of adjacent Zs; Z_on_qubit2 is Z on one qubit only). -/
 lemma Z_on_qubit2_operators_ne_of_mem (s : NQubitPauliGroupElement 3) (hs : s ∈ subgroup) :
     s.operators ≠ Z_on_qubit2.operators := by
@@ -318,14 +328,16 @@ theorem repetitionCode3_has_distance_one : HasCodeDistance stabilizerCode 1 := b
   intro g _ hw
   exact Nat.one_le_of_lt hw
 
-/-- The minimum weight of a nontrivial logical operator for the repetition code is 1. -/
+/-- The minimum weight of a nontrivial logical operator for the repetition code
+is 1. -/
 theorem repetitionCode3_min_weight_nontrivial_logical (g : NQubitPauliGroupElement 3)
     (hg : IsNontrivialLogicalOperator g stabilizerGroup)
     (hw : 0 < NQubitPauliGroupElement.weight g) :
     NQubitPauliGroupElement.weight g ≥ 1 :=
   HasCodeDistance.min_weight stabilizerCode 1 repetitionCode3_has_distance_one g hg hw
 
-/-- The 3-qubit repetition code as a `[[3, 1, 1]]` stabilizer code with distance. -/
+/-- The 3-qubit repetition code as a `[[3, 1, 1]]` stabilizer code with
+distance. -/
 noncomputable def stabilizerCodeWithDistance : StabilizerCodeWithDistance 3 1 1 where
   toStabilizerCode := stabilizerCode
   hasDistance      := repetitionCode3_has_distance_one

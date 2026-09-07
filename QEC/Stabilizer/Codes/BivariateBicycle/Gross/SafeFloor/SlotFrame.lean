@@ -44,15 +44,16 @@ set_option maxRecDepth 4096
 
 /-! ## §0 The integration bridge
 
-`floor_of_data_analytic` is the analytic analogue of `MImMembership.floor_of_data`:
-given the per-rep analytic floor on `costFromComps`, it produces the real
-`chainWeight ≥ 12` by rewriting through `chainWeight_coset_eq`.  Its hypothesis
-`h` is *exactly* the RHS of `chainWeight_coset_eq`, so a downstream `Yr.floor`
-built from it has the identical signature `(f) → 12 ≤ chainWeight (seamC zrep + ∂₂ f)`
-that `MImAssembly` consumes — the engine swap is invisible above this line. -/
+`floor_of_data_analytic` is the analytic analogue of
+`MImMembership.floor_of_data`: given the per-rep analytic floor on
+`costFromComps`, it produces the real `chainWeight ≥ 12` by rewriting through
+`chainWeight_coset_eq`. Its hypothesis `h` is *exactly* the RHS of
+`chainWeight_coset_eq`, so a downstream `Yr.floor` built from it has the
+identical signature `(f) → 12 ≤ chainWeight (seamC zrep + ∂₂ f)` that
+`MImAssembly` consumes — the engine swap is invisible above this line. -/
 
-/-- **The analytic floor bridge.**  A per-rep analytic lower bound on the closed
-coset-weight form `costFromComps` lifts to the real chain-weight floor.  Reuses
+/-- **The analytic floor bridge.** A per-rep analytic lower bound on the closed
+coset-weight form `costFromComps` lifts to the real chain-weight floor. Reuses
 `chainWeight_coset_eq` (MImClassify §7) verbatim; the proof is one rewrite. -/
 theorem floor_of_data_analytic (zrep : BaseGroup → ZMod 2)
     (h : ∀ f : BaseGroup → ZMod 2, 12 ≤ costFromComps
@@ -73,20 +74,21 @@ theorem floor_of_data_analytic (zrep : BaseGroup → ZMod 2)
 
 /-! ## §1 Slots, the kill vector, and the labeling vectors (A4 §10.1)
 
-`Ring = Z₂² → F₄` is the slot-value representation.  The group-algebra element
+`Ring = Z₂² → F₄` is the slot-value representation. The group-algebra element
 `XY = ∑_g g` is the all-ones `uv = (1,1,1,1)`; its slot value at the slot
-`xy = (1,1)` is the free constant `δ`.  The **kill vector** records the slot
-function modulo that free `δ`-shift: `κ(v)(s) = v(s) + v(xy)` (so `κ(v)(xy) = 0`). -/
+`xy = (1,1)` is the free constant `δ`. The **kill vector** records the slot
+function modulo that free `δ`-shift: `κ(v)(s) = v(s) + v(xy)` (so
+`κ(v)(xy) = 0`). -/
 
 /-- The kill vector `κ(v)(s) = v(s) + v(xy)`: the slot function modulo the free
-constant `XY`-shift.  `κ(v)` always vanishes at the slot `xy = (1,1)`. -/
+constant `XY`-shift. `κ(v)` always vanishes at the slot `xy = (1,1)`. -/
 def kappa (v : Ring) : Ring := fun s => fadd (v s) (v (1, 1))
 
-/-- The labeling vector `ℓ := κ(B̂) = (ω², ω, 1, 0)`.  (`B̂ = B̂₂` has zero `xy`
+/-- The labeling vector `ℓ := κ(B̂) = (ω², ω, 1, 0)`. (`B̂ = B̂₂` has zero `xy`
 slot, so `κ(B̂) = B̂ = Bhat2`.) -/
 def ellL : Ring := kappa Bhat2
 
-/-- The labeling vector `ℓ' := κ(Â₃) = (ω², 1, ω, 0)`.  (`Â₃ = Â₁ = Ahat1` has
+/-- The labeling vector `ℓ' := κ(Â₃) = (ω², 1, ω, 0)`. (`Â₃ = Â₁ = Ahat1` has
 zero `xy` slot, so `κ(Â₃) = Â₁ = Ahat1`.) -/
 def ellR : Ring := kappa Ahat1
 
@@ -104,7 +106,8 @@ theorem ellL_eq : ellL = Bhat2 := by decide
 /-- `ℓ'` agrees with `Ahat1 = (ω², 1, ω, 0)` as a slot function. -/
 theorem ellR_eq : ellR = Ahat1 := by decide
 
-/-- **Lemma 19a.** `ℓ` is an injective slot map (its four values are distinct). -/
+/-- **Lemma 19a.** `ℓ` is an injective slot map (its four values are distinct).
+-/
 theorem ellL_inj : Function.Injective (fun s : ZMod 2 × ZMod 2 => ellL s) := by decide
 
 /-- **Lemma 19a.** `ℓ'` is an injective slot map. -/
@@ -123,22 +126,25 @@ theorem ellR_sq_eq : (fun s => fmul (ellR s) (ellR s)) = fun s => fmul 3 (ellL s
 /-! ## §2 The per-slot cost lower bounds (A4 §10.2, Lemma 20 — the M-tables)
 
 The closed coset weight `costFromComps` is a sum over the four `Z₂²` slots of
-`wt5OfComps` of the ten CRT components.  Per the slot-cost rules, the cheapest
-realization of a slot datum minimizes over the block's *free unit-side* component
-(the `unitHat`-multiplied one: component `2` on the A/left block, component `1` on
-the B/right block — recall repo-left = lab-right).  The min-over-free-component
-lower bound `mFree2`/`mFree1` therefore lower-bounds the exact per-slot weight.
+`wt5OfComps` of the ten CRT components. Per the slot-cost rules, the cheapest
+realization of a slot datum minimizes over the block's *free unit-side*
+component (the `unitHat`-multiplied one: component `2` on the A/left block,
+component `1` on the B/right block — recall repo-left = lab-right). The
+min-over-free-component lower bound `mFree2`/`mFree1` therefore lower-bounds the
+exact per-slot weight.
 
 These are proved by `omega` over the four opaque `wt5OfComps` values — **no
-`decide`/`native_decide`**, so they are axiom-clean (standard three only).  They
+`decide`/`native_decide`**, so they are axiom-clean (standard three only). They
 are the load-bearing per-slot bound that the orbit walks sum over the slots. -/
 
-/-- Min over component 1 of the per-slot weight (the B/right-block free component). -/
+/-- Min over component 1 of the per-slot weight (the B/right-block free
+component). -/
 def mFree1 (v0 v2 v3 v4 : Fin 4) : Nat :=
   min (min (wt5OfComps v0 0 v2 v3 v4) (wt5OfComps v0 1 v2 v3 v4))
       (min (wt5OfComps v0 2 v2 v3 v4) (wt5OfComps v0 3 v2 v3 v4))
 
-/-- Min over component 2 of the per-slot weight (the A/left-block free component). -/
+/-- Min over component 2 of the per-slot weight (the A/left-block free
+component). -/
 def mFree2 (v0 v1 v3 v4 : Fin 4) : Nat :=
   min (min (wt5OfComps v0 v1 0 v3 v4) (wt5OfComps v0 v1 1 v3 v4))
       (min (wt5OfComps v0 v1 2 v3 v4) (wt5OfComps v0 v1 3 v3 v4))
@@ -159,9 +165,9 @@ theorem mFree2_le (v0 v1 v2 v3 v4 : Fin 4) :
   have h : v2 = 0 ∨ v2 = 1 ∨ v2 = 2 ∨ v2 = 3 := by omega
   rcases h with rfl | rfl | rfl | rfl <;> omega
 
-/-- **Remark 3** (slot parity).  Every per-slot layer cost is `≡ v₀ (mod 2)`
-(an odd layer has odd weight, an even layer even).  Over the 512 value-tuples,
-by kernel `decide` (~12 s) — **axiom-clean** (no `native_decide`).  Summing over
+/-- **Remark 3** (slot parity). Every per-slot layer cost is `≡ v₀ (mod 2)` (an
+odd layer has odd weight, an even layer even). Over the 512 value-tuples, by
+kernel `decide` (~12 s) — **axiom-clean** (no `native_decide`). Summing over
 slots, a block's total cost is `≡ |V₀| (mod 2)`; this parity is what the
 achiever-structure lemma (Lem 28) uses to force the `(min_L + min_R)` splits to
 be even, ruling out the would-be odd weight-`10` configurations. -/
@@ -170,20 +176,23 @@ theorem slot_parity : ∀ (v0 : Fin 2) (v1 v2 v3 v4 : Fin 4),
 
 /-! ### Block-cost lower bounds: sum the per-slot bound over the four slots.
 
-`costFromComps` splits as an A-block sum plus a B-block sum (`Finset.sum_add_distrib`);
-each block's slot sum is lower-bounded by the matching `mFree` sum (`Finset.sum_le_sum`).
-The A-block frees component 2 (`mFree2`), the B-block frees component 1 (`mFree1`). -/
+`costFromComps` splits as an A-block sum plus a B-block sum
+(`Finset.sum_add_distrib`); each block's slot sum is lower-bounded by the
+matching `mFree` sum (`Finset.sum_le_sum`). The A-block frees component 2
+(`mFree2`), the B-block frees component 1 (`mFree1`). -/
 
-/-- The A/left-block slot-cost lower bound: sum of `mFree2` over the four slots. -/
+/-- The A/left-block slot-cost lower bound: sum of `mFree2` over the four slots.
+-/
 def blockLBL (vL0 vL1 vL3 vL4 : Ring) : Nat :=
   ∑ s : ZMod 2 × ZMod 2, mFree2 (vL0 s) (vL1 s) (vL3 s) (vL4 s)
 
-/-- The B/right-block slot-cost lower bound: sum of `mFree1` over the four slots. -/
+/-- The B/right-block slot-cost lower bound: sum of `mFree1` over the four
+slots. -/
 def blockLBR (vR0 vR2 vR3 vR4 : Ring) : Nat :=
   ∑ s : ZMod 2 × ZMod 2, mFree1 (vR0 s) (vR2 s) (vR3 s) (vR4 s)
 
-/-- **The block-split lower bound.**  `costFromComps` is bounded below by the sum
-of the two block slot-cost lower bounds.  (Each block frees its unit-side
+/-- **The block-split lower bound.** `costFromComps` is bounded below by the sum
+of the two block slot-cost lower bounds. (Each block frees its unit-side
 component; the bound ignores the cross-block `ρ`-link, so it is the link-free
 floor — sufficient framing for the orbit walks, which sharpen it per-cell.) -/
 theorem costFromComps_ge_blockLB
@@ -200,15 +209,15 @@ theorem costFromComps_ge_blockLB
 
 The slot-cost analysis turns on the fibre partition of an affine slot function
 `k = κ + λ u` (`u` a bijection) and, in the deepest case, on whether four points
-of `AG(2,F₄)` are in general position.  Both reduce to finite F₄ checks. -/
+of `AG(2,F₄)` are in general position. Both reduce to finite F₄ checks. -/
 
 /-- Three points of `AG(2,F₄)` are collinear (slot values in F₄): the chord
-`p→q` and `p→r` have equal reciprocal slope.  An `F₄`-equality, so decidable
+`p→q` and `p→r` have equal reciprocal slope. An `F₄`-equality, so decidable
 (`abbrev` keeps the `DecidableEq (Fin 4)` instance transparent). -/
 abbrev collinear3 (p q r : Fin 4 × Fin 4) : Prop :=
   fmul (fadd q.1 p.1) (fadd r.2 p.2) = fmul (fadd r.1 p.1) (fadd q.2 p.2)
 
-/-- **Lemma 21** (pair-ratio), the algebraic core.  For an affine pencil
+/-- **Lemma 21** (pair-ratio), the algebraic core. For an affine pencil
 `k = κ + λu`, two slots have `k`-values equal iff `λ·Δu = Δκ` — a char-2
 rearrangement, valid for all F₄ data (a closed `decide` over `4⁵` tuples). -/
 theorem pencil_fibre_iff : ∀ a b c d lam : Fin 4,

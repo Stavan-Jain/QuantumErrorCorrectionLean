@@ -38,19 +38,21 @@ lemma mem_support_toricXOperatorOfChain_edgeToQubitIdx_iff
       simp [toricXOperatorOfChain, hex]
     simp [NQubitPauliOperator.support, hX]
 
-/-- The X-operator-of-chain at qubit `q` is `X` if some edge mapping to `q` has `c e = 1`,
-else `I`. -/
+/-- The X-operator-of-chain at qubit `q` is `X` if some edge mapping to `q` has
+`c e = 1`, else `I`. -/
 lemma toricXOperatorOfChain_op_at (L : ℕ) (c : C1 L) (q : Fin (toricNumQubits L)) :
     (toricXOperatorOfChain L c).operators q =
       if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1
         then PauliOperator.X else PauliOperator.I := rfl
 
-/-- Predicate: encoded X-chain operator commutes with every Z-check (vertex) generator. -/
+/-- Predicate: encoded X-chain operator commutes with every Z-check (vertex)
+generator. -/
 def xCommutesWithZChecks (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) : Prop :=
   let g := toricXOperatorOfChain L c
   ∀ z ∈ StabilizerGroup.ToricCodeN.ZGenerators L, z * g = g * z
 
-/-- Predicate: encoded X-chain operator is a product of X plaquette (face) generators. -/
+/-- Predicate: encoded X-chain operator is a product of X plaquette (face)
+generators. -/
 def xIsPlaquetteProduct (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) : Prop :=
   let g := toricXOperatorOfChain L c
   g ∈ Subgroup.closure (StabilizerGroup.ToricCodeN.XGenerators L)
@@ -75,7 +77,8 @@ abbrev incidentQubitIdx4 (L : ℕ) [Fact (2 ≤ L)] (xv yv : Fin L) :
     Fin (StabilizerGroup.ToricCodeN.numQubits L) :=
   StabilizerGroup.ToricCodeN.vEdge L xv (StabilizerGroup.ToricCodeN.prev L yv)
 
-/-- Mid-level API: pointwise anticommutation criterion against a fixed vertex check. -/
+/-- Mid-level API: pointwise anticommutation criterion against a fixed vertex
+check. -/
 theorem anticommutesAt_vertexStab_toricX_iff
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L)
     (i : Fin (StabilizerGroup.ToricCodeN.numQubits L)) :
@@ -171,7 +174,8 @@ theorem anticommutesAt_vertexStab_toricX_iff_oneOfFour
         (mem_support_toricXOperatorOfChain_edgeToQubitIdx_iff L c
           (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv))).2 hc4
 
-/-- Mid-level API: global anticommutation set equals a filtered four-point set. -/
+/-- Mid-level API: global anticommutation set equals a filtered four-point set.
+-/
 theorem anticommute_filter_eq_four_filter
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
     ∀ i : Fin (StabilizerGroup.ToricCodeN.numQubits L),
@@ -267,7 +271,8 @@ theorem vertexCheckCommutes_iff_evenIncidentOverlap
   convert four_filter_card_eq_indicator_sum L c xv yv |> Eq.symm using 2;
   ext i; simp [anticommutesAt_vertexStab_toricX_iff_oneOfFour]
 
-/-- Parity bridge over `ZMod 2`: even indicator count equals zero sum in `ZMod 2`. -/
+/-- Parity bridge over `ZMod 2`: even indicator count equals zero sum in
+`ZMod 2`. -/
 lemma even_indicator_sum4_iff_zmod2_zero (a b c d : ZMod 2) :
     Even (((if a = 1 then 1 else 0) +
       (if b = 1 then 1 else 0) +
@@ -275,7 +280,8 @@ lemma even_indicator_sum4_iff_zmod2_zero (a b c d : ZMod 2) :
       (if d = 1 then 1 else 0)) : ℕ) ↔ a + b + c + d = 0 := by
   fin_cases a <;> fin_cases b <;> fin_cases c <;> fin_cases d <;> decide
 
-/-- Even overlap on incident edges is equivalent to vanishing `∂₁` at that vertex. -/
+/-- Even overlap on incident edges is equivalent to vanishing `∂₁` at that
+vertex. -/
 theorem evenIncidentOverlap_iff_boundary1_zero_at
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
     Even
@@ -290,8 +296,8 @@ theorem evenIncidentOverlap_iff_boundary1_zero_at
     (c (EdgeIdx.v xv yv))
     (c (EdgeIdx.v xv (StabilizerGroup.ToricCodeN.prev L yv)))
 
-/-- Step 1 bridge: for a fixed vertex check, commutation with the encoded X-chain operator
-is equivalent to vanishing primal boundary at that vertex. -/
+/-- Step 1 bridge: for a fixed vertex check, commutation with the encoded
+X-chain operator is equivalent to vanishing primal boundary at that vertex. -/
 theorem vertexCheckCommutes_iff_boundary1_zero_at
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) (xv yv : Fin L) :
     StabilizerGroup.ToricCodeN.vertexStab L xv yv * toricXOperatorOfChain L c =
@@ -300,8 +306,8 @@ theorem vertexCheckCommutes_iff_boundary1_zero_at
   exact (vertexCheckCommutes_iff_evenIncidentOverlap L c xv yv).trans
     (evenIncidentOverlap_iff_boundary1_zero_at L c xv yv)
 
-/-- Step 2 bridge: commutation with all vertex-Z generators is equivalent to pointwise
-vanishing of the primal boundary map. -/
+/-- Step 2 bridge: commutation with all vertex-Z generators is equivalent to
+pointwise vanishing of the primal boundary map. -/
 theorem xCommutesWithZChecks_iff_boundary1_pointwise_zero
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     xCommutesWithZChecks L c ↔ ∀ v : VtxIdx L, ∂₁ (L := L) c v = 0 := by
@@ -318,8 +324,8 @@ theorem xCommutesWithZChecks_iff_boundary1_pointwise_zero
     rcases hz with ⟨⟨xv, yv⟩, rfl⟩
     exact (vertexCheckCommutes_iff_boundary1_zero_at L c xv yv).mpr (h (xv, yv))
 
-/-- Step 3 bridge: pointwise vanishing of `∂₁` is equivalent to kernel membership,
-i.e. cycle membership. -/
+/-- Step 3 bridge: pointwise vanishing of `∂₁` is equivalent to kernel
+membership, i.e. cycle membership. -/
 theorem boundary1_pointwise_zero_iff_mem_toricCycles
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     (∀ v : VtxIdx L, ∂₁ (L := L) c v = 0) ↔ c ∈ Z₁ L := by
@@ -333,8 +339,9 @@ theorem boundary1_pointwise_zero_iff_mem_toricCycles
 
 /-- Commutation criterion: X-chain commutes with all Z checks iff it is a cycle.
 
-This delegates to the generic `chainXOperator_commutes_ZGenerators_iff_mem_cycles`
-via the toric `HomologicalCode` instance and the lattice/abstract generator-set bridge. -/
+This delegates to the generic
+`chainXOperator_commutes_ZGenerators_iff_mem_cycles` via the toric
+`HomologicalCode` instance and the lattice/abstract generator-set bridge. -/
 theorem xCommutesWithZChecks_iff_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     xCommutesWithZChecks L c ↔ c ∈ Z₁ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -477,7 +484,8 @@ lemma xType_in_stabilizerGroup_implies_in_XClosure
       hz_id hz_id_1
   rw [hz_id]; norm_num; assumption
 
-/-- Any element of the stabilizer with X/I-only operators is X-type (phasePower = 0). -/
+/-- Any element of the stabilizer with X/I-only operators is X-type (phasePower
+= 0). -/
 lemma xTypeOps_in_stabilizer_has_phase_zero
     (L : ℕ) [Fact (2 ≤ L)]
     (s : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L))
@@ -528,7 +536,8 @@ lemma xTypeOps_in_stabilizer_has_phase_zero
   rw [hzx, hz_id, one_mul]
   exact hx_ty
 
-/-- If `s` is in the toric stabilizer and has the same operators as an X-chain encoding,
+/-- If `s` is in the toric stabilizer and has the same operators as an X-chain
+encoding,
     then the corresponding chain is a boundary. -/
 lemma stabilizer_same_ops_implies_boundary
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L)
@@ -553,8 +562,8 @@ lemma stabilizer_same_ops_implies_boundary
 
 /-- X nontrivial logical iff corresponding chain is cycle-not-boundary.
 
-Delegates to the generic `chainXOperator_isNontrivialLogical_iff` via the
-shared underlying subgroup of the toric and abstract stabilizer groups. -/
+Delegates to the generic `chainXOperator_isNontrivialLogical_iff` via the shared
+underlying subgroup of the toric and abstract stabilizer groups. -/
 theorem xNontrivialLogical_iff_cycle_not_boundary (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     StabilizerGroup.IsNontrivialLogicalOperator
         (toricXOperatorOfChain L c) (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔

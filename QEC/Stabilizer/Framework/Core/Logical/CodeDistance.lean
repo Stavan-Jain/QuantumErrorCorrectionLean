@@ -11,12 +11,12 @@ variable {n k : ℕ}
 # Code distance [[n, k, d]]
 
 The **code distance** d of a stabilizer code is the minimum Pauli weight among
-nontrivial logical operators that act nontrivially on the physical qubits (weight > 0).
-Nontrivial logical operators are defined at the element level as representing a
-nontrivial coset of the stabilizer (in the centralizer): not the identity coset and
-not a phase-only coset. Phase-only elements (e.g. -1) have weight 0 and are excluded
-so that distance is meaningful. A code with distance d can detect any error of
-weight < d and correct any error of weight < d/2.
+nontrivial logical operators that act nontrivially on the physical qubits
+(weight > 0). Nontrivial logical operators are defined at the element level as
+representing a nontrivial coset of the stabilizer (in the centralizer): not the
+identity coset and not a phase-only coset. Phase-only elements (e.g. -1) have
+weight 0 and are excluded so that distance is meaningful. A code with distance d
+can detect any error of weight < d and correct any error of weight < d/2.
 -/
 
 open NQubitPauliGroupElement
@@ -35,7 +35,8 @@ theorem HasCodeDistance.one_le_d (C : StabilizerCode n k) (d : ℕ) (h : HasCode
     d ≥ 1 :=
   h.1
 
-/-- If C has distance d, then every nontrivial logical with positive weight has weight ≥ d. -/
+/-- If C has distance d, then every nontrivial logical with positive weight has
+weight ≥ d. -/
 theorem HasCodeDistance.min_weight (C : StabilizerCode n k) (d : ℕ)
     (h : HasCodeDistance C d) (g : NQubitPauliGroupElement n)
     (hg : IsNontrivialLogicalOperator g C.toStabilizerGroup) (hw : 0 < weight g) :
@@ -70,10 +71,10 @@ theorem hasCodeDistance_of (C : StabilizerCode n k) (d : ℕ)
 `StabilizerCode n k` captures the first two parameters of the standard
 `[[n, k, d]]` notation. Distance is layered on as a separate `Prop`
 (`HasCodeDistance`) so that codes whose distance is not yet known (e.g.,
-research-track codes whose minimum-weight nontrivial logical is unproven)
-can still be formalized as stabilizer codes. This wrapper bundles the
-two for codes where distance *is* established, giving a single object
-that carries all three parameters in its type.
+research-track codes whose minimum-weight nontrivial logical is unproven) can
+still be formalized as stabilizer codes. This wrapper bundles the two for codes
+where distance *is* established, giving a single object that carries all three
+parameters in its type.
 -/
 
 /-- A stabilizer code together with a proof that its distance equals `d`.

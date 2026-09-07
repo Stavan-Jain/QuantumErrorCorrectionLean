@@ -8,19 +8,19 @@ import QEC.Stabilizer.Codes.Toric.CodeN
 # §E — Toric chain complex as an instance of `HomologicalCode`
 
 The toric code is the canonical instance of the generic `HomologicalCode`
-abstraction.  This file packages the toric boundary maps as a `HomologicalCode`
+abstraction. This file packages the toric boundary maps as a `HomologicalCode`
 and proves the basic identities relating the toric-specific submodules
 (`toricCycles`, `toricBoundaries`, `toricH1`) to the generic versions on
 `toricHomologicalCode L`.
 
-Existing toric proofs continue to operate on the lattice-specific
-definitions.  The benefit of the abstraction layer is that any new
-homological CSS code (e.g. the rotated surface code, color codes,
-hypergraph product codes) only needs to define its own `HomologicalCode`
-instance to inherit the cycles/boundaries/H₁ infrastructure, the chain
-operators with `_zero`/`_add` homomorphism lemmas, the stabilizer generators
-with pairwise commutation, the centralizer-membership logical-correspondence
-iffs, and the CSS distance bridge `not_both_boundary_of_nontrivial`.
+Existing toric proofs continue to operate on the lattice-specific definitions.
+The benefit of the abstraction layer is that any new homological CSS code (e.g.
+the rotated surface code, color codes, hypergraph product codes) only needs to
+define its own `HomologicalCode` instance to inherit the cycles/boundaries/H₁
+infrastructure, the chain operators with `_zero`/`_add` homomorphism lemmas, the
+stabilizer generators with pairwise commutation, the centralizer-membership
+logical-correspondence iffs, and the CSS distance bridge
+`not_both_boundary_of_nontrivial`.
 -/
 
 namespace Quantum
@@ -29,10 +29,11 @@ namespace Lattice
 
 open scoped ToricChain
 
-/-- The toric edge-to-qubit equiv, built from `edgeToQubitIdx` (which is injective
-between equinumerous finite types). Returns an `EdgeIdx L ≃ Fin (toricNumQubits L)`
-so the abstract chain operator and the existing `toricXOperatorOfChain L` end up
-in the same `NQubitPauliGroupElement (2 * L * L)` type. -/
+/-- The toric edge-to-qubit equiv, built from `edgeToQubitIdx` (which is
+injective between equinumerous finite types). Returns an
+`EdgeIdx L ≃ Fin (toricNumQubits L)` so the abstract chain operator and the
+existing `toricXOperatorOfChain L` end up in the same
+`NQubitPauliGroupElement (2 * L * L)` type. -/
 noncomputable def toricEdgeEquiv (L : ℕ) [Fact (0 < L)] :
     EdgeIdx L ≃ Fin (Quantum.Stabilizer.Lattice.toricNumQubits L) := by
   have hbij : Function.Bijective
@@ -42,10 +43,10 @@ noncomputable def toricEdgeEquiv (L : ℕ) [Fact (0 < L)] :
     simp [Quantum.Stabilizer.Lattice.toricNumQubits, card_edgeIdx]
   exact Equiv.ofBijective (Quantum.Stabilizer.Lattice.edgeToQubitIdx L) hbij
 
-/-- The toric chain complex as a `HomologicalCode`.  The 0-cells are vertices,
-1-cells are edges, 2-cells are faces.  The boundary maps and the chain-complex
-law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`.  The qubit indexing
-is the same `edgeToQubitIdx` used elsewhere in the toric files. -/
+/-- The toric chain complex as a `HomologicalCode`. The 0-cells are vertices,
+1-cells are edges, 2-cells are faces. The boundary maps and the chain-complex
+law `∂₁ ∘ ∂₂ = 0` are imported from `ToricBoundaryMaps`. The qubit indexing is
+the same `edgeToQubitIdx` used elsewhere in the toric files. -/
 noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
     Quantum.Stabilizer.Homological.HomologicalCode where
   C0 := VtxIdx L
@@ -64,7 +65,8 @@ noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
   numQubits_eq := card_edgeIdx L
   edgeEquiv := toricEdgeEquiv L
 
-/-- The toric cycle submodule equals the generic version on `toricHomologicalCode L`. -/
+/-- The toric cycle submodule equals the generic version on
+`toricHomologicalCode L`. -/
 theorem toricHomologicalCode_cycles_eq (L : ℕ) [Fact (0 < L)] :
     Z₁ L = (toricHomologicalCode L).cycles := rfl
 
@@ -76,7 +78,8 @@ theorem toricHomologicalCode_boundaries_eq (L : ℕ) [Fact (0 < L)] :
 theorem toricHomologicalCode_H1_eq (L : ℕ) [Fact (0 < L)] :
     H₁ L = (toricHomologicalCode L).H1 := rfl
 
-/-- The toric `boundaries ≤ cycles` follows from the generic chain-complex law. -/
+/-- The toric `boundaries ≤ cycles` follows from the generic chain-complex law.
+-/
 theorem toricHomologicalCode_boundaries_le_cycles (L : ℕ) [Fact (0 < L)] :
     B₁ L ≤ Z₁ L :=
   (toricHomologicalCode L).boundaries_le_cycles
@@ -91,7 +94,7 @@ theorem toricHomologicalCode_numQubits_eq (L : ℕ) [Fact (0 < L)] :
       Quantum.StabilizerGroup.ToricCodeN.numQubits L := rfl
 
 /-- The abstract `chainXOperator` of the toric chain complex is the existing
-`toricXOperatorOfChain`.  This holds because both operators are defined by the
+`toricXOperatorOfChain`. This holds because both operators are defined by the
 same `if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1 then X else I` formula, and the
 toric instance's `edgeEquiv` is `Equiv.ofBijective (edgeToQubitIdx L) _`. -/
 theorem toricHomologicalCode_chainXOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 L) :
@@ -104,12 +107,12 @@ theorem toricHomologicalCode_chainZOperator_eq (L : ℕ) [Fact (0 < L)] (c : C1 
 /-! ## Generator-set bridges
 
 The toric instance carries its own `vertexStab`, `faceStab`, `ZGenerators`,
-`XGenerators` definitions (in `Codes/ToricCodeN.lean`).  The bridges below
+`XGenerators` definitions (in `Codes/ToricCodeN.lean`). The bridges below
 identify each of these with the generic versions provided by the
 `HomologicalCode` abstraction.
 
-These bridges are what makes the toric correspondence / distance proofs
-collapse to one-line applications of the generic theorems in
+These bridges are what makes the toric correspondence / distance proofs collapse
+to one-line applications of the generic theorems in
 `Homological/LogicalCorrespondence.lean` and `Homological/Distance.lean`. -/
 
 section Bridges
@@ -117,10 +120,10 @@ section Bridges
 variable (L : ℕ) [Fact (0 < L)]
 
 /-- The abstract `cutMap` of `toricHomologicalCode L` is the explicit
-`toricVertexCutMap`.  Proof: both are the `𝔽₂`-transpose of `∂₁`, and
-`∂₁` agrees on both definitions, so the transpose pairing
-`∑ v, ∂₁(δ_e) v * s v = ∑ e', δ_e e' * cutMap s e'` isolates the value
-at edge `e` on both sides. -/
+`toricVertexCutMap`. Proof: both are the `𝔽₂`-transpose of `∂₁`, and `∂₁` agrees
+on both definitions, so the transpose pairing
+`∑ v, ∂₁(δ_e) v * s v = ∑ e', δ_e e' * cutMap s e'` isolates the value at edge
+`e` on both sides. -/
 theorem toricHomologicalCode_cutMap_eq :
     (toricHomologicalCode L).cutMap = δ⁰ (L := L) := by
   classical
@@ -219,10 +222,12 @@ theorem toricHomologicalCode_XGenerators_eq :
 /-! Note: the `dual` bridges (`dualCycles_eq`, `dualBoundary_eq`,
 `dualBoundaries_eq`) live in `ToricLogicalCorrespondenceZ.lean` — they reference
 `toricDualBoundary`/`toricDualCycles`/`toricDualBoundaries`, which are defined
-there.  See the §E.2 (Z-side) refactor for those bridges and the delegated iffs. -/
+there. See the §E.2 (Z-side) refactor for those bridges and the delegated iffs.
+-/
 
-/-- Bridge: the lattice `StabilizerGroup.ToricCodeN.stabilizerGroup L` and the abstract
-`(toricHomologicalCode L).homologicalStabilizerGroup` have the same underlying subgroup.
+/-- Bridge: the lattice `StabilizerGroup.ToricCodeN.stabilizerGroup L` and the
+abstract `(toricHomologicalCode L).homologicalStabilizerGroup` have the same
+underlying subgroup.
 
 This is the key fact for delegating any `IsNontrivialLogicalOperator` /
 `Subgroup`-mem statements between the toric and the generic stabilizer groups —

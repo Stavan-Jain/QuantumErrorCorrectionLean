@@ -14,21 +14,23 @@ open scoped BigOperators
 /-!
 # The N-Qubit Pauli Group Element
 
-An n-qubit Pauli group element consists of a global phase and an n-qubit Pauli operator.
-This extends the single-qubit Pauli group to n-qubit systems.
+An n-qubit Pauli group element consists of a global phase and an n-qubit Pauli
+operator. This extends the single-qubit Pauli group to n-qubit systems.
 -/
 
 variable {n : ℕ}
 
 /-- An element of the n-qubit Pauli group.
 
-The n-qubit Pauli group consists of elements of the form `i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})` where:
+The n-qubit Pauli group consists of elements of the form
+`i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})` where:
 - `phasePower : Fin 4` represents the global phase:
   - k=0 → phase = 1
   - k=1 → phase = i
   - k=2 → phase = -1
   - k=3 → phase = -i
-- `operators : NQubitPauliOperator n` assigns a single-qubit Pauli operator to each qubit
+- `operators : NQubitPauliOperator n` assigns a single-qubit Pauli operator to
+  each qubit
 
 For n qubits, this gives 4 phases × 4^n operators = 4^(n+1) total elements.
 -/
@@ -46,9 +48,10 @@ namespace NQubitPauliGroupElement
 
 /-- Convert an n-qubit Pauli group element to its matrix representation.
 
-This multiplies the global phase by the tensor product of the individual Pauli matrices.
-The matrix representation is a group homomorphism: `(p * q).toMatrix = p.toMatrix * q.toMatrix`.
-Derived from `toGate` by taking the underlying matrix.
+This multiplies the global phase by the tensor product of the individual Pauli
+matrices. The matrix representation is a group homomorphism:
+`(p * q).toMatrix = p.toMatrix * q.toMatrix`. Derived from `toGate` by taking
+the underlying matrix.
 -/
 noncomputable def toMatrix (p : NQubitPauliGroupElement n) :
   Matrix (NQubitBasis n) (NQubitBasis n) ℂ :=
@@ -56,9 +59,9 @@ noncomputable def toMatrix (p : NQubitPauliGroupElement n) :
 
 /-- Convert an n-qubit Pauli group element to its underlying gate.
 
-This is the primary representation connecting the Stabilizer layer to Foundations.
-For `⟨k, op⟩` representing `i^k * (P₀ ⊗ ... ⊗ P_{n-1})`, we scale the base gate
-`op.toGate` by the unit complex `phasePowerToUnitComplex k`.
+This is the primary representation connecting the Stabilizer layer to
+Foundations. For `⟨k, op⟩` representing `i^k * (P₀ ⊗ ... ⊗ P_{n-1})`, we scale
+the base gate `op.toGate` by the unit complex `phasePowerToUnitComplex k`.
 -/
 noncomputable def toGate (p : NQubitPauliGroupElement n) : QuantumGate (NQubitBasis n) :=
   PauliGroupElement.phasePowerToUnitComplex p.phasePower • (p.operators.toGate)
@@ -79,24 +82,28 @@ lemma toGate_val (p : NQubitPauliGroupElement n) : (toGate p).val = toMatrix p :
   by simp [toMatrix, toGate, smul_UnitComplex_gate_val, NQubitPauliOperator.toGate_val,
     PauliGroupElement.phasePowerToUnitComplex_coe]
 
-/-- Matrix bridge for canonical aliases: `gate` viewed as a matrix is `toMatrix`. -/
+/-- Matrix bridge for canonical aliases: `gate` viewed as a matrix is
+`toMatrix`. -/
 @[simp] lemma gate_val (p : NQubitPauliGroupElement n) : p.gate.val = p.toMatrix := by
   simpa [gate] using toGate_val p
 
-/-- The identity element of the n-qubit Pauli group: I ⊗ I ⊗ ... ⊗ I with phase 1. -/
+/-- The identity element of the n-qubit Pauli group: I ⊗ I ⊗ ... ⊗ I with phase
+1. -/
 def one (n : ℕ) : NQubitPauliGroupElement n :=
   ⟨0, NQubitPauliOperator.identity n⟩
 
-/-- The central element `-1` of the n-qubit Pauli group: phase -1 with identity operators. -/
+/-- The central element `-1` of the n-qubit Pauli group: phase -1 with identity
+operators. -/
 def minusOne (n : ℕ) : NQubitPauliGroupElement n :=
   ⟨2, NQubitPauliOperator.identity n⟩
 
-/-- The central phase element `i` of the n-qubit Pauli group: phase `i` with identity operators. -/
+/-- The central phase element `i` of the n-qubit Pauli group: phase `i` with
+identity operators. -/
 def phaseI (n : ℕ) : NQubitPauliGroupElement n :=
   ⟨1, NQubitPauliOperator.identity n⟩
 
-/-- The central phase element `-i` of the n-qubit Pauli group: phase `-i` with identity
-operators. -/
+/-- The central phase element `-i` of the n-qubit Pauli group: phase `-i` with
+identity operators. -/
 def phaseNegI (n : ℕ) : NQubitPauliGroupElement n :=
   ⟨3, NQubitPauliOperator.identity n⟩
 
@@ -106,7 +113,8 @@ def phase (p : NQubitPauliGroupElement n) : Fin 4 := p.phasePower
 /-- Extract the n-qubit Pauli operator. -/
 def ops (p : NQubitPauliGroupElement n) : NQubitPauliOperator n := p.operators
 
-/-- Construct an n-qubit Pauli group element from an operator with phase 0 (i.e., no phase). -/
+/-- Construct an n-qubit Pauli group element from an operator with phase 0
+(i.e., no phase). -/
 def ofOperator (op : NQubitPauliOperator n) : NQubitPauliGroupElement n :=
   ⟨0, op⟩
 
@@ -143,7 +151,8 @@ def getOp (p : NQubitPauliGroupElement n) (i : Fin n) : PauliOperator :=
 
 This multiplies operators qubit-by-qubit and returns:
 - The total phase contribution from all qubit multiplications (mod 4)
-- The resulting n-qubit operator (function mapping each qubit to its result operator)
+- The resulting n-qubit operator (function mapping each qubit to its result
+  operator)
 -/
 noncomputable def mulOp (p q : NQubitPauliOperator n) : NQubitPauliGroupElement n :=
   -- Multiply qubit-by-qubit
@@ -161,8 +170,8 @@ infixl:70 " *ₚ " => mulOp
 
 /-- Multiplication in the n-qubit Pauli group.
 
-If we have `i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})` and `i^m * (Q₀ ⊗ Q₁ ⊗ ... ⊗ Q_{n-1})`,
-their product is computed qubit-by-qubit:
+If we have `i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})` and
+`i^m * (Q₀ ⊗ Q₁ ⊗ ... ⊗ Q_{n-1})`, their product is computed qubit-by-qubit:
 - For each qubit i: P_i * Q_i = i^{p_i} * R_i
 - Total phase: k + m + (sum of p_i) mod 4
 - Result operator: R₀ ⊗ R₁ ⊗ ... ⊗ R_{n-1}
@@ -173,9 +182,9 @@ noncomputable def mul (p q : NQubitPauliGroupElement n) : NQubitPauliGroupElemen
 
 /-- The inverse of an n-qubit Pauli group element.
 
-For `i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})`, the inverse is `i^(4-k mod 4) * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})`
-since each P_i * P_i = I for Pauli operators, so the operators remain the same and only
-the phase is inverted.
+For `i^k * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})`, the inverse is
+`i^(4-k mod 4) * (P₀ ⊗ P₁ ⊗ ... ⊗ P_{n-1})` since each P_i * P_i = I for Pauli
+operators, so the operators remain the same and only the phase is inverted.
 -/
 noncomputable def inv (p : NQubitPauliGroupElement n) : NQubitPauliGroupElement n :=
   ⟨-p.phasePower, p.operators⟩
@@ -190,7 +199,8 @@ noncomputable instance : Inv (NQubitPauliGroupElement n) := ⟨inv⟩
 
 @[simp] lemma inv_eq (p : NQubitPauliGroupElement n) : p⁻¹ = inv p := rfl
 
-/-- The central element -1 is its own inverse (phase 2 satisfies 2 + 2 = 0 in Fin 4). -/
+/-- The central element -1 is its own inverse (phase 2 satisfies 2 + 2 = 0 in
+Fin 4). -/
 @[simp] lemma minusOne_inv (n : ℕ) : (minusOne n)⁻¹ = minusOne n := by
   ext <;> simp [inv_eq, inv, minusOne]
   decide
@@ -204,7 +214,8 @@ noncomputable instance : One (NQubitPauliGroupElement n) := ⟨one n⟩
 @[simp] lemma one_operators_def (n : ℕ) :
 (1 : NQubitPauliGroupElement n).operators = NQubitPauliOperator.identity n := rfl
 
-/-- Helper: multiplication with identity operator gives no phase contribution. -/
+/-- Helper: multiplication with identity operator gives no phase contribution.
+-/
 lemma mulOp_identity_right_phase (op : NQubitPauliOperator n) :
   (mulOp op (NQubitPauliOperator.identity n)).phasePower = 0 := by
   unfold mulOp NQubitPauliOperator.identity
@@ -217,7 +228,8 @@ lemma mulOp_identity_right_phase (op : NQubitPauliOperator n) :
     simp
   simp [hsum]
 
-/-- Helper: multiplication with identity operator on the left gives no phase contribution. -/
+/-- Helper: multiplication with identity operator on the left gives no phase
+contribution. -/
 lemma mulOp_identity_left_phase (op : NQubitPauliOperator n) :
   (mulOp (NQubitPauliOperator.identity n) op).phasePower = 0 := by
   unfold mulOp NQubitPauliOperator.identity
@@ -238,7 +250,8 @@ lemma mulOp_identity_right_op (op : NQubitPauliOperator n) :
   simp
   cases op i <;> simp
 
-/-- Helper: multiplication with identity operator on the left gives same operator. -/
+/-- Helper: multiplication with identity operator on the left gives same
+operator. -/
 lemma mulOp_identity_left_op (op : NQubitPauliOperator n) :
   (mulOp (NQubitPauliOperator.identity n) op).operators = op := by
   unfold mulOp NQubitPauliOperator.identity
@@ -287,7 +300,8 @@ private lemma mulOp_self_inv (op : NQubitPauliOperator n) :
 @[simp] lemma inv_operators (p : NQubitPauliGroupElement n) : (p⁻¹).operators = p.operators := by
   simp [inv_eq, inv]
 
-/-- If p and q have the same operator part, then p * q⁻¹ differs from the identity only by phase
+/-- If p and q have the same operator part, then p * q⁻¹ differs from the
+identity only by phase
     (its operator part is the identity). -/
 lemma mul_inv_operators_identity_of_eq_operators (p q : NQubitPauliGroupElement n)
     (h : p.operators = q.operators) :
@@ -303,7 +317,8 @@ lemma mul_inv_operators_identity_of_eq_operators (p q : NQubitPauliGroupElement 
 @[simp] lemma mul_left_inv (p : NQubitPauliGroupElement n) : p⁻¹ * p = 1 := by
   simp [mul, inv, mulOp_self_inv]
 
-/-- Helper: associativity of n-qubit operator multiplication (operator part only). -/
+/-- Helper: associativity of n-qubit operator multiplication (operator part
+only). -/
 private lemma mulOp_assoc_op (p q r : NQubitPauliOperator n) :
   (mulOp (mulOp p q).operators r).operators = (mulOp p (mulOp q r).operators).operators := by
   ext i
@@ -343,15 +358,17 @@ noncomputable instance : Group (NQubitPauliGroupElement n) where
 /-!
 ## Pauli weight and support
 
-The **support** and **weight** of a group element are those of its operator part; the phase
-does not affect them.
+The **support** and **weight** of a group element are those of its operator
+part; the phase does not affect them.
 -/
 
-/-- The support of an n-qubit Pauli group element: qubits where the operator is not I. -/
+/-- The support of an n-qubit Pauli group element: qubits where the operator is
+not I. -/
 def support (p : NQubitPauliGroupElement n) : Finset (Fin n) :=
   NQubitPauliOperator.support p.operators
 
-/-- The Pauli weight: number of qubits on which the element acts nontrivially (not I). -/
+/-- The Pauli weight: number of qubits on which the element acts nontrivially
+(not I). -/
 def weight (p : NQubitPauliGroupElement n) : ℕ :=
   NQubitPauliOperator.weight p.operators
 
@@ -376,7 +393,8 @@ lemma mem_support (p : NQubitPauliGroupElement n) (i : Fin n) :
     i ∈ support p ↔ p.operators i ≠ PauliOperator.I :=
   NQubitPauliOperator.mem_support p.operators i
 
-/-- Weight is zero iff the operator part is the identity. (Phase is irrelevant to weight.) -/
+/-- Weight is zero iff the operator part is the identity. (Phase is irrelevant
+to weight.) -/
 lemma weight_eq_zero_iff (p : NQubitPauliGroupElement n) :
     weight p = 0 ↔ p.operators = NQubitPauliOperator.identity n := by
   simp [weight, NQubitPauliOperator.weight_eq_zero_iff]

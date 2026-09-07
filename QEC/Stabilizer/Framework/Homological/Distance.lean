@@ -6,13 +6,13 @@ import QEC.Stabilizer.Framework.Core.Logical.CodeDistance
 
 For a homological CSS code, every Pauli element decomposes into an X-support
 chain (qubits where it acts non-trivially with an X-component) and a Z-support
-chain.  The key bridging fact is that for a non-trivial logical operator,
-the X-chain and Z-chain *cannot* both be boundaries — otherwise we could build
-a stabilizer with the same operators, contradicting non-triviality.
+chain. The key bridging fact is that for a non-trivial logical operator, the
+X-chain and Z-chain *cannot* both be boundaries — otherwise we could build a
+stabilizer with the same operators, contradicting non-triviality.
 
-This file provides the abstract building blocks for distance arguments.
-The full `code_distance_eq_min_dX_dZ` packaging is left to each instance
-since `HasCodeDistance` requires a `StabilizerCode` (instance-specific).
+This file provides the abstract building blocks for distance arguments. The full
+`code_distance_eq_min_dX_dZ` packaging is left to each instance since
+`HasCodeDistance` requires a `StabilizerCode` (instance-specific).
 -/
 
 namespace Quantum
@@ -204,8 +204,8 @@ lemma chainZOperator_zChainOf_op_at
 /-! ## Weight of the X- / Z-only encodings
 
 The qubit support of `chainXOperator c` (resp. `chainZOperator c`) is in
-bijection with `chainSupport c` via `edgeEquiv`, hence the operator
-weight equals the chain weight. -/
+bijection with `chainSupport c` via `edgeEquiv`, hence the operator weight
+equals the chain weight. -/
 
 /-- `weight (chainXOperator c) = chainWeight c`. -/
 lemma weight_chainXOperator (c : X.C1 → ZMod 2) :
@@ -259,12 +259,12 @@ lemma weight_chainZOperator (c : X.C1 → ZMod 2) :
 
 For any qubit `i`, the qubit-wise anticommutation of `g` against a Z-type
 generator (`vertexStabOf v`) is determined entirely by `g`'s X-content at `i`,
-i.e. matches that of `chainXOperator (xChainOf g)`.  Mirror on the Z side.
-These let centralizer-style arguments on `g` transfer to its X-only / Z-only
-encoding without redoing the Pauli case analysis. -/
+i.e. matches that of `chainXOperator (xChainOf g)`. Mirror on the Z side. These
+let centralizer-style arguments on `g` transfer to its X-only / Z-only encoding
+without redoing the Pauli case analysis. -/
 
-/-- Anticommutation against the Z-type vertex stab matches between `g` and
-its X-only encoding `chainXOperator (xChainOf g)`. -/
+/-- Anticommutation against the Z-type vertex stab matches between `g` and its
+X-only encoding `chainXOperator (xChainOf g)`. -/
 lemma anticommutesAt_vertexStabOf_iff_xChainOf
     (g : NQubitPauliGroupElement X.numQubits) (v : X.C0)
     (i : Fin X.numQubits) :
@@ -285,8 +285,8 @@ lemma anticommutesAt_vertexStabOf_iff_xChainOf
     cases hgi : g.operators i <;>
       simp [PauliOperator.mulOp]
 
-/-- Mirror: anticommutation against the X-type face stab matches between
-`g` and its Z-only encoding `chainZOperator (zChainOf g)`. -/
+/-- Mirror: anticommutation against the X-type face stab matches between `g` and
+its Z-only encoding `chainZOperator (zChainOf g)`. -/
 lemma anticommutesAt_faceStabOf_iff_zChainOf
     (g : NQubitPauliGroupElement X.numQubits) (f : X.C2)
     (i : Fin X.numQubits) :
@@ -310,8 +310,8 @@ lemma anticommutesAt_faceStabOf_iff_zChainOf
 /-! ## Centralizer → cycle bridges
 
 These complete the qubit-level commutation story: if `g` commutes with every
-stabilizer, then its X-chain is a 1-cycle (resp. Z-chain is a dual 1-cycle).
-The bridge runs through `chainXOperator_mem_centralizer_iff_mem_cycles` from
+stabilizer, then its X-chain is a 1-cycle (resp. Z-chain is a dual 1-cycle). The
+bridge runs through `chainXOperator_mem_centralizer_iff_mem_cycles` from
 `LogicalCorrespondence.lean`. -/
 
 /-- For `g ∈ centralizer`, `xChainOf g` is a 1-cycle. -/
@@ -411,8 +411,8 @@ Note: the Z-side closure helpers (`chainZOperator_cutMap_mem_ZClosure`,
 mirrors in `LogicalCorrespondence.lean`.
 -/
 
-/-- Helper: combining the X-only and Z-only encodings of `g` (their operator part)
-recovers `g.operators` qubit-by-qubit. -/
+/-- Helper: combining the X-only and Z-only encodings of `g` (their operator
+part) recovers `g.operators` qubit-by-qubit. -/
 private lemma chainOps_xz_combine_eq
     (g : NQubitPauliGroupElement X.numQubits) (i : Fin X.numQubits) :
     (((X.chainXOperator (X.xChainOf g)).operators i).mulOp
@@ -421,8 +421,8 @@ private lemma chainOps_xz_combine_eq
   rw [chainXOperator_xChainOf_op_at, chainZOperator_zChainOf_op_at]
   cases hgi : g.operators i <;> simp [PauliOperator.mulOp]
 
-/-- For a nontrivial logical operator, the X-chain and Z-chain cannot both be
-in the respective boundaries (CSS bridge). -/
+/-- For a nontrivial logical operator, the X-chain and Z-chain cannot both be in
+the respective boundaries (CSS bridge). -/
 theorem not_both_boundary_of_nontrivial
     (g : NQubitPauliGroupElement X.numQubits)
     (hg : Quantum.StabilizerGroup.IsNontrivialLogicalOperator g
@@ -464,20 +464,21 @@ theorem not_both_boundary_of_nontrivial
 
 Packages the abstract CSS bridge into a single statement that downstream
 homological-code distance proofs can call directly. Given lower bounds on
-non-boundary X-cycles' chain weight (`hX`) and non-dual-boundary Z-cycles'
-chain weight (`hZ`), every non-trivial logical Pauli has weight ≥ the
-respective bound.
+non-boundary X-cycles' chain weight (`hX`) and non-dual-boundary Z-cycles' chain
+weight (`hZ`), every non-trivial logical Pauli has weight ≥ the respective
+bound.
 
 Combines:
-- `xChainOf_mem_cycles_of_centralizer` / `zChainOf_mem_dualCycles_of_centralizer`
+- `xChainOf_mem_cycles_of_centralizer` /
+  `zChainOf_mem_dualCycles_of_centralizer`
 - `not_both_boundary_of_nontrivial`
 - `weight_ge_chainWeight_xChainOf` / `weight_ge_chainWeight_zChainOf`
 
-This is the natural CSS-bridge entry point for new code families with
-parametric chain-weight bounds (BB codes, hypergraph products, etc.). The
-existing rotated-surface and toric distance proofs predate this combinator
-and inline the case-split; they could be refactored to use this directly,
-but that's left as a future cleanup. -/
+This is the natural CSS-bridge entry point for new code families with parametric
+chain-weight bounds (BB codes, hypergraph products, etc.). The existing
+rotated-surface and toric distance proofs predate this combinator and inline the
+case-split; they could be refactored to use this directly, but that's left as a
+future cleanup. -/
 
 /-- Symmetric form: a single lower bound `K` on both X- and Z-cycle chain
 weights yields a lower bound on every non-trivial logical's Pauli weight. -/
@@ -506,8 +507,8 @@ theorem chainWeight_lower_bound_transfers
   · exact (hX _ hxCyc hxNotBnd).trans (weight_ge_chainWeight_xChainOf g)
 
 /-- Asymmetric form: separate `K_X` and `K_Z` lower bounds, conclusion uses
-`min K_X K_Z`. Useful when the two sides of a CSS code have genuinely
-different chain-weight bounds. -/
+`min K_X K_Z`. Useful when the two sides of a CSS code have genuinely different
+chain-weight bounds. -/
 theorem chainWeight_lower_bound_transfers_asymmetric
     (X : HomologicalCode) (K_X K_Z : ℕ)
     (hX : ∀ c ∈ X.cycles, c ∉ X.boundaries → K_X ≤ X.chainWeight c)

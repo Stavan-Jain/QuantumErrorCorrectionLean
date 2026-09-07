@@ -44,18 +44,18 @@ open scoped BigOperators
 /-! ## The three residual hypotheses (the Phase 2–4 targets) -/
 
 /-- **(A)** Chain-level `d(base) ≥ 6`: every nontrivial cycle of the bb72
-complex has weight ≥ 6.  Paper source: the small-cycle theorem,
-A4 Theorem A / Corollary A′ (Entry 13).  Phase-2 target. -/
+complex has weight ≥ 6. Paper source: the small-cycle theorem, A4 Theorem A /
+Corollary A′ (Entry 13). Phase-2 target. -/
 def BaseDistanceGe6 : Prop :=
   ∀ u : BaseGroup × Fin 2 → ZMod 2,
     u ∈ bb72Complex.cycles → u ∉ bb72Complex.boundaries →
     6 ≤ bb72Complex.chainWeight u
 
-/-- **(M), `b ≠ 0` rungs**: every nontrivial gross cycle in the dangerous
-sector (pushforward a base boundary) with *nonzero* pushforward has weight
-≥ 12.  Paper source: the light-stabilizer classification + m-rungs,
-A4 Theorem C (Entries 10–13).  Phase-3 target.  (The `b = 0` rung is
-discharged below from `BaseDistanceGe6` alone.) -/
+/-- **(M), `b ≠ 0` rungs**: every nontrivial gross cycle in the dangerous sector
+(pushforward a base boundary) with *nonzero* pushforward has weight ≥ 12. Paper
+source: the light-stabilizer classification + m-rungs, A4 Theorem C (Entries
+10–13). Phase-3 target. (The `b = 0` rung is discharged below from
+`BaseDistanceGe6` alone.) -/
 def DangerousSectorGe12 : Prop :=
   ∀ v : GrossGroup × Fin 2 → ZMod 2,
     v ∈ grossComplex.cycles → v ∉ grossComplex.boundaries →
@@ -63,10 +63,10 @@ def DangerousSectorGe12 : Prop :=
     12 ≤ grossComplex.chainWeight v
 
 /-- **(M-im)**: every gross cycle in the safe sector (pushforward NOT a base
-boundary) has weight ≥ 12.  Paper source: (R) + the flux characterization +
-the (M-im) confined-floor program, A4 Part II / Theorem D (Entries 16–28).
-Phase-4 target.  (Such a `v` is automatically not a boundary, since `p`
-maps boundaries to boundaries.) -/
+boundary) has weight ≥ 12. Paper source: (R) + the flux characterization + the
+(M-im) confined-floor program, A4 Part II / Theorem D (Entries 16–28). Phase-4
+target. (Such a `v` is automatically not a boundary, since `p` maps boundaries
+to boundaries.) -/
 def SafeSectorGe12 : Prop :=
   ∀ v : GrossGroup × Fin 2 → ZMod 2,
     v ∈ grossComplex.cycles → coverPush1 v ∉ bb72Complex.boundaries →
@@ -133,8 +133,8 @@ theorem gross_chain_distance_eq_12_of_sectors
 
 /-! ## The dual (Z) side, by the Φ duality -/
 
-/-- Dual-side mirror: the same three inputs bound every nontrivial *dual*
-cycle (Z-side chain) at ≥ 12, via the chain-level `d_X = d_Z` duality. -/
+/-- Dual-side mirror: the same three inputs bound every nontrivial *dual* cycle
+(Z-side chain) at ≥ 12, via the chain-level `d_X = d_Z` duality. -/
 theorem gross_dual_chainWeight_ge_12_of_sectors
     (hbase : BaseDistanceGe6) (hM : DangerousSectorGe12)
     (hMim : SafeSectorGe12) :
@@ -148,9 +148,9 @@ theorem gross_dual_chainWeight_ge_12_of_sectors
 
 /-! ## Pauli-level corollaries (the CSS distance bridge) -/
 
-/-- Unconditional: an explicit weight-12 nontrivial logical Pauli operator
-of the gross homological stabilizer group (the X-type encoding of the
-Phase-0 witness `τ(u*)`). -/
+/-- Unconditional: an explicit weight-12 nontrivial logical Pauli operator of
+the gross homological stabilizer group (the X-type encoding of the Phase-0
+witness `τ(u*)`). -/
 theorem gross_exists_weight12_logical :
     ∃ g : NQubitPauliGroupElement grossComplex.numQubits,
       Quantum.StabilizerGroup.IsNontrivialLogicalOperator g
@@ -162,9 +162,9 @@ theorem gross_exists_weight12_logical :
       ⟨tauUStar_mem_cycles, tauUStar_not_mem_boundaries⟩
   · rw [HomologicalCode.weight_chainXOperator, chainWeight_tauUStar]
 
-/-- Conditional Pauli-level lower bound: given the three sector inputs,
-every nontrivial logical operator of the gross homological stabilizer group
-has weight ≥ 12. -/
+/-- Conditional Pauli-level lower bound: given the three sector inputs, every
+nontrivial logical operator of the gross homological stabilizer group has weight
+≥ 12. -/
 theorem gross_logical_weight_ge_12_of_sectors
     (hbase : BaseDistanceGe6) (hM : DangerousSectorGe12)
     (hMim : SafeSectorGe12)
@@ -176,9 +176,9 @@ theorem gross_logical_weight_ge_12_of_sectors
     (fun c hc hnb => gross_chainWeight_ge_12_of_sectors hbase hM hMim c hc hnb)
     (gross_dual_chainWeight_ge_12_of_sectors hbase hM hMim) g hg
 
-/-- **Conditional Pauli-level `d(gross) = 12`**: given the three sector
-inputs, 12 is the least weight of a nontrivial logical operator of the gross
-homological stabilizer group. -/
+/-- **Conditional Pauli-level `d(gross) = 12`**: given the three sector inputs,
+12 is the least weight of a nontrivial logical operator of the gross homological
+stabilizer group. -/
 theorem gross_pauli_distance_eq_12_of_sectors
     (hbase : BaseDistanceGe6) (hM : DangerousSectorGe12)
     (hMim : SafeSectorGe12) :

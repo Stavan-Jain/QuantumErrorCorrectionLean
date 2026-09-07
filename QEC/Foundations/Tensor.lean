@@ -1,28 +1,32 @@
-import QEC.Foundations.Basic
+import QEC.Foundations.KetNotation
 import QEC.Foundations.Gates
 
 /-!
 # Tensor Products
 
-This file defines tensor products for quantum gates and states, which are fundamental
-operations in quantum computing for combining multiple quantum systems.
+This file defines tensor products for quantum gates and states, which are
+fundamental operations in quantum computing for combining multiple quantum
+systems.
 
 ## Tensor Products of Gates
 
-The tensor product of two quantum gates `G₁ : QuantumGate α` and `G₂ : QuantumGate β`
-produces a gate `G₁ ⊗ᵍ G₂ : QuantumGate (α × β)` that acts independently on the two
-subsystems. The matrix representation is the Kronecker product of the individual gate matrices.
+The tensor product of two quantum gates `G₁ : QuantumGate α` and
+`G₂ : QuantumGate β` produces a gate `G₁ ⊗ᵍ G₂ : QuantumGate (α × β)` that acts
+independently on the two subsystems. The matrix representation is the Kronecker
+product of the individual gate matrices.
 
 ## Tensor Products of States
 
-The tensor product of two quantum states `ψ : QuantumState α` and `φ : QuantumState β`
-produces a state `ψ ⊗ₛ φ : QuantumState (α × β)` representing the joint system.
-The vector representation multiplies amplitudes component-wise.
+The tensor product of two quantum states `ψ : QuantumState α` and
+`φ : QuantumState β` produces a state `ψ ⊗ₛ φ : QuantumState (α × β)`
+representing the joint system. The vector representation multiplies amplitudes
+component-wise.
 
 ## Key Properties
 
 - Tensor products preserve unitarity (tensor of unitary gates is unitary)
-- Tensor products preserve normalization (tensor of normalized states is normalized)
+- Tensor products preserve normalization (tensor of normalized states is
+  normalized)
 - The Kronecker product satisfies `(A ⊗ B)ᴴ = Aᴴ ⊗ Bᴴ`
 -/
 namespace Quantum
@@ -30,8 +34,8 @@ namespace Quantum
 open Matrix
 open Kronecker
 
-/-- The conjugate transpose of a Kronecker product is the Kronecker product of the
-conjugate transposes. -/
+/-- The conjugate transpose of a Kronecker product is the Kronecker product of
+the conjugate transposes. -/
 @[simp]
 theorem star_kron
   {α β : Type*}
@@ -68,7 +72,8 @@ by
 
 scoped notation G₁:60 " ⊗ᵍ " G₂:60 => tensorGate G₁ G₂
 
-/-- The matrix underlying `tensorGate G₁ G₂` is the Kronecker product `G₁ ⊗ₖ G₂`. -/
+/-- The matrix underlying `tensorGate G₁ G₂` is the Kronecker product
+`G₁ ⊗ₖ G₂`. -/
 @[simp]
 lemma tensorGate_val
   {α β : Type*} [Fintype α] [DecidableEq α]
@@ -352,5 +357,86 @@ noncomputable def CNOT_q2_q3_3 : ThreeQubitGate :=
 /-- CNOT with control q2 and target q3: |111⟩ ↦ |110⟩. -/
 @[simp] lemma CNOT_q2_q3_3_on_ket111 : CNOT_q2_q3_3 • |111⟩ = |110⟩ := by
   vec_expand_simp [CNOT_q2_q3_3,  Matrix.mulVec, CNOT, controllize, Xmat]
+
+/-! ## Tensor powers of a one-qubit gate
+
+`tensorGate` above is binary. This section gives the `n`-fold power of a single
+one-qubit gate on the function-indexed basis `NQubitBasis n`, which is the shape
+the `n`-qubit layers of this library use.
+-/
+
+/-- The `n`-fold tensor power `G ^ ⊗ n` of a one-qubit gate, as a matrix on
+`NQubitBasis n`: the amplitude between bitstrings `b₁` and `b₂` is the product
+of the one-qubit amplitudes `G (b₁ i) (b₂ i)` over the qubits `i`.
+
+This is the tensor power over a *function-indexed* basis, so it is written
+directly as that product rather than by iterating `tensorGate`. The two
+constructions index their result differently — `tensorGate` builds
+`QuantumGate (α × β)`, while `NQubitBasis n` is `Fin n → QubitBasis` — so
+relating them would require transporting along
+`(Fin (n+1) → Q) ≃ Q × (Fin n → Q)`, which buys nothing here. -/
+noncomputable def tensorPowMatrix (n : ℕ) (G : OneQubitGate) :
+    Matrix (NQubitBasis n) (NQubitBasis n) ℂ :=
+  fun b₁ b₂ => (Finset.univ : Finset (Fin n)).prod (fun i => G.val (b₁ i) (b₂ i))
+
+/-- The tensor power of a unitary is unitary: `G ^ ⊗ n ∈ unitaryGroup` when `G`
+is. -/
+lemma tensorPowMatrix_mem_unitaryGroup (n : ℕ) (G : OneQubitGate) :
+    tensorPowMatrix n G ∈ Matrix.unitaryGroup (NQubitBasis n) ℂ := by
+  constructor
+  · ext b₁ b₂; simp +decide [Matrix.mul_apply, Matrix.one_apply]
+    have h_unitary :
+      ∀ i : Fin n,
+        ∑ x : QubitBasis, (starRingEnd ℂ) (G.val x (b₁ i)) * G.val x (b₂ i) =
+          if b₁ i = b₂ i then 1 else 0 := by
+      intro i
+      have h_unitary :
+        ∑ x : QubitBasis, (starRingEnd ℂ) (G.val x (b₁ i)) * G.val x (b₂ i) =
+          (star G.val * G.val) (b₁ i) (b₂ i) := by
+        simp +decide [Matrix.mul_apply]
+      have := G.2.2; aesop
+    convert Finset.prod_congr rfl fun i _ => h_unitary i using 1
+    any_goals exact Finset.univ
+    · rw [Finset.prod_sum]
+      refine Finset.sum_bij (fun p _ => fun i _ => p i) ?_ ?_ ?_ ?_ <;>
+        simp +decide [Finset.mem_univ]
+      · simp +decide [funext_iff]
+      · exact fun b => ⟨fun i => b i (Finset.mem_univ i), funext fun i => rfl⟩
+      · unfold tensorPowMatrix; simp +decide [Finset.prod_mul_distrib]
+    · by_cases h : b₁ = b₂ <;> simp +decide [h]
+      rw [Finset.prod_eq_zero (Finset.mem_univ (Classical.choose (Function.ne_iff.mp h)))]
+      simp +decide [Classical.choose_spec (Function.ne_iff.mp h)]
+  · ext i j; simp +decide [Matrix.mul_apply]
+    have h_GG_star :
+      ∀ i j : QubitBasis,
+        ∑ k : QubitBasis, G.val i k * starRingEnd ℂ (G.val j k) = if i = j then 1 else 0 := by
+      have := G.2.2
+      intro i j; replace this := congr_fun (congr_fun this i) j
+      simp_all +decide [Matrix.mul_apply, Matrix.one_apply]
+    have h_prod :
+      ∑ x : NQubitBasis n,
+          (∏ k : Fin n, G.val (i k) (x k)) *
+            (∏ k : Fin n, starRingEnd ℂ (G.val (j k) (x k))) =
+        ∏ k : Fin n, ∑ x : QubitBasis, G.val (i k) x * starRingEnd ℂ (G.val (j k) x) := by
+      simp +decide only [Finset.prod_sum, Finset.prod_mul_distrib]
+      refine Finset.sum_bij (fun x _ => fun k _ => x k) ?_ ?_ ?_ ?_ <;> simp +decide
+      · simp +decide [funext_iff]
+      · exact fun b => ⟨fun k => b k (Finset.mem_univ k), funext fun k => rfl⟩
+    convert h_prod using 1
+    · unfold tensorPowMatrix; simp +decide
+    · by_cases hij : i = j <;> simp +decide [hij, h_GG_star]
+      · simp +decide [hij, Matrix.one_apply]
+      · rw [Finset.prod_eq_zero (Finset.mem_univ (Classical.choose (Function.ne_iff.mp hij)))]
+        simp +decide [Classical.choose_spec (Function.ne_iff.mp hij)]
+
+/-- The `n`-fold tensor power of a one-qubit gate, bundled with its unitarity
+proof.
+
+The quantum-error-correction reading of this construction — applying the same
+gate to every physical qubit, i.e. a *uniform transversal* gate — is
+`uniformTransversalGate`, stated in the stabilizer layer where transversality
+relative to a code is meaningful. -/
+noncomputable def tensorPowGate (n : ℕ) (G : OneQubitGate) : NQubitGate n :=
+  ⟨tensorPowMatrix n G, tensorPowMatrix_mem_unitaryGroup n G⟩
 
 end Quantum

@@ -14,12 +14,14 @@ namespace NQubitPauliGroupElement
 /-!
 # Decidability of rowsLinearIndependent
 
-For a list `L` of n-qubit Pauli group elements, `rowsLinearIndependent L` is equivalent to:
-the only F₂-coefficient combination of the check-matrix rows that equals zero is the zero
-combination. We decide this by checking all `f : Fin L.length → ZMod 2` (finitely many).
+For a list `L` of n-qubit Pauli group elements, `rowsLinearIndependent L` is
+equivalent to: the only F₂-coefficient combination of the check-matrix rows that
+equals zero is the zero combination. We decide this by checking all
+`f : Fin L.length → ZMod 2` (finitely many).
 -/
 
-/-- Rows are linearly independent iff the only coefficient vector giving the zero combination
+/-- Rows are linearly independent iff the only coefficient vector giving the
+zero combination
     is the zero vector. -/
 theorem rowsLinearIndependent_iff_forall (L : List (NQubitPauliGroupElement n)) :
     rowsLinearIndependent L ↔
@@ -40,7 +42,8 @@ theorem rowsLinearIndependent_iff_forall (L : List (NQubitPauliGroupElement n)) 
     rw [← ZModModule.add_self (f i)] at heq
     exact (add_left_cancel heq).symm
 
-/-- Decidability of row linear independence: we check exhaustively over all coefficient
+/-- Decidability of row linear independence: we check exhaustively over all
+coefficient
     vectors in (ZMod 2)^(L.length). -/
 instance (L : List (NQubitPauliGroupElement n)) : Decidable (rowsLinearIndependent L) :=
   decidable_of_iff' (∀ f : Fin L.length → ZMod 2, (∑ i, f i • checkMatrix L i) = 0 → f = 0)

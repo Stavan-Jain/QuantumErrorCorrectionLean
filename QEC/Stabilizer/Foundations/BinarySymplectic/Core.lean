@@ -18,8 +18,8 @@ variable {n : ℕ}
 
 namespace PauliOperator
 
-/-- Binary (x,z) components: P = X^x Z^z with x,z ∈ {0,1}.
-  I → (0,0), X → (1,0), Y → (1,1), Z → (0,1). -/
+/-- Binary (x,z) components: P = X^x Z^z with x,z ∈ {0,1}. I → (0,0), X → (1,0),
+Y → (1,1), Z → (0,1). -/
 def toSymplecticSingle (P : PauliOperator) : ZMod 2 × ZMod 2 :=
   match P with
   | I => (0, 0)
@@ -32,13 +32,14 @@ def toSymplecticSingle (P : PauliOperator) : ZMod 2 × ZMod 2 :=
 @[simp] lemma toSymplecticSingle_Y : toSymplecticSingle Y = (1, 1) := rfl
 @[simp] lemma toSymplecticSingle_Z : toSymplecticSingle Z = (0, 1) := rfl
 
-/-- Distinct single-qubit Pauli operators have distinct symplectic (x,z) pairs. -/
+/-- Distinct single-qubit Pauli operators have distinct symplectic (x,z) pairs.
+-/
 lemma toSymplecticSingle_injective : Function.Injective toSymplecticSingle := by
   rintro a b h
   cases a <;> cases b <;> simp at h <;> rfl
 
-/-- The symplectic (x,z) of the product operator is the sum mod 2 of the two (x,z) pairs.
-  (The phase of P.mulOp Q does not affect the operator part.) -/
+/-- The symplectic (x,z) of the product operator is the sum mod 2 of the two
+(x,z) pairs. (The phase of P.mulOp Q does not affect the operator part.) -/
 lemma toSymplecticSingle_add (P Q : PauliOperator) :
     ((P.mulOp Q).operator).toSymplecticSingle =
     (P.toSymplecticSingle.1 + Q.toSymplecticSingle.1, P.toSymplecticSingle.2 +
@@ -52,22 +53,24 @@ end PauliOperator
 namespace NQubitPauliOperator
 
 /-- The symplectic vector of an n-qubit Pauli operator: Fin (n + n) → ZMod 2.
-  Indices 0..n-1 are the X-components, indices n..2n-1 are the Z-components.
-  We use (n + n) so that Fin.castAdd and Fin.natAdd give valid indices. -/
+Indices 0..n-1 are the X-components, indices n..2n-1 are the Z-components. We
+use (n + n) so that Fin.castAdd and Fin.natAdd give valid indices. -/
 def toSymplectic (op : NQubitPauliOperator n) (j : Fin (n + n)) : ZMod 2 :=
   if h : j.val < n then
     (op ⟨j.val, h⟩).toSymplecticSingle.1
   else
     (op ⟨j.val - n, by have := j.2; omega⟩).toSymplecticSingle.2
 
-/-- Index `castAdd n i` (in the first n positions) is the X-component of qubit `i`. -/
+/-- Index `castAdd n i` (in the first n positions) is the X-component of qubit
+`i`. -/
 lemma toSymplectic_X_part (op : NQubitPauliOperator n) (i : Fin n) :
     toSymplectic op (Fin.castAdd n i) = (op i).toSymplecticSingle.1 := by
   simp only [toSymplectic]
   have hlt : (Fin.castAdd n i).val < n := i.2
   simp
 
-/-- Index `natAdd n i` (in the last n positions) is the Z-component of qubit `i`. -/
+/-- Index `natAdd n i` (in the last n positions) is the Z-component of qubit
+`i`. -/
 lemma toSymplectic_Z_part (op : NQubitPauliOperator n) (i : Fin n) :
     toSymplectic op (Fin.natAdd n i) = (op i).toSymplecticSingle.2 := by
   simp only [toSymplectic]

@@ -136,8 +136,8 @@ theorem bbBoundary2Fn_homotopyChain {v : GrossGroup × Fin 2 → ZMod 2}
     rw [conv_grossB_homotopyChain v]
     rfl
 
-/-- **The deck homotopy (R)**: for every gross 1-cycle `v`, the deck
-translate differs from `v` by a boundary; i.e. `σ` acts trivially on `H₁`. -/
+/-- **The deck homotopy (R)**: for every gross 1-cycle `v`, the deck translate
+differs from `v` by a boundary; i.e. `σ` acts trivially on `H₁`. -/
 theorem deck_add_mem_boundaries {v : GrossGroup × Fin 2 → ZMod 2}
     (hv : v ∈ grossComplex.cycles) :
     v + deckShift1 v ∈ grossComplex.boundaries := by

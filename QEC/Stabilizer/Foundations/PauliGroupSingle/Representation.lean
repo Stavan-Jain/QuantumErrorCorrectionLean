@@ -21,8 +21,8 @@ namespace PauliGroupElement
 
 /-- Matrix multiplication of Pauli operators matches their group multiplication.
 
-For Pauli operators P and Q, if P.mulOp Q = ⟨p, R⟩, then
-P.toMatrix * Q.toMatrix = phasePowerToComplex p • R.toMatrix.
+For Pauli operators P and Q, if P.mulOp Q = ⟨p, R⟩, then P.toMatrix * Q.toMatrix
+= phasePowerToComplex p • R.toMatrix.
 -/
 lemma PauliOperator.toMatrix_mul (P Q : PauliOperator) :
   P.toMatrix * Q.toMatrix =

@@ -53,9 +53,9 @@ open scoped BigOperators
 set_option maxRecDepth 4096
 
 /-- The data of a BB code over `G` presented as a free ℤ₂ cover of a BB code
-over `H` along one doubled axis.  `proj` is the covering projection, `deckS`
-the deck translation, `sec` a set-theoretic section, `Ac, Bc` the cover
-polynomials and `Ab, Bb` their descents. -/
+over `H` along one doubled axis. `proj` is the covering projection, `deckS` the
+deck translation, `sec` a set-theoretic section, `Ac, Bc` the cover polynomials
+and `Ab, Bb` their descents. -/
 structure XDoubleCoverData (G H : Type)
     [Fintype G] [AddCommGroup G] [DecidableEq G]
     [Fintype H] [AddCommGroup H] [DecidableEq H] where
@@ -113,8 +113,7 @@ lemma proj_add_deckS (g : G) : D.proj (g + D.deckS) = D.proj g :=
 lemma proj_surjective : Function.Surjective ⇑D.proj := fun p =>
   ⟨D.sec p, D.proj_sec p⟩
 
-/-- Every cover point is the section point of its fiber or its deck
-partner. -/
+/-- Every cover point is the section point of its fiber or its deck partner. -/
 lemma point_dichotomy (g : G) :
     g = D.sec (D.proj g) ∨ g = D.sec (D.proj g) + D.deckS :=
   (D.proj_fiber (D.sec (D.proj g)) g).mp (D.proj_sec (D.proj g)).symm
@@ -129,8 +128,8 @@ noncomputable def baseComplex : HomologicalCode := bbChainComplex D.Ab D.Bb
 
 /-! ## Deck data on chains -/
 
-/-- The deck involution on qubit indices: shift the group coordinate by
-`deckS`, keep the block. -/
+/-- The deck involution on qubit indices: shift the group coordinate by `deckS`,
+keep the block. -/
 def deckSigma1 : G × Fin 2 → G × Fin 2 :=
   fun p => (p.1 + D.deckS, p.2)
 
@@ -141,8 +140,8 @@ def deckSigma1 : G × Fin 2 → G × Fin 2 :=
 def deckShift0 (v : G → ZMod 2) : G → ZMod 2 :=
   fun g => v (g + D.deckS)
 
-/-- Deck shift on 1-chains (qubits): shift the group coordinate, keep the
-block. -/
+/-- Deck shift on 1-chains (qubits): shift the group coordinate, keep the block.
+-/
 def deckShift1 (v : G × Fin 2 → ZMod 2) : G × Fin 2 → ZMod 2 :=
   fun p => v (p.1 + D.deckS, p.2)
 
@@ -312,16 +311,15 @@ theorem pull1_push1 (v : G × Fin 2 → ZMod 2) :
   rw [fiberSumFn_pair D.deckSigma1_ne D.proj_prodMap_fiber v p]
   rfl
 
-/-- **The transfer chase at the cover**: a cover 1-cycle whose pushforward is
-a base boundary differs from the pullback of a base 1-cycle by a cover
-boundary.  This is the hard (`ker ≤ range`) half of the exactness of the
-transfer sequence on `H₁`; the quotient-level packaging lives in
-`BBTransferH1.lean`.
+/-- **The transfer chase at the cover**: a cover 1-cycle whose pushforward is a
+base boundary differs from the pullback of a base 1-cycle by a cover boundary.
+This is the hard (`ker ≤ range`) half of the exactness of the transfer sequence
+on `H₁`; the quotient-level packaging lives in `BBTransferH1.lean`.
 
 Chase: `p₁ v = ∂₂ᵇ w`; lift `w = p₀ w'` (`push0_surjective`); then
 `p₁ (v + ∂₂ᶜ w') = ∂₂ᵇ w + ∂₂ᵇ w = 0` (char 2), so `v + ∂₂ᶜ w' = τ₁ u`
-(`push1_eq_zero_iff`); finally `u` is a base cycle by `pull_boundary1_comm`
-and `pull0_injective`. -/
+(`push1_eq_zero_iff`); finally `u` is a base cycle by `pull_boundary1_comm` and
+`pull0_injective`. -/
 theorem exists_pull_eq_add_boundary {v : G × Fin 2 → ZMod 2}
     (hv : v ∈ D.coverComplex.cycles)
     (hbd : D.push1 v ∈ D.baseComplex.boundaries) :
@@ -365,8 +363,8 @@ theorem exists_pull_eq_add_boundary {v : G × Fin 2 → ZMod 2}
 
 /-! ## Weight identities -/
 
-/-- The number of qubits in the support of `v` whose deck partner is also in
-the support (counts each doubly-covered fiber twice). -/
+/-- The number of qubits in the support of `v` whose deck partner is also in the
+support (counts each doubly-covered fiber twice). -/
 noncomputable def overlapCount (v : G × Fin 2 → ZMod 2) : ℕ :=
   (Finset.univ.filter fun p : G × Fin 2 =>
     v p ≠ 0 ∧ v (p.1 + D.deckS, p.2) ≠ 0).card
@@ -485,8 +483,8 @@ lemma overlapCount_eq_two_mul_sheets (v : G × Fin 2 → ZMod 2) :
   exact card_overlap_eq_two_mul D.deckSigma1_ne D.proj_prodMap_fiber
     D.proj_prodMap_sec1 v
 
-/-- **Refined slice identity**:
-`|v| = |p(v)| + 2·|supp(sheet0 v) ∖ supp p(v)|`. -/
+/-- **Refined slice identity**: `|v| = |p(v)| + 2·|supp(sheet0 v) ∖ supp p(v)|`.
+-/
 theorem chainWeight_sheet_eq (v : G × Fin 2 → ZMod 2) :
     D.coverComplex.chainWeight v
       = D.baseComplex.chainWeight (D.push1 v)
@@ -612,8 +610,8 @@ lemma liftC2_add (ξ η : H → ZMod 2) :
 def seamN (ξ : H → ZMod 2) : H × Fin 2 → ZMod 2 :=
   D.sheet0 (D.liftStab ξ)
 
-/-- The seam-crossing part: sheet-1 component of the lifted stabilizer.
-The Smith connecting map at chain level is `ζ ↦ seamC ζ` on 2-cycles. -/
+/-- The seam-crossing part: sheet-1 component of the lifted stabilizer. The
+Smith connecting map at chain level is `ζ ↦ seamC ζ` on 2-cycles. -/
 def seamC (ξ : H → ZMod 2) : H × Fin 2 → ZMod 2 :=
   D.sheet1 (D.liftStab ξ)
 
@@ -674,8 +672,8 @@ lemma sheet1_self_add_deck (v : G × Fin 2 → ZMod 2) (j : H × Fin 2) :
 
 /-! ## The chain-level Smith connecting map lands in cycles -/
 
-/-- For a base 2-cycle `ζ` (`∂₂ ζ = 0`), the seam-crossing component
-`seamC ζ` is a base 1-cycle.  Pure exactness of the double cover. -/
+/-- For a base 2-cycle `ζ` (`∂₂ ζ = 0`), the seam-crossing component `seamC ζ`
+is a base 1-cycle. Pure exactness of the double cover. -/
 theorem seamC_mem_cycles {ζ : H → ZMod 2}
     (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
     D.seamC ζ ∈ D.baseComplex.cycles := by

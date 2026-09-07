@@ -4,7 +4,7 @@ import Mathlib.Tactic
 # Abstract length-3 chain complex over `ZMod 2`
 
 A `HomologicalCode` is a length-3 chain complex `C₂ →∂₂ C₁ →∂₁ C₀` over `𝔽₂`
-with finite cells, satisfying the chain-complex law `∂₁ ∘ ∂₂ = 0`.  It is the
+with finite cells, satisfying the chain-complex law `∂₁ ∘ ∂₂ = 0`. It is the
 core data from which a CSS stabilizer code with `n = |C₁|` qubits and
 `k = dim H₁` logical qubits is built.
 
@@ -21,10 +21,11 @@ This file sets up the abstract structure and the homology API:
 The CSS construction itself is in `QEC/Stabilizer/Homological/CSS.lean`.
 -/
 
-/-- `dim₂ V` is `Module.finrank (ZMod 2) V`, the `𝔽₂`-dimension of a chain space, cycle
-space, or homology group (mathlib precedent: `local notation "dim" => Module.finrank ℝ`).
-`dim₂ V` elaborates to exactly `Module.finrank (ZMod 2) V`, and the unexpander the
-`notation` command generates prints it back while the scope is open. Scoped: enable with
+/-- `dim₂ V` is `Module.finrank (ZMod 2) V`, the `𝔽₂`-dimension of a chain
+space, cycle space, or homology group (mathlib precedent:
+`local notation "dim" => Module.finrank ℝ`). `dim₂ V` elaborates to exactly
+`Module.finrank (ZMod 2) V`, and the unexpander the `notation` command generates
+prints it back while the scope is open. Scoped: enable with
 `open scoped Homology`. -/
 scoped[Homology] notation "dim₂" => Module.finrank (ZMod 2)
 
@@ -36,8 +37,9 @@ open scoped BigOperators
 open scoped Homology
 
 open Lean Elab Command in
-/-- Display test: elaborate `stx` and check that its pretty-printed text is `expected`
-(`exact := false`: contains `expected`). Run through `run_cmd` so no `#`-command is needed. -/
+/-- Display test: elaborate `stx` and check that its pretty-printed text is
+`expected` (`exact := false`: contains `expected`). Run through `run_cmd` so no
+`#`-command is needed. -/
 private def checkDisplay (stx : Syntax) (expected : String) (exact : Bool := true) :
     CommandElabM Unit :=
   liftTermElabM do
@@ -78,18 +80,18 @@ structure HomologicalCode where
   boundary2 : (C2 → ZMod 2) →ₗ[ZMod 2] (C1 → ZMod 2)
   /-- Chain-complex law: `∂₁ ∘ ∂₂ = 0`. -/
   boundary_comp : boundary1.comp boundary2 = 0
-  /-- The number of physical qubits.  Each instance specifies this explicitly
-  (e.g. the toric code uses `2 * L * L`); we relate it to `Fintype.card C₁`
-  via `numQubits_eq` below.  Making this a field rather than a derived
-  `abbrev` lets each instance use its own canonical Nat representation,
-  which keeps the resulting `NQubitPauliGroupElement numQubits` type
-  defeq to whatever the existing instance code uses. -/
+  /-- The number of physical qubits. Each instance specifies this explicitly
+(e.g. the toric code uses `2 * L * L`); we relate it to `Fintype.card C₁` via
+`numQubits_eq` below. Making this a field rather than a derived `abbrev` lets
+each instance use its own canonical Nat representation, which keeps the
+resulting `NQubitPauliGroupElement numQubits` type defeq to whatever the
+existing instance code uses. -/
   numQubits : ℕ
   /-- The number of qubits is `Fintype.card C₁`. -/
   numQubits_eq : @Fintype.card C1 fin1 = numQubits
-  /-- A chosen bijection between 1-cells and qubit indices `Fin numQubits`.
-  Each instance is free to choose its own qubit indexing — the toric instance
-  uses `edgeToQubitIdx`, for example. -/
+  /-- A chosen bijection between 1-cells and qubit indices `Fin numQubits`. Each
+instance is free to choose its own qubit indexing — the toric instance uses
+`edgeToQubitIdx`, for example. -/
   edgeEquiv : C1 ≃ Fin numQubits
 
 namespace HomologicalCode
@@ -197,8 +199,8 @@ theorem finrank_H1_eq_cycles_sub_boundaries :
 
 `(cutMap s) e = ∑ v, s v · ∂₁(δ_e)(v)` where `δ_e := Pi.single e 1`.
 
-This is what one would get from `LinearMap.dualMap`, but inlined as a finite
-sum to keep instance synthesis cheap (no `Module.Dual` lookups). -/
+This is what one would get from `LinearMap.dualMap`, but inlined as a finite sum
+to keep instance synthesis cheap (no `Module.Dual` lookups). -/
 noncomputable def cutMap : (X.C0 → ZMod 2) →ₗ[ZMod 2] (X.C1 → ZMod 2) where
   toFun s := fun e => ∑ v : X.C0, s v * X.boundary1 (Pi.single e 1) v
   map_add' s t := by
@@ -213,11 +215,11 @@ noncomputable def cutMap : (X.C0 → ZMod 2) →ₗ[ZMod 2] (X.C1 → ZMod 2) wh
 
 /-- Pointwise expansion of `∂₁` via the standard basis on `C₁`.
 
-`(∂₁ c) v = ∑ e, c e · (∂₁ δ_e) v` where `δ_e := Pi.single e 1`.  This lets
-downstream code reason about per-vertex boundary values without re-deriving
-the basis expansion.  Used in `boundary1_cutMap_transpose`, and in the toric
-bridge that identifies `(toricHomologicalCode L).cutMap` with the lattice-
-specific `toricVertexCutMap`. -/
+`(∂₁ c) v = ∑ e, c e · (∂₁ δ_e) v` where `δ_e := Pi.single e 1`. This lets
+downstream code reason about per-vertex boundary values without re-deriving the
+basis expansion. Used in `boundary1_cutMap_transpose`, and in the toric bridge
+that identifies `(toricHomologicalCode L).cutMap` with the lattice- specific
+`toricVertexCutMap`. -/
 theorem boundary1_apply_eq_sum (c : X.C1 → ZMod 2) (v : X.C0) :
     X.boundary1 c v = ∑ e : X.C1, c e * X.boundary1 (Pi.single e 1) v := by
   have hc : c = ∑ e : X.C1, c e • (Pi.single e (1 : ZMod 2)) := by

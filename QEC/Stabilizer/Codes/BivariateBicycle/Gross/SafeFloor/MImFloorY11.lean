@@ -66,7 +66,8 @@ Confined/spine components range over the radical ideal `{αD + β·uv}`; `slotCo
 
 -- The 4⁶-knob walks stay kernel-checked (axiom-clean); `+kernel` and the
 -- packed-`Nat` tables keep them cheap.
-/-- B/right block `≥ 6`: comp2 `(0,0,0,0)`, comp3 `(1,1,1,1)`, comp4 `(1,3,1,3)`. -/
+/-- B/right block `≥ 6`: comp2 `(0,0,0,0)`, comp3 `(1,1,1,1)`, comp4
+`(1,3,1,3)`. -/
 theorem Rdec : ∀ a2 b2 a3 b3 a4 b4 : Fin 4,
     6 ≤ slotCost (fadd 0 (fadd (fmul a2 3) (fmul b2 1)))
                  (fadd 1 (fadd (fmul a3 3) (fmul b3 1)))
@@ -82,7 +83,8 @@ theorem Rdec : ∀ a2 b2 a3 b3 a4 b4 : Fin 4,
                  (fadd 3 (fadd (fmul a4 0) (fmul b4 1))) := by decide +kernel
 
 -- Kernel `decide` (axiom-clean); see `Rdec`.
-/-- A/left block `≥ 6`: comp1 `(2,2,2,2)`, comp3 `(3,3,3,3)`, comp4 `(0,1,0,1)`. -/
+/-- A/left block `≥ 6`: comp1 `(2,2,2,2)`, comp3 `(3,3,3,3)`, comp4 `(0,1,0,1)`.
+-/
 theorem Ldec : ∀ a1 b1 a3 b3 a4 b4 : Fin 4,
     6 ≤ slotCostL (fadd 2 (fadd (fmul a1 3) (fmul b1 1)))
                   (fadd 3 (fadd (fmul a3 3) (fmul b3 1)))
@@ -97,7 +99,8 @@ theorem Ldec : ∀ a1 b1 a3 b3 a4 b4 : Fin 4,
                   (fadd 3 (fadd (fmul a3 0) (fmul b3 1)))
                   (fadd 1 (fadd (fmul a4 0) (fmul b4 1))) := by decide +kernel
 
-/-- B/right-block per-slot sum `≥ 6` for every coset (radical-ideal image ▸ `Rdec`). -/
+/-- B/right-block per-slot sum `≥ 6` for every coset (radical-ideal image ▸
+`Rdec`). -/
 theorem Rblock (f : BaseGroup → ZMod 2) :
     6 ≤ ∑ s, slotCost (shifted (seamOffR zrep psi2) Bhat2 (compF f psi2) s)
                       (shifted (seamOffR zrep psi3) Bhat2 (compF f psi3) s)
@@ -109,7 +112,8 @@ theorem Rblock (f : BaseGroup → ZMod 2) :
   rw [sum_zmod2sq]
   exact Rdec a2 b2 a3 b3 a4 b4
 
-/-- A/left-block per-slot sum `≥ 6` for every coset (radical-ideal image ▸ `Ldec`). -/
+/-- A/left-block per-slot sum `≥ 6` for every coset (radical-ideal image ▸
+`Ldec`). -/
 theorem Lblock (f : BaseGroup → ZMod 2) :
     6 ≤ ∑ s, slotCostL (shifted (seamOffL zrep psi1) Ahat1 (compF f psi1) s)
                        (shifted (seamOffL zrep psi3) Ahat1 (compF f psi3) s)
@@ -121,8 +125,9 @@ theorem Lblock (f : BaseGroup → ZMod 2) :
   rw [sum_zmod2sq]
   exact Ldec a1 b1 a3 b3 a4 b4
 
-/-- **Y-orbit-11 safe-sector floor** (analytic): every base 1-cycle in `[seamC zrep]`
-has weight `≥ 12`.  Discharged by the slot-frame walk — no `floorOK`. -/
+/-- **Y-orbit-11 safe-sector floor** (analytic): every base 1-cycle in
+`[seamC zrep]` has weight `≥ 12`. Discharged by the slot-frame walk — no
+`floorOK`. -/
 theorem floor (f : BaseGroup → ZMod 2) :
     12 ≤ bb72Complex.chainWeight (seamC zrep + bbBoundary2Fn baseA baseB f) :=
   floor_of_data_analytic zrep

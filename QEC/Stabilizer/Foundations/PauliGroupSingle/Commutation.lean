@@ -15,7 +15,8 @@ the operators are equal or one is the identity). The phase factors don't affect
 commutation since they're scalars.
 -/
 
-/-- Two single-qubit Pauli operators commute if and only if they are equal or one is I. -/
+/-- Two single-qubit Pauli operators commute if and only if they are equal or
+one is I. -/
 lemma PauliOperator.commutes_iff (P Q : PauliOperator) :
   P.mulOp Q = Q.mulOp P ↔ (P = Q ∨ P = PauliOperator.I ∨ Q = PauliOperator.I) := by
   cases P <;> cases Q <;> simp
@@ -48,14 +49,14 @@ lemma commutes_iff (p q : PauliGroupElement) :
         rw [h]
       exact h_op
 
-/-- The `operator` part of Pauli group multiplication is commutative
-(phase factors may differ). -/
+/-- The `operator` part of Pauli group multiplication is commutative (phase
+factors may differ). -/
 lemma operator_mul_comm (p q : PauliGroupElement) :
     (p * q).operator = (q * p).operator := by
   simp [mul, PauliOperator.mulOp_operator_comm]
 
-/-- Two Pauli group elements commute iff the phase contributed by multiplying their
-operators is the same in either order.
+/-- Two Pauli group elements commute iff the phase contributed by multiplying
+their operators is the same in either order.
 
 Since the `operator` field of `p * q` is always equal to that of `q * p` (the
 noncommutativity is entirely captured by the phase), commutation reduces to a
@@ -76,8 +77,8 @@ lemma commutes_iff_mulOp_phasePower (p q : PauliGroupElement) :
 /-- The central element `-1` of the Pauli group, represented as `i^2 * I`. -/
 def minusOne : PauliGroupElement := ⟨2, PauliOperator.I⟩
 
-/-- For Pauli operators, multiplication either commutes (same phase power) or anticommutes
-(phase differs by `2`, i.e. a factor of `-1`). -/
+/-- For Pauli operators, multiplication either commutes (same phase power) or
+anticommutes (phase differs by `2`, i.e. a factor of `-1`). -/
 lemma PauliOperator.mulOp_phasePower_eq_or_eq_add_two (P Q : PauliOperator) :
     (P.mulOp Q).phasePower = (Q.mulOp P).phasePower ∨
     (P.mulOp Q).phasePower = (Q.mulOp P).phasePower + 2 := by
@@ -85,7 +86,8 @@ lemma PauliOperator.mulOp_phasePower_eq_or_eq_add_two (P Q : PauliOperator) :
 
 /-- Any two Pauli group elements either commute or anticommute.
 
-Anticommutation is expressed as `p * q = (-1) * (q * p)`, where `-1` is `minusOne`. -/
+Anticommutation is expressed as `p * q = (-1) * (q * p)`, where `-1` is
+`minusOne`. -/
 lemma commute_or_anticommute (p q : PauliGroupElement) :
   p * q = q * p ∨ p * q = minusOne * (q * p) := by
   rcases PauliOperator.mulOp_phasePower_eq_or_eq_add_two p.operator q.operator with h | h

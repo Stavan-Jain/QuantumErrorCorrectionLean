@@ -48,12 +48,12 @@ open Quantum.Stabilizer.Homological NQubitPauliGroupElement
 through these few-term forms (rather than `conv`) keeps the kernel `decide`
 sweeps cheap. -/
 
-/-- `∂₂(δ_f)` evaluated at qubit `(h, j)`:  `A(h-f)` on the left block,
-`B(h-f)` on the right. -/
+/-- `∂₂(δ_f)` evaluated at qubit `(h, j)`: `A(h-f)` on the left block, `B(h-f)`
+on the right. -/
 def d2term (f h : GrossGroup) (j : Fin 2) : ZMod 2 :=
   if j = 0 then grossA (h - f) else grossB (h - f)
 
-/-- `cutMap(δ_v)` evaluated at qubit `(h, j)`:  `B(v-h)` on the left block,
+/-- `cutMap(δ_v)` evaluated at qubit `(h, j)`: `B(v-h)` on the left block,
 `A(v-h)` on the right. -/
 def cmTerm (v h : GrossGroup) (j : Fin 2) : ZMod 2 :=
   if j = 0 then grossB (v - h) else grossA (v - h)
@@ -113,7 +113,8 @@ set_option maxRecDepth 40000 in
 -- kernel decide needs more recursion headroom on the 72-point enumeration.
 private lemma grossEnum_complete : ∀ g : GrossGroup, g ∈ grossEnum := by decide
 
-/-- A `ZMod 2`-valued left fold with `+` from `0` is the sum of the mapped list. -/
+/-- A `ZMod 2`-valued left fold with `+` from `0` is the sum of the mapped list.
+-/
 private lemma foldl_add_eq_sum {α : Type*} (l : List α) (g : α → ZMod 2) :
     l.foldl (fun acc x => acc + g x) 0 = (l.map g).sum := by
   have gen : ∀ (a : ZMod 2), l.foldl (fun acc x => acc + g x) a = a + (l.map g).sum := by
@@ -269,7 +270,8 @@ private lemma kerCorrection_eq_kerCorrB (red : List (List GrossGroup)) (redE : L
   rw [hmapc, sum_map_z2_eq_foldl_xor_false (fun j => (redE.getD j []).contains (encG p'))]
   rfl
 
-/-- Per-input shifted-point tables: `(encG p, the six encoded translate points)`. -/
+/-- Per-input shifted-point tables:
+`(encG p, the six encoded translate points)`. -/
 private def shiftTableXE : List (Nat × (Nat × Nat × Nat × Nat × Nat × Nat)) :=
   grossEnum.map (fun p =>
     (encG p, (encG (p + ((3 : ZMod 12), (0 : ZMod 6))), encG (p + ((0 : ZMod 12), (1 : ZMod 6))),
@@ -282,7 +284,8 @@ private def shiftTableZE : List (Nat × (Nat × Nat × Nat × Nat × Nat × Nat)
       encG (v - ((2 : ZMod 12), (0 : ZMod 6))), encG (v - ((3 : ZMod 12), (0 : ZMod 6))),
       encG (v - ((0 : ZMod 12), (1 : ZMod 6))), encG (v - ((0 : ZMod 12), (2 : ZMod 6))))))
 
-/-- Encoded per-row bucket tables (one `phiX`/`phiZ` filter pass per output row). -/
+/-- Encoded per-row bucket tables (one `phiX`/`phiZ` filter pass per output
+row). -/
 private def phiXBucketsE : List (Nat × List (Nat × Fin 2)) :=
   grossEnum.map (fun p' => (encG p',
     (phiX.filter (fun pr => pr.1 = p')).map (fun pr => (encG pr.2.1, pr.2.2))))
@@ -291,7 +294,8 @@ private def phiZBucketsE : List (Nat × List (Nat × Fin 2)) :=
   grossEnum.map (fun p' => (encG p',
     (phiZ.filter (fun pr => pr.1 = p')).map (fun pr => (encG pr.2.1, pr.2.2))))
 
-/-- Bool-only per-row check: xor-fold of hits, xor correction, compare to Kronecker. -/
+/-- Bool-only per-row check: xor-fold of hits, xor correction, compare to
+Kronecker. -/
 private def checkRowB (tbl : List (Nat × (Nat × Nat × Nat × Nat × Nat × Nat)))
     (redE : List (List Nat)) (ep' : Nat) (bucketE : List (Nat × Fin 2)) : Bool :=
   tbl.all (fun ps =>
@@ -347,8 +351,8 @@ theorem decoder_identity_X :
   rw [hmap, sum_map_z2_eq_foldl_xor_false]
   exact h3
 
-/-- **Vertex decoder identity** (kernel-checked): mirror of
-`decoder_identity_X` for the Z block (`cutMap`, `phiZ`, `redCM`). -/
+/-- **Vertex decoder identity** (kernel-checked): mirror of `decoder_identity_X`
+for the Z block (`cutMap`, `phiZ`, `redCM`). -/
 theorem decoder_identity_Z :
     ∀ p p' : GrossGroup,
       decodeZAt p p' + kerCorrection redCM p p' = (if p' = p then 1 else 0) := by
@@ -377,8 +381,8 @@ theorem decoder_identity_Z :
 
 /-! ## §3  Lift the decoder identities to all chains (the independence core)
 
-`decoder_identity_X` is a per-basis-vector fact; here we lift it by linearity
-to `face_kernel_trivial : ∂₂ f = 0 ∧ f|_dropSet = 0 → f = 0` (and the mirror
+`decoder_identity_X` is a per-basis-vector fact; here we lift it by linearity to
+`face_kernel_trivial : ∂₂ f = 0 ∧ f|_dropSet = 0 → f = 0` (and the mirror
 `vtx_kernel_trivial`). These feed the block-split `rowsLinearIndependent`. -/
 
 /-- **(L1, X)** Basis expansion of `∂₂` in the sparse `d2term` form. -/
@@ -483,7 +487,8 @@ lemma sum_decodeZAt_eq_zero_of_cutMap {s : GrossGroup → ZMod 2}
     rw [← cutMap_apply_eq_sum_cmTerm, hs]; rfl
   simp [hz]
 
-/-- **Face block independence core**: a `∂₂`-cycle vanishing on `dropSet` is `0`. -/
+/-- **Face block independence core**: a `∂₂`-cycle vanishing on `dropSet` is
+`0`. -/
 lemma face_kernel_trivial {f : GrossGroup → ZMod 2}
     (hf : grossComplex.boundary2 f = 0) (hd : ∀ d ∈ dropSet, f d = 0) : f = 0 := by
   funext p'
@@ -549,7 +554,8 @@ lemma faceStabOf_listProd (L : List grossComplex.C2) :
     rw [List.map_cons, List.prod_cons, List.map_cons, List.sum_cons, map_add,
       HomologicalCode.chainXOperator_add, HomologicalCode.chainXOperator_boundary2_singleFace, ih]
 
-/-- Product of vertex stabs over a list = `chainZOperator (cutMap (Σ indicators))`. -/
+/-- Product of vertex stabs over a list =
+`chainZOperator (cutMap (Σ indicators))`. -/
 lemma vertexStabOf_listProd (L : List grossComplex.C0) :
     (L.map grossComplex.vertexStabOf).prod
       = grossComplex.chainZOperator
@@ -879,7 +885,8 @@ private lemma zmod2_dich (a : ZMod 2) : a = 0 ∨ a = 1 := by
   · exact Or.inl h
   · exact Or.inr h
 
-/-- Z-half symplectic entry of a vertex stab = the cutMap chain value at that edge. -/
+/-- Z-half symplectic entry of a vertex stab = the cutMap chain value at that
+edge. -/
 lemma vertexStabOf_sympl_Z (v : grossComplex.C0) (i : Fin grossComplex.numQubits) :
     NQubitPauliOperator.toSymplectic (grossComplex.vertexStabOf v).operators
         (Fin.natAdd grossComplex.numQubits i)
@@ -901,7 +908,8 @@ lemma vertexStabOf_sympl_Z (v : grossComplex.C0) (i : Fin grossComplex.numQubits
       · exact absurd ⟨grossComplex.edgeEquiv.symm i, Equiv.apply_symm_apply _ _, h1⟩ h
     rw [hz]; rfl
 
-/-- X-half symplectic entry of a face stab = the boundary2 chain value at that edge. -/
+/-- X-half symplectic entry of a face stab = the boundary2 chain value at that
+edge. -/
 lemma faceStabOf_sympl_X (f : grossComplex.C2) (i : Fin grossComplex.numQubits) :
     NQubitPauliOperator.toSymplectic (grossComplex.faceStabOf f).operators
         (Fin.castAdd grossComplex.numQubits i)
@@ -1085,7 +1093,8 @@ set_option maxRecDepth 4096 in
 set_option maxHeartbeats 1000000 in
 -- the block-split reduction unifies 132 check-matrix rows against the chain maps,
 -- which exceeds the default heartbeat budget.
-/-- The trimmed 132-generator list has linearly independent check-matrix rows. -/
+/-- The trimmed 132-generator list has linearly independent check-matrix rows.
+-/
 theorem rowsLinearIndependent_packaged :
     NQubitPauliGroupElement.rowsLinearIndependent genListPackaged := by
   rw [NQubitPauliGroupElement.rowsLinearIndependent, Fintype.linearIndependent_iff]
@@ -1162,16 +1171,18 @@ theorem generators_independent_packaged :
 
 /-! ## §6  Packaged stabilizer group, logical operators, the `StabilizerCode` + `HasCodeDistance`
 
-The 12 logical-qubit operators are the `grossComplex.chainXOperator`/`chainZOperator`
-of the offline-validated symplectic basis `logX`/`logZ` (identity `12×12`
-intersection matrix). The performance trap — kernel `whnf` exploding through the
-noncomputable `grossComplex` and the 132-element literal generator list when a
-`centralizer`-transport `rw` or `commute_or_anticommute` runs against a *concrete*
-chain operator — is dodged by proving every centralizer / (anti)commutation fact
-in a helper lemma with the **chain held abstract** (a stuck variable that blocks
-`chainXOperator c` from reducing and keeps `packagedSG` behind the precompiled
-`packagedSG_toSubgroup_eq`). `logicalQubit` then only *applies* those helpers by
-substitution, paying the heavy defeq once, generically. -/
+The 12 logical-qubit operators are the
+`grossComplex.chainXOperator`/`chainZOperator` of the offline-validated
+symplectic basis `logX`/`logZ` (identity `12×12` intersection matrix). The
+performance trap — kernel `whnf` exploding through the noncomputable
+`grossComplex` and the 132-element literal generator list when a
+`centralizer`-transport `rw` or `commute_or_anticommute` runs against a
+*concrete* chain operator — is dodged by proving every centralizer /
+(anti)commutation fact in a helper lemma with the **chain held abstract** (a
+stuck variable that blocks `chainXOperator c` from reducing and keeps
+`packagedSG` behind the precompiled `packagedSG_toSubgroup_eq`). `logicalQubit`
+then only *applies* those helpers by substitution, paying the heavy defeq once,
+generically. -/
 
 open Quantum.StabilizerGroup
 
@@ -1199,7 +1210,8 @@ lemma gens_no_neg_packaged :
   rw [closure_packaged_eq]
   exact grossComplex.homologicalStabilizerGroup.no_neg_identity
 
-/-- The packaged stabilizer group (closure of the trimmed 132-generator list). -/
+/-- The packaged stabilizer group (closure of the trimmed 132-generator list).
+-/
 noncomputable def packagedSG : StabilizerGroup grossComplex.numQubits :=
   mkStabilizerFromGenerators grossComplex.numQubits genListPackaged
     gens_commute_packaged gens_no_neg_packaged
@@ -1211,9 +1223,10 @@ lemma packagedSG_toSubgroup_eq :
   change Subgroup.closure (listToSet genListPackaged) = _
   exact closure_packaged_eq
 
-/-- Centralizer membership for an X-chain operator, **chain abstract**: the stuck
-`c` blocks `grossComplex.chainXOperator` from reducing and `packagedSG` stays behind
-`packagedSG_toSubgroup_eq`, so the `centralizer`-transport defeq is paid once here. -/
+/-- Centralizer membership for an X-chain operator, **chain abstract**: the
+stuck `c` blocks `grossComplex.chainXOperator` from reducing and `packagedSG`
+stays behind `packagedSG_toSubgroup_eq`, so the `centralizer`-transport defeq is
+paid once here. -/
 lemma chainXOperator_mem_centralizer_packagedSG (c : grossComplex.C1 → ZMod 2)
     (hc : grossComplex.boundary1 c = 0) :
     grossComplex.chainXOperator c ∈ centralizer packagedSG := by
@@ -1222,7 +1235,8 @@ lemma chainXOperator_mem_centralizer_packagedSG (c : grossComplex.C1 → ZMod 2)
   exact (HomologicalCode.chainXOperator_mem_centralizer_iff_mem_cycles c).mpr
     ((grossComplex.mem_cycles_iff c).mpr hc)
 
-/-- Centralizer membership for a Z-chain operator (chain abstract; mirror of the X case). -/
+/-- Centralizer membership for a Z-chain operator (chain abstract; mirror of the
+X case). -/
 lemma chainZOperator_mem_centralizer_packagedSG (c : grossComplex.C1 → ZMod 2)
     (hc : grossComplex.dualBoundary c = 0) :
     grossComplex.chainZOperator c ∈ centralizer packagedSG := by
@@ -1233,8 +1247,9 @@ lemma chainZOperator_mem_centralizer_packagedSG (c : grossComplex.C1 → ZMod 2)
   rw [LinearMap.mem_ker]
   exact hc
 
-/-- An X-chain and a Z-chain operator anticommute when their inner product is `1`
-(chains abstract — `commute_or_anticommute` never reduces the concrete operators). -/
+/-- An X-chain and a Z-chain operator anticommute when their inner product is
+`1` (chains abstract — `commute_or_anticommute` never reduces the concrete
+operators). -/
 lemma chainXOperator_anticommute_chainZOperator (c c' : grossComplex.C1 → ZMod 2)
     (h : grossComplex.chainInnerProduct c c' = 1) :
     NQubitPauliGroupElement.Anticommute
@@ -1279,8 +1294,8 @@ lemma dualBoundary_eq_dualBfn (c : GrossGroup × Fin 2 → ZMod 2) (f : GrossGro
 
 /-! ### §6a  Kernel-decide infrastructure for the logical-basis sweeps
 
-`grossA`/`grossB` have three monomials each, so `∂₁`, the dual boundary, and
-the chain inner product all collapse to six-term membership sums; the 12- and
+`grossA`/`grossB` have three monomials each, so `∂₁`, the dual boundary, and the
+chain inner product all collapse to six-term membership sums; the 12- and
 144-case sweeps below are then cheap kernel `decide`s over `grossEnum`. -/
 
 /-- `A = x³ + y + y²` as a sum of point masses. -/
@@ -1418,8 +1433,8 @@ lemma logChain_inner (i j : Fin 12) :
   exact h i j
 
 set_option maxRecDepth 4096 in
-/-- The `i`-th logical qubit operator pair: the abstract helpers above are simply
-*applied* to the concrete chains, so no heavy defeq is re-run here. -/
+/-- The `i`-th logical qubit operator pair: the abstract helpers above are
+simply *applied* to the concrete chains, so no heavy defeq is re-run here. -/
 noncomputable def logicalQubit (i : Fin 12) :
     LogicalQubitOps grossComplex.numQubits packagedSG where
   xOp := grossComplex.chainXOperator (logXchain i)
@@ -1431,8 +1446,8 @@ noncomputable def logicalQubit (i : Fin 12) :
     (by rw [logChain_inner i i, if_pos rfl])
 
 set_option maxRecDepth 4096 in
-/-- Logical operators for different logical qubits commute (the `12×12` matrix is
-diagonal off the diagonal). -/
+/-- Logical operators for different logical qubits commute (the `12×12` matrix
+is diagonal off the diagonal). -/
 theorem logical_commute_cross : ∀ ℓ ℓ' : Fin 12, ℓ ≠ ℓ' →
     ((logicalQubit ℓ).xOp * (logicalQubit ℓ').xOp
         = (logicalQubit ℓ').xOp * (logicalQubit ℓ).xOp ∧
@@ -1492,12 +1507,12 @@ theorem grossStabilizerCode_logical_weight_ge_6
   gross_logical_weight_ge_6 g
     ((IsNontrivialLogicalOperator_of_toSubgroup_eq g grossStabilizerCode_toSubgroup_eq).mp hg)
 
-/-- **`HasCodeDistance grossStabilizerCode 12`**, conditional only on `MImBound`.
-The `LightStabilizerClassification` input (`hC`) is discharged by
-`LightStab.lightStabilizerClassification_holds`; everything else — the packaging and
-the chain-level distance — is unconditional.  `MImBound` itself is discharged in
-`MImAssembly` (`LightStab.mimBound_holds`); for the fully unconditional statement see
-`grossStabilizerCode_hasCodeDistance_12_uncond` there. -/
+/-- **`HasCodeDistance grossStabilizerCode 12`**, conditional only on
+`MImBound`. The `LightStabilizerClassification` input (`hC`) is discharged by
+`LightStab.lightStabilizerClassification_holds`; everything else — the packaging
+and the chain-level distance — is unconditional. `MImBound` itself is discharged
+in `MImAssembly` (`LightStab.mimBound_holds`); for the fully unconditional
+statement see `grossStabilizerCode_hasCodeDistance_12_uncond` there. -/
 theorem grossStabilizerCode_hasCodeDistance_12 (hMim : MImBound) :
     HasCodeDistance grossStabilizerCode 12 := by
   have hleast := gross_pauli_distance_eq_12_of_engine

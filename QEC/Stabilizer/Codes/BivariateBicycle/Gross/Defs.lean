@@ -39,7 +39,7 @@ abbrev BaseGroup : Type := ZMod 6 × ZMod 6
 /-! ## Polynomials
 
 Group-algebra elements are `ZMod 2`-valued indicator functions of their
-supports.  Monomial `xᵃyᵇ` ↦ the point `(a, b)`; `poly[x^3 + y + y^2]`
+supports. Monomial `xᵃyᵇ` ↦ the point `(a, b)`; `poly[x^3 + y + y^2]`
 (`BBChainComplex.lean`) expands to exactly the
 `fun g => if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0` indicator. -/
 
@@ -58,8 +58,8 @@ def baseB : BaseGroup → ZMod 2 := poly[y^3 + x + x^2]
 /-- The polynomial `1 + x²` (homotopy-chain prefactor). -/
 def onePlusX2 : GrossGroup → ZMod 2 := poly[1 + x^2]
 
-/-- `B ⋆ B = 1 + x² + x⁴` over the gross group (squares kill cross terms in
-char 2, and `y⁶ = 1`). -/
+/-- `B ⋆ B = 1 + x² + x⁴` over the gross group (squares kill cross terms in char
+2, and `y⁶ = 1`). -/
 def bSquaredPoly : GrossGroup → ZMod 2 := poly[1 + x^2 + x^4]
 
 /-- The polynomial `1 + x⁶ = 1 + deck`. -/
@@ -98,7 +98,8 @@ def coverPi : GrossGroup →+ BaseGroup :=
     (ZMod.castHom (by norm_num : (6 : ℕ) ∣ 12) (ZMod 6)).toAddMonoidHom
     (AddMonoidHom.id (ZMod 6))
 
-/-- Fibers of `coverPi` are deck orbits: `π g' = π g ↔ g' = g ∨ g' = g + deckS`. -/
+/-- Fibers of `coverPi` are deck orbits: `π g' = π g ↔ g' = g ∨ g' = g + deckS`.
+-/
 theorem coverPi_fiber :
     ∀ g g' : GrossGroup, coverPi g' = coverPi g ↔ g' = g ∨ g' = g + deckS := by
   decide +kernel
@@ -119,8 +120,8 @@ theorem coverPi_coverSec : ∀ p : BaseGroup, coverPi (coverSec p) = p := by
 def deckShift0 (v : GrossGroup → ZMod 2) : GrossGroup → ZMod 2 :=
   fun g => v (g + deckS)
 
-/-- Deck shift on 1-chains (qubits): shift the group coordinate, keep the
-block. -/
+/-- Deck shift on 1-chains (qubits): shift the group coordinate, keep the block.
+-/
 def deckShift1 (v : GrossGroup × Fin 2 → ZMod 2) : GrossGroup × Fin 2 → ZMod 2 :=
   fun p => v (p.1 + deckS, p.2)
 

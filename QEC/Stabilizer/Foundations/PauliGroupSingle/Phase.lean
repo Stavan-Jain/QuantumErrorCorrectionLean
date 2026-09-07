@@ -40,7 +40,8 @@ lemma phasePowerToComplex_add3 (a b c : Fin 4) :
   phasePowerToComplex (a + b + c) := by
   rw [phasePowerToComplex_add, phasePowerToComplex_add, add_assoc]
 
-/-- The conjugate of a phase power equals the negative phase power: star(i^k) = i^(-k). -/
+/-- The conjugate of a phase power equals the negative phase power: star(i^k) =
+i^(-k). -/
 lemma phasePowerToComplex_star (k : Fin 4) :
   star (phasePowerToComplex k) = phasePowerToComplex (-k) := by
   fin_cases k <;> simp [phasePowerToComplex]

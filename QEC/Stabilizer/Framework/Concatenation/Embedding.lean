@@ -78,7 +78,8 @@ lemma qIdx_injective {b b' : Fin n₂} {i i' : Fin n₁} (h : qIdx b i = qIdx b'
 
 /-! ## Block embedding -/
 
-/-- Operator-level embedding: place `op` into block `b`, identity on other blocks. -/
+/-- Operator-level embedding: place `op` into block `b`, identity on other
+blocks. -/
 def embedBlockOp (b : Fin n₂) (op : NQubitPauliOperator n₁) :
     NQubitPauliOperator (n₁ * n₂) :=
   fun q => if blockOf q = b then op (posOf q) else PauliOperator.I
@@ -110,7 +111,8 @@ lemma embedBlockOp_qIdx_ne {b b' : Fin n₂} (h : b ≠ b') (op : NQubitPauliOpe
   funext q
   simp [embedBlockOp, NQubitPauliOperator.identity]
 
-/-! ## Multiplicativity (operator level only — NO group-level `embedBlock_mul`, R2) -/
+/-! ## Multiplicativity (operator level only — NO group-level `embedBlock_mul`,
+R2) -/
 
 /-- Embedding respects operator multiplication *within a block* (phase-free). -/
 lemma mulOp_embedBlockOp_operators (b : Fin n₂) (g h : NQubitPauliOperator n₁) :
@@ -144,15 +146,17 @@ lemma mulOp_embedBlockOp_operators (b : Fin n₂) (g h : NQubitPauliOperator n�
   rfl
 
 omit [NeZero n₁] in
-/-- The weight of a `Fin (n₁*n₂)` element is the sum of its per-block weights. -/
+/-- The weight of a `Fin (n₁*n₂)` element is the sum of its per-block weights.
+-/
 lemma weight_eq_sum_block_weights (g : NQubitPauliGroupElement (n₁ * n₂)) :
     g.weight = ∑ b : Fin n₂, (g.support.filter (fun q => blockOf q = b)).card := by
   change g.support.card = _
   exact Finset.card_eq_sum_card_fiberwise (fun q _ => Finset.mem_univ _)
 
 omit [NeZero n₁] in
-/-- Block-superadditivity: if `d₁` qubits of the support land in each of `B` blocks,
-the total weight is at least `d₁ * |B|`. The load-bearing input for the distance bound. -/
+/-- Block-superadditivity: if `d₁` qubits of the support land in each of `B`
+blocks, the total weight is at least `d₁ * |B|`. The load-bearing input for the
+distance bound. -/
 theorem weight_ge_of_blocks_ge (d₁ : ℕ) (g : NQubitPauliGroupElement (n₁ * n₂))
     (B : Finset (Fin n₂))
     (hB : ∀ b ∈ B, d₁ ≤ (g.support.filter (fun q => blockOf q = b)).card) :
@@ -179,8 +183,8 @@ lemma not_anticommutesAt_of_right_I {m : ℕ} (P Q : NQubitPauliOperator m) (i :
   simp only [NQubitPauliGroupElement.anticommutesAt, hI]
   cases P i <;> simp
 
-/-- Per-position behaviour of a same-block embedding: anticommutes at `q` iff `q` lies in
-block `b` and the underlying operators anticommute at `posOf q`. -/
+/-- Per-position behaviour of a same-block embedding: anticommutes at `q` iff
+`q` lies in block `b` and the underlying operators anticommute at `posOf q`. -/
 private lemma anticommutesAt_embedBlock_iff (b : Fin n₂) (g g' : NQubitPauliGroupElement n₁)
     (q : Fin (n₁ * n₂)) :
     NQubitPauliGroupElement.anticommutesAt
@@ -218,7 +222,8 @@ lemma anticommutesAt_count_eq (b : Fin n₂) (g g' : NQubitPauliGroupElement n�
       exact ⟨blockOf_qIdx b i, by rw [posOf_qIdx]; exact hac⟩
   rw [heq, Finset.card_image_of_injective _ hinj]
 
-/-- Operators embedded in **different** blocks always commute (disjoint supports). -/
+/-- Operators embedded in **different** blocks always commute (disjoint
+supports). -/
 theorem embedBlock_cross_commute {b b' : Fin n₂} (hbb : b ≠ b')
     (g g' : NQubitPauliGroupElement n₁) :
     embedBlock b g * embedBlock b' g' = embedBlock b' g' * embedBlock b g := by
@@ -242,7 +247,8 @@ theorem embedBlock_commute_iff (b : Fin n₂) (g g' : NQubitPauliGroupElement n�
       ↔ g * g' = g' * g := by
   rw [commutes_iff_even_anticommutes, commutes_iff_even_anticommutes, anticommutesAt_count_eq]
 
-/-- Within one block, embedded operators anticommute iff the underlying ones do. -/
+/-- Within one block, embedded operators anticommute iff the underlying ones do.
+-/
 theorem embedBlock_anticommute_iff (b : Fin n₂) (g g' : NQubitPauliGroupElement n₁) :
     Anticommute (embedBlock b g) (embedBlock b g') ↔ Anticommute g g' := by
   rw [anticommutes_iff_odd_anticommutes, anticommutes_iff_odd_anticommutes,

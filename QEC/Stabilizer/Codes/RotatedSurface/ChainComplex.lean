@@ -11,8 +11,8 @@ Packages the boundary maps `rscBoundary1` / `rscBoundary2` from
 `HomologicalCode` instance, plus rfl-bridges relating the lattice-specific
 submodules (`rscCycles`, `rscBoundaries`, `rscH1`) to the abstract versions.
 
-The qubit indexing is the standard row-major map `(x, y) ↦ y * L + x`,
-packaged via `rscQubitEquiv` as an `Equiv VtxIdx L ≃ Fin (L * L)`.
+The qubit indexing is the standard row-major map `(x, y) ↦ y * L + x`, packaged
+via `rscQubitEquiv` as an `Equiv VtxIdx L ≃ Fin (L * L)`.
 -/
 
 namespace Quantum
@@ -26,8 +26,8 @@ open scoped RotatedSurfaceChain
 /-! ## Lattice-specific cycles / boundaries / `H₁`
 
 These mirror the toric `toricCycles` / `toricBoundaries` / `toricH1`
-definitions, providing a stable API surface for downstream files that
-reason against the rotated-surface chain complex directly. -/
+definitions, providing a stable API surface for downstream files that reason
+against the rotated-surface chain complex directly. -/
 
 variable (L : ℕ)
 
@@ -39,9 +39,10 @@ def rscCycles [Fact (Odd L)] : Submodule (ZMod 2) (VtxIdx L → ZMod 2) :=
 def rscBoundaries : Submodule (ZMod 2) (VtxIdx L → ZMod 2) :=
   LinearMap.range (∂₂ L)
 
-/-- `Z₁ L` is the rotated-surface 1-cycle submodule `rscCycles L` (`L` explicit, as for
-`∂₁`). Scoped: `open scoped RotatedSurfaceChain`. The `ToricChain` scope binds the same
-tokens `Z₁`/`B₁`/`H₁` to the toric submodules, so open one of the two scopes per file. -/
+/-- `Z₁ L` is the rotated-surface 1-cycle submodule `rscCycles L` (`L` explicit,
+as for `∂₁`). Scoped: `open scoped RotatedSurfaceChain`. The `ToricChain` scope
+binds the same tokens `Z₁`/`B₁`/`H₁` to the toric submodules, so open one of the
+two scopes per file. -/
 scoped[RotatedSurfaceChain] notation "Z₁" => Quantum.Stabilizer.Lattice.RotatedSurface.rscCycles
 
 /-- `B₁ L` is the rotated-surface 1-boundary submodule `rscBoundaries L`.
@@ -68,9 +69,9 @@ scoped[RotatedSurfaceChain] notation "H₁" => Quantum.Stabilizer.Lattice.Rotate
 
 /-! ## Row-major qubit indexing -/
 
-/-- Row-major qubit indexing: `(x, y) ↦ y * L + x`.  This is the
-canonical bijection `VtxIdx L ≃ Fin (L * L)` and matches the convention
-used elsewhere in the codebase (`Lattice.rowMajor_injective`). -/
+/-- Row-major qubit indexing: `(x, y) ↦ y * L + x`. This is the canonical
+bijection `VtxIdx L ≃ Fin (L * L)` and matches the convention used elsewhere in
+the codebase (`Lattice.rowMajor_injective`). -/
 def vtxToQubitIdx (p : VtxIdx L) : Fin (L * L) :=
   ⟨p.2.val * L + p.1.val, by
     have h1 := p.1.isLt
@@ -100,16 +101,16 @@ noncomputable def rscQubitEquiv [Fact (0 < L)] :
 
 /-! ## The `HomologicalCode` instance -/
 
-/-- Positivity of `L` follows from `Fact (3 ≤ L)`.  Registered as an instance
-so the qubit-equivalence and other `[Fact (0 < L)]`-requiring lemmas resolve
+/-- Positivity of `L` follows from `Fact (3 ≤ L)`. Registered as an instance so
+the qubit-equivalence and other `[Fact (0 < L)]`-requiring lemmas resolve
 automatically downstream. -/
 instance pos_of_three_le {L : ℕ} [Fact (3 ≤ L)] : Fact (0 < L) :=
   ⟨lt_of_lt_of_le (by decide : 0 < 3) Fact.out⟩
 
 /-- The rotated-surface-code chain complex packaged as a generic
-`HomologicalCode`.  Consumers of `Homological.HomologicalCode`'s API
-(generic stabilizer construction, CSS distance bridge, etc.) can
-operate on this without re-deriving any lattice-specific facts. -/
+`HomologicalCode`. Consumers of `Homological.HomologicalCode`'s API (generic
+stabilizer construction, CSS distance bridge, etc.) can operate on this without
+re-deriving any lattice-specific facts. -/
 noncomputable def rotatedSurfaceHomologicalCode [Fact (Odd L)] [Fact (3 ≤ L)] :
     Quantum.Stabilizer.Homological.HomologicalCode where
   C0 := ZFaceIdx L
@@ -130,9 +131,9 @@ noncomputable def rotatedSurfaceHomologicalCode [Fact (Odd L)] [Fact (3 ≤ L)] 
 
 /-! ## RFL bridges
 
-These all hold definitionally — the proofs are `rfl`.  They give
-downstream code a stable interface for translating between
-lattice-specific and abstract names. -/
+These all hold definitionally — the proofs are `rfl`. They give downstream code
+a stable interface for translating between lattice-specific and abstract names.
+-/
 
 variable [Fact (Odd L)] [Fact (3 ≤ L)]
 

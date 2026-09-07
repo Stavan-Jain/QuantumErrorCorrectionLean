@@ -20,24 +20,27 @@ open scoped BigOperators
 /-!
 # Logical operators
 
-**Pauli logical operators** are Pauli group elements that preserve the codespace: when
-viewed as a unitary gate via `toGate`, they map the codespace to itself (i.e. are logical gates).
-We define `IsPauliLogicalOperator g S` as `IsLogicalGate (g.toGate) S`. This is equivalent to
-lying in the centralizer of S (commuting with every element of the stabilizer).
+**Pauli logical operators** are Pauli group elements that preserve the
+codespace: when viewed as a unitary gate via `toGate`, they map the codespace to
+itself (i.e. are logical gates). We define `IsPauliLogicalOperator g S` as
+`IsLogicalGate (g.toGate) S`. This is equivalent to lying in the centralizer of
+S (commuting with every element of the stabilizer).
 
-**Logical operators as cosets**: The mathematical notion of "a logical operator" is a coset of S
-in the group of Pauli logical operators (the centralizer). Two elements represent the same
-logical operator iff they lie in the same coset (`SameLogicalOperator`).
+**Logical operators as cosets**: The mathematical notion of "a logical operator"
+is a coset of S in the group of Pauli logical operators (the centralizer). Two
+elements represent the same logical operator iff they lie in the same coset
+(`SameLogicalOperator`).
 
-**Nontrivial logical operators (for distance)** are those that represent a coset that is not the
-identity coset and not a phase-only coset (φ·S). The element predicate
- `IsNontrivialLogicalOperator g S`
-means: g is a Pauli logical operator and g represents such a nontrivial coset (i.e.
-`RepresentsNontrivialCoset g S`).
+**Nontrivial logical operators (for distance)** are those that represent a coset
+that is not the identity coset and not a phase-only coset (φ·S). The element
+predicate `IsNontrivialLogicalOperator g S` means: g is a Pauli logical operator
+and g represents such a nontrivial coset (i.e. `RepresentsNontrivialCoset g S`).
 -/
 
-/-- A Pauli logical operator is a Pauli whose associated gate maps the codespace to itself.
-    Equivalently, it lies in the centralizer of S (commutes with every element of S). -/
+/-- A Pauli logical operator is a Pauli whose associated gate maps the codespace
+to itself.
+    Equivalently, it lies in the centralizer of S (commutes with every element of S).
+-/
 def IsPauliLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
   IsLogicalGate (g.toGate) S
 
@@ -103,7 +106,8 @@ lemma anticommutes_imp_not_isPauliLogicalOperator (g : NQubitPauliGroupElement n
   exact (h_contradiction ψ).elim (fun nψ => absurd hψ nψ) (fun ngψ =>
     absurd (mem_logicalGateGroup_iff (g.toGate) S |>.1 hg ψ hψ) ngψ)
 
-/-- A Pauli is a logical operator if and only if it lies in the centralizer of S. -/
+/-- A Pauli is a logical operator if and only if it lies in the centralizer of
+S. -/
 theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement n)
     (S : StabilizerGroup n) : IsPauliLogicalOperator g S ↔ g ∈ centralizer S := by
   constructor
@@ -144,7 +148,8 @@ theorem isPauliLogicalOperator_iff_mem_centralizer (g : NQubitPauliGroupElement 
       simpa [NQubitPauliGroupElement.toGate_val] using g.toGate.2.2
     simpa [Matrix.mulVec_mulVec, Matrix.mul_assoc, h_unitary] using h_stab
 
-/-- A Pauli is a logical operator iff it commutes with every element of a generating set
+/-- A Pauli is a logical operator iff it commutes with every element of a
+generating set
     for the stabilizer. -/
 theorem isPauliLogicalOperator_iff_commutes_generators (g : NQubitPauliGroupElement n)
     (S : StabilizerGroup n) (genSet : Set (NQubitPauliGroupElement n))
@@ -159,32 +164,50 @@ lemma IsPauliLogicalOperator_of_mem_stabilizer (S : StabilizerGroup n)
     IsPauliLogicalOperator g S :=
   (isPauliLogicalOperator_iff_mem_centralizer g S).2 (stabilizer_le_centralizer S hg)
 
-/-- Pauli logical operator is unchanged when the stabilizer has the same subgroup. -/
+/-- Pauli logical operator is unchanged when the stabilizer has the same
+subgroup. -/
 theorem IsPauliLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElement n)
     {S T : StabilizerGroup n} (h : S.toSubgroup = T.toSubgroup) :
     (IsPauliLogicalOperator g S ↔ IsPauliLogicalOperator g T) := by
   rw [IsPauliLogicalOperator, IsPauliLogicalOperator]
   exact isLogicalGate_iff_toSubgroup_eq (g.toGate) S T h
 
-/-- A nontrivial logical operator (for code distance) is a Pauli logical operator that represents
+/-- A nontrivial logical operator (for code distance) is a Pauli logical
+operator that represents
     a nontrivial coset: g is in the centralizer, not in S, and no s ∈ S has the same operator
     part as g (so the coset is not a phase-only coset φ·S). -/
 def IsNontrivialLogicalOperator (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
   RepresentsNontrivialCoset g S
 
-/-- Nontrivial logical operator is equivalent to representing a nontrivial coset. -/
+/-- Nontrivial logical operator is equivalent to representing a nontrivial
+coset. -/
 theorem IsNontrivialLogicalOperator_iff (g : NQubitPauliGroupElement n) (S : StabilizerGroup n) :
     IsNontrivialLogicalOperator g S ↔
       g ∈ centralizer S ∧ g ∉ S.toSubgroup ∧ ∀ s ∈ S.toSubgroup, s.operators ≠ g.operators :=
   Iff.rfl
 
-/-- Nontrivial logical operator is unchanged when the stabilizer has the same subgroup. -/
+/-- Nontrivial logical operator is unchanged when the stabilizer has the same
+subgroup. -/
 theorem IsNontrivialLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElement n)
     {S T : StabilizerGroup n} (h : S.toSubgroup = T.toSubgroup) :
     (IsNontrivialLogicalOperator g S ↔ IsNontrivialLogicalOperator g T) :=
   RepresentsNontrivialCoset_of_toSubgroup_eq g h
 
-/-- Data for one logical qubit: a pair of logical X and Z operators that commute with
+/-- A centralizer element that anticommutes with some other centralizer element
+is a nontrivial logical operator. It cannot lie in the stabilizer, which
+commutes with the whole centralizer, and neither can any stabilizer element
+sharing its operator part, since anticommutation only sees operator parts
+(`anticommute_congr_left`). This is how a low-weight representative `X̄·s` (`s`
+a stabilizer) is certified nontrivial: it still anticommutes with `Z̄`. -/
+theorem isNontrivialLogicalOperator_of_anticommute_centralizer (S : StabilizerGroup n)
+    {g h : NQubitPauliGroupElement n} (hg : g ∈ centralizer S) (hh : h ∈ centralizer S)
+    (hgh : NQubitPauliGroupElement.Anticommute g h) : IsNontrivialLogicalOperator g S :=
+  ⟨hg, not_mem_stabilizer_of_anticommutes_centralizer S g h hh hgh, fun s hs h_ops =>
+    not_mem_stabilizer_of_anticommutes_centralizer S s h hh
+      ((NQubitPauliGroupElement.anticommute_congr_left h_ops).mpr hgh) hs⟩
+
+/-- Data for one logical qubit: a pair of logical X and Z operators that commute
+with
     the stabilizer and anticommute with each other. -/
 structure LogicalQubitOps (n : ℕ) (S : StabilizerGroup n) where
   /-- Logical X operator. -/
@@ -222,7 +245,8 @@ theorem zOp_not_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
   not_mem_stabilizer_of_anticommutes_centralizer S ops.zOp ops.xOp ops.x_mem_centralizer
     (NQubitPauliGroupElement.anticommute_symm ops.xOp ops.zOp ops.anticommute)
 
-/-- No stabilizer element has the same operator part as logical X; otherwise X̄ would commute
+/-- No stabilizer element has the same operator part as logical X; otherwise X̄
+would commute
     with Z̄ (since X̄ would differ from that stabilizer only by phase). -/
 theorem xOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S)
     (s : NQubitPauliGroupElement n) (hs : s ∈ S.toSubgroup) :
@@ -262,7 +286,8 @@ theorem xOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n
     exact right_eq_mul.mp (id (Eq.symm h_neg))
   exact negIdentity_ne_one n h_one
 
-/-- No stabilizer element has the same operator part as logical Z; otherwise Z̄ would commute
+/-- No stabilizer element has the same operator part as logical Z; otherwise Z̄
+would commute
     with X̄ (since Z̄ would differ from that stabilizer only by phase). -/
 theorem zOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n S)
     (s : NQubitPauliGroupElement n) (hs : s ∈ S.toSubgroup) :
@@ -322,19 +347,22 @@ theorem zOp_operators_ne_of_mem {S : StabilizerGroup n} (ops : LogicalQubitOps n
     exact right_eq_mul.mp (id (Eq.symm h_neg))
   exact negIdentity_ne_one n h_one
 
-/-- The logical X operator is a nontrivial logical operator (represents a nontrivial coset). -/
+/-- The logical X operator is a nontrivial logical operator (represents a
+nontrivial coset). -/
 theorem xOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
     IsNontrivialLogicalOperator ops.xOp S :=
   ⟨ops.x_mem_centralizer, ops.xOp_not_mem, fun s hs => xOp_operators_ne_of_mem ops s hs⟩
 
-/-- The logical Z operator is a nontrivial logical operator (represents a nontrivial coset). -/
+/-- The logical Z operator is a nontrivial logical operator (represents a
+nontrivial coset). -/
 theorem zOp_nontrivial {S : StabilizerGroup n} (ops : LogicalQubitOps n S) :
     IsNontrivialLogicalOperator ops.zOp S :=
   ⟨ops.z_mem_centralizer, ops.zOp_not_mem, fun s hs => zOp_operators_ne_of_mem ops s hs⟩
 
 end LogicalQubitOps
 
-/-- Two Pauli elements represent the same logical operator if they differ by an element
+/-- Two Pauli elements represent the same logical operator if they differ by an
+element
     of the stabilizer (same coset of S in the centralizer). -/
 def SameLogicalOperator (L L' : NQubitPauliGroupElement n) (S : StabilizerGroup n) : Prop :=
   L⁻¹ * L' ∈ S.toSubgroup

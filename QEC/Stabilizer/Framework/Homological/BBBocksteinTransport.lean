@@ -128,19 +128,17 @@ square-zero cover of rings -/
 
 section RingLift
 
-/-- **The element-form span, pushed down a square-zero ring cover.**  Let
+/-- **The element-form span, pushed down a square-zero ring cover.** Let
 `ρ : R̂ → R` be a surjective ring map with `ker ρ ⊆ (ε̂²)`, `ρ ε̂ = ε`,
-`ε² = 0`, where upstairs `char R̂ = 2` and `Ann(ε̂) = (ε̂³)`.  Then the
-Bockstein element form holds downstairs: whenever `A·z = ε·a` and
-`B·z = ε·b` in `R`, the representative `A·b + B·a` lies in `ε·(A, B)`,
-with explicit Bezout witnesses.
+`ε² = 0`, where upstairs `char R̂ = 2` and `Ann(ε̂) = (ε̂³)`. Then the Bockstein
+element form holds downstairs: whenever `A·z = ε·a` and `B·z = ε·b` in `R`, the
+representative `A·b + B·a` lies in `ε·(A, B)`, with explicit Bezout witnesses.
 
 This is `BocksteinLift.bockstein_element_form` transported through the
-isomorphism `R ≅ R̂ ⧸ (ε̂²)` — but stated without constructing the
-isomorphism: hypotheses are lifted through surjectivity of `ρ`, the
-quotient conclusion is unpacked by `Ideal.mem_span_pair`, and the witness
-identity descends along `ρ` (the `(ε̂²)`-ambiguity dies because
-`ρ(ε̂²) = ε² = 0`). -/
+isomorphism `R ≅ R̂ ⧸ (ε̂²)` — but stated without constructing the isomorphism:
+hypotheses are lifted through surjectivity of `ρ`, the quotient conclusion is
+unpacked by `Ideal.mem_span_pair`, and the witness identity descends along `ρ`
+(the `(ε̂²)`-ambiguity dies because `ρ(ε̂²) = ε² = 0`). -/
 theorem bockstein_span_of_ringHom {Rh Rg : Type*} [CommRing Rh] [CommRing Rg]
     (ρ : Rh →+* Rg) (εh : Rh) (εg : Rg)
     (hchar : (2 : Rh) = 0)
@@ -258,11 +256,11 @@ section LiftCover
 variable {G : Type} [Fintype G] [AddCommGroup G] [DecidableEq G]
 variable {Ghat : Type} [Fintype Ghat] [AddCommGroup Ghat] [DecidableEq Ghat]
 
-/-- The transfer bundle of an order-4 lift `q : Ĝ →+ G` with deck
-`c = σ̂ + σ̂`: an `XDoubleCoverData Ĝ G` with zero polynomials.  Only its
-transfer layer (`pull0`, `push0`, `liftC2`, `deckPoly`) is used — it lets
-the generic level-0 identities (`pull0_eq_conv_deckPoly_liftC2`) compute
-the kernel of `𝔽₂[Ĝ] → 𝔽₂[G]`. -/
+/-- The transfer bundle of an order-4 lift `q : Ĝ →+ G` with deck `c = σ̂ + σ̂`:
+an `XDoubleCoverData Ĝ G` with zero polynomials. Only its transfer layer
+(`pull0`, `push0`, `liftC2`, `deckPoly`) is used — it lets the generic level-0
+identities (`pull0_eq_conv_deckPoly_liftC2`) compute the kernel of
+`𝔽₂[Ĝ] → 𝔽₂[G]`. -/
 noncomputable def liftCoverData (q : Ghat →+ G) (shat : Ghat)
     (hc : shat + shat ≠ 0)
     (hfiber : ∀ g g' : Ghat, q g' = q g ↔ g' = g ∨ g' = g + (shat + shat))
@@ -292,8 +290,8 @@ variable {G H : Type}
 
 /-! ## Level-0 transfer identities: `τ₀ = ε · lift` -/
 
-/-- The chain identity `τ₀(p₀ w) = w + σw` on `C₀`/`C₂` chains (level-0
-sibling of `pull1_push1`). -/
+/-- The chain identity `τ₀(p₀ w) = w + σw` on `C₀`/`C₂` chains (level-0 sibling
+of `pull1_push1`). -/
 theorem pull0_push0 (w : G → ZMod 2) :
     D.pull0 (D.push0 w) = w + D.deckShift0 w := by
   funext g
@@ -306,10 +304,10 @@ theorem push0_pull0_eq_zero (u : H → ZMod 2) :
   change fiberSumFn (⇑D.proj) (u ∘ ⇑D.proj) = 0
   exact fiberSumFn_pullback D.deckSigma0_ne D.proj_fiber u
 
-/-- **`τ₀ = ε · lift`**: the pullback of a base chain is `deckPoly`
-convolved with its sheet-0 lift.  This is the multiplication-operator
-form of the transfer, the key identity that turns `τ₁(seamC ζ) = liftStab ζ`
-into the `ε`-divisibility hypotheses of the element form. -/
+/-- **`τ₀ = ε · lift`**: the pullback of a base chain is `deckPoly` convolved
+with its sheet-0 lift. This is the multiplication-operator form of the transfer,
+the key identity that turns `τ₁(seamC ζ) = liftStab ζ` into the `ε`-divisibility
+hypotheses of the element form. -/
 theorem pull0_eq_conv_deckPoly_liftC2 (u : H → ZMod 2) :
     D.pull0 u = D.deckPoly ⋆ D.liftC2 u := by
   have h1 : D.push0 (D.liftC2 u) = u := by
@@ -349,8 +347,8 @@ lemma rightHalf_pull1 (u : H × Fin 2 → ZMod 2) :
 
 /-! ## The seam chain as an `ε`-division: the element-form hypotheses -/
 
-/-- `A⋆(lift ζ) = ε⋆(lift of the left half of seamC ζ)`: the left
-component of `τ₁(seamC ζ) = liftStab ζ` read through `τ₀ = ε·lift`. -/
+/-- `A⋆(lift ζ) = ε⋆(lift of the left half of seamC ζ)`: the left component of
+`τ₁(seamC ζ) = liftStab ζ` read through `τ₀ = ε·lift`. -/
 theorem conv_Ac_liftC2_seamC {ζ : H → ZMod 2}
     (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
     D.Ac ⋆ D.liftC2 ζ
@@ -376,12 +374,12 @@ theorem conv_Bc_liftC2_seamC {ζ : H → ZMod 2}
 
 /-! ## The Bockstein element form and the transport core -/
 
-/-- **The Bockstein element form** for a cover bundle, in convolution
-language: whenever `A⋆z` and `B⋆z` are `ε`-divisible (`ε = deckPoly =
-1 + x^σ`), the representative `A⋆b + B⋆a` built from the `ε`-quotients
-lies in `ε·(A, B)`.  This is the `δ₁∘δ₂ = 0` element fact (A13 §1, claim 4);
-`elementForm_of_orderFourLift` discharges it from an order-4 lift of the
-deck. -/
+/-- **The Bockstein element form** for a cover bundle, in convolution language:
+whenever `A⋆z` and `B⋆z` are `ε`-divisible (`ε = deckPoly = 1 + x^σ`), the
+representative `A⋆b + B⋆a` built from the `ε`-quotients lies in `ε·(A, B)`. This
+is the `δ₁∘δ₂ = 0` element fact (A13 §1, claim 4);
+`elementForm_of_orderFourLift` discharges it from an order-4 lift of the deck.
+-/
 def BocksteinElementForm : Prop :=
   ∀ z a b : G → ZMod 2,
     D.Ac ⋆ z = D.deckPoly ⋆ a →
@@ -390,11 +388,11 @@ def BocksteinElementForm : Prop :=
       D.Ac ⋆ b + D.Bc ⋆ a
         = D.deckPoly ⋆ (D.Ac ⋆ r + D.Bc ⋆ s)
 
-/-- **The transport core**: under the element form, every seam chain is
-the pushforward of a cover 1-cycle — on the nose.  The corrected lift
-`v = (ã + ε⋆s | b̃ + ε⋆r)` is a cycle because the element form makes the
-two boundary defects cancel in characteristic 2, and pushes to `seamC ζ`
-because `p₀` kills `ε`-multiples. -/
+/-- **The transport core**: under the element form, every seam chain is the
+pushforward of a cover 1-cycle — on the nose. The corrected lift
+`v = (ã + ε⋆s | b̃ + ε⋆r)` is a cycle because the element form makes the two
+boundary defects cancel in characteristic 2, and pushes to `seamC ζ` because
+`p₀` kills `ε`-multiples. -/
 theorem exists_cycle_push_eq_seamC (hEF : D.BocksteinElementForm)
     {ζ : H → ZMod 2} (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
     ∃ v : G × Fin 2 → ZMod 2,
@@ -454,8 +452,8 @@ theorem exists_cycle_push_eq_seamC (hEF : D.BocksteinElementForm)
 /-! ## The capstone: `BocksteinVanishes` from the element form -/
 
 /-- **The seamC ↔ δ₂ transport**: the element form implies the
-Bockstein-vanishing criterion `ker τ_* ≤ range p_*` on `H₁`.  Unpack
-`ker τ_*` through the seam-coset characterization (`im δ₂ = ker τ₁`,
+Bockstein-vanishing criterion `ker τ_* ≤ range p_*` on `H₁`. Unpack `ker τ_*`
+through the seam-coset characterization (`im δ₂ = ker τ₁`,
 `BBDeficitWall.pull1_mem_boundaries_iff_seamCoset`), then push the
 transport-core cycle forward. -/
 theorem bocksteinVanishes_of_elementForm (hEF : D.BocksteinElementForm) :
@@ -509,16 +507,15 @@ theorem finrank_ker_epsH1_eq_of_elementForm (hEF : D.BocksteinElementForm) :
 
 section OrderFourLift
 
-/-- **The element form from an order-4 lift.**  If the deck `σ = deckS`
-lifts one rung up the doubling tower — a group `Ĝ` with `σ̂` of exact
-order 4 and a surjection `q : Ĝ →+ G` with `q σ̂ = σ` and
-`ker q = {0, σ̂ + σ̂}` — then `BocksteinElementForm` holds.
+/-- **The element form from an order-4 lift.** If the deck `σ = deckS` lifts one
+rung up the doubling tower — a group `Ĝ` with `σ̂` of exact order 4 and a
+surjection `q : Ĝ →+ G` with `q σ̂ = σ` and `ker q = {0, σ̂ + σ̂}` — then
+`BocksteinElementForm` holds.
 
-Route: `ρ = 𝔽₂[q] : 𝔽₂[Ĝ] → 𝔽₂[G]` is surjective with `ker ρ ⊆ (ε̂²)`
-(fiber-sum exactness of the hat cover `liftCoverData`, read through
-`convEquiv`), `Ann(ε̂) = (ε̂³)` holds by L2a
-(`epsFree_one_add_single_of_addOrderOf` at order `2² = 4`), and
-`bockstein_span_of_ringHom` descends the element form along `ρ`;
+Route: `ρ = 𝔽₂[q] : 𝔽₂[Ĝ] → 𝔽₂[G]` is surjective with `ker ρ ⊆ (ε̂²)` (fiber-sum
+exactness of the hat cover `liftCoverData`, read through `convEquiv`),
+`Ann(ε̂) = (ε̂³)` holds by L2a (`epsFree_one_add_single_of_addOrderOf` at order
+`2² = 4`), and `bockstein_span_of_ringHom` descends the element form along `ρ`;
 `convEquiv` transports the result to convolution language. -/
 theorem elementForm_of_orderFourLift {Ghat : Type}
     [Finite Ghat] [AddCommGroup Ghat]
@@ -669,8 +666,8 @@ theorem elementForm_of_orderFourLift {Ghat : Type}
       LinearEquiv.apply_symm_apply]
   rw [← hL, ← hR, hrs']
 
-/-- **`BocksteinVanishes` from an order-4 lift of the deck** — the
-seamC ↔ δ₂ transport composed with the element-form discharge. -/
+/-- **`BocksteinVanishes` from an order-4 lift of the deck** — the seamC ↔ δ₂
+transport composed with the element-form discharge. -/
 theorem bocksteinVanishes_of_orderFourLift {Ghat : Type}
     [Finite Ghat] [AddCommGroup Ghat]
     (q : Ghat →+ G) (shat : Ghat)
@@ -722,14 +719,14 @@ namespace XDoubleCoverData
 
 variable {H : Type} [Fintype H] [AddCommGroup H] [DecidableEq H]
 
-/-- **The element form for doubled-axis `ZMod` products** — the concrete
-order-4 lift.  For a cover group `ZMod (2n) × ZMod m` whose deck is
-`(n, t)` (the standard doubled-axis deck; `t` any order-2 twist, `0`
-included), the Frattini lift `ZMod (4n) × ZMod m` with `σ̂ = (n, t)` and
-`q = cast × id` discharges `BocksteinElementForm` unconditionally: `σ̂`
-has exact order 4 (`2σ̂ = (2n, 0) ≠ 0` in `ZMod (4n)`), `q` is surjective
-with kernel `{0, 2σ̂}` (the two multiples of `2n` below `4n`).  Every
-free-ℤ₂ BB doubling cover in the program has this shape. -/
+/-- **The element form for doubled-axis `ZMod` products** — the concrete order-4
+lift. For a cover group `ZMod (2n) × ZMod m` whose deck is `(n, t)` (the
+standard doubled-axis deck; `t` any order-2 twist, `0` included), the Frattini
+lift `ZMod (4n) × ZMod m` with `σ̂ = (n, t)` and `q = cast × id` discharges
+`BocksteinElementForm` unconditionally: `σ̂` has exact order 4
+(`2σ̂ = (2n, 0) ≠ 0` in `ZMod (4n)`), `q` is surjective with kernel `{0, 2σ̂}`
+(the two multiples of `2n` below `4n`). Every free-ℤ₂ BB doubling cover in the
+program has this shape. -/
 theorem elementForm_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod (2 * n) × ZMod m) H)
     (t : ZMod m) (ht : t + t = 0)
@@ -822,8 +819,8 @@ theorem elementForm_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
         rw [h1, h2, map_natCast, ZMod.natCast_self]
         rfl
 
-/-- **`BocksteinVanishes` for doubled-axis `ZMod` products** —
-unconditional over the concrete BB doubling family. -/
+/-- **`BocksteinVanishes` for doubled-axis `ZMod` products** — unconditional
+over the concrete BB doubling family. -/
 theorem bocksteinVanishes_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod (2 * n) × ZMod m) H)
     (t : ZMod m) (ht : t + t = 0)
@@ -832,8 +829,8 @@ theorem bocksteinVanishes_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
   D.bocksteinVanishes_of_elementForm (D.elementForm_of_zmod_double t ht hdeck)
 
 /-- **The Bockstein rank equality for doubled-axis `ZMod` products**:
-`dim (1+σ)·H₁(cover) = k̃ − k`, unconditionally (A13 Theorem, claim 2,
-for every free-ℤ₂ BB doubling cover of the program). -/
+`dim (1+σ)·H₁(cover) = k̃ − k`, unconditionally (A13 Theorem, claim 2, for every
+free-ℤ₂ BB doubling cover of the program). -/
 theorem finrank_range_epsH1_eq_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod (2 * n) × ZMod m) H)
     (t : ZMod m) (ht : t + t = 0)
@@ -843,13 +840,12 @@ theorem finrank_range_epsH1_eq_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
         - dim₂ D.baseComplex.H1 :=
   D.finrank_range_epsH1_eq (D.bocksteinVanishes_of_zmod_double t ht hdeck)
 
-/-- **The element form for doubled-axis `ZMod` products, second-axis
-mirror** — the concrete order-4 lift with the doubled factor in the
-*second* coordinate (the y-deck orientation, e.g. A19-type y-deck
-covers).  For a cover group `ZMod m × ZMod (2n)` whose deck is `(t, n)`
-(`t` any order-2 twist, `0` included), the Frattini lift
-`ZMod m × ZMod (4n)` with `σ̂ = (t, n)` and `q = id × cast` discharges
-`BocksteinElementForm` unconditionally.  Mirror of
+/-- **The element form for doubled-axis `ZMod` products, second-axis mirror** —
+the concrete order-4 lift with the doubled factor in the *second* coordinate
+(the y-deck orientation, e.g. A19-type y-deck covers). For a cover group
+`ZMod m × ZMod (2n)` whose deck is `(t, n)` (`t` any order-2 twist, `0`
+included), the Frattini lift `ZMod m × ZMod (4n)` with `σ̂ = (t, n)` and
+`q = id × cast` discharges `BocksteinElementForm` unconditionally. Mirror of
 `elementForm_of_zmod_double`. -/
 theorem elementForm_of_zmod_double_right {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod m × ZMod (2 * n)) H)
@@ -942,8 +938,8 @@ theorem elementForm_of_zmod_double_right {n m : ℕ} [NeZero n] [NeZero m]
         rw [h1, h2, map_natCast, ZMod.natCast_self]
         rfl
 
-/-- **`BocksteinVanishes` for doubled-axis `ZMod` products, second-axis
-mirror** — unconditional for y-deck covers (e.g. A19-type). -/
+/-- **`BocksteinVanishes` for doubled-axis `ZMod` products, second-axis mirror**
+— unconditional for y-deck covers (e.g. A19-type). -/
 theorem bocksteinVanishes_of_zmod_double_right {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod m × ZMod (2 * n)) H)
     (t : ZMod m) (ht : t + t = 0)
@@ -952,9 +948,8 @@ theorem bocksteinVanishes_of_zmod_double_right {n m : ℕ} [NeZero n] [NeZero m]
   D.bocksteinVanishes_of_elementForm
     (D.elementForm_of_zmod_double_right t ht hdeck)
 
-/-- **The Bockstein rank equality for doubled-axis `ZMod` products,
-second-axis mirror**: `dim (1+σ)·H₁(cover) = k̃ − k`, unconditionally,
-for y-deck covers. -/
+/-- **The Bockstein rank equality for doubled-axis `ZMod` products, second-axis
+mirror**: `dim (1+σ)·H₁(cover) = k̃ − k`, unconditionally, for y-deck covers. -/
 theorem finrank_range_epsH1_eq_of_zmod_double_right {n m : ℕ}
     [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod m × ZMod (2 * n)) H)

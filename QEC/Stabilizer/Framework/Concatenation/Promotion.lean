@@ -53,7 +53,8 @@ def promoteE (Xbar Zbar : NQubitPauliOperator n₁) (h : NQubitPauliGroupElement
     (h : NQubitPauliGroupElement n₂) :
     (promoteE Xbar Zbar h).operators = promoteOp Xbar Zbar h.operators := rfl
 
-/-- A Z-type outer operator promotes (with a Z-type `Z̄`) to a Z-type element. -/
+/-- A Z-type outer operator promotes (with a Z-type `Z̄`) to a Z-type element.
+-/
 lemma promoteE_isZ {Xbar Zbar : NQubitPauliOperator n₁} (hZbar : NQubitPauliOperator.IsZType Zbar)
     {h : NQubitPauliGroupElement n₂} (hh : NQubitPauliOperator.IsZType h.operators) :
     IsZTypeElement (promoteE Xbar Zbar h) := by
@@ -63,7 +64,8 @@ lemma promoteE_isZ {Xbar Zbar : NQubitPauliOperator n₁} (hZbar : NQubitPauliOp
   · rw [hI]; exact Or.inl rfl
   · rw [hZ]; exact hZbar (posOf q)
 
-/-- An X-type outer operator promotes (with an X-type `X̄`) to an X-type element. -/
+/-- An X-type outer operator promotes (with an X-type `X̄`) to an X-type
+element. -/
 lemma promoteE_isX {Xbar Zbar : NQubitPauliOperator n₁} (hXbar : NQubitPauliOperator.IsXType Xbar)
     {h : NQubitPauliGroupElement n₂} (hh : NQubitPauliOperator.IsXType h.operators) :
     IsXTypeElement (promoteE Xbar Zbar h) := by
@@ -73,8 +75,8 @@ lemma promoteE_isX {Xbar Zbar : NQubitPauliOperator n₁} (hXbar : NQubitPauliOp
   · rw [hI]; exact Or.inl rfl
   · rw [hX]; exact hXbar (posOf q)
 
-/-- Embedding a Z-type element into a block yields a Z-type element (the off-block
-positions are `I`, which is Z-type). -/
+/-- Embedding a Z-type element into a block yields a Z-type element (the
+off-block positions are `I`, which is Z-type). -/
 lemma embedBlock_isZ (b : Fin n₂) {g : NQubitPauliGroupElement n₁}
     (hg : IsZTypeElement g) : IsZTypeElement (embedBlock b g) := by
   refine ⟨rfl, fun q => ?_⟩
@@ -92,8 +94,8 @@ lemma embedBlock_isX (b : Fin n₂) {g : NQubitPauliGroupElement n₁}
   · rw [if_pos hbq]; exact hg.2 (posOf q)
   · rw [if_neg hbq]; exact Or.inl rfl
 
-/-- An X-type operator tensor has no `Y` component (feeds the `no-Y` hypotheses of
-`promote_anticommute_parity`). -/
+/-- An X-type operator tensor has no `Y` component (feeds the `no-Y` hypotheses
+of `promote_anticommute_parity`). -/
 lemma noY_of_isXType {n : ℕ} {op : NQubitPauliOperator n}
     (h : NQubitPauliOperator.IsXType op) (i : Fin n) : op i ≠ PauliOperator.Y := by
   rcases h i with hi | hi <;> rw [hi] <;> decide
@@ -105,8 +107,8 @@ lemma noY_of_isZType {n : ℕ} {op : NQubitPauliOperator n}
 
 /-! ## The concatenated-code data bundle -/
 
-/-- Input data for concatenating a `k₁ = 1` CSS inner code with a CSS outer code.
-Carries the typed (Z/X) splits of both generator lists and the CSS-typed,
+/-- Input data for concatenating a `k₁ = 1` CSS inner code with a CSS outer
+code. Carries the typed (Z/X) splits of both generator lists and the CSS-typed,
 phase-0 inner logical representatives `X̄₁ = (Cin.logicalX 0)`,
 `Z̄₁ = (Cin.logicalZ 0)`. -/
 structure ConcatCSSData (n₁ n₂ k₂ : ℕ) [NeZero n₁] where
@@ -126,9 +128,9 @@ structure ConcatCSSData (n₁ n₂ k₂ : ℕ) [NeZero n₁] where
   innerLogX_phaseZero : (Cin.logicalX 0).phasePower = 0
   innerLogZ_isZ : NQubitPauliOperator.IsZType (Cin.logicalZ 0).operators
   innerLogZ_phaseZero : (Cin.logicalZ 0).phasePower = 0
-  /-- The outer logical `X` representatives are X-type (hence `Y`-free): required so that
-  `promote_anticommute_parity` applies to the promoted logicals. A CSS outer code admits
-  such representatives. -/
+  /-- The outer logical `X` representatives are X-type (hence `Y`-free):
+required so that `promote_anticommute_parity` applies to the promoted logicals.
+A CSS outer code admits such representatives. -/
   outerLogX_isX : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsXType (Cout.logicalX ℓ).operators
   /-- The outer logical `Z` representatives are Z-type (hence `Y`-free). -/
   outerLogZ_isZ : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsZType (Cout.logicalZ ℓ).operators

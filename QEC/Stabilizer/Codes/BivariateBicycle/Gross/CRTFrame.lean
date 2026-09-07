@@ -33,15 +33,16 @@ namespace CRTFrame
 
 Characteristic-2 addition table and the F₄ multiplication table. -/
 
-/-- F₄ addition (characteristic 2): bitwise XOR on the `Fin 4` encoding (the table
-`![![0,1,2,3], ![1,0,3,2], ![2,3,0,1], ![3,2,1,0]]`).  `Nat.xor` is
+/-- F₄ addition (characteristic 2): bitwise XOR on the `Fin 4` encoding (the
+table `![![0,1,2,3], ![1,0,3,2], ![2,3,0,1], ![3,2,1,0]]`). `Nat.xor` is
 kernel-accelerated, which keeps the big `decide` walks downstream cheap. -/
 def fadd : Fin 4 → Fin 4 → Fin 4 :=
   fun a b => ⟨(a.val ^^^ b.val) % 4, by omega⟩
 
-/-- F₄ multiplication: the table `![![0,0,0,0], ![0,1,2,3], ![0,2,3,1], ![0,3,1,2]]`
-packed row-major (`a*4 + b`) at 2 bits per entry into the literal `0x9c78e400`.
-`Nat.shiftRight`/`Nat.mod` are kernel-accelerated (cf. `fadd`). -/
+/-- F₄ multiplication: the table
+`![![0,0,0,0], ![0,1,2,3], ![0,2,3,1], ![0,3,1,2]]` packed row-major (`a*4 + b`)
+at 2 bits per entry into the literal `0x9c78e400`. `Nat.shiftRight`/`Nat.mod`
+are kernel-accelerated (cf. `fadd`). -/
 def fmul : Fin 4 → Fin 4 → Fin 4 :=
   fun a b => ⟨(0x9c78e400 >>> (2 * (a.val * 4 + b.val))) % 4, by omega⟩
 
@@ -80,9 +81,9 @@ def rmul (p q : Ring) : Ring :=
 def uv : Ring := fun _ => 1
 
 /-- Explicit ring element from its four layer values (canonical layer order
-`1, s_x, s_y, s_xs_y`).  Together with `ring_eq_mkRing` this converts
-`∀ r : Ring, …` sweeps into `∀ a b c d : Fin 4, …` sweeps — the form the
-kernel can enumerate without whnf-ing the 256-element pi-type `Fintype`. -/
+`1, s_x, s_y, s_xs_y`). Together with `ring_eq_mkRing` this converts
+`∀ r : Ring, …` sweeps into `∀ a b c d : Fin 4, …` sweeps — the form the kernel
+can enumerate without whnf-ing the 256-element pi-type `Fintype`. -/
 def mkRing (a b c d : Fin 4) : Ring := fun s =>
   if s = (0, 0) then a else if s = (1, 0) then b else if s = (0, 1) then c else d
 
@@ -111,9 +112,9 @@ def torus (g : BaseGroup) : ZMod 3 × ZMod 3 := (torus1 g.1, torus1 g.2)
 /-! ## §4 The radical multipliers (A4 §3 table), as value vectors over the
 layers `(0,0),(1,0),(0,1),(1,1) = (1, s_x, s_y, s_xs_y)`.
 
-The six radical multipliers `Â₁, Â₃, Â₄, B̂₂, B̂₃, B̂₄` collapse to three distinct
-value vectors, each with exactly one zero layer and three distinct nonzero
-values — the input to the engine's ≥3-layer dichotomy. -/
+The six radical multipliers `Â₁, Â₃, Â₄, B̂₂, B̂₃, B̂₄` collapse to three
+distinct value vectors, each with exactly one zero layer and three distinct
+nonzero values — the input to the engine's ≥3-layer dichotomy. -/
 
 /-- `Â₁ = Â₃ = u + ωv`, value vector `(3, 1, 2, 0)`. -/
 def Ahat1 : Ring := fun s =>
@@ -131,7 +132,7 @@ def Bhat2 : Ring := fun s =>
 
 For a radical multiplier `D` (here `Â₁`, `Â₄`, `B̂₂` — the three distinct
 vectors): `D² = 0`, `Ann(D) = (D) = {αD + β·uv}` (a 2-dimensional ideal), and
-every NONZERO ideal element has `≥ 3` nonzero layers.  All three are finite
+every NONZERO ideal element has `≥ 3` nonzero layers. All three are finite
 checks over the 256-element ring (EngineProbe GREEN). -/
 
 /-- The four F₄ values. -/
@@ -190,28 +191,29 @@ theorem Bhat2_ideal_ge3 : all16.all (fun ab =>
 
 /-! ## §6 The component transform `V` and its F₂-linearity (M2 bridge).
 
-`V psi s f = Σ_{h : layer h = s, f h = 1} psi h` (sum in F₄).  The load-bearing
+`V psi s f = Σ_{h : layer h = s, f h = 1} psi h` (sum in F₄). The load-bearing
 fact for the multiplicativity engine is that `V` is **F₂-linear in the chain**
 `f` (`V_add`), proved from a generic char-2 fold-splitting lemma (`foldl_char2`,
 whose only arithmetic content is one `decide` over the 256 `Bool²×Fin 4³`
-accumulator cases).  This is what lifts the basis-chain multiplicativity
-(M2-(A): `V_j(baseP⋆δ_p) = P̂_j·V_j(δ_p)`, a kernel `decide` over the 36 `δ_p`, all
-10 (j,P) instances GREEN in `phase6/MultProbe.lean`) to all chains `z`.  The five
+accumulator cases). This is what lifts the basis-chain multiplicativity (M2-(A):
+`V_j(baseP⋆δ_p) = P̂_j·V_j(δ_p)`, a kernel `decide` over the 36 `δ_p`, all 10
+(j,P) instances GREEN in `phase6/MultProbe.lean`) to all chains `z`. The five
 component characters are the A4 §3 frame characters. -/
 
 /-- Enumeration of the base group (36 cells). -/
 def allG : List BaseGroup :=
   (List.range 6).flatMap (fun a => (List.range 6).map (fun b => ((a : ZMod 6), (b : ZMod 6))))
 
-/-- Component characters (A4 §3): ψ₀=1, ψ₁=ω^{t_y}, ψ₂=ω^{t_x},
-ψ₃=ω^{t_x+t_y}, ψ₄=ω^{t_x+2t_y}. -/
+/-- Component characters (A4 §3): ψ₀=1, ψ₁=ω^{t_y}, ψ₂=ω^{t_x}, ψ₃=ω^{t_x+t_y},
+ψ₄=ω^{t_x+2t_y}. -/
 def psi0 : BaseGroup → Fin 4 := fun _ => 1
 def psi1 : BaseGroup → Fin 4 := fun g => omegaPow (torus1 g.2)
 def psi2 : BaseGroup → Fin 4 := fun g => omegaPow (torus1 g.1)
 def psi3 : BaseGroup → Fin 4 := fun g => omegaPow (torus1 g.1 + torus1 g.2)
 def psi4 : BaseGroup → Fin 4 := fun g => omegaPow (torus1 g.1 + 2 * torus1 g.2)
 
-/-- Generic char-2 transform: `fadd`-fold of `b` over the cells where `P` holds. -/
+/-- Generic char-2 transform: `fadd`-fold of `b` over the cells where `P` holds.
+-/
 def fsum (b : BaseGroup → Fin 4) (P : BaseGroup → Bool) : Fin 4 :=
   allG.foldl (fun acc h => if P h then fadd acc (b h) else acc) 0
 
@@ -246,9 +248,9 @@ theorem fsum_xor (b : BaseGroup → Fin 4) (Pf Pg : BaseGroup → Bool) :
 def V (psi : BaseGroup → Fin 4) (s : ZMod 2 × ZMod 2) (f : BaseGroup → ZMod 2) : Fin 4 :=
   fsum psi (fun h => decide (layer h = s) && decide (f h = 1))
 
-/-- **The F₂-linearity bridge (M2-(B)): `V` is additive in the chain.**  This is
-the load-bearing step that lifts the basis-chain multiplicativity (M2-(A),
-a kernel `decide` over the 36 `δ_p`) to all chains `z`; it is the piece with no
+/-- **The F₂-linearity bridge (M2-(B)): `V` is additive in the chain.** This is
+the load-bearing step that lifts the basis-chain multiplicativity (M2-(A), a
+kernel `decide` over the 36 `δ_p`) to all chains `z`; it is the piece with no
 mathlib analogue (F₄ is `Fin 4`+tables, so there is no `AddCommMonoid` to borrow
 `Finset.sum` additivity from — hence the hand-rolled char-2 `foldl_char2`). -/
 theorem V_add (psi : BaseGroup → Fin 4) (s : ZMod 2 × ZMod 2)
@@ -264,13 +266,13 @@ theorem V_add (psi : BaseGroup → Fin 4) (s : ZMod 2 × ZMod 2)
 
 /-! ## §7 General multiplicativity `V_j(baseP⋆z) = P̂_j·V_j(z)` for all chains.
 
-The basis-chain identity (M2-(A): `V_j(baseP⋆δ_p) = P̂_j·V_j(δ_p)`, kernel `decide`
-on the `Pi.single p 1`, all 10 (j,P) instances GREEN in `phase6/MultProbe.lean`)
-lifts to **all** chains `z` because every map in sight is F₂-linear: the
-convolution `conv baseP ·` (`conv_add_right`), the transform `V` (`V_add`), and
-the ring product `rmul` (`rmul_add_right`).  `mult_of_basis` packages the support
-induction; the six radical-multiplier instances the engine (§5) consumes are
-spelled out below. -/
+The basis-chain identity (M2-(A): `V_j(baseP⋆δ_p) = P̂_j·V_j(δ_p)`, kernel
+`decide` on the `Pi.single p 1`, all 10 (j,P) instances GREEN in
+`phase6/MultProbe.lean`) lifts to **all** chains `z` because every map in sight
+is F₂-linear: the convolution `conv baseP ·` (`conv_add_right`), the transform
+`V` (`V_add`), and the ring product `rmul` (`rmul_add_right`). `mult_of_basis`
+packages the support induction; the six radical-multiplier instances the engine
+(§5) consumes are spelled out below. -/
 
 /-- Generic F₄ fold-additivity: a `fadd`-fold of a pointwise sum splits. -/
 theorem foldl_add {α : Type} (m n : α → Fin 4) :
@@ -343,7 +345,7 @@ theorem self_eq_ind_filter (z : BaseGroup → ZMod 2) :
   simp only [ind, Finset.mem_filter, Finset.mem_univ, true_and]
   exact (hz (z g)).symm
 
-/-- **General multiplicativity from the basis case.**  If the multiplicativity
+/-- **General multiplicativity from the basis case.** If the multiplicativity
 identity holds on every point-mass chain `Pi.single p 1`, it holds for every
 chain `z` — by F₂-linearity of `conv baseP ·`, `V`, and `rmul`. -/
 theorem mult_of_basis (psi : BaseGroup → Fin 4) (P : BaseGroup → ZMod 2)
@@ -383,8 +385,8 @@ For each, a kernel `decide` discharges the 36-`δ_p` basis case (in the sparse
 `conv P δ_p = P (· - p)` form supplied by `basis_of_translate`, so no
 `Finset.sum` ever reaches the kernel); `mult_of_basis` lifts it to all `z`. -/
 
-/-- Sparse form of right-convolution with a point mass:
-`conv P δ_p = P (· - p)` (from `conv_comm` + `conv_single_left`). -/
+/-- Sparse form of right-convolution with a point mass: `conv P δ_p = P (· - p)`
+(from `conv_comm` + `conv_single_left`). -/
 theorem conv_single_right (P : BaseGroup → ZMod 2) (p : BaseGroup) :
     P ⋆ Pi.single p 1 = fun g => P (g - p) := by
   rw [conv_comm, conv_single_left]

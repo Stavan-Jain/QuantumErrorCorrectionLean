@@ -6,13 +6,13 @@ import QEC.Stabilizer.Codes.Toric.CodeN
 /-!
 # Toric chain-operator machinery (below the iff layer)
 
-This file collects the lattice-specific chain ↔ Pauli-element bridges that
-the generic `HomologicalCode`-instance for the toric code needs.  Placing
-them here (between `ToricH1Dimension` / `ToricCodeN` and the X/Z logical
-correspondence iff files) avoids a circular import:
+This file collects the lattice-specific chain ↔ Pauli-element bridges that the
+generic `HomologicalCode`-instance for the toric code needs. Placing them here
+(between `ToricH1Dimension` / `ToricCodeN` and the X/Z logical correspondence
+iff files) avoids a circular import:
 
-  `ToricChainComplex` imports this file → defines `toricHomologicalCode`
-  and the generator-set bridges → `ToricLogicalCorrespondenceX/Z` import
+  `ToricChainComplex` imports this file → defines `toricHomologicalCode` and the
+  generator-set bridges → `ToricLogicalCorrespondenceX/Z` import
   `ToricChainComplex` and delegate their iff theorems to the generic
   `HomologicalCode` correspondence.
 
@@ -21,8 +21,8 @@ Specifically, this file contains:
 * `toricZOperatorOfChain` — Z-flavored mirror of `toricXOperatorOfChain`.
 * `chainOfZOperator` and the round-trip lemma `chainOfZOperator_*`.
 * `toricXOperatorOfChain_zero` / `_add` and Z analogues.
-* `toricXOperatorOfChain_boundary_singleFace` — identifies the encoded
-  chain `toricBoundary2 (singleFace (x, y))` with the lattice `faceStab L x y`.
+* `toricXOperatorOfChain_boundary_singleFace` — identifies the encoded chain
+  `toricBoundary2 (singleFace (x, y))` with the lattice `faceStab L x y`.
 * `toricZOperatorOfChain_cutMap_singleVtx` — same for the vertex side.
 -/
 
@@ -37,7 +37,8 @@ open scoped ToricChain
 -- Z-operator encoding (mirror of `toricXOperatorOfChain`)
 -- ---------------------------------------------------------------------------
 
-/-- Build a Z-type Pauli element from a 1-chain (dual to `toricXOperatorOfChain`). -/
+/-- Build a Z-type Pauli element from a 1-chain (dual to
+`toricXOperatorOfChain`). -/
 def toricZOperatorOfChain (L : ℕ) (c : C1 L) :
     NQubitPauliGroupElement (toricNumQubits L) :=
   ⟨0, fun q =>
@@ -104,8 +105,8 @@ lemma mem_support_toricZOperatorOfChain_edgeToQubitIdx_iff
       simp [toricZOperatorOfChain, hex]
     simp [NQubitPauliOperator.support, hZ]
 
-/-- The Z-operator-of-chain at qubit `q` is `Z` if some edge mapping to `q` has `c e = 1`,
-else `I`. -/
+/-- The Z-operator-of-chain at qubit `q` is `Z` if some edge mapping to `q` has
+`c e = 1`, else `I`. -/
 lemma toricZOperatorOfChain_op_at (L : ℕ) (c : C1 L) (q : Fin (toricNumQubits L)) :
     (toricZOperatorOfChain L c).operators q =
       if ∃ e, edgeToQubitIdx L e = q ∧ c e = 1
@@ -219,8 +220,8 @@ lemma toricZOperatorOfChain_add (L : ℕ) (c c' : C1 L) :
 -- vertex stab via Z-chain on cutMap(singleVtx).
 -- ---------------------------------------------------------------------------
 
-/-- `toricXOperatorOfChain` maps the boundary of a single face to the corresponding
-face stabilizer. -/
+/-- `toricXOperatorOfChain` maps the boundary of a single face to the
+corresponding face stabilizer. -/
 lemma toricXOperatorOfChain_boundary_singleFace (L : ℕ) [Fact (2 ≤ L)] (x y : Fin L) :
     toricXOperatorOfChain L (∂₂ (L := L) (singleFace (x, y))) =
       StabilizerGroup.ToricCodeN.faceStab L x y := by
