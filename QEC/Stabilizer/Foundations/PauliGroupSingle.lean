@@ -8,8 +8,8 @@ import QEC.Stabilizer.Foundations.PauliGroupSingle.Commutation
 /-!
 # The Pauli Group on a Single Qubit
 
-This module is a thin “barrel import” that re-exports the single-qubit Pauli group
-development from smaller files:
+This module is a thin “barrel import” that re-exports the single-qubit Pauli
+group development from smaller files:
 
 - `QEC.Stabilizer.Foundations.PauliGroupSingle.Core`
 - `QEC.Stabilizer.Foundations.PauliGroupSingle.Operator`

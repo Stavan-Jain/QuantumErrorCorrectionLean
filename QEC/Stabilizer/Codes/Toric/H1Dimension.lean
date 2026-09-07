@@ -13,7 +13,8 @@ open scoped ToricChain
 
 variable (L : ℕ) [Fact (0 < L)]
 
-/-- The boundary submodule viewed inside the cycle submodule (`B₁` as a submodule of `Z₁`). -/
+/-- The boundary submodule viewed inside the cycle submodule (`B₁` as a
+submodule of `Z₁`). -/
 abbrev toricBoundarySubmoduleInCycles : Submodule (ZMod 2) (Z₁ L) :=
   Submodule.comap (Z₁ L).subtype (B₁ L)
 
@@ -65,10 +66,11 @@ theorem toric_rank_nullity_boundary2 :
   simpa [toricBoundaries, add_comm, add_left_comm, add_assoc] using
     (LinearMap.finrank_range_add_finrank_ker (∂₂ (L := L))).symm
 
-/-- The vertex cut map: sends a 0-chain `s` to the 1-chain whose value at edge `e`
-is the parity-difference of `s` at the two endpoints of `e`. This is the transpose
-of `∂₁` and the linear map whose image is exactly the `B₁` boundary subspace, used
-to compute `rank(∂₁)` via `toric_rank_boundary1_eq_rank_cutMap`. -/
+/-- The vertex cut map: sends a 0-chain `s` to the 1-chain whose value at edge
+`e` is the parity-difference of `s` at the two endpoints of `e`. This is the
+transpose of `∂₁` and the linear map whose image is exactly the `B₁` boundary
+subspace, used to compute `rank(∂₁)` via `toric_rank_boundary1_eq_rank_cutMap`.
+-/
 noncomputable def toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L := by
   refine
     { toFun := fun s =>
@@ -85,9 +87,9 @@ noncomputable def toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L := by
     ext e
     cases e <;> simp [mul_add]
 
-/-- `δ⁰` is the toric vertex cut map `toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L` (the
-transpose of `∂₁`, i.e. the coboundary `C⁰ → C¹`), with the lattice size explicit:
-`δ⁰ L s`. Scoped: `open scoped ToricChain`. -/
+/-- `δ⁰` is the toric vertex cut map `toricVertexCutMap : C0 L →ₗ[ZMod 2] C1 L`
+(the transpose of `∂₁`, i.e. the coboundary `C⁰ → C¹`), with the lattice size
+explicit: `δ⁰ L s`. Scoped: `open scoped ToricChain`. -/
 scoped[ToricChain] notation "δ⁰" => Quantum.Stabilizer.Lattice.toricVertexCutMap
 
 /-
@@ -159,7 +161,8 @@ theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
   simp_all +decide [ Finset.sum_add_distrib, mul_add, add_mul ];
   simp +decide only [← Finset.sum_product'] ; ring!;)))
 
-/-- `∂₁` and `toricVertexCutMap` are mutual transposes, so they have equal rank. -/
+/-- `∂₁` and `toricVertexCutMap` are mutual transposes, so they have equal rank.
+-/
 theorem toric_rank_boundary1_eq_rank_cutMap :
     dim₂ (LinearMap.range (∂₁ (L := L))) =
       dim₂ (LinearMap.range (δ⁰ (L := L))) := by
@@ -200,7 +203,8 @@ theorem toric_rank_boundary1_eq_rank_cutMap :
     convert a.pi_apply_eq_sum_univ _ using 1
     simp +decide [ eq_comm, mul_comm ]
 
-/-- The kernel of the toric vertex cut map consists exactly of the constant 0-chains. -/
+/-- The kernel of the toric vertex cut map consists exactly of the constant
+0-chains. -/
 theorem mem_ker_cutMap_iff (s : C0 L) :
     s ∈ LinearMap.ker (δ⁰ (L := L)) ↔ ∃ c : ZMod 2, s = fun _ => c := by
   constructor

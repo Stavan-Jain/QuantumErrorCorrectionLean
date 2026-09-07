@@ -8,8 +8,8 @@ import QEC.Stabilizer.Framework.Homological.LogicalCorrespondence
 /-!
 # Parametric rotated surface code on an `L × L` lattice (`L` odd, `L ≥ 3`)
 
-This file defines the lattice-side stabilizer generators for the rotated
-surface code, delegating commutation and the no-`-I` property to the generic
+This file defines the lattice-side stabilizer generators for the rotated surface
+code, delegating commutation and the no-`-I` property to the generic
 `HomologicalCode` abstraction on `rotatedSurfaceHomologicalCode L`.
 
 The full `StabilizerCode (L*L) 1` packaging is built in
@@ -17,21 +17,21 @@ The full `StabilizerCode (L*L) 1` packaging is built in
 
 ## Design
 
-The Z-stabilizer at a Z-face `zf : ZFaceIdx L` and the X-stabilizer at an
-X-face `xf : XFaceIdx L` are defined directly as the corresponding
-`HomologicalCode.vertexStabOf` / `faceStabOf`.  This pins every concrete
+The Z-stabilizer at a Z-face `zf : ZFaceIdx L` and the X-stabilizer at an X-face
+`xf : XFaceIdx L` are defined directly as the corresponding
+`HomologicalCode.vertexStabOf` / `faceStabOf`. This pins every concrete
 generator to its abstract counterpart by definition, so the generator-set
 bridges below are all `rfl`.
 
 Since the rotated surface code has no redundant generators (we proved
-`rscBoundary2_injective` and `rscZCutMap_injective` in Stage 3), the
-full generator list has length
+`rscBoundary2_injective` and `rscZCutMap_injective` in Stage 3), the full
+generator list has length
 
   `|ZFaceIdx L| + |XFaceIdx L| = L² − 1 = numQubits L − 1`,
 
 which matches `StabilizerCode (L*L) 1`'s `generators_length` requirement
-*without trimming*.  Contrast the toric code, where the analogous list
-needs trimming by two (one redundancy on each side).
+*without trimming*. Contrast the toric code, where the analogous list needs
+trimming by two (one redundancy on each side).
 -/
 
 namespace Quantum
@@ -49,16 +49,16 @@ variable (L : ℕ) [Fact (Odd L)] [Fact (3 ≤ L)]
 
 /-! ## Qubit indexing -/
 
-/-- Data-qubit index: row-major `(x, y) ↦ y * L + x`, matching `rscQubitEquiv`. -/
+/-- Data-qubit index: row-major `(x, y) ↦ y * L + x`, matching `rscQubitEquiv`.
+-/
 noncomputable def dataQubitIdx (v : VtxIdx L) : Fin (numQubits L) :=
   rscQubitEquiv L v
 
 /-! ## Stabilizer generators
 
 `zStab zf` and `xStab xf` are defined as the abstract `vertexStabOf` /
-`faceStabOf` on `rotatedSurfaceHomologicalCode L`.  This pins each
-generator to its homological counterpart, so the bridges below are all
-`rfl`.
+`faceStabOf` on `rotatedSurfaceHomologicalCode L`. This pins each generator to
+its homological counterpart, so the bridges below are all `rfl`.
 -/
 
 /-- Z-stabilizer at face `zf`. -/
@@ -101,9 +101,9 @@ lemma generators_eq_homologicalGenerators :
 
 /-! ## Generator lists
 
-We enumerate the Z- and X-stabs via `Finset.univ.toList`.  This gives lists
-whose `listToSet` equals the corresponding generator set, and whose lengths
-are exactly `Fintype.card (ZFaceIdx L)` and `Fintype.card (XFaceIdx L)`.
+We enumerate the Z- and X-stabs via `Finset.univ.toList`. This gives lists whose
+`listToSet` equals the corresponding generator set, and whose lengths are
+exactly `Fintype.card (ZFaceIdx L)` and `Fintype.card (XFaceIdx L)`.
 -/
 
 /-- Canonical list of all Z-stabs (length `(L²−1)/2`). -/

@@ -9,8 +9,8 @@ import QECWidgets.Demo
 /-!
 # QECWidgets
 
-ProofWidgets-based infoview widgets for the QEC library: colored per-qubit
-Pauli support strips, commutation parity views, and friends. See
+ProofWidgets-based infoview widgets for the QEC library: colored per-qubit Pauli
+support strips, commutation parity views, and friends. See
 `QECWidgets/Demo.lean` for living usage examples.
 
 This library is deliberately separate from `QEC` (same policy as

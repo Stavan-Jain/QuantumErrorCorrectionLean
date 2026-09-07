@@ -4,9 +4,10 @@ import QEC.Stabilizer.Codes.RotatedSurface.DistanceX
 /-!
 # Rotated-surface-code Z-distance ≥ L
 
-The Z-distance mirror of [RotatedSurfaceCodeNDistanceX](RotatedSurfaceCodeNDistanceX.lean).
-Every non-trivial Z-type logical of `rotatedSurfaceStabilizerCode L` has Pauli
-weight ≥ L, witnessed exactly by `logicalZ L` (the middle-row Z-string).
+The Z-distance mirror of
+[RotatedSurfaceCodeNDistanceX](RotatedSurfaceCodeNDistanceX.lean). Every
+non-trivial Z-type logical of `rotatedSurfaceStabilizerCode L` has Pauli weight
+≥ L, witnessed exactly by `logicalZ L` (the middle-row Z-string).
 
 ## Strategy — column-parity invariant (dual side)
 
@@ -22,9 +23,9 @@ Three key facts:
 * `dim (dualCycles / dualBoundaries) = 1` (proved here via the transpose-rank
   bridge to `rsc_rank_boundary2` from Stage 3).
 
-Combining these: for any non-trivial dual cycle `c`, `colParity c x = 1`
-for all `x`, so each column contributes ≥ 1 qubit to the support, giving
-total weight ≥ L.
+Combining these: for any non-trivial dual cycle `c`, `colParity c x = 1` for all
+`x`, so each column contributes ≥ 1 qubit to the support, giving total weight ≥
+L.
 -/
 
 namespace Quantum
@@ -41,7 +42,8 @@ variable (L : ℕ) [Fact (Odd L)] [Fact (3 ≤ L)]
 
 /-! ## §A — Column parity functional -/
 
-/-- The column-parity functional at column `x`: parity of `c (x, y)` over `y`. -/
+/-- The column-parity functional at column `x`: parity of `c (x, y)` over `y`.
+-/
 def colParity (c : RotatedSurface.VtxIdx L → ZMod 2) (x : Fin L) : ZMod 2 :=
   ∑ y : Fin L, c (x, y)
 
@@ -83,8 +85,9 @@ theorem colParity_middleRowChain (x : Fin L) :
 
 /-! ## §C — Column parity vanishes on dual boundaries
 
-`dualBoundaries = range rscZCutMap`.  We show that `colParity (rscZCutMap s) x = 0`
-for every Z-face chain `s`, by case analysis on each Z-face type.
+`dualBoundaries = range rscZCutMap`. We show that
+`colParity (rscZCutMap s) x = 0` for every Z-face chain `s`, by case analysis on
+each Z-face type.
 -/
 
 omit [Fact (Odd L)] [Fact (3 ≤ L)] in
@@ -98,8 +101,8 @@ private lemma card_empty_or_pair_zmod2_zero' {α : Type*} [DecidableEq α] (s : 
     decide
 
 omit [Fact (Odd L)] in
-/-- Per-column intersection of `zSupport zf` with column `x` is either empty
-or a 2-element set. -/
+/-- Per-column intersection of `zSupport zf` with column `x` is either empty or
+a 2-element set. -/
 private lemma colFilter_zSupport_card_even
     (zf : RotatedSurface.ZFaceIdx L) (x : Fin L) :
     (((Finset.univ : Finset (Fin L)).filter
@@ -251,7 +254,8 @@ theorem colParity_rscZCutMap
   ring
 
 omit [Fact (Odd L)] in
-/-- `colParity` vanishes on the dual-boundaries submodule (range of `rscZCutMap`). -/
+/-- `colParity` vanishes on the dual-boundaries submodule (range of
+`rscZCutMap`). -/
 theorem colParity_eq_zero_of_mem_dualBoundaries
     {c : RotatedSurface.VtxIdx L → ZMod 2}
     (hc : c ∈ LinearMap.range (δ⁰ L)) (x : Fin L) :
@@ -264,18 +268,19 @@ theorem colParity_eq_zero_of_mem_dualBoundaries
 We need two rank computations:
 
 * `dim dualCycles = L*L − card XFaceIdx`, via rank-nullity on the abstract
-  `dualBoundary`, whose rank matches `rank rscBoundary2 = card XFaceIdx`
-  (Stage 3) by `Matrix.rank_transpose`.
+  `dualBoundary`, whose rank matches `rank rscBoundary2 = card XFaceIdx` (Stage
+  3) by `Matrix.rank_transpose`.
 
-* `dim dualBoundaries = card ZFaceIdx`, via the bridge
-  `cutMap = rscZCutMap` and Stage 3's `rsc_rank_zCutMap`.
+* `dim dualBoundaries = card ZFaceIdx`, via the bridge `cutMap = rscZCutMap` and
+  Stage 3's `rsc_rank_zCutMap`.
 
 The dual chain-complex law `dualBoundary ∘ cutMap = 0` (which gives
 `dualBoundaries ≤ dualCycles`) is the transpose of `∂₁ ∘ ∂₂ = 0`.
 -/
 
 omit [Fact (Odd L)] [Fact (3 ≤ L)] in
-/-- The X-stab incidence matrix: entry `(xf, v)` is `1` iff `v ∈ xSupport xf`. -/
+/-- The X-stab incidence matrix: entry `(xf, v)` is `1` iff `v ∈ xSupport xf`.
+-/
 def stabXMatrix : Matrix (RotatedSurface.XFaceIdx L) (RotatedSurface.VtxIdx L) (ZMod 2) :=
   fun xf v => if v ∈ RotatedSurface.xSupport xf then 1 else 0
 
@@ -489,7 +494,8 @@ theorem middleRowChain_not_mem_dualBoundaries :
   rw [h1] at h0
   exact (by decide : (1 : ZMod 2) ≠ 0) h0
 
-/-- The class of `middleRowChain` in `dualCycles / dualBoundaries` is non-zero. -/
+/-- The class of `middleRowChain` in `dualCycles / dualBoundaries` is non-zero.
+-/
 private lemma middleRowChain_dual_class_ne_zero :
     (Submodule.Quotient.mk
       (⟨middleRowChain L, by
@@ -570,8 +576,8 @@ omit [Fact (Odd L)] [Fact (3 ≤ L)] in
 /-- `colParity c x = (#{y : c (x, y) ≠ 0} mod 2)`.
 
 Equivalent to the count of `c (x, y) = 1` for `ZMod 2`-valued `c`, stated in
-terms of `≠ 0` so it dovetails with the generic
-`HomologicalCode.chainSupport` predicate. -/
+terms of `≠ 0` so it dovetails with the generic `HomologicalCode.chainSupport`
+predicate. -/
 private lemma colParity_eq_col_card_cast
     (c : RotatedSurface.VtxIdx L → ZMod 2) (x : Fin L) :
     colParity L c x =
@@ -634,10 +640,11 @@ theorem dual_chainWeight_ge_L_of_nontrivial
 /-! Z-mirror of the X-side proof in `RotatedSurfaceCodeNDistanceX`:
 `weight_ge_chainWeight_zChainOf`, `zChainOf_mem_dualCycles_of_centralizer`, and
 `not_both_boundary_of_nontrivial` from the abstract CSS bridge. For a Z-type
-`g`, `xChainOf g = 0` (no X- or Y-components), trivially in `boundaries`, so
-the bridge forces `zChainOf g ∉ dualBoundaries`. -/
+`g`, `xChainOf g = 0` (no X- or Y-components), trivially in `boundaries`, so the
+bridge forces `zChainOf g ∉ dualBoundaries`. -/
 
-/-- Any non-trivial Z-type logical of the rotated surface stabilizer code has weight ≥ L. -/
+/-- Any non-trivial Z-type logical of the rotated surface stabilizer code has
+weight ≥ L. -/
 theorem weight_ge_L_of_nontrivial_Z_logical
     {g : NQubitPauliGroupElement (numQubits L)}
     (hgZ : NQubitPauliGroupElement.IsZTypeElement g)

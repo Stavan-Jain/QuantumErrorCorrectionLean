@@ -15,19 +15,21 @@ open Matrix
 /-!
 # Logical gate group
 
-The **logical gate group** for a stabilizer group S is the subgroup of n-qubit unitaries that
-map the codespace to itself (i.e. **logical gates**). Equivalently, for every g ∈ S the conjugated
-operator U g U† stabilizes every state in the codespace (adjoint on the right).
-See `LogicalGates.lean` for `IsLogicalGate`.
+The **logical gate group** for a stabilizer group S is the subgroup of n-qubit
+unitaries that map the codespace to itself (i.e. **logical gates**).
+Equivalently, for every g ∈ S the conjugated operator U g U† stabilizes every
+state in the codespace (adjoint on the right). See `LogicalGates.lean` for
+`IsLogicalGate`.
 -/
 
-/-- Conjugation formulation: for every g ∈ S, U g U† stabilizes every codespace state. -/
+/-- Conjugation formulation: for every g ∈ S, U g U† stabilizes every codespace
+state. -/
 private def PreservesCodespaceConjugation (U : NQubitGate n) (S : StabilizerGroup n) : Prop :=
   ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
     IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val
 
-/-- Gate-level conjugation formulation: for every g ∈ S, `(conjByGate U g.gate)` stabilizes
-every codespace state. -/
+/-- Gate-level conjugation formulation: for every g ∈ S, `(conjByGate U g.gate)`
+stabilizes every codespace state. -/
 private def PreservesCodespaceConjugationGate (U : NQubitGate n) (S : StabilizerGroup n) : Prop :=
   ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
     IsInCodespace ψ S → ((conjByGate U g.gate).val).mulVec ψ.val = ψ.val
@@ -39,7 +41,8 @@ def codespaceSubmodule (S : StabilizerGroup n) : Submodule ℂ (NQubitVec n) whe
   zero_mem' := by intro g hg; rw [Matrix.mulVec_zero]
   smul_mem' := by intro c x hx g hg; rw [Matrix.mulVec_smul, hx g hg]
 
-/-- A state is in the codespace iff its vector lies in `codespaceSubmodule S`. -/
+/-- A state is in the codespace iff its vector lies in `codespaceSubmodule S`.
+-/
 lemma mem_codespace_iff_mem_submodule (ψ : NQubitState n) (S : StabilizerGroup n) :
   IsInCodespace ψ S ↔ ψ.val ∈ codespaceSubmodule S := by
   simp [IsInCodespace, IsStabilizedBy, IsStabilizedVec, codespaceSubmodule]
@@ -71,7 +74,8 @@ private lemma extend_from_states_to_submodule (M : Matrix (NQubitBasis n) (NQubi
     _ = c⁻¹ • (c • v) := by rw [this]
     _ = v := by simp [smul_smul, inv_mul_cancel₀ hc_ne]
 
-/-- Helper: a unitary that maps codespace into itself is surjective on codespace. -/
+/-- Helper: a unitary that maps codespace into itself is surjective on
+codespace. -/
 private lemma unitary_surj_on_codespace (M : NQubitGate n) (S : StabilizerGroup n)
     (hM : ∀ v ∈ codespaceSubmodule S, M.val.mulVec v ∈ codespaceSubmodule S) :
     ∀ v ∈ codespaceSubmodule S, ∃ w ∈ codespaceSubmodule S, M.val.mulVec w = v := by
@@ -164,8 +168,8 @@ private lemma conjugation_iff_maps_codespace (U : NQubitGate n) (S : StabilizerG
         show star U.val * U.val = 1 from mem_unitaryGroup_iff'.1 U.2, one_mulVec]]
     rw [hw g hg, hUw]
 
-/-- If U preserves the codespace (conjugation formulation),
-then U maps the submodule into itself. -/
+/-- If U preserves the codespace (conjugation formulation), then U maps the
+submodule into itself. -/
 private lemma maps_to_codespace_of_conjugation (U : NQubitGate n) (S : StabilizerGroup n)
   (h : PreservesCodespaceConjugation U S) :
   ∀ v ∈ codespaceSubmodule S,
@@ -261,13 +265,15 @@ def logicalGateGroup (S : StabilizerGroup n) : Subgroup (NQubitGate n) where
     simp_all only [IsStabilizedBy, IsStabilizedVec, smul_QState_val]
 
 
-/-- U is in the logical gate group iff U maps every codespace state into the codespace. -/
+/-- U is in the logical gate group iff U maps every codespace state into the
+codespace. -/
 lemma mem_logicalGateGroup_iff (U : NQubitGate n) (S : StabilizerGroup n) :
   U ∈ logicalGateGroup S ↔ ∀ ψ, IsInCodespace ψ S → IsInCodespace (U • ψ) S := by
   simp only [logicalGateGroup, Subgroup.mem_mk]
   exact conjugation_iff_maps_codespace U S
 
-/-- U is in the logical gate group iff for every g ∈ S, U g U† stabilizes every codespace state. -/
+/-- U is in the logical gate group iff for every g ∈ S, U g U† stabilizes every
+codespace state. -/
 lemma mem_logicalGateGroup_iff_conjugation (U : NQubitGate n) (S : StabilizerGroup n) :
   U ∈ logicalGateGroup S ↔ ∀ g ∈ S.toSubgroup, ∀ ψ : NQubitState n,
     IsInCodespace ψ S → (U.val * g.toMatrix * star U.val).mulVec ψ.val = ψ.val := by

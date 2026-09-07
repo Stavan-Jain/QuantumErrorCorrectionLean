@@ -18,10 +18,11 @@ import QEC.Stabilizer.Foundations.PauliGroup.NQubitElement
 # Inner-centralizer classification (Milestone M4)
 
 Milestone **M4** of the CSS concatenation plan
-(`qec-lab:pipeline/attempts/concat_css_general/plan.md`) — the long pole of the distance
-argument. For a `k = 1` stabilizer code, the centralizer of the stabilizer is
-`stabilizer ⊔ ⟨X̄₁, Z̄₁⟩`; the distance proof needs to read off, per block, whether
-a centralizing operator is "stabilizer-like" or a genuine logical.
+(`qec-lab:pipeline/attempts/concat_css_general/plan.md`) — the long pole of the
+distance argument. For a `k = 1` stabilizer code, the centralizer of the
+stabilizer is `stabilizer ⊔ ⟨X̄₁, Z̄₁⟩`; the distance proof needs to read off,
+per block, whether a centralizing operator is "stabilizer-like" or a genuine
+logical.
 
 This module assembles the `SymplecticSpan` bridge into two results:
 
@@ -31,20 +32,22 @@ This module assembles the `SymplecticSpan` bridge into two results:
   argument applies to each `restrictBlock b L`.
 
   **Note on the statement.** The plan's draft phrased the "trivial" branch as
-  `g ∈ stabilizer`. That over-claims: `g` may differ from a stabilizer element by
-  a global phase (`i`, `-1`, `-i`), and such a phased element is neither in the
-  stabilizer (no `-I`) nor a *nontrivial* logical (its operator part coincides
-  with a stabilizer's). The phase-clean, downstream-usable form — and the one the
-  repo's `no_weight_w_logical_of_centralizer_in_span` already uses — states the
-  trivial branch in **operator-part** terms: `∃ s ∈ stabilizer, s.operators =
-  g.operators`. That is exactly what the weight/distance argument consumes.
+  `g ∈ stabilizer`. That over-claims: `g` may differ from a stabilizer element
+  by a global phase (`i`, `-1`, `-i`), and such a phased element is neither in
+  the stabilizer (no `-I`) nor a *nontrivial* logical (its operator part
+  coincides with a stabilizer's). The phase-clean, downstream-usable form — and
+  the one the repo's `no_weight_w_logical_of_centralizer_in_span` already uses —
+  states the trivial branch in **operator-part** terms:
+  `∃ s ∈ stabilizer, s.operators = g.operators`. That is exactly what the
+  weight/distance argument consumes.
 
 - **`operators_eq_stab_of_commutes_both_logicals`** (the *decisive direction* —
   still `sorry`) — a centralizing element that commutes with *both* inner
   logicals has its operator part realized by a stabilizer element. This is the
   genuine content of M4 and the one place the weak dichotomy is insufficient: it
-  is the `k = 1` "dimension-2 quotient" fact `sympOrthogonal(span{stab rows,
-  X̄, Z̄}) = span{stab rows}`. See its doc-comment for the precise scoped goal.
+  is the `k = 1` "dimension-2 quotient" fact
+  `sympOrthogonal(span{stab rows, X̄, Z̄}) = span{stab rows}`. See its
+  doc-comment for the precise scoped goal.
 -/
 
 namespace Quantum.StabilizerGroup
@@ -53,17 +56,19 @@ open NQubitPauliGroupElement
 
 variable {n k : ℕ}
 
-/-- **(M4, weak dichotomy.)** Any element of the centralizer of a stabilizer code's
-stabilizer group is, in operator-part terms, either *stabilizer-like* (some stabilizer
-element shares its operator part) or a *nontrivial logical*.
+/-- **(M4, weak dichotomy.)** Any element of the centralizer of a stabilizer
+code's stabilizer group is, in operator-part terms, either *stabilizer-like*
+(some stabilizer element shares its operator part) or a *nontrivial logical*.
 
-Proof: split on whether the symplectic vector of `g.operators` lies in the row span
-`sympSpan C.generatorsList`. If it does, `exists_mem_closure_of_symp_in_span` realizes
-the operator part by a closure (= stabilizer) element. If it does not, all three clauses
-of `IsNontrivialLogicalOperator` hold — centralizer membership is the hypothesis, and the
-"not a stabilizer / operator-part distinct from every stabilizer" clauses follow because
-any stabilizer element's symplectic vector *does* lie in `sympSpan` (the generators are
-phase-0, so `mem_closure_implies_symp_in_span` applies). No dimension count, no `k = 1`. -/
+Proof: split on whether the symplectic vector of `g.operators` lies in the row
+span `sympSpan C.generatorsList`. If it does,
+`exists_mem_closure_of_symp_in_span` realizes the operator part by a closure (=
+stabilizer) element. If it does not, all three clauses of
+`IsNontrivialLogicalOperator` hold — centralizer membership is the hypothesis,
+and the "not a stabilizer / operator-part distinct from every stabilizer"
+clauses follow because any stabilizer element's symplectic vector *does* lie in
+`sympSpan` (the generators are phase-0, so `mem_closure_implies_symp_in_span`
+applies). No dimension count, no `k = 1`. -/
 theorem centralizer_classify_of_k1 (C : StabilizerCode n k)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup) :
     (∃ s ∈ C.toStabilizerGroup.toSubgroup, s.operators = g.operators) ∨
@@ -79,17 +84,20 @@ theorem centralizer_classify_of_k1 (C : StabilizerCode n k)
       have hs' := mem_closure_implies_symp_in_span C.generatorsList C.generators_phaseZero s hs
       rwa [heq] at hs'
 
-/-! ## The symplectic form as a nondegenerate `BilinForm` (for the dimension count) -/
+/-! ## The symplectic form as a nondegenerate `BilinForm` (for the dimension
+count) -/
 
 section BilinForm
 
 open NQubitPauliOperator
 
-/-- The two halves of `Fin (n + n)` are disjoint: an X-index never equals a Z-index. -/
+/-- The two halves of `Fin (n + n)` are disjoint: an X-index never equals a
+Z-index. -/
 private lemma castAdd_ne_natAdd (i k : Fin n) : Fin.castAdd n i ≠ Fin.natAdd n k := by
   intro h; have := Fin.ext_iff.mp h; simp [Fin.val_castAdd] at this; omega
 
-/-- The symplectic bilinear form on `F₂^{2n}`, bundled as a mathlib `BilinForm`. -/
+/-- The symplectic bilinear form on `F₂^{2n}`, bundled as a mathlib `BilinForm`.
+-/
 noncomputable def sympBilinForm (n : ℕ) :
     LinearMap.BilinForm (ZMod 2) (Fin (n + n) → ZMod 2) :=
   LinearMap.mk₂ (ZMod 2) symplecticBilinear
@@ -101,7 +109,8 @@ noncomputable def sympBilinForm (n : ℕ) :
 @[simp] lemma sympBilinForm_apply (v w : Fin (n + n) → ZMod 2) :
     sympBilinForm n v w = symplecticBilinear v w := rfl
 
-/-- The symplectic form is symmetric (over `ZMod 2`, the cross terms coincide). -/
+/-- The symplectic form is symmetric (over `ZMod 2`, the cross terms coincide).
+-/
 lemma symplecticBilinear_comm (v w : Fin (n + n) → ZMod 2) :
     symplecticBilinear v w = symplecticBilinear w v := by
   unfold symplecticBilinear
@@ -112,8 +121,8 @@ lemma sympBilinForm_isRefl : (sympBilinForm (n := n)).IsRefl := by
   rw [sympBilinForm_apply, symplecticBilinear_comm]
   rwa [sympBilinForm_apply] at h
 
-/-- The symplectic form is nondegenerate: testing against the standard basis vectors
-`Pi.single` recovers each coordinate. -/
+/-- The symplectic form is nondegenerate: testing against the standard basis
+vectors `Pi.single` recovers each coordinate. -/
 lemma sympBilinForm_nondegenerate : (sympBilinForm (n := n)).Nondegenerate := by
   refine (LinearMap.IsRefl.nondegenerate_iff_separatingLeft sympBilinForm_isRefl).mpr ?_
   intro v hv
@@ -146,8 +155,8 @@ lemma sympBilinForm_nondegenerate : (sympBilinForm (n := n)).Nondegenerate := by
     rw [sympBilinForm_apply, key] at this
     simpa using this
 
-/-- Membership in the symplectic orthogonal of a span reduces to orthogonality against the
-spanning set (the form is linear in the first argument). -/
+/-- Membership in the symplectic orthogonal of a span reduces to orthogonality
+against the spanning set (the form is linear in the first argument). -/
 lemma mem_sympBilinForm_orthogonal_span_iff (S : Set (Fin (n + n) → ZMod 2))
     (m : Fin (n + n) → ZMod 2) :
     m ∈ LinearMap.BilinForm.orthogonal (sympBilinForm n) (Submodule.span (ZMod 2) S) ↔
@@ -189,22 +198,26 @@ section Kernel
 
 open NQubitPauliOperator Module
 
-/-- **(M4, decisive direction — the long pole.)** For a `k = 1` code with linearly-independent
-check-matrix rows, a centralizing element that commutes with *both* inner logicals `X̄₁`, `Z̄₁`
-has its operator part realized by a stabilizer element.
+/-- **(M4, decisive direction — the long pole.)** For a `k = 1` code with
+linearly-independent check-matrix rows, a centralizing element that commutes
+with *both* inner logicals `X̄₁`, `Z̄₁` has its operator part realized by a
+stabilizer element.
 
-The proof reduces (via `exists_mem_closure_of_symp_in_span`) to the symplectic core
-`toSymplectic g.operators ∈ sympSpan C.generatorsList`, the `k = 1` *dimension-2 quotient*
-fact. Writing `V = sympSpan L` (row span), `U = span{X̄, Z̄}`, and `W = V ⊔ U`:
-`g ∈ centralizer` and commuting with `X̄, Z̄` put `symp(g) ∈ Wᗮ`. The form is nondegenerate,
-so `dim Wᗮ = 2n − dim W`. The rows are independent (`dim V = n − 1`); `X̄, Z̄` are independent
-(anticommuting pair, `dim U = 2`) and meet `V` trivially (`X̄, Z̄ ⊥ V`), so `dim W = n + 1` and
-`dim Wᗮ = n − 1 = dim V`. Since `V ⊆ Wᗮ` (the stabilizer is isotropic and commutes with the
-logicals), `V = Wᗮ`, whence `symp(g) ∈ V`.
+The proof reduces (via `exists_mem_closure_of_symp_in_span`) to the symplectic
+core `toSymplectic g.operators ∈ sympSpan C.generatorsList`, the `k = 1`
+*dimension-2 quotient* fact. Writing `V = sympSpan L` (row span),
+`U = span{X̄, Z̄}`, and `W = V ⊔ U`: `g ∈ centralizer` and commuting with
+`X̄, Z̄` put `symp(g) ∈ Wᗮ`. The form is nondegenerate, so
+`dim Wᗮ = 2n − dim W`. The rows are independent (`dim V = n − 1`); `X̄, Z̄` are
+independent (anticommuting pair, `dim U = 2`) and meet `V` trivially
+(`X̄, Z̄ ⊥ V`), so `dim W = n + 1` and `dim Wᗮ = n − 1 = dim V`. Since `V ⊆ Wᗮ`
+(the stabilizer is isotropic and commutes with the logicals), `V = Wᗮ`, whence
+`symp(g) ∈ V`.
 
-Row-independence (`rowsLinearIndependent`) is an explicit hypothesis: `StabilizerCode` carries
-only the weaker subgroup `GeneratorsIndependent`. For a concrete code it is `native_decide`-able
-(as the small CSS codes discharge `by decide`). -/
+Row-independence (`rowsLinearIndependent`) is an explicit hypothesis:
+`StabilizerCode` carries only the weaker subgroup `GeneratorsIndependent`. For a
+concrete code it is `native_decide`-able (as the small CSS codes discharge
+`by decide`). -/
 theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCode n 1)
     (hindep : rowsLinearIndependent C.generatorsList)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup)

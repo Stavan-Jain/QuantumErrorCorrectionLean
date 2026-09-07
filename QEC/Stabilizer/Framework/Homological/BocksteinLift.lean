@@ -45,11 +45,10 @@ namespace BocksteinLift
 variable {R : Type*} [CommRing R]
 
 /-- **Upstairs core.** In a commutative ring of characteristic 2 where
-`Ann(ε) = (ε³)` (e.g. `F₂[Ĝ]` with `ε = 1 + σ̂`, `σ̂` of order 4, by
-freeness over `F₂[ℤ/4]`), if `A·z` and `B·z` are both divisible by `ε`
-then the Bockstein representative `A·b + B·a` built from the quotients
-is divisible by `ε³`; in particular it lies in `(ε²)`, the kernel of
-the descent to the cover ring. -/
+`Ann(ε) = (ε³)` (e.g. `F₂[Ĝ]` with `ε = 1 + σ̂`, `σ̂` of order 4, by freeness
+over `F₂[ℤ/4]`), if `A·z` and `B·z` are both divisible by `ε` then the Bockstein
+representative `A·b + B·a` built from the quotients is divisible by `ε³`; in
+particular it lies in `(ε²)`, the kernel of the descent to the cover ring. -/
 theorem rep_eq_zero_upstairs (ε A B z a b : R)
     (hchar : (2 : R) = 0)
     (hann : ∀ w : R, ε * w = 0 → ∃ v, w = ε ^ 3 * v)
@@ -63,8 +62,8 @@ theorem rep_eq_zero_upstairs (ε A B z a b : R)
   obtain ⟨v, hv⟩ := hann _ hkill
   exact ⟨v, by rw [hv]; ring⟩
 
-/-- The annihilator of `ε` in the descended ring `R ⧸ (ε²)` is `(ε)`:
-what `Ann(ε̂) = (ε̂³)` upstairs becomes downstairs. -/
+/-- The annihilator of `ε` in the descended ring `R ⧸ (ε²)` is `(ε)`: what
+`Ann(ε̂) = (ε̂³)` upstairs becomes downstairs. -/
 theorem ann_eps_quotient (ε : R)
     (hann : ∀ w : R, ε * w = 0 → ∃ v, w = ε ^ 3 * v)
     (w : R ⧸ Ideal.span {ε ^ 2})
@@ -83,10 +82,10 @@ theorem ann_eps_quotient (ε : R)
   exact ⟨Ideal.Quotient.mk _ (r + ε ^ 2 * v), by rw [← map_mul, h3]⟩
 
 /-- **Descended canonical choice.** In the cover ring `R̃ = R̂ ⧸ (ε̂²)`,
-whenever `A·z` and `B·z` are divisible by `ε`, there are `ε`-preimages
-`a₀, b₀` with `A·b₀ + B·a₀ = 0` on the nose: lift `z` upstairs, apply
-`rep_eq_zero_upstairs`, and descend. This is the tower-compatible
-choice of the paper proof. -/
+whenever `A·z` and `B·z` are divisible by `ε`, there are `ε`-preimages `a₀, b₀`
+with `A·b₀ + B·a₀ = 0` on the nose: lift `z` upstairs, apply
+`rep_eq_zero_upstairs`, and descend. This is the tower-compatible choice of the
+paper proof. -/
 theorem exists_vanishing_choice_in_quotient (ε A B : R)
     (hchar : (2 : R) = 0)
     (hann : ∀ w : R, ε * w = 0 → ∃ v, w = ε ^ 3 * v)
@@ -118,11 +117,10 @@ theorem exists_vanishing_choice_in_quotient (ε A B : R)
   exact Ideal.Quotient.eq_zero_iff_mem.mpr
     (Ideal.mem_span_singleton.mpr ⟨ε * v, rfl⟩)
 
-/-- **Choice independence.** If one valid choice `(a₀, b₀)` of
-`ε`-preimages makes `W` vanish, then every valid choice `(a, b)` lands
-in `ε·(A,B)`: the A12 OQ2 element form. Works in any commutative ring
-whose `ε`-annihilator is `(ε)` — downstairs, that is
-`ann_eps_quotient`. -/
+/-- **Choice independence.** If one valid choice `(a₀, b₀)` of `ε`-preimages
+makes `W` vanish, then every valid choice `(a, b)` lands in `ε·(A,B)`: the A12
+OQ2 element form. Works in any commutative ring whose `ε`-annihilator is `(ε)` —
+downstairs, that is `ann_eps_quotient`. -/
 theorem mem_span_of_vanishing_choice (ε A B z a b a₀ b₀ : R)
     (hannε : ∀ w : R, ε * w = 0 → ∃ v, w = ε * v)
     (hAz : ε * a = A * z) (hBz : ε * b = B * z)
@@ -142,14 +140,13 @@ theorem mem_span_of_vanishing_choice (ε A B z a b a₀ b₀ : R)
     (Ideal.mul_mem_right _ _ (Ideal.subset_span (Set.mem_insert_of_mem _ rfl)))
     (Ideal.mul_mem_right _ _ (Ideal.subset_span (Set.mem_insert _ _)))
 
-/-- **The element form (A12 OQ2), abstract capstone.** Downstairs in the
-cover ring `Q = R ⧸ (ε²)` (with `R = F₂[Ĝ]` the Frattini lift and
-`ε = ε̂` its order-4 deck class), whenever `A·z̄` and `B·z̄` are
-`ε`-divisible the Bockstein representative `A·b + B·a` lies in `ε·(A,B)`.
-This is `δ₁∘δ₂ = 0` at the element level: `exists_vanishing_choice_*`
-produces the ℤ/4-compatible choice that vanishes on the nose, and
-`mem_span_of_vanishing_choice` (fed the downstairs annihilator fact
-`ann_eps_quotient`) absorbs any other choice into `ε·(A,B)`. -/
+/-- **The element form (A12 OQ2), abstract capstone.** Downstairs in the cover
+ring `Q = R ⧸ (ε²)` (with `R = F₂[Ĝ]` the Frattini lift and `ε = ε̂` its order-4
+deck class), whenever `A·z̄` and `B·z̄` are `ε`-divisible the Bockstein
+representative `A·b + B·a` lies in `ε·(A,B)`. This is `δ₁∘δ₂ = 0` at the element
+level: `exists_vanishing_choice_*` produces the ℤ/4-compatible choice that
+vanishes on the nose, and `mem_span_of_vanishing_choice` (fed the downstairs
+annihilator fact `ann_eps_quotient`) absorbs any other choice into `ε·(A,B)`. -/
 theorem bockstein_element_form (ε A B : R)
     (hchar : (2 : R) = 0)
     (hann : ∀ w : R, ε * w = 0 → ∃ v, w = ε ^ 3 * v)
@@ -166,18 +163,16 @@ theorem bockstein_element_form (ε A B : R)
 
 /-! ## The ℤ/4 deck algebra: an unconditional instance
 
-`F₂[ℤ/4] ≅ F₂[X]/(X⁴)` (freshman's dream twice: `X⁴−1 = X⁴+1 = (X+1)⁴`
-in characteristic 2, so with `ε = 1+σ = X+1 ↦ X` the group algebra is the
-truncated polynomial ring). It is the Frattini-lift local model of the
-deck, and it satisfies both upstairs hypotheses — `char 2` and
-`Ann(ε) = (ε³)` — so the element form holds **unconditionally** on its
-cover quotient `F₂[X]/(X⁴) ⧸ (X²)` (`≅ F₂[ℤ/2]`, the `r = 1` chain
-block). By the CRT block decomposition (A13 §3) this is the local content
-behind the odd-undoubled-coordinate corollary. -/
+`F₂[ℤ/4] ≅ F₂[X]/(X⁴)` (freshman's dream twice: `X⁴−1 = X⁴+1 = (X+1)⁴` in
+characteristic 2, so with `ε = 1+σ = X+1 ↦ X` the group algebra is the truncated
+polynomial ring). It is the Frattini-lift local model of the deck, and it
+satisfies both upstairs hypotheses — `char 2` and `Ann(ε) = (ε³)` — so the
+element form holds **unconditionally** on its cover quotient `F₂[X]/(X⁴) ⧸ (X²)`
+(`≅ F₂[ℤ/2]`, the `r = 1` chain block). By the CRT block decomposition (A13 §3)
+this is the local content behind the odd-undoubled-coordinate corollary. -/
 
 open Polynomial in
-/-- The truncated polynomial ring `F₂[X]/(X⁴)`, standing in for
-`F₂[ℤ/4]`. -/
+/-- The truncated polynomial ring `F₂[X]/(X⁴)`, standing in for `F₂[ℤ/4]`. -/
 abbrev DeckRing := Polynomial (ZMod 2) ⧸ Ideal.span {(X : Polynomial (ZMod 2)) ^ 4}
 
 open Polynomial in
@@ -194,8 +189,8 @@ theorem deckRing_two : (2 : DeckRing) = 0 := by
     (map_ofNat (Ideal.Quotient.mk _) 2).symm, hP, map_zero]
 
 open Polynomial in
-/-- `Ann(ε) = (ε³)` in `F₂[X]/(X⁴)`: if `X·p ≡ 0 mod X⁴` then `X³ ∣ p`
-(cancel `X` in the polynomial domain). -/
+/-- `Ann(ε) = (ε³)` in `F₂[X]/(X⁴)`: if `X·p ≡ 0 mod X⁴` then `X³ ∣ p` (cancel
+`X` in the polynomial domain). -/
 theorem deckRing_ann :
     ∀ w : DeckRing, deckEps * w = 0 → ∃ v, w = deckEps ^ 3 * v := by
   haveI : NoZeroDivisors (ZMod 2) := ⟨by decide⟩
@@ -213,11 +208,11 @@ theorem deckRing_ann :
     (map_pow (Ideal.Quotient.mk _) X 3).symm
   rw [hpow, ← map_mul, hXp]
 
-/-- **Unconditional element form on the ℤ/4 chain block.** No hypotheses:
-the Bockstein composite vanishes at the element level on the cover ring
-`DeckRing ⧸ (ε²)`. A fully kernel-checked instance of
-`bockstein_element_form`, witnessing that the theorem's hypotheses are
-satisfiable by the actual deck algebra. -/
+/-- **Unconditional element form on the ℤ/4 chain block.** No hypotheses: the
+Bockstein composite vanishes at the element level on the cover ring
+`DeckRing ⧸ (ε²)`. A fully kernel-checked instance of `bockstein_element_form`,
+witnessing that the theorem's hypotheses are satisfiable by the actual deck
+algebra. -/
 theorem bockstein_element_form_deck (A B : DeckRing)
     (z a b : DeckRing ⧸ Ideal.span {deckEps ^ 2})
     (hAz : Ideal.Quotient.mk _ A * z = Ideal.Quotient.mk _ deckEps * a)

@@ -66,7 +66,7 @@ theorem chainWeight_tauUStar : grossComplex.chainWeight (coverPull1 uStar) = 12 
 
 /-! ## The dual witness -/
 
-/-- An explicit dual cycle pairing oddly with `τ(u*)`.  Left-block support
+/-- An explicit dual cycle pairing oddly with `τ(u*)`. Left-block support
 `x y⁰ + x y³ + x⁴(1 + y + y² + y³ + y⁴ + y⁵)`, right-block support
 `1 + y³ + x + x y³`. -/
 def fluxWitness : GrossGroup × Fin 2 → ZMod 2 := fun p =>
@@ -78,8 +78,8 @@ def fluxWitness : GrossGroup × Fin 2 → ZMod 2 := fun p =>
     (if p.1 = (0, 0) ∨ p.1 = (0, 3) ∨ p.1 = (1, 0) ∨ p.1 = (1, 3)
      then 1 else 0)
 
-/-- Raw (computable) form of `dualBoundary fluxWitness = 0`, via the
-transpose formula `bb_dualBoundary_eq`. -/
+/-- Raw (computable) form of `dualBoundary fluxWitness = 0`, via the transpose
+formula `bb_dualBoundary_eq`. -/
 theorem fluxWitness_dual_raw :
     (fun f => (reflect grossA ⋆ leftHalf fluxWitness) f
       + (reflect grossB ⋆ rightHalf fluxWitness) f)

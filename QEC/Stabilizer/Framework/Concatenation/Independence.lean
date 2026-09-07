@@ -5,10 +5,11 @@ import QEC.Stabilizer.Foundations.BinarySymplectic.CheckMatrixDecidable
 # Concatenation: structural generator independence
 
 The constructor `concatenate` (M3) takes generator independence
-(`GeneratorsIndependent (n₁ * n₂) concatGeneratorsList`) as a hypothesis, because
-the only available decision procedure — `Decidable (rowsLinearIndependent L)` —
-enumerates all `2 ^ L.length` coefficient vectors, which is infeasible for the
-`n₁ * n₂ - k₂` concatenated generators (e.g. `2 ^ 48` for Steane ⊗ Steane).
+(`GeneratorsIndependent (n₁ * n₂) concatGeneratorsList`) as a hypothesis,
+because the only available decision procedure —
+`Decidable (rowsLinearIndependent L)` — enumerates all `2 ^ L.length`
+coefficient vectors, which is infeasible for the `n₁ * n₂ - k₂` concatenated
+generators (e.g. `2 ^ 48` for Steane ⊗ Steane).
 
 This file discharges that hypothesis **structurally**: it derives the symplectic
 linear independence of the concatenated generators from
@@ -30,8 +31,8 @@ symplectic coordinates. Its key properties:
 
 * `blockRestrictSymp_toSymplectic` — it commutes with `toSymplectic ∘ operators`
   and `restrictBlock b`;
-* an embedded inner generator restricts to the generator itself on its own
-  block and to `0` elsewhere;
+* an embedded inner generator restricts to the generator itself on its own block
+  and to `0` elsewhere;
 * a promoted outer generator restricts to a combination of `X̄₁, Z̄₁`;
 * a vector all of whose block restrictions vanish is itself `0`.
 
@@ -57,9 +58,10 @@ variable {n : ℕ}
 disjointness of their symplectic spans — the list-level form of
 `linearIndependent_sum`. -/
 
-/-- The append of two generator lists has linearly independent check-matrix rows iff each
-piece does and their symplectic spans are disjoint. (Reindexes the row family along
-`Fin A.length ⊕ Fin B.length ≃ Fin (A ++ B).length` and applies `linearIndependent_sum`.) -/
+/-- The append of two generator lists has linearly independent check-matrix rows
+iff each piece does and their symplectic spans are disjoint. (Reindexes the row
+family along `Fin A.length ⊕ Fin B.length ≃ Fin (A ++ B).length` and applies
+`linearIndependent_sum`.) -/
 theorem rowsLinearIndependent_append_iff (A B : List (NQubitPauliGroupElement n)) :
     rowsLinearIndependent (A ++ B) ↔
       rowsLinearIndependent A ∧ rowsLinearIndependent B ∧
@@ -94,7 +96,8 @@ theorem rowsLinearIndependent_append_iff (A B : List (NQubitPauliGroupElement n)
   simp only [Sum.elim_comp_inl, Sum.elim_comp_inr]
   rfl
 
-/-- The empty generator list has (vacuously) linearly independent check-matrix rows. -/
+/-- The empty generator list has (vacuously) linearly independent check-matrix
+rows. -/
 lemma rowsLinearIndependent_nil :
     rowsLinearIndependent ([] : List (NQubitPauliGroupElement n)) := by
   rw [rowsLinearIndependent]
@@ -118,15 +121,17 @@ variable {n₁ n₂ k₂ : ℕ} [NeZero n₁]
 
 /-! ## Block restriction at the symplectic level -/
 
-/-- The coordinate map embedding inner symplectic indices (`Fin (n₁ + n₁)`) into block `b`'s
-slot of the global symplectic indices (`Fin (n₁*n₂ + n₁*n₂)`): X-coordinate `i` ↦ X-coordinate
-`qIdx b i`, Z-coordinate `i` ↦ Z-coordinate `qIdx b i`. -/
+/-- The coordinate map embedding inner symplectic indices (`Fin (n₁ + n₁)`) into
+block `b`'s slot of the global symplectic indices (`Fin (n₁*n₂ + n₁*n₂)`):
+X-coordinate `i` ↦ X-coordinate `qIdx b i`, Z-coordinate `i` ↦ Z-coordinate
+`qIdx b i`. -/
 def blockEmbedIdx (b : Fin n₂) : Fin (n₁ + n₁) → Fin (n₁ * n₂ + n₁ * n₂) :=
   Fin.addCases (fun i => Fin.castAdd (n₁ * n₂) (qIdx b i))
                (fun i => Fin.natAdd (n₁ * n₂) (qIdx b i))
 
-/-- Block restriction as a linear map on symplectic vectors: read off block `b`'s coordinates.
-Built as `LinearMap.funLeft` of `blockEmbedIdx`, so linearity is free. -/
+/-- Block restriction as a linear map on symplectic vectors: read off block
+`b`'s coordinates. Built as `LinearMap.funLeft` of `blockEmbedIdx`, so linearity
+is free. -/
 def blockRestrictSymp (b : Fin n₂) :
     (Fin (n₁ * n₂ + n₁ * n₂) → ZMod 2) →ₗ[ZMod 2] (Fin (n₁ + n₁) → ZMod 2) :=
   LinearMap.funLeft (ZMod 2) (ZMod 2) (blockEmbedIdx b)
@@ -144,7 +149,8 @@ omit [NeZero n₁] in
   simp only [blockRestrictSymp, LinearMap.funLeft_apply, blockEmbedIdx, Fin.addCases_right]
 
 omit [NeZero n₁] in
-/-- The block-restriction map commutes with `toSymplectic ∘ operators` and `restrictBlock`. -/
+/-- The block-restriction map commutes with `toSymplectic ∘ operators` and
+`restrictBlock`. -/
 lemma blockRestrictSymp_toSymplectic (b : Fin n₂) (x : NQubitPauliGroupElement (n₁ * n₂)) :
     blockRestrictSymp b (toSymplectic x.operators)
       = toSymplectic (restrictBlock b x).operators := by
@@ -155,8 +161,8 @@ lemma blockRestrictSymp_toSymplectic (b : Fin n₂) (x : NQubitPauliGroupElement
   · rw [blockRestrictSymp_natAdd, toSymplectic_Z_part, toSymplectic_Z_part,
       restrictBlock_operators, restrictBlockOp]
 
-/-- A vector all of whose block restrictions vanish is `0` (each coordinate is recovered by
-restricting to the block of its qubit). -/
+/-- A vector all of whose block restrictions vanish is `0` (each coordinate is
+recovered by restricting to the block of its qubit). -/
 lemma eq_zero_of_forall_blockRestrictSymp_zero (w : Fin (n₁ * n₂ + n₁ * n₂) → ZMod 2)
     (h : ∀ b : Fin n₂, blockRestrictSymp b w = 0) : w = 0 := by
   funext j
@@ -168,14 +174,16 @@ lemma eq_zero_of_forall_blockRestrictSymp_zero (w : Fin (n₁ * n₂ + n₁ * n�
 
 /-! ## Operator-level restriction of embedded / promoted generators -/
 
-/-- Restricting an inner generator embedded in block `b` to block `b` recovers it. -/
+/-- Restricting an inner generator embedded in block `b` to block `b` recovers
+it. -/
 lemma restrictBlock_embedBlock_self (b : Fin n₂) (g : NQubitPauliGroupElement n₁) :
     (restrictBlock b (embedBlock b g)).operators = g.operators := by
   funext i
   change (embedBlock b g).operators (qIdx b i) = g.operators i
   simp only [embedBlock_operators, embedBlockOp, blockOf_qIdx, posOf_qIdx, if_true]
 
-/-- Restricting an inner generator embedded in block `b'` to a different block `b` gives `I`. -/
+/-- Restricting an inner generator embedded in block `b'` to a different block
+`b` gives `I`. -/
 lemma restrictBlock_embedBlock_ne {b b' : Fin n₂} (h : b ≠ b') (g : NQubitPauliGroupElement n₁) :
     (restrictBlock b (embedBlock b' g)).operators = NQubitPauliOperator.identity n₁ := by
   funext i
@@ -183,8 +191,8 @@ lemma restrictBlock_embedBlock_ne {b b' : Fin n₂} (h : b ≠ b') (g : NQubitPa
   simp only [embedBlock_operators, embedBlockOp, blockOf_qIdx]
   rw [if_neg h]; simp [NQubitPauliOperator.identity]
 
-/-- Restricting a promoted outer generator to block `b` gives the inner logical class of
-`t.operators b` (the `promoteSingle` value). -/
+/-- Restricting a promoted outer generator to block `b` gives the inner logical
+class of `t.operators b` (the `promoteSingle` value). -/
 lemma restrictBlock_promoteE (Xbar Zbar : NQubitPauliOperator n₁) (b : Fin n₂)
     (t : NQubitPauliGroupElement n₂) :
     (restrictBlock b (promoteE Xbar Zbar t)).operators
@@ -199,8 +207,9 @@ lemma toSymplectic_identity (m : ℕ) :
   rw [← NQubitPauliGroupElement.one_operators_def]; exact toSymplectic_one_operators
 
 omit [NeZero n₁] in
-/-- The symplectic vector of a (non-`Y`) promoted single Pauli is the matching combination of
-the inner logical symplectic vectors. (`Y` is excluded because `promoteSingle` is lossy there.) -/
+/-- The symplectic vector of a (non-`Y`) promoted single Pauli is the matching
+combination of the inner logical symplectic vectors. (`Y` is excluded because
+`promoteSingle` is lossy there.) -/
 lemma toSymplectic_promoteSingle (Xbar Zbar : NQubitPauliOperator n₁) {P : PauliOperator}
     (hP : P ≠ PauliOperator.Y) :
     toSymplectic (promoteSingle Xbar Zbar P)
@@ -215,9 +224,10 @@ lemma toSymplectic_promoteSingle (Xbar Zbar : NQubitPauliOperator n₁) {P : Pau
 
 /-! ## Independence of one block's embedded inner generators -/
 
-/-- Embedding an independent inner generator list into a single block preserves symplectic
-independence. (Block restriction `blockRestrictSymp b` is a left inverse on block `b`, so the
-embedded rows are independent exactly when the originals are.) -/
+/-- Embedding an independent inner generator list into a single block preserves
+symplectic independence. (Block restriction `blockRestrictSymp b` is a left
+inverse on block `b`, so the embedded rows are independent exactly when the
+originals are.) -/
 lemma rowsLinearIndependent_map_embedBlock (b : Fin n₂) (L : List (NQubitPauliGroupElement n₁))
     (hL : rowsLinearIndependent L) :
     rowsLinearIndependent (L.map (embedBlock b)) := by
@@ -244,10 +254,12 @@ lemma rowsLinearIndependent_map_embedBlock (b : Fin n₂) (L : List (NQubitPauli
     exact h0
   exact (Fintype.linearIndependent_iff.mp hL) f key i
 
-/-! ## Independence of the per-block inner generators (`flatMap` over distinct blocks) -/
+/-! ## Independence of the per-block inner generators (`flatMap` over distinct
+blocks) -/
 
-/-- If every element of `M` is an inner generator embedded into some block **other than** `b'`,
-then `blockRestrictSymp b'` annihilates the entire symplectic span of `M`. -/
+/-- If every element of `M` is an inner generator embedded into some block
+**other than** `b'`, then `blockRestrictSymp b'` annihilates the entire
+symplectic span of `M`. -/
 lemma blockRestrictSymp_eq_zero_of_mem_sympSpan (b' : Fin n₂)
     (M : List (NQubitPauliGroupElement (n₁ * n₂)))
     (hM : ∀ e ∈ M, ∃ (b'' : Fin n₂) (g : NQubitPauliGroupElement n₁),
@@ -263,8 +275,9 @@ lemma blockRestrictSymp_eq_zero_of_mem_sympSpan (b' : Fin n₂)
       restrictBlock_embedBlock_ne (Ne.symm hne), toSymplectic_identity]
   exact hle hv
 
-/-- Embedding an independent inner generator list into each of a list of **distinct** blocks
-yields a symplectically independent family (the blocks' supports are disjoint). -/
+/-- Embedding an independent inner generator list into each of a list of
+**distinct** blocks yields a symplectically independent family (the blocks'
+supports are disjoint). -/
 lemma rowsLinearIndependent_flatMap_embedBlock (L : List (NQubitPauliGroupElement n₁))
     (hL : rowsLinearIndependent L) :
     ∀ bs : List (Fin n₂), bs.Nodup →
@@ -298,8 +311,9 @@ namespace ConcatCSSData
 
 variable (D : ConcatCSSData n₁ n₂ k₂)
 
-/-- `blockRestrictSymp b` of a promoted outer generator is the matching combination of the
-inner logicals' symplectic vectors (using that outer generators are `Y`-free per block). -/
+/-- `blockRestrictSymp b` of a promoted outer generator is the matching
+combination of the inner logicals' symplectic vectors (using that outer
+generators are `Y`-free per block). -/
 lemma blockRestrictSymp_promoteE (b : Fin n₂) (t : NQubitPauliGroupElement n₂)
     (hY : t.operators b ≠ PauliOperator.Y) :
     blockRestrictSymp b (toSymplectic (promoteE D.Xbar D.Zbar t).operators)
@@ -307,10 +321,11 @@ lemma blockRestrictSymp_promoteE (b : Fin n₂) (t : NQubitPauliGroupElement n�
         + (t.operators b).toSymplecticSingle.2 • toSymplectic D.Zbar := by
   rw [blockRestrictSymp_toSymplectic, restrictBlock_promoteE, toSymplectic_promoteSingle _ _ hY]
 
-/-- The promoted outer generators are symplectically independent, given that the inner logicals
-are (`hlog`) and the outer generators are (`hout`). Each block restriction is a combination of
-`X̄₁, Z̄₁`; `hlog` forces the two aggregated coefficients to vanish at every block, which
-reassembles into an outer linear relation killed by `hout`. -/
+/-- The promoted outer generators are symplectically independent, given that the
+inner logicals are (`hlog`) and the outer generators are (`hout`). Each block
+restriction is a combination of `X̄₁, Z̄₁`; `hlog` forces the two aggregated
+coefficients to vanish at every block, which reassembles into an outer linear
+relation killed by `hout`. -/
 lemma rowsLinearIndependent_promotedOuterList
     (hlog : rowsLinearIndependent [D.Cin.logicalX 0, D.Cin.logicalZ 0])
     (hout : rowsLinearIndependent (D.outerZ ++ D.outerX)) :
@@ -377,8 +392,8 @@ lemma rowsLinearIndependent_promotedOuterList
       exact (hcoeff b).2
   exact (Fintype.linearIndependent_iff.mp hout) f hrelation t
 
-/-- The inner stabilizers replicated across all blocks are symplectically independent, given the
-inner generators are. -/
+/-- The inner stabilizers replicated across all blocks are symplectically
+independent, given the inner generators are. -/
 lemma rowsLinearIndependent_s1PerBlockList (hCin : rowsLinearIndependent D.Cin.generatorsList) :
     rowsLinearIndependent D.s1PerBlockList := by
   rw [ConcatCSSData.s1PerBlockList]
@@ -387,7 +402,8 @@ lemma rowsLinearIndependent_s1PerBlockList (hCin : rowsLinearIndependent D.Cin.g
 
 /-! ## Disjointness of the inner and promoted spans -/
 
-/-- Block restriction of the inner-stabilizer span lands in the inner-generator span. -/
+/-- Block restriction of the inner-stabilizer span lands in the inner-generator
+span. -/
 lemma blockRestrictSymp_mem_sympSpan_inner (b : Fin n₂)
     {v : Fin (n₁ * n₂ + n₁ * n₂) → ZMod 2} (hv : v ∈ sympSpan D.s1PerBlockList) :
     blockRestrictSymp b v ∈ sympSpan D.Cin.generatorsList := by
@@ -407,8 +423,8 @@ lemma blockRestrictSymp_mem_sympSpan_inner (b : Fin n₂)
       exact Submodule.zero_mem _
   exact hle hv
 
-/-- Block restriction of the promoted-stabilizer span lands in the span of the two inner
-logical symplectic vectors. -/
+/-- Block restriction of the promoted-stabilizer span lands in the span of the
+two inner logical symplectic vectors. -/
 lemma blockRestrictSymp_mem_span_logicals (b : Fin n₂)
     {v : Fin (n₁ * n₂ + n₁ * n₂) → ZMod 2} (hv : v ∈ sympSpan D.promotedOuterList) :
     blockRestrictSymp b v
@@ -426,9 +442,10 @@ lemma blockRestrictSymp_mem_span_logicals (b : Fin n₂)
     · exact toSymplectic_mem_sympSpan_of_mem (by simp)
   exact hle hv
 
-/-- The inner-stabilizer span and the promoted-stabilizer span are disjoint, given the inner
-generators are independent from the two inner logicals (`hdisj`). Every block restriction of a
-shared vector lies in `sympSpan Cin.gens ⊓ span{X̄₁, Z̄₁} = 0`, so the vector itself is `0`. -/
+/-- The inner-stabilizer span and the promoted-stabilizer span are disjoint,
+given the inner generators are independent from the two inner logicals
+(`hdisj`). Every block restriction of a shared vector lies in
+`sympSpan Cin.gens ⊓ span{X̄₁, Z̄₁} = 0`, so the vector itself is `0`. -/
 lemma disjoint_s1_promoted
     (hdisj : Disjoint (sympSpan D.Cin.generatorsList)
       (sympSpan [D.Cin.logicalX 0, D.Cin.logicalZ 0])) :
@@ -444,15 +461,16 @@ lemma disjoint_s1_promoted
 
 /-! ## The structural independence theorem -/
 
-/-- **Structural concatenated-generator independence.** The concatenated generators are
-symplectically independent, given:
+/-- **Structural concatenated-generator independence.** The concatenated
+generators are symplectically independent, given:
 
-* `hin` — the inner generators together with the two inner logical representatives `X̄₁, Z̄₁`
-  are symplectically independent, and
+* `hin` — the inner generators together with the two inner logical
+  representatives `X̄₁, Z̄₁` are symplectically independent, and
 * `hout` — the outer generators are symplectically independent.
 
-Both inputs are small (Steane: `2 ^ 8` and `2 ^ 6`), hence `decide`/`native_decide`-able per
-instance — unlike the `2 ^ (n₁ n₂ - k₂)` direct check on the concatenated list. -/
+Both inputs are small (Steane: `2 ^ 8` and `2 ^ 6`), hence
+`decide`/`native_decide`-able per instance — unlike the `2 ^ (n₁ n₂ - k₂)`
+direct check on the concatenated list. -/
 theorem rowsLinearIndependent_concat
     (hin : rowsLinearIndependent (D.Cin.generatorsList ++
       [D.Cin.logicalX 0, D.Cin.logicalZ 0]))
@@ -464,7 +482,8 @@ theorem rowsLinearIndependent_concat
     D.rowsLinearIndependent_promotedOuterList hlog hout,
     D.disjoint_s1_promoted hdisj⟩
 
-/-- The `GeneratorsIndependent` corollary, ready to feed `concatenate` and the M7 instances. -/
+/-- The `GeneratorsIndependent` corollary, ready to feed `concatenate` and the
+M7 instances. -/
 theorem generatorsIndependent_concat
     (hin : rowsLinearIndependent (D.Cin.generatorsList ++
       [D.Cin.logicalX 0, D.Cin.logicalZ 0]))

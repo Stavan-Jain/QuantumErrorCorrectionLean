@@ -4,35 +4,34 @@ import Mathlib.Tactic
 # Rotated-surface-code cell complex types
 
 Type-level scaffolding for the parametric `RotatedSurfaceCodeN`, paralleling the
-toric `CellComplexTypes`.  For an `L × L` rotated surface code (intended `L`
-odd, `L ≥ 3`):
+toric `CellComplexTypes`. For an `L × L` rotated surface code (intended `L` odd,
+`L ≥ 3`):
 
-* `VtxIdx L = Fin L × Fin L` — data qubits, indexed `(x, y)` with `x` the
-  column (`0 = leftmost`) and `y` the row (`0 = topmost`).
-* `ZFaceIdx L` / `XFaceIdx L` — Z- and X-stabilizer slots, each split into
-  three constructors: interior 2×2 face, plus two opposite-edge boundary
-  weight-2 stabs.  Their union has the standard `(L² − 1)/2` count for `L`
-  odd.
+* `VtxIdx L = Fin L × Fin L` — data qubits, indexed `(x, y)` with `x` the column
+  (`0 = leftmost`) and `y` the row (`0 = topmost`).
+* `ZFaceIdx L` / `XFaceIdx L` — Z- and X-stabilizer slots, each split into three
+  constructors: interior 2×2 face, plus two opposite-edge boundary weight-2
+  stabs. Their union has the standard `(L² − 1)/2` count for `L` odd.
 
 The interior face at corner `(x, y) ∈ Fin (L-1) × Fin (L-1)` covers the four
-qubits `(x, y), (x+1, y), (x, y+1), (x+1, y+1)`.  Its colour alternates with
-`(x + y) mod 2`: **Z if even, X if odd**.  Boundary stabs are placed so that
-the checkerboard parity closes up; see `zSupport` / `xSupport` for the exact
+qubits `(x, y), (x+1, y), (x, y+1), (x+1, y+1)`. Its colour alternates with
+`(x + y) mod 2`: **Z if even, X if odd**. Boundary stabs are placed so that the
+checkerboard parity closes up; see `zSupport` / `xSupport` for the exact
 coordinates.
 
-`zSupport zf` / `xSupport xf` return the `Finset` of qubits each stab acts
-on.  These are the building blocks for the boundary maps `rscBoundary1` /
+`zSupport zf` / `xSupport xf` return the `Finset` of qubits each stab acts on.
+These are the building blocks for the boundary maps `rscBoundary1` /
 `rscBoundary2` in `RotatedSurfaceBoundaryMaps.lean`.
 
 ## L = 3 sanity check
 
 At `L = 3` the eight stabs collapse to four interior 2×2 faces (two Z, two X)
-and four weight-2 boundary stabs (one each on top/bottom/left/right).  The
-qubit supports (under row-major indexing `(x, y) ↦ y * L + x`) are
-documented case-by-case below; they match the existing
-`RotatedSurfaceCode3.lean` generators **up to a fixed permutation of qubit
-indices**.  The retire-equivalence (Stage 8 of the Phase-3 plan) handles
-that permutation explicitly.
+and four weight-2 boundary stabs (one each on top/bottom/left/right). The qubit
+supports (under row-major indexing `(x, y) ↦ y * L + x`) are documented
+case-by-case below; they match the existing `RotatedSurfaceCode3.lean`
+generators **up to a fixed permutation of qubit indices**. The
+retire-equivalence (Stage 8 of the Phase-3 plan) handles that permutation
+explicitly.
 -/
 
 namespace Quantum
@@ -49,7 +48,7 @@ abbrev VtxIdx (L : ℕ) : Type := Fin L × Fin L
 /-- 1-chains: `ZMod 2`-valued functions on data qubits. -/
 abbrev C1 (L : ℕ) : Type := VtxIdx L → ZMod 2
 
-/-- Top-left corner of an interior 2×2 face.  Such a face covers qubits
+/-- Top-left corner of an interior 2×2 face. Such a face covers qubits
 `(x, y), (x+1, y), (x, y+1), (x+1, y+1)`, so `x, y ∈ Fin (L-1)`. -/
 abbrev FaceCornerIdx (L : ℕ) : Type := Fin (L - 1) × Fin (L - 1)
 
@@ -66,8 +65,8 @@ instance (L : ℕ) : DecidableEq (XInteriorCornerIdx L) := Subtype.instDecidable
 instance (L : ℕ) : Fintype (ZInteriorCornerIdx L) := Subtype.fintype _
 instance (L : ℕ) : Fintype (XInteriorCornerIdx L) := Subtype.fintype _
 
-/-- Boundary-stab index for a single rough/smooth edge.  There are
-`(L-1)/2` boundary stabs per side, parameterised here by `Fin ((L-1)/2)`. -/
+/-- Boundary-stab index for a single rough/smooth edge. There are `(L-1)/2`
+boundary stabs per side, parameterised here by `Fin ((L-1)/2)`. -/
 abbrev RscBdyIdx (L : ℕ) : Type := Fin ((L - 1) / 2)
 
 /-- Z-stabilizer slots: interior Z-faces ⊕ left-boundary ⊕ right-boundary.
@@ -175,13 +174,13 @@ def xSupport {L : ℕ} : XFaceIdx L → Finset (VtxIdx L)
       let x2 : Fin L := ⟨2 * k.val + 2, by have := k.isLt; omega⟩
       {(x1, yB), (x2, yB)}
 
-/-- Membership in the Z-support of an interior face unfolds to the
-explicit four-qubit set. -/
+/-- Membership in the Z-support of an interior face unfolds to the explicit
+four-qubit set. -/
 lemma zSupport_interior {L : ℕ} (c : ZInteriorCornerIdx L) :
     zSupport (ZFaceIdx.interior c) = faceQubits c.val := rfl
 
-/-- Membership in the X-support of an interior face unfolds to the
-explicit four-qubit set. -/
+/-- Membership in the X-support of an interior face unfolds to the explicit
+four-qubit set. -/
 lemma xSupport_interior {L : ℕ} (c : XInteriorCornerIdx L) :
     xSupport (XFaceIdx.interior c) = faceQubits c.val := rfl
 

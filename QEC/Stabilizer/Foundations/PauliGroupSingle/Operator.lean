@@ -17,8 +17,8 @@ namespace PauliOperator
 
 /-- Convert a Pauli operator to a quantum gate.
 
-Maps I → I, X → X, Y → Y, Z → Z (the gates defined in Foundations.Gates).
-This is the primary representation for operators.
+Maps I → I, X → X, Y → Y, Z → Z (the gates defined in Foundations.Gates). This
+is the primary representation for operators.
 -/
 noncomputable def toGate : PauliOperator → OneQubitGate
   | .I => Quantum.I
@@ -83,7 +83,8 @@ noncomputable def mulOp : PauliOperator → PauliOperator → PauliGroupElement
 @[simp] lemma mulOp_Z_Y : PauliOperator.Z.mulOp PauliOperator.Y = ⟨3, PauliOperator.X⟩ := rfl
 @[simp] lemma mulOp_Z_Z : PauliOperator.Z.mulOp PauliOperator.Z = ⟨0, PauliOperator.I⟩ := rfl
 
-/-- The *operator* part of `mulOp` is commutative (the phase power may differ). -/
+/-- The *operator* part of `mulOp` is commutative (the phase power may differ).
+-/
 lemma mulOp_operator_comm (P Q : PauliOperator) :
     (P.mulOp Q).operator = (Q.mulOp P).operator := by
   cases P <;> cases Q <;> simp

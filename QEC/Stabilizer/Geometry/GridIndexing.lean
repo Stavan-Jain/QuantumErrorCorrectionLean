@@ -5,7 +5,8 @@ namespace Quantum
 namespace Stabilizer
 namespace Lattice
 
-/-- Row-major encoding `(x,y) ↦ y*L + x` is injective on `Fin L × Fin L` for `L > 0`. -/
+/-- Row-major encoding `(x,y) ↦ y*L + x` is injective on `Fin L × Fin L` for
+`L > 0`. -/
 lemma rowMajor_injective (L : ℕ) [Fact (0 < L)] :
     Function.Injective (fun p : Fin L × Fin L => p.2.val * L + p.1.val) := by
   intro p q hpq
@@ -31,12 +32,14 @@ lemma rowMajor_injective (L : ℕ) [Fact (0 < L)] :
     exact hdiv
   exact Prod.ext (Fin.ext hxval) (Fin.ext hyval)
 
-/-- If one index lies below an offset and another is at least the offset, they differ. -/
+/-- If one index lies below an offset and another is at least the offset, they
+differ. -/
 lemma ne_of_lt_offset_le {a b offset : ℕ} (ha : a < offset) (hb : offset ≤ b) : a ≠ b := by
   intro hab
   omega
 
-/-- Fin-indexed variant of `ne_of_lt_offset_le` for values in the same ambient `Fin n`. -/
+/-- Fin-indexed variant of `ne_of_lt_offset_le` for values in the same ambient
+`Fin n`. -/
 lemma fin_ne_of_val_lt_offset_le {n offset : ℕ} {i j : Fin n}
     (hi : i.val < offset) (hj : offset ≤ j.val) : i ≠ j := by
   intro hij

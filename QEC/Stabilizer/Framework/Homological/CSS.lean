@@ -8,13 +8,13 @@ import QEC.Stabilizer.Framework.Core
 # Generic CSS construction from a `HomologicalCode`
 
 This file lifts the toric CSS operator-encoding machinery to the abstract
-`HomologicalCode` setting.  Given a length-3 chain complex `X`, we encode
+`HomologicalCode` setting. Given a length-3 chain complex `X`, we encode
 1-chains as X-type and Z-type Pauli operators on `Fintype.card X.C1` qubits,
 indexed by the canonical `Fintype.equivFin X.C1`.
 
-This file currently covers §B.1 (Pauli-operator encoding).  §B.2 (generators)
-and §B.3 (the `StabilizerCode` instance with symplectic-LI lift) follow in
-later edits.
+This file currently covers §B.1 (Pauli-operator encoding). §B.2 (generators) and
+§B.3 (the `StabilizerCode` instance with symplectic-LI lift) follow in later
+edits.
 -/
 
 namespace Quantum
@@ -202,7 +202,8 @@ set_option maxHeartbeats 1000000 in
 -- This split-`if` over chain-sum cases involves a quadratic case explosion across
 -- the three indicator predicates (c, c', c+c'); the extra heartbeats accommodate
 -- it without restructuring the proof.
-/-- Homomorphism: `chainXOperator (c + c') = chainXOperator c * chainXOperator c'`. -/
+/-- Homomorphism:
+`chainXOperator (c + c') = chainXOperator c * chainXOperator c'`. -/
 theorem chainXOperator_add (c c' : X.C1 → ZMod 2) :
     X.chainXOperator (c + c') = X.chainXOperator c * X.chainXOperator c' := by
   simp [chainXOperator] at *
@@ -225,7 +226,8 @@ theorem chainXOperator_add (c c' : X.C1 → ZMod 2) :
 
 set_option maxHeartbeats 1000000 in
 -- Same case-explosion as `chainXOperator_add`; see comment there.
-/-- Homomorphism: `chainZOperator (c + c') = chainZOperator c * chainZOperator c'`. -/
+/-- Homomorphism:
+`chainZOperator (c + c') = chainZOperator c * chainZOperator c'`. -/
 theorem chainZOperator_add (c c' : X.C1 → ZMod 2) :
     X.chainZOperator (c + c') = X.chainZOperator c * X.chainZOperator c' := by
   simp [chainZOperator] at *

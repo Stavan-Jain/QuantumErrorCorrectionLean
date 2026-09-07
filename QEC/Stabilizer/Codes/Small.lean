@@ -14,6 +14,6 @@ import QEC.Stabilizer.Codes.Small.SixQubit_6_2_2
 Single-instance stabilizer codes: Shor's [[9,1,3]], Steane [[7,1,3]] (with
 transversal gates, and its distance-3 proof in `Steane7Distance.lean` via the
 Hamming-column condition), the [[4,2,2]] code, quantum Hamming, the [[5,1,3]]
-perfect code (the first non-CSS code in the repo), the [[4,1,2]]
-LNCY CSS detection code, and Knill's C_6 [[6,2,2]] CSS detection code.
+perfect code (the first non-CSS code in the repo), the [[4,1,2]] LNCY CSS
+detection code, and Knill's C_6 [[6,2,2]] CSS detection code.
 -/

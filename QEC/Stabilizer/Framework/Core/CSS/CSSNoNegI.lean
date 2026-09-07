@@ -8,14 +8,17 @@ namespace Quantum
 /-!
 # CSS: excluding `negIdentity`
 
-This file packages a reusable “no `-I`” criterion for **CSS-generated** subgroups.
+This file packages a reusable “no `-I`” criterion for **CSS-generated**
+subgroups.
 
 The proof is purely algebraic:
 - assume generators split into `ZGen` and `XGen` that commute generatorwise
-- use `Subgroup.mem_closure_union_exists_mul_of_commute_generators` to decompose any element
-  of `closure (ZGen ∪ XGen)` as `z * x` with `z ∈ closure ZGen` and `x ∈ closure XGen`
+- use `Subgroup.mem_closure_union_exists_mul_of_commute_generators` to decompose
+  any element of `closure (ZGen ∪ XGen)` as `z * x` with `z ∈ closure ZGen` and
+  `x ∈ closure XGen`
 - show `z` is Z-type and `x` is X-type (closure invariants from `CSS.lean`)
-- if `z * x` has identity operators then it must be `1` (cross-type identity lemma)
+- if `z * x` has identity operators then it must be `1` (cross-type identity
+  lemma)
 - apply to `negIdentity n`, whose operators are identity but which is not `1`
 - conclude `negIdentity n ∉ closure (ZGen ∪ XGen)`
 -/
@@ -24,8 +27,8 @@ namespace CSS
 
 open StabilizerGroup NQubitPauliGroupElement
 
-/-- If `ZGen` and `XGen` are phase-0 Z-type / X-type generators that commute generatorwise,
-then `negIdentity n` is not in the subgroup they generate. -/
+/-- If `ZGen` and `XGen` are phase-0 Z-type / X-type generators that commute
+generatorwise, then `negIdentity n` is not in the subgroup they generate. -/
 theorem negIdentity_not_mem_closure_union
     {n : ℕ} (ZGen XGen : Set (NQubitPauliGroupElement n))
     (hZ : ∀ z, z ∈ ZGen → NQubitPauliGroupElement.IsZTypeElement z)

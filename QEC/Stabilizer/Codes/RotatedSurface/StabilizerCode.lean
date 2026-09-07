@@ -14,20 +14,19 @@ Upgrades the lattice-side stabilizer family from
 
 ## Strategy
 
-* **Symplectic linear independence.**  The generator list has block
-  structure: a Z-block (rows = `vertexStabOf zf`, Z-half =
-  `1[v ∈ zSupport zf]`, X-half = `0`) followed by an X-block
-  (rows = `faceStabOf xf`, X-half = `1[v ∈ xSupport xf]`, Z-half = `0`).
-  LI of the full row family reduces to LI of each block, which follows
-  immediately from `rscBoundary2_injective` and `rscZCutMap_injective`
-  (proven in Stage 3): no trimming is needed because the rotated surface
-  code has *no* redundant generators.
+* **Symplectic linear independence.** The generator list has block structure: a
+  Z-block (rows = `vertexStabOf zf`, Z-half = `1[v ∈ zSupport zf]`, X-half =
+  `0`) followed by an X-block (rows = `faceStabOf xf`, X-half =
+  `1[v ∈ xSupport xf]`, Z-half = `0`). LI of the full row family reduces to LI
+  of each block, which follows immediately from `rscBoundary2_injective` and
+  `rscZCutMap_injective` (proven in Stage 3): no trimming is needed because the
+  rotated surface code has *no* redundant generators.
 
-* **Logical operators.**  With Z-rough left/right boundaries and X-rough
-  top/bottom boundaries, the logical X is a vertical X-string at the
-  middle column `x = (L−1)/2`, and the logical Z is a horizontal Z-string
-  at the middle row `y = (L−1)/2`.  They intersect at the centre qubit
-  `(mid, mid)` exactly once, so they anticommute.
+* **Logical operators.** With Z-rough left/right boundaries and X-rough
+  top/bottom boundaries, the logical X is a vertical X-string at the middle
+  column `x = (L−1)/2`, and the logical Z is a horizontal Z-string at the middle
+  row `y = (L−1)/2`. They intersect at the centre qubit `(mid, mid)` exactly
+  once, so they anticommute.
 -/
 
 namespace Quantum
@@ -47,9 +46,9 @@ variable (L : ℕ) [Fact (Odd L)] [Fact (3 ≤ L)]
 /-! ## §A — `cutMap (singleVtx _)` and `boundary2 (singleFace _)` indicators
 
 The generic `cutMap`/`boundary2`, applied to the canonical single-cell
-indicators, reduce to `ZMod 2`-valued membership indicators on the
-corresponding `zSupport`/`xSupport` finsets.  We use these as the bridges
-between the abstract symplectic check matrix and the lattice combinatorics.
+indicators, reduce to `ZMod 2`-valued membership indicators on the corresponding
+`zSupport`/`xSupport` finsets. We use these as the bridges between the abstract
+symplectic check matrix and the lattice combinatorics.
 -/
 
 omit [Fact (Odd L)] [Fact (3 ≤ L)] in
@@ -123,12 +122,13 @@ lemma boundary2_singleFace_apply (xf : RotatedSurface.XFaceIdx L)
 
 /-! ## §B — Symplectic check-matrix entries
 
-Each generator row of the check matrix has a clean closed form:
-`zStab zf` is Z-type, so its X-half is uniformly zero; its Z-half at qubit
-`rscQubitEquiv L v` is `1[v ∈ zSupport zf]`.  Symmetrically for `xStab xf`.
+Each generator row of the check matrix has a clean closed form: `zStab zf` is
+Z-type, so its X-half is uniformly zero; its Z-half at qubit `rscQubitEquiv L v`
+is `1[v ∈ zSupport zf]`. Symmetrically for `xStab xf`.
 -/
 
-/-- The inverse of `rscQubitEquiv`, mapping a qubit index back to its data-qubit. -/
+/-- The inverse of `rscQubitEquiv`, mapping a qubit index back to its
+data-qubit. -/
 noncomputable def vtxOfQubit (q : Fin (numQubits L)) : RotatedSurface.VtxIdx L :=
   (RotatedSurface.rscQubitEquiv L).symm q
 
@@ -267,8 +267,8 @@ private lemma generatorsList_length_split :
   rw [List.length_append, generatorsListZ_eq_map, generatorsListX_eq_map,
     List.length_map, List.length_map]
 
-/-- The generator at index `k` with `k < (zList L).length` is the Z-stab at
-the `k`-th element of `zList L`. -/
+/-- The generator at index `k` with `k < (zList L).length` is the Z-stab at the
+`k`-th element of `zList L`. -/
 private lemma get_generatorsList_Z (k : ℕ) (hk : k < (generatorsList L).length)
     (hkZ : k < (zList L).length) :
     (generatorsList L).get ⟨k, hk⟩ = zStab L ((zList L).get ⟨k, hkZ⟩) := by
@@ -360,12 +360,12 @@ private lemma toSymplectic_xStab_X (xf : RotatedSurface.XFaceIdx L)
 /-! ## §C — Symplectic linear independence of the generator list
 
 The argument decomposes the sum at column `natAdd numQubits q` (the Z-half)
-versus `castAdd numQubits q` (the X-half).  At the Z-half, X-block rows
+versus `castAdd numQubits q` (the X-half). At the Z-half, X-block rows
 contribute zero by `toSymplectic_xStab_Z`, leaving only the Z-block sum.
-Reindexing this sum across vertices via `vtxOfQubit` recovers
-`rscZCutMap` applied to the Z-block coefficient function, which is zero
-by hypothesis.  Injectivity of `rscZCutMap` (Stage 3) finishes the Z-side.
-The X-side is the mirror image.
+Reindexing this sum across vertices via `vtxOfQubit` recovers `rscZCutMap`
+applied to the Z-block coefficient function, which is zero by hypothesis.
+Injectivity of `rscZCutMap` (Stage 3) finishes the Z-side. The X-side is the
+mirror image.
 -/
 
 /-- Z-block index → `ZFaceIdx` via `zList`. -/
@@ -428,8 +428,8 @@ omit [Fact (Odd L)] [Fact (3 ≤ L)] in
   rw [Equiv.apply_symm_apply, xEquiv_apply]
   rfl
 
-/-- The Z-block coefficient function for a row-coefficient `f`,
-indexed by `ZFaceIdx`. -/
+/-- The Z-block coefficient function for a row-coefficient `f`, indexed by
+`ZFaceIdx`. -/
 private noncomputable def coeffsZ
     (f : Fin (generatorsList L).length → ZMod 2) :
     RotatedSurface.ZFaceIdx L → ZMod 2 := fun zf =>
@@ -439,8 +439,8 @@ private noncomputable def coeffsZ
     have hsplit := generatorsList_length_split L
     omega⟩
 
-/-- The X-block coefficient function for a row-coefficient `f`,
-indexed by `XFaceIdx`. -/
+/-- The X-block coefficient function for a row-coefficient `f`, indexed by
+`XFaceIdx`. -/
 private noncomputable def coeffsX
     (f : Fin (generatorsList L).length → ZMod 2) :
     RotatedSurface.XFaceIdx L → ZMod 2 := fun xf =>
@@ -742,9 +742,9 @@ theorem generators_independent :
 
 /-! ## §D — Logical operators
 
-Logical X is supported on the middle column `x = (L−1)/2`, and logical Z
-on the middle row `y = (L−1)/2`.  They intersect at the centre qubit
-`(mid, mid)` exactly once, so they anticommute.
+Logical X is supported on the middle column `x = (L−1)/2`, and logical Z on the
+middle row `y = (L−1)/2`. They intersect at the centre qubit `(mid, mid)`
+exactly once, so they anticommute.
 -/
 
 /-- The middle row/column index `(L − 1) / 2`. -/
@@ -848,7 +848,8 @@ theorem middleColChain_mem_cycles :
     rw [hv1]
     rw [if_neg (by omega)]
 
-/-- `dualBoundary c xf = ∑ v ∈ xSupport xf, c v` (the indicator characterization). -/
+/-- `dualBoundary c xf = ∑ v ∈ xSupport xf, c v` (the indicator
+characterization). -/
 lemma dualBoundary_apply_eq_sum (c : RotatedSurface.VtxIdx L → ZMod 2)
     (xf : RotatedSurface.XFaceIdx L) :
     (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundary c xf =
@@ -989,8 +990,8 @@ lemma logicalZ_mem_centralizer_homological :
       |>.chainZOperator_mem_centralizer_iff_mem_dualCycles (middleRowChain L)
   exact h.mpr (middleRowChain_mem_dualCycles L)
 
-/-- The chain inner product of `middleColChain` and `middleRowChain` is 1
-(they share exactly the centre qubit `(mid, mid)`). -/
+/-- The chain inner product of `middleColChain` and `middleRowChain` is 1 (they
+share exactly the centre qubit `(mid, mid)`). -/
 private lemma chainInnerProduct_middleCol_middleRow :
     Quantum.Stabilizer.Homological.HomologicalCode.chainInnerProduct
         (X := RotatedSurface.rotatedSurfaceHomologicalCode L)

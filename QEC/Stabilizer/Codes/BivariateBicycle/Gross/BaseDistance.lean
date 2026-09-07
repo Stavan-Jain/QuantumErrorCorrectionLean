@@ -69,9 +69,9 @@ lemma card_support_translate1 (c : BaseGroup) (u : BaseGroup × Fin 2 → ZMod 2
 
 /-! ## The sparse syndrome form
 
-For an indicator chain `χ_S`, the boundary `∂₁(χ_S)(h)` is the
-`|S|`-term sum `syndAt S h` — far cheaper to evaluate than the
-convolution form during the kernel `decide` sweep. -/
+For an indicator chain `χ_S`, the boundary `∂₁(χ_S)(h)` is the `|S|`-term sum
+`syndAt S h` — far cheaper to evaluate than the convolution form during the
+kernel `decide` sweep. -/
 
 /-- The syndrome contribution of a single qubit at a check position. -/
 def termAt (q : BaseGroup × Fin 2) (h : BaseGroup) : ZMod 2 :=
@@ -130,11 +130,10 @@ lemma bbBoundary1Fn_indicator (S : Finset (BaseGroup × Fin 2)) :
 
 /-! ## The parity lemma (PAR)
 
-Every cycle has even weight: applying the augmentation `ε(w) = Σ_g w(g)`
-to `B⋆u_L + A⋆u_R = 0` gives `ε(u_L) + ε(u_R) = 0` since
-`ε(A) = ε(B) = 1`.  This kills all odd-weight supports analytically, so the
-finite sweep below only needs the (normalized) weight-2 and weight-4
-configurations. -/
+Every cycle has even weight: applying the augmentation `ε(w) = Σ_g w(g)` to
+`B⋆u_L + A⋆u_R = 0` gives `ε(u_L) + ε(u_R) = 0` since `ε(A) = ε(B) = 1`. This
+kills all odd-weight supports analytically, so the finite sweep below only needs
+the (normalized) weight-2 and weight-4 configurations. -/
 
 /-- The augmentation is multiplicative on convolutions. -/
 lemma sum_conv {G : Type} [Fintype G] [AddCommGroup G] (a b : G → ZMod 2) :
@@ -191,12 +190,12 @@ lemma cycle_weight_even (u : BaseGroup × Fin 2 → ZMod 2)
 
 /-! ## The normalized finite check
 
-Every normalized configuration — `((0,0), b)` plus one or three further
-qubits (by (PAR) those are the only sizes a small cycle could have) — has a
-nonzero syndrome.  Quantified over plain tuples (no `Finset.powersetCard`
-in the decided statement: its compiled decision procedure is prohibitively
-expensive), so repeated/colliding tuples are allowed; the statements remain
-true since any such chain is nonzero of weight ≤ 4. -/
+Every normalized configuration — `((0,0), b)` plus one or three further qubits
+(by (PAR) those are the only sizes a small cycle could have) — has a nonzero
+syndrome. Quantified over plain tuples (no `Finset.powersetCard` in the decided
+statement: its compiled decision procedure is prohibitively expensive), so
+repeated/colliding tuples are allowed; the statements remain true since any such
+chain is nonzero of weight ≤ 4. -/
 
 /-- No normalized weight-2 chain is a cycle. -/
 lemma smallCycleCheck_two : ∀ b : Fin 2, ∀ q : BaseGroup × Fin 2,
@@ -207,17 +206,16 @@ lemma smallCycleCheck_two : ∀ b : Fin 2, ∀ q : BaseGroup × Fin 2,
 
 /-! ### Packed-mask engine for the weight-4 sweep
 
-The `2·72³ ≈ 7.5·10⁵` weight-4 configurations are too many for a kernel
-`decide` through `ZMod` arithmetic, so the sweep runs on GMP-fast `Nat`
-bit operations instead: each qubit's three-check syndrome is a 36-bit mask
-(packed into the single literal `synTable`), the four-qubit syndrome is the
-XOR of four masks, and the innermost quantifier disappears —
-`m₀ ^^^ m₁ ^^^ m₂ ^^^ m₃ = 0` forces `m₃ = m₀ ^^^ m₁ ^^^ m₂`, so it
-suffices that the XOR of three masks never *is* another qubit's mask,
-checked by a perfect-hash membership refuter (`synInvTable`; modulus 351 is
-injective on the 72 masks).  `termAt_eq_testBit` (a small kernel `decide`)
-bridges each mask bit back to `termAt`, keeping the public statement of
-`smallCycleCheck_four` unchanged. -/
+The `2·72³ ≈ 7.5·10⁵` weight-4 configurations are too many for a kernel `decide`
+through `ZMod` arithmetic, so the sweep runs on GMP-fast `Nat` bit operations
+instead: each qubit's three-check syndrome is a 36-bit mask (packed into the
+single literal `synTable`), the four-qubit syndrome is the XOR of four masks,
+and the innermost quantifier disappears — `m₀ ^^^ m₁ ^^^ m₂ ^^^ m₃ = 0` forces
+`m₃ = m₀ ^^^ m₁ ^^^ m₂`, so it suffices that the XOR of three masks never *is*
+another qubit's mask, checked by a perfect-hash membership refuter
+(`synInvTable`; modulus 351 is injective on the 72 masks). `termAt_eq_testBit`
+(a small kernel `decide`) bridges each mask bit back to `termAt`, keeping the
+public statement of `smallCycleCheck_four` unchanged. -/
 
 /-- Qubit index `(g, j) ↦ (6·g₁ + g₂)·2 + j ∈ [0, 72)`. -/
 private def encQubit (q : BaseGroup × Fin 2) : Nat :=
@@ -249,8 +247,8 @@ private def synMask (i : Nat) : Nat := (synTable >>> (36 * i)) % 2 ^ 36
 private lemma synMask_lt (i : Nat) : synMask i < 2 ^ 36 :=
   Nat.mod_lt _ (Nat.two_pow_pos 36)
 
-/-- Perfect-hash inverse table: byte `synMask i % 351` holds `i + 1`, and
-`0` marks "no mask hashes here". -/
+/-- Perfect-hash inverse table: byte `synMask i % 351` holds `i + 1`, and `0`
+marks "no mask hashes here". -/
 private def synInvTable : Nat :=
   0x000000000000000000434500470000000d004839000000000f00000000003b0000080000 <<< 2592 +
   0x0000000011000000000000000000000001000002001000000000003c0000003500000000 <<< 2304 +
@@ -345,8 +343,8 @@ private lemma testBit_false_of_lt {x n i : Nat} (hx : x < 2 ^ n) (hi : n ≤ i) 
   Nat.testBit_lt_two_pow
     (Nat.lt_of_lt_of_le hx (Nat.pow_le_pow_right (by omega) hi))
 
-/-- A nonzero `Nat` with only-zero bits at positions `≥ n` has a set bit
-below `n`. -/
+/-- A nonzero `Nat` with only-zero bits at positions `≥ n` has a set bit below
+`n`. -/
 private lemma exists_testBit_of_ne_zero {n x : Nat}
     (hhigh : ∀ i, n ≤ i → x.testBit i = false) (hne : x ≠ 0) :
     ∃ k, k < n ∧ x.testBit k = true := by
@@ -369,10 +367,10 @@ private lemma sum_ne_zero_of_xor : ∀ b₀ b₁ b₂ b₃ : Bool,
   decide
 
 /-- No normalized weight-≤4 chain containing the origin qubit is a cycle
-(disjunctive form: the hypotheses `qᵢ ≠ origin` are folded into the
-conclusion; proven by the packed-mask engine — `mask_sweep` plus the
-`termAt_eq_testBit` bridge, with `exists_testBit_of_ne_zero` extracting the
-witness check position from the nonzero XOR mask). -/
+(disjunctive form: the hypotheses `qᵢ ≠ origin` are folded into the conclusion;
+proven by the packed-mask engine — `mask_sweep` plus the `termAt_eq_testBit`
+bridge, with `exists_testBit_of_ne_zero` extracting the witness check position
+from the nonzero XOR mask). -/
 lemma smallCycleCheck_four : ∀ b : Fin 2, ∀ q₁ q₂ q₃ : BaseGroup × Fin 2,
     q₁ = (((0, 0) : BaseGroup), b) ∨ q₂ = (((0, 0) : BaseGroup), b) ∨
     q₃ = (((0, 0) : BaseGroup), b) ∨
@@ -408,8 +406,8 @@ lemma smallCycleCheck_four : ∀ b : Fin 2, ∀ q₁ q₂ q₃ : BaseGroup × Fi
 
 /-! ## The small-cycle theorem (strong form) -/
 
-/-- **Small-cycle theorem** (A4 Theorem A, repo form): every nonzero 1-cycle
-of the bb72 base complex has weight ≥ 6 — boundaries included. -/
+/-- **Small-cycle theorem** (A4 Theorem A, repo form): every nonzero 1-cycle of
+the bb72 base complex has weight ≥ 6 — boundaries included. -/
 theorem base_cycle_weight_ge_6
     (u : BaseGroup × Fin 2 → ZMod 2)
     (hcyc : bbBoundary1Fn baseA baseB u = 0) (hne : u ≠ 0) :
@@ -540,8 +538,8 @@ theorem base_chain_distance_eq_6 :
 /-! ## Unconditional d(gross) ≥ 6 (A4 Theorem B)
 
 Sector split on `b := p(v)`: if `b ≠ 0` then `b` is a nonzero base *cycle*
-(boundary or not), so `|v| ≥ |b| ≥ 6` by the strong small-cycle theorem;
-if `b = 0` the Phase-1 rung gives `|v| ≥ 12`. -/
+(boundary or not), so `|v| ≥ |b| ≥ 6` by the strong small-cycle theorem; if
+`b = 0` the Phase-1 rung gives `|v| ≥ 12`. -/
 
 /-- Every nontrivial cycle of the gross complex has chain weight ≥ 6 —
 **unconditionally**. -/
@@ -572,8 +570,8 @@ theorem gross_dual_chainWeight_ge_6 :
   exact (bb_cycle_bound_iff_dual_bound grossA grossB 6).mp hX
 
 /-- **Unconditional d(gross) ≥ 6 at the Pauli level** (A4 Theorem B): every
-nontrivial logical operator of the gross homological stabilizer group has
-weight ≥ 6 — triple the published Lin–Pryadko floor of 2. -/
+nontrivial logical operator of the gross homological stabilizer group has weight
+≥ 6 — triple the published Lin–Pryadko floor of 2. -/
 theorem gross_logical_weight_ge_6
     (g : NQubitPauliGroupElement grossComplex.numQubits)
     (hg : Quantum.StabilizerGroup.IsNontrivialLogicalOperator g
@@ -585,11 +583,11 @@ theorem gross_logical_weight_ge_6
 
 /-! ## The narrowed Phase-1 interface
 
-With (A) discharged, the conditional `d(gross) = 12` needs only the two
-sector inputs. -/
+With (A) discharged, the conditional `d(gross) = 12` needs only the two sector
+inputs. -/
 
-/-- Conditional Pauli-level `d(gross) = 12`, now from the two remaining
-sector hypotheses (A4 Theorems C and D; Phases 3–4). -/
+/-- Conditional Pauli-level `d(gross) = 12`, now from the two remaining sector
+hypotheses (A4 Theorems C and D; Phases 3–4). -/
 theorem gross_pauli_distance_eq_12_of_two_sectors
     (hM : DangerousSectorGe12) (hMim : SafeSectorGe12) :
     IsLeast {w : ℕ | ∃ g : NQubitPauliGroupElement grossComplex.numQubits,

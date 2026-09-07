@@ -9,7 +9,8 @@ open scoped BigOperators
 
 variable (L : ℕ) [Fact (0 < L)]
 
-/-- Boundary map `∂2 : C2 → C1` for the toric square cellulation over `ZMod 2`. -/
+/-- Boundary map `∂2 : C2 → C1` for the toric square cellulation over `ZMod 2`.
+-/
 def toricBoundary2 : C2 L →ₗ[ZMod 2] C1 L where
   toFun f :=
     fun e => match e with
@@ -24,7 +25,8 @@ def toricBoundary2 : C2 L →ₗ[ZMod 2] C1 L where
     ext e
     cases e <;> simp [mul_add]
 
-/-- Boundary map `∂1 : C1 → C0` for the toric square cellulation over `ZMod 2`. -/
+/-- Boundary map `∂1 : C1 → C0` for the toric square cellulation over `ZMod 2`.
+-/
 def toricBoundary1 : C1 L →ₗ[ZMod 2] C0 L where
   toFun c :=
     fun v =>
@@ -43,12 +45,12 @@ def toricBoundary1 : C1 L →ₗ[ZMod 2] C0 L where
 ## Notation
 
 The scoped `ToricChain` notation renders the toric boundary maps the way the
-homological narrative writes them: `∂₂ L f`, `∂₁ L c` (and `δ⁰ L s` for the vertex
-cut map, declared next to it in `H1Dimension.lean`). The lattice size stays an
-explicit argument, exactly as for the underlying constants — `∂₁ L`, `∂₁ (L := L)` —
-so the conversion is purely notational: `toricBoundary1` is still the declaration
-name for `simp [toricBoundary1]`, `unfold`, and lemma names. Enable with
-`open scoped ToricChain`.
+homological narrative writes them: `∂₂ L f`, `∂₁ L c` (and `δ⁰ L s` for the
+vertex cut map, declared next to it in `H1Dimension.lean`). The lattice size
+stays an explicit argument, exactly as for the underlying constants — `∂₁ L`,
+`∂₁ (L := L)` — so the conversion is purely notational: `toricBoundary1` is
+still the declaration name for `simp [toricBoundary1]`, `unfold`, and lemma
+names. Enable with `open scoped ToricChain`.
 -/
 
 /-- `∂₂` is the toric face-boundary map `toricBoundary2 : C2 L →ₗ[ZMod 2] C1 L`,

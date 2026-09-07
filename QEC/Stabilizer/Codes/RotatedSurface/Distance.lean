@@ -8,12 +8,13 @@ import QEC.Stabilizer.Framework.Core.Logical.CodeDistance
 /-!
 # Stage 7 — Combined rotated-surface-code distance = `L`
 
-Combines the X-distance ≥ L (`RotatedSurfaceCodeNDistanceX`) and the
-Z-distance ≥ L (`RotatedSurfaceCodeNDistanceZ`) via the generic CSS bridge
-on `HomologicalCode` to obtain `HasCodeDistance (rotatedSurfaceStabilizerCode L) L`.
+Combines the X-distance ≥ L (`RotatedSurfaceCodeNDistanceX`) and the Z-distance
+≥ L (`RotatedSurfaceCodeNDistanceZ`) via the generic CSS bridge on
+`HomologicalCode` to obtain
+`HasCodeDistance (rotatedSurfaceStabilizerCode L) L`.
 
 The entire CSS-bridge machinery — centralizer ⇒ cycles, weight bridges, and the
-"not both boundary" lemma — lives in `Stabilizer.Homological.Distance`.  This
+"not both boundary" lemma — lives in `Stabilizer.Homological.Distance`. This
 file just plugs the rotated-surface `HomologicalCode` instance into that
 machinery and combines the result with the Stage 5/6 weight bounds.
 -/
@@ -28,8 +29,8 @@ open NQubitPauliGroupElement Stabilizer.Lattice.RotatedSurface
 
 variable (L : ℕ) [Fact (Odd L)] [Fact (3 ≤ L)]
 
-/-- **Stage 7 endpoint.**  The rotated surface code on an `L × L` lattice
-has code distance exactly `L`. -/
+/-- **Stage 7 endpoint.** The rotated surface code on an `L × L` lattice has
+code distance exactly `L`. -/
 theorem rotatedSurfaceCodeN_distance_eq_L :
     HasCodeDistance (rotatedSurfaceStabilizerCode L) L := by
   have hL_pos : 0 < L := by have h3 : 3 ≤ L := Fact.out; omega
@@ -136,8 +137,8 @@ theorem rotatedSurfaceCodeN_distance_eq_L :
       exact (h_iff_NL (logicalX L)).mpr hlogX_nl_hom
     · exact logicalX_weight_eq_L L
 
-/-- The rotated surface code on an `L × L` lattice packaged as a
-`[[L*L, 1, L]]` stabilizer code with distance. -/
+/-- The rotated surface code on an `L × L` lattice packaged as a `[[L*L, 1, L]]`
+stabilizer code with distance. -/
 noncomputable def rotatedSurfaceStabilizerCodeWithDistance :
     StabilizerCodeWithDistance (numQubits L) 1 L where
   toStabilizerCode := rotatedSurfaceStabilizerCode L

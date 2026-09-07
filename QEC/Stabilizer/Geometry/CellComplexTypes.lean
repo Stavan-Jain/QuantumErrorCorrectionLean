@@ -42,7 +42,8 @@ abbrev vEdgeIdx (L : ℕ) (x y : Fin L) : EdgeIdx L := EdgeIdx.v x y
 @[simp] lemma card_faceIdx (L : ℕ) : Fintype.card (FaceIdx L) = L * L := by
   simp [FaceIdx]
 
-/-- Canonical equivalence between edge tags and a sum of two coordinate pairs. -/
+/-- Canonical equivalence between edge tags and a sum of two coordinate pairs.
+-/
 def edgeIdxEquivSum (L : ℕ) : EdgeIdx L ≃ (VtxIdx L ⊕ VtxIdx L) where
   toFun
     | EdgeIdx.h x y => Sum.inl (x, y)

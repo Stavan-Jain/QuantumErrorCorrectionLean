@@ -28,9 +28,9 @@ namespace FiveQubit_5_1_3
 /-!
 # The five-qubit perfect code [[5, 1, 3]] (Laflamme et al. 1996)
 
-The smallest stabilizer code that corrects an arbitrary single-qubit error.
-It encodes `k = 1` logical qubit in `n = 5` physical qubits with distance
-`d = 3`, saturating the quantum Hamming bound.
+The smallest stabilizer code that corrects an arbitrary single-qubit error. It
+encodes `k = 1` logical qubit in `n = 5` physical qubits with distance `d = 3`,
+saturating the quantum Hamming bound.
 
 ## Stabilizer generators (cyclic shifts of XZZXI)
 
@@ -47,20 +47,20 @@ It encodes `k = 1` logical qubit in `n = 5` physical qubits with distance
 
 ## Non-CSS divergence
 
-This is the **first non-CSS code** in the repository. Each generator
-contains both `X` and `Z` factors on different qubits, so it satisfies
-neither `IsZTypeElement` nor `IsXTypeElement`. Consequently:
+This is the **first non-CSS code** in the repository. Each generator contains
+both `X` and `Z` factors on different qubits, so it satisfies neither
+`IsZTypeElement` nor `IsXTypeElement`. Consequently:
 
 * §3 (typing predicates) — SKIPPED.
-* §4–§5 (cross-commutation + all-pair commutation) — done as 6 explicit
-  pairwise commutations, then bundled via `rcases` on the 4-element
-  generator set. No CSS shortcut.
-* §6 (`−I ∉ closure`) — uses `negIdentity_not_mem_of_independent_phase_zero`
-  (a general-form helper introduced for this code; see `gap_audit.md`),
-  *not* `CSS.negIdentity_not_mem_closure_union`.
+* §4–§5 (cross-commutation + all-pair commutation) — done as 6 explicit pairwise
+  commutations, then bundled via `rcases` on the 4-element generator set. No CSS
+  shortcut.
+* §6 (`−I ∉ closure`) — uses `negIdentity_not_mem_of_independent_phase_zero` (a
+  general-form helper introduced for this code; see `gap_audit.md`), *not*
+  `CSS.negIdentity_not_mem_closure_union`.
 * §14 (distance proof) — preferentially `native_decide` on full
-  `HasCodeDistance`; if that fails, manual enumeration of weight-1
-  (via existing helper) and weight-2 (via a new helper —
+  `HasCodeDistance`; if that fails, manual enumeration of weight-1 (via existing
+  helper) and weight-2 (via a new helper —
   `no_weight_two_mem_centralizer_of_anticommute_witness`).
 
 ## References
@@ -69,23 +69,23 @@ neither `IsZTypeElement` nor `IsXTypeElement`. Consequently:
 * Bennett, DiVincenzo, Smolin, Wootters, `arxiv:quant-ph/9604024`
 * EC Zoo `stab_5_1_3`, cross-referenced with Qiskit `preset:qiskit ID 21`
 
-Stage 4 closed all 23 sorries from the original skeleton; the file
-compiles to `lake build` without warnings other than mathlib-style
-lints inherited from upstream files. See
-`qec-lab:pipeline/attempts/stab_5_1_3/result.md` for the full session log.
+Stage 4 closed all 23 sorries from the original skeleton; the file compiles to
+`lake build` without warnings other than mathlib-style lints inherited from
+upstream files. See `qec-lab:pipeline/attempts/stab_5_1_3/result.md` for the
+full session log.
 -/
 
 open NQubitPauliGroupElement
 
 /-! ## Local Decidable instances
 
-These are scoped to this file (via `local instance`) because adding them
-to the global instance pool — as `PauliGroup/Commutation.lean` originally
-did during Stage 4 — disrupted the typeclass synthesis of the
-`weight_2_pairs_span_coeffs` `native_decide` proof in `RotatedSurfaceCode3.lean`.
-The standard Pi-decidability chain in that proof must remain primary, so
-we localise the group-element-level instances here, where the [[5,1,3]]
-distance proof needs them. -/
+These are scoped to this file (via `local instance`) because adding them to the
+global instance pool — as `PauliGroup/Commutation.lean` originally did during
+Stage 4 — disrupted the typeclass synthesis of the `weight_2_pairs_span_coeffs`
+`native_decide` proof in `RotatedSurfaceCode3.lean`. The standard
+Pi-decidability chain in that proof must remain primary, so we localise the
+group-element-level instances here, where the [[5,1,3]] distance proof needs
+them. -/
 
 /-- `DecidableEq` on `NQubitPauliGroupElement n` via field-wise decision.
 File-local to keep RotatedSurfaceCode3.lean's synthesis path intact. -/
@@ -96,10 +96,10 @@ local instance instDecidableEqNQubitPauliGroupElement (n : ℕ) :
      fun h => by cases h; exact ⟨rfl, rfl⟩⟩
 
 /-- `Decidable (Anticommute p q)`: unfolds to equality of two Pauli group
-elements and decides via the local `DecidableEq` above. Marked
-`noncomputable` because `*` on `NQubitPauliGroupElement` is noncomputable,
-but `decide` still reduces through the kernel. (`native_decide` does not
-work — prefer `decide`.) -/
+elements and decides via the local `DecidableEq` above. Marked `noncomputable`
+because `*` on `NQubitPauliGroupElement` is noncomputable, but `decide` still
+reduces through the kernel. (`native_decide` does not work — prefer `decide`.)
+-/
 noncomputable local instance decidableAnticommute
 (p q : NQubitPauliGroupElement 5) :
     Decidable (NQubitPauliGroupElement.Anticommute p q) :=
@@ -121,8 +121,8 @@ def g4 : NQubitPauliGroupElement 5 := σ[ZXIXZ]
 
 /-! ## §2 — Generator set and subgroup
 
-Non-CSS: a single flat generator set, no `ZGenerators`/`XGenerators`
-partition. -/
+Non-CSS: a single flat generator set, no `ZGenerators`/`XGenerators` partition.
+-/
 
 /-- The four stabilizer generators of the [[5, 1, 3]] code. -/
 def generators : Set (NQubitPauliGroupElement 5) :=
@@ -134,17 +134,16 @@ noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 5) :=
 
 /-! ## §3 — Z/X-type predicates
 
-SKIPPED: this is a non-CSS code. Each `gᵢ` carries both `X` and `Z`
-factors on different qubits, so `IsZTypeElement` and `IsXTypeElement`
-both fail.
+SKIPPED: this is a non-CSS code. Each `gᵢ` carries both `X` and `Z` factors on
+different qubits, so `IsZTypeElement` and `IsXTypeElement` both fail.
 -/
 
 /-! ## §4 — Pairwise commutation of generators (6 unordered pairs)
 
-Each pair has an even number of anticommuting qubit positions (count = 2
-in every case — see `informal_spec.md` for the explicit Finsets).
-Closed by `pauli_comm_even_anticommutes` + explicit Finset computation,
-mirroring `Steane7.lean`'s `Zᵢ_comm_Xⱼ` pattern.
+Each pair has an even number of anticommuting qubit positions (count = 2 in
+every case — see `informal_spec.md` for the explicit Finsets). Closed by
+`pauli_comm_even_anticommutes` + explicit Finset computation, mirroring
+`Steane7.lean`'s `Zᵢ_comm_Xⱼ` pattern.
 -/
 
 private lemma g1_comm_g2 : g1 * g2 = g2 * g1 := by
@@ -248,7 +247,8 @@ theorem generators_commute :
 def generatorsList : List (NQubitPauliGroupElement 5) :=
   [g1, g2, g3, g4]
 
-/-- The list-form generators have the same elements as the set-form `generators`. -/
+/-- The list-form generators have the same elements as the set-form
+`generators`. -/
 lemma listToSet_generatorsList :
     NQubitPauliGroupElement.listToSet generatorsList = generators := by
   simp only [generatorsList, generators,
@@ -280,11 +280,11 @@ theorem GeneratorsIndependent_5_generatorsList :
 
 /-! ## §6 — `−I` is not in the stabilizer subgroup
 
-**Non-CSS divergence**: cannot use
-`CSS.negIdentity_not_mem_closure_union`. We rely on the general-form
-helper `negIdentity_not_mem_of_indep_phase_zero_commute` in
-`BinarySymplectic/SymplecticSpan.lean` (added during Stage-4 of this
-code's formalization; see `gap_audit.md` Gap 1).
+**Non-CSS divergence**: cannot use `CSS.negIdentity_not_mem_closure_union`. We
+rely on the general-form helper
+`negIdentity_not_mem_of_indep_phase_zero_commute` in
+`BinarySymplectic/SymplecticSpan.lean` (added during Stage-4 of this code's
+formalization; see `gap_audit.md` Gap 1).
 -/
 
 /-- `−I` is not in the [[5, 1, 3]] stabilizer subgroup.
@@ -334,8 +334,8 @@ noncomputable def logicalY : NQubitPauliGroupElement 5 :=
 /-! ## §11 — Logical anticommutation (`X̄` and `Z̄`)
 
 For all-X / all-Z logicals, the dedicated lemma
-`NQubitPauliOperator.allX_allZ_anticommute` closes this in one line
-(since `n = 5` is odd).
+`NQubitPauliOperator.allX_allZ_anticommute` closes this in one line (since
+`n = 5` is odd).
 -/
 
 /-- `X̄` and `Z̄` anticommute (since `n = 5` is odd). -/
@@ -345,9 +345,9 @@ theorem logicalX_anticommutes_logicalZ :
 
 /-! ## §12 — Logicals in centralizer
 
-Eight per-generator commutation lemmas (4 for `logicalX`, 4 for
-`logicalZ`), each closed by `pauli_comm_even_anticommutes` + explicit
-Finset. Then bundled via `Subgroup.forall_comm_closure_iff`.
+Eight per-generator commutation lemmas (4 for `logicalX`, 4 for `logicalZ`),
+each closed by `pauli_comm_even_anticommutes` + explicit Finset. Then bundled
+via `Subgroup.forall_comm_closure_iff`.
 -/
 
 private lemma logicalX_commutes_g1 : logicalX * g1 = g1 * logicalX := by
@@ -500,9 +500,9 @@ noncomputable def stabilizerCode : Code[[5, 1]] where
   logicalOps := logicalOps5_1_3
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 
-/-- Bridge: the stabilizer-code's underlying subgroup is the closure of `generators`.
-Used to translate distance proofs against `stabilizerGroup` into proofs against
-`stabilizerCode.toStabilizerGroup`. -/
+/-- Bridge: the stabilizer-code's underlying subgroup is the closure of
+`generators`. Used to translate distance proofs against `stabilizerGroup` into
+proofs against `stabilizerCode.toStabilizerGroup`. -/
 private lemma stabilizerCode_toSubgroup_eq :
     stabilizerCode.toStabilizerGroup.toSubgroup = Subgroup.closure generators := by
   change (Subgroup.closure (NQubitPauliGroupElement.listToSet generatorsList) : _) =
@@ -512,16 +512,16 @@ private lemma stabilizerCode_toSubgroup_eq :
 /-! ## §14 — Code distance = 3
 
 The Core infrastructure for this proof has been added (Gap 1:
-`negIdentity_not_mem_of_indep_phase_zero_commute` in `SymplecticSpan.lean`;
-Gap 2: `weightTwoAt` + `no_weight_two_mem_centralizer_of_anticommute_witness`
-in `Core/CSSDistance.lean`). What remains is the in-file enumeration of the
+`negIdentity_not_mem_of_indep_phase_zero_commute` in `SymplecticSpan.lean`; Gap
+2: `weightTwoAt` + `no_weight_two_mem_centralizer_of_anticommute_witness` in
+`Core/CSSDistance.lean`). What remains is the in-file enumeration of the
 anticomm-witness table — 15 weight-1 cases and 90 weight-2 cases. Each case
 needs an explicit Finset computation because the parity-based `Anticommute`
-characterization uses `Classical.propDecidable` and the wrong-generator
-branches need a clean failure path.
+characterization uses `Classical.propDecidable` and the wrong-generator branches
+need a clean failure path.
 
-This is mechanical work (~300-500 LoC) deferred to a follow-up session;
-the structure is documented below and in `gap_audit.md`.
+This is mechanical work (~300-500 LoC) deferred to a follow-up session; the
+structure is documented below and in `gap_audit.md`.
 -/
 
 /-- Anticommutation depends only on the operator-parts (not phases): if two
@@ -543,10 +543,11 @@ private lemma anticommute_of_operators_eq
   rw [this]
   exact h_ac
 
-/-- The weight-3 distance witness, defined directly with operators `I, Y, Y,
-I, X` and phase power 2. This is the operator-part of `logicalX * g1` (see
-`logicalX_w3_eq_mul` below for the equivalence). Defined explicitly (not via
-the `*` of noncomputable group operations) so that `decide` can reduce it. -/
+/-- The weight-3 distance witness, defined directly with operators
+`I, Y, Y, I, X` and phase power 2. This is the operator-part of `logicalX * g1`
+(see `logicalX_w3_eq_mul` below for the equivalence). Defined explicitly (not
+via the `*` of noncomputable group operations) so that `decide` can reduce it.
+-/
 def logicalX_w3 : NQubitPauliGroupElement 5 := -σ[IYYIX]
 
 /-- Sanity check: the explicit definition matches `logicalX * g1`. -/
@@ -561,7 +562,8 @@ lemma logicalX_w3_eq_mul : logicalX_w3 = logicalX * g1 := by
   decide
 
 /-- `logicalX_w3` anticommutes with `logicalZ`. By the parity criterion, the
-overlap pattern `IYYIX` vs `ZZZZZ` anticommutes at qubits 1, 2, 4 (odd count). -/
+overlap pattern `IYYIX` vs `ZZZZZ` anticommutes at qubits 1, 2, 4 (odd count).
+-/
 private lemma logicalX_w3_anticomm_logicalZ :
     NQubitPauliGroupElement.Anticommute logicalX_w3 logicalZ := by
   change logicalX_w3 * logicalZ = NQubitPauliGroupElement.minusOne 5 * (logicalZ * logicalX_w3)
@@ -584,18 +586,18 @@ private lemma logicalX_w3_mem_centralizer :
     exact Subgroup.subset_closure (by simp [generators])
 
 /-- `logicalX_w3 ∉ stabilizerCode.toStabilizerGroup.toSubgroup`. Since it
-anticommutes with `logicalZ` (a centralizer element), it cannot itself be
-in the stabilizer. -/
+anticommutes with `logicalZ` (a centralizer element), it cannot itself be in the
+stabilizer. -/
 private lemma logicalX_w3_not_mem_subgroup :
     logicalX_w3 ∉ stabilizerCode.toStabilizerGroup.toSubgroup := by
   apply not_mem_stabilizer_of_anticommutes_centralizer _ logicalX_w3 logicalZ
   · exact (logicalOps5_1_3 0).z_mem_centralizer
   · exact logicalX_w3_anticomm_logicalZ
 
-/-- No stabilizer element shares `logicalX_w3`'s operator-part. If one did,
-that element would anticommute with `logicalZ` (anticommutation depends only
-on operators), but it commutes with `logicalZ` by virtue of being in the
-abelian stabilizer subgroup. -/
+/-- No stabilizer element shares `logicalX_w3`'s operator-part. If one did, that
+element would anticommute with `logicalZ` (anticommutation depends only on
+operators), but it commutes with `logicalZ` by virtue of being in the abelian
+stabilizer subgroup. -/
 private lemma logicalX_w3_no_stab_same_operators :
     ∀ s ∈ stabilizerCode.toStabilizerGroup.toSubgroup,
       s.operators ≠ logicalX_w3.operators := by
@@ -614,11 +616,11 @@ private lemma logicalX_w3_isNontrivial :
 
 /-! ### Weight-1 anticomm witness
 
-For every qubit `i ∈ Fin 5` and every non-identity single-qubit Pauli `P`,
-some generator anticommutes with `weightOneAt i P`. We use the
-high-priority computable `DecidableEq` and `Decidable Anticommute`
-instances from `PauliGroup/Commutation.lean` to close each case by
-`decide`, with `first` backtracking across the four generators.
+For every qubit `i ∈ Fin 5` and every non-identity single-qubit Pauli `P`, some
+generator anticommutes with `weightOneAt i P`. We use the high-priority
+computable `DecidableEq` and `Decidable Anticommute` instances from
+`PauliGroup/Commutation.lean` to close each case by `decide`, with `first`
+backtracking across the four generators.
 
 Generator local Paulis (for reference):
 * `g₁ = X Z Z X I`
@@ -652,12 +654,12 @@ private lemma weight_one_anticomm_witness :
 
 For every distinct qubit pair `(i, j)` with `i ≠ j` and every pair of
 non-identity Paulis `(P, Q)`, some generator anticommutes with
-`weightTwoAt i j P Q`. Same structure as the weight-1 witness, but
-nested: `match` on `(P, Q)` then `fin_cases i <;> fin_cases j` and
-backtrack over generators by `first`. The `i = j` subgoals discharge
-via `exact absurd rfl hij`. Unused generator branches per `(P, Q)`
-case are trimmed (`g₄` is not needed for `(X, X)`, `(Y, Z)`, `(Z, Y)`)
-to avoid `linter.unusedTactic` warnings. -/
+`weightTwoAt i j P Q`. Same structure as the weight-1 witness, but nested:
+`match` on `(P, Q)` then `fin_cases i <;> fin_cases j` and backtrack over
+generators by `first`. The `i = j` subgoals discharge via
+`exact absurd rfl hij`. Unused generator branches per `(P, Q)` case are trimmed
+(`g₄` is not needed for `(X, X)`, `(Y, Z)`, `(Z, Y)`) to avoid
+`linter.unusedTactic` warnings. -/
 
 private lemma weight_two_anticomm_witness :
     ∀ i j : Fin 5, i ≠ j → ∀ P Q : PauliOperator, P ≠ PauliOperator.I →
@@ -731,9 +733,9 @@ private lemma weight_two_anticomm_witness :
 
 /-- The [[5, 1, 3]] five-qubit perfect code has distance 3.
 
-Combines the weight-1 and weight-2 anti-witness tables above (which rule
-out nontrivial logical operators of weight `< 3`) with the explicit
-weight-3 witness `logicalX_w3 = IYYIX` and its non-triviality proof. -/
+Combines the weight-1 and weight-2 anti-witness tables above (which rule out
+nontrivial logical operators of weight `< 3`) with the explicit weight-3 witness
+`logicalX_w3 = IYYIX` and its non-triviality proof. -/
 theorem code_has_distance_three : HasCodeDistance stabilizerCode 3 := by
   refine hasCodeDistance_of stabilizerCode 3 (by decide)
     ⟨logicalX_w3, logicalX_w3_isNontrivial, by decide⟩ ?_

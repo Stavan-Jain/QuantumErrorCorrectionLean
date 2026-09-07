@@ -13,10 +13,11 @@ variable {n : ℕ}
 /-!
 # Centralizer of a stabilizer group
 
-The centralizer of a stabilizer group S is the subgroup of the n-qubit Pauli group
-consisting of all elements that commute with every element of S. These are exactly
-the operators that preserve the codespace (map the codespace to itself). For Pauli
-stabilizer groups (no -I), the centralizer coincides with the normalizer.
+The centralizer of a stabilizer group S is the subgroup of the n-qubit Pauli
+group consisting of all elements that commute with every element of S. These are
+exactly the operators that preserve the codespace (map the codespace to itself).
+For Pauli stabilizer groups (no -I), the centralizer coincides with the
+normalizer.
 -/
 
 /-- The centralizer of a stabilizer group: all Pauli elements that commute with
@@ -34,7 +35,8 @@ lemma centralizer_eq_of_toSubgroup_eq (S T : StabilizerGroup n) (h : S.toSubgrou
 noncomputable def pauliNormalizer (S : StabilizerGroup n) : Subgroup (NQubitPauliGroupElement n) :=
   Subgroup.normalizer S.toSubgroup
 
-/-- For a stabilizer group (abelian, no -I), the normalizer of S in the Pauli group
+/-- For a stabilizer group (abelian, no -I), the normalizer of S in the Pauli
+group
     equals the centralizer of S in the Pauli group. -/
 theorem pauliNormalizer_eq_centralizer (S : StabilizerGroup n) :
     pauliNormalizer S = centralizer S := by
@@ -111,7 +113,8 @@ lemma mem_centralizer_iff_closure (g : NQubitPauliGroupElement n) (S : Stabilize
   rw [mem_centralizer_iff, h_closure]
   exact Subgroup.forall_comm_closure_iff g genSet
 
-/-- Every element of the stabilizer group lies in its centralizer (S is abelian). -/
+/-- Every element of the stabilizer group lies in its centralizer (S is
+abelian). -/
 theorem stabilizer_le_centralizer (S : StabilizerGroup n) :
     S.toSubgroup ≤ centralizer S := by
   intro g hg
@@ -122,11 +125,11 @@ theorem stabilizer_le_centralizer (S : StabilizerGroup n) :
 /-!
 ## Proving an operator is not in the stabilizer via a centralizer witness
 
-If a Pauli operator Q is in the centralizer (commutes with the whole stabilizer) and
-anticommutes with P, then P cannot lie in the stabilizer: the stabilizer is abelian,
-so every element would commute with Q, contradicting P * Q = -Q * P.
-This gives a uniform, code-agnostic way to show e.g. that logical X and Z are not
-in the stabilizer, by taking Q = logical Z and Q = logical X respectively.
+If a Pauli operator Q is in the centralizer (commutes with the whole stabilizer)
+and anticommutes with P, then P cannot lie in the stabilizer: the stabilizer is
+abelian, so every element would commute with Q, contradicting P * Q = -Q * P.
+This gives a uniform, code-agnostic way to show e.g. that logical X and Z are
+not in the stabilizer, by taking Q = logical Z and Q = logical X respectively.
 -/
 
 /-- If P and Q anticommute and Q commutes with every element of the stabilizer,

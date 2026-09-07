@@ -38,8 +38,9 @@ theorem translate_comp (c d : BaseGroup) (f : BaseGroup → ZMod 2) :
 theorem translate_zero (f : BaseGroup → ZMod 2) : translate (0 : BaseGroup) f = f := by
   funext g; simp [translate]
 
-/-- **`chainWeight` is translation-invariant**: `translate1 c` permutes the qubits
-(`p ↦ (p.1 + c, p.2)` is a bijection), so the support cardinality is unchanged. -/
+/-- **`chainWeight` is translation-invariant**: `translate1 c` permutes the
+qubits (`p ↦ (p.1 + c, p.2)` is a bijection), so the support cardinality is
+unchanged. -/
 theorem chainWeight_translate1 (c : BaseGroup) (v : BaseGroup × Fin 2 → ZMod 2) :
     bb72Complex.chainWeight (translate1 c v) = bb72Complex.chainWeight v := by
   rw [bb72Complex_chainWeight_eq, bb72Complex_chainWeight_eq]
@@ -53,7 +54,8 @@ theorem chainWeight_translate1 (c : BaseGroup) (v : BaseGroup × Fin 2 → ZMod 
   · intro a _; simp
   · intro a _; simp
 
-/-- `∂₂ f` is a `(0,k)`-translate of another boundary (the chain-map shuffle). -/
+/-- `∂₂ f` is a `(0,k)`-translate of another boundary (the chain-map shuffle).
+-/
 theorem boundary_shuffle_k (k : ZMod 6) (f : BaseGroup → ZMod 2) :
     bbBoundary2Fn baseA baseB f
       = translate1 ((0,k) : BaseGroup)
@@ -63,8 +65,8 @@ theorem boundary_shuffle_k (k : ZMod 6) (f : BaseGroup → ZMod 2) :
 
 /-! ## §16 The `seamC` y-covariance and the transport reduction -/
 
-/-- **`seamC` is y-translation covariant** on `ker ∂₂` (the x-direction fails; y holds at the
-chain level).  Kernel `decide` over the 6 shifts × 64 `kcombo`s. -/
+/-- **`seamC` is y-translation covariant** on `ker ∂₂` (the x-direction fails; y
+holds at the chain level). Kernel `decide` over the 6 shifts × 64 `kcombo`s. -/
 theorem seamC_shiftYk_combo : ∀ (k : ZMod 6) (c0 c1 c2 c3 c4 c5 : ZMod 2),
     seamC (translate ((0,k) : BaseGroup) (kcombo c0 c1 c2 c3 c4 c5))
       = translate1 ((0,k) : BaseGroup) (seamC (kcombo c0 c1 c2 c3 c4 c5)) := by
@@ -77,9 +79,9 @@ theorem seamC_shiftYk_combo : ∀ (k : ZMod 6) (c0 c1 c2 c3 c4 c5 : ZMod 2),
   funext q
   exact core k c0 c1 c2 c3 c4 c5 q
 
-/-- **The transport reduction**: the safe-sector floor for `kcombo c` propagates to every
-`(0,k)`-translate of it.  (`seamC` covariance ▸ boundary shuffle ▸ `translate1` additivity ▸
-`chainWeight` invariance, then re-index `f`.) -/
+/-- **The transport reduction**: the safe-sector floor for `kcombo c` propagates
+to every `(0,k)`-translate of it. (`seamC` covariance ▸ boundary shuffle ▸
+`translate1` additivity ▸ `chainWeight` invariance, then re-index `f`.) -/
 theorem floor_shiftYk_combo (c0 c1 c2 c3 c4 c5 : ZMod 2) (k : ZMod 6)
     (hf : ∀ f, 12 ≤ bb72Complex.chainWeight
       (seamC (kcombo c0 c1 c2 c3 c4 c5) + bbBoundary2Fn baseA baseB f))
@@ -93,26 +95,27 @@ theorem floor_shiftYk_combo (c0 c1 c2 c3 c4 c5 : ZMod 2) (k : ZMod 6)
 
 /-! ## §17 General 2-D transport (x and y), via an explicit boundary defect
 
-`seamC` is covariant only in `y` at the chain level; in `x` the §9.3 cut-shift produces a
-nonzero boundary defect.  Both directions are captured by the single class-level statement
-`seamC z' = T_c (seamC z) + ∂₂ δ`, which `floor_transfer` turns into a floor-transport step
-(the defect `δ` is absorbed into the re-indexed free chain `f`).  This lets a floor proved for
-one representative cover its whole **2-D** translation orbit, reducing the 13 `y`-orbit reps to
-the 5 full-orbit reps `Y0, Y1, Y4, Y11, Y12`. -/
+`seamC` is covariant only in `y` at the chain level; in `x` the §9.3 cut-shift
+produces a nonzero boundary defect. Both directions are captured by the single
+class-level statement `seamC z' = T_c (seamC z) + ∂₂ δ`, which `floor_transfer`
+turns into a floor-transport step (the defect `δ` is absorbed into the
+re-indexed free chain `f`). This lets a floor proved for one representative
+cover its whole **2-D** translation orbit, reducing the 13 `y`-orbit reps to the
+5 full-orbit reps `Y0, Y1, Y4, Y11, Y12`. -/
 
-/-- `∂₂ f` is a `c`-translate of another boundary, for an arbitrary base translation `c`
-(the general `boundary_shuffle_k`). -/
+/-- `∂₂ f` is a `c`-translate of another boundary, for an arbitrary base
+translation `c` (the general `boundary_shuffle_k`). -/
 theorem boundary_shuffle (c : BaseGroup) (f : BaseGroup → ZMod 2) :
     bbBoundary2Fn baseA baseB f
       = translate1 c (bbBoundary2Fn baseA baseB (translate (-c) f)) := by
   have h0 : (c + (-c) : BaseGroup) = 0 := by simp
   rw [← bbBoundary2Fn_translate, translate_comp, h0, translate_zero]
 
-/-- **General floor transport.**  Given the class-level covariance
-`seamC z' = T_c (seamC z) + ∂₂ δ` (`δ` the explicit boundary defect) and the floor for `z`,
-the floor holds for `z'`.  Mirrors `floor_shiftYk_combo`, with the defect folded into the
-re-indexed free chain.  (For `c` a pure `y`-shift the defect is `0`; for `x` it is nonzero —
-see `MImAssembly`.) -/
+/-- **General floor transport.** Given the class-level covariance
+`seamC z' = T_c (seamC z) + ∂₂ δ` (`δ` the explicit boundary defect) and the
+floor for `z`, the floor holds for `z'`. Mirrors `floor_shiftYk_combo`, with the
+defect folded into the re-indexed free chain. (For `c` a pure `y`-shift the
+defect is `0`; for `x` it is nonzero — see `MImAssembly`.) -/
 theorem floor_transfer (z z' : BaseGroup → ZMod 2) (c : BaseGroup) (δ : BaseGroup → ZMod 2)
     (hcov : seamC z' = translate1 c (seamC z) + bbBoundary2Fn baseA baseB δ)
     (hf : ∀ f, 12 ≤ bb72Complex.chainWeight (seamC z + bbBoundary2Fn baseA baseB f))

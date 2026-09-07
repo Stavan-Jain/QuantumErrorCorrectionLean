@@ -6,14 +6,15 @@ import QEC.Stabilizer.Framework.Core.CSS.CSSNoNegI
 /-!
 # §B.3 — Generic CSS stabilizer group from a homological code
 
-This file constructs `homologicalStabilizerGroup X : StabilizerGroup X.numQubits`
-from the generators defined in §B.2.  The generators pairwise commute (§B.2)
-and their closure does not contain `-I` (standard CSS argument), so this
-packages directly as a `StabilizerGroup`.
+This file constructs
+`homologicalStabilizerGroup X : StabilizerGroup X.numQubits` from the generators
+defined in §B.2. The generators pairwise commute (§B.2) and their closure does
+not contain `-I` (standard CSS argument), so this packages directly as a
+`StabilizerGroup`.
 
-The full `StabilizerCode` construction (which adds logical operators per
-H₁ basis element, plus the symplectic-LI proof) is left to each instance
-since it depends on instance-specific kernel data and a basis of `H₁`.
+The full `StabilizerCode` construction (which adds logical operators per H₁
+basis element, plus the symplectic-LI proof) is left to each instance since it
+depends on instance-specific kernel data and a basis of `H₁`.
 -/
 
 namespace Quantum
@@ -26,7 +27,8 @@ namespace HomologicalCode
 
 variable (X : HomologicalCode)
 
-/-- The full generator set of the CSS code: union of vertex and face stabilizers. -/
+/-- The full generator set of the CSS code: union of vertex and face
+stabilizers. -/
 noncomputable def homologicalGenerators :
     Set (NQubitPauliGroupElement X.numQubits) :=
   X.ZGenerators ∪ X.XGenerators
@@ -43,7 +45,8 @@ lemma XGenerators_subset_homologicalGenerators :
     X.XGenerators ⊆ X.homologicalGenerators :=
   Set.subset_union_right
 
-/-- All generators pairwise commute (combining X-X, Z-Z, and X-Z arguments from §B.2). -/
+/-- All generators pairwise commute (combining X-X, Z-Z, and X-Z arguments from
+§B.2). -/
 lemma homologicalGenerators_commute :
     ∀ g ∈ X.homologicalGenerators, ∀ h ∈ X.homologicalGenerators, g * h = h * g := by
   rintro g (hg | hg) h (hh | hh)
@@ -83,7 +86,8 @@ noncomputable def homologicalStabilizerGroup :
     (X.homologicalStabilizerGroup).toSubgroup =
       Subgroup.closure X.homologicalGenerators := rfl
 
-/-- The stabilizer group's subgroup, expressed as the closure of `Z ∪ X` generators. -/
+/-- The stabilizer group's subgroup, expressed as the closure of `Z ∪ X`
+generators. -/
 lemma homologicalStabilizerGroup_toSubgroup_union :
     (X.homologicalStabilizerGroup).toSubgroup =
       Subgroup.closure (X.ZGenerators ∪ X.XGenerators) := rfl

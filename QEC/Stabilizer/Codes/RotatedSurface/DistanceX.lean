@@ -4,31 +4,30 @@ import QEC.Stabilizer.Codes.RotatedSurface.StabilizerCode
 /-!
 # Rotated-surface-code X-distance — Stage 5 foundations
 
-For the parametric rotated surface code (L odd, L ≥ 3), the eventual goal
-is to prove that every non-trivial X-type logical has weight ≥ L (lower
-bound), witnessed exactly by the middle-column X-string `logicalX L`.
+For the parametric rotated surface code (L odd, L ≥ 3), the eventual goal is to
+prove that every non-trivial X-type logical has weight ≥ L (lower bound),
+witnessed exactly by the middle-column X-string `logicalX L`.
 
-This file currently establishes the **row-parity invariant** infrastructure:
-the `rowParity` linear functional, its key value on `middleColChain` (= 1
-for every row), and the linearity properties that anchor the eventual
-proof that `rowParity` vanishes on boundaries and is constant in `y` on
-cycles.
+This file currently establishes the **row-parity invariant** infrastructure: the
+`rowParity` linear functional, its key value on `middleColChain` (= 1 for every
+row), and the linearity properties that anchor the eventual proof that
+`rowParity` vanishes on boundaries and is constant in `y` on cycles.
 
-The full lower bound `weight g ≥ L` for non-trivial X-logicals, plus the
-witness packaging `HasCodeDistance`, will follow from:
+The full lower bound `weight g ≥ L` for non-trivial X-logicals, plus the witness
+packaging `HasCodeDistance`, will follow from:
 
-* `rowParity (∂₂ f) y = 0` for every X-face 2-chain `f` and row `y`
-  (each `xSupport xf` projected to any row has even cardinality —
-   proven by direct case analysis on the three face types).
+* `rowParity (∂₂ f) y = 0` for every X-face 2-chain `f` and row `y` (each
+  `xSupport xf` projected to any row has even cardinality — proven by direct
+  case analysis on the three face types).
 * `rowParity c y` is constant in `y` on cycles `c` (summing the relevant
   interior + boundary Z-face constraints between adjacent rows).
 * `dim H₁ = 1` (Stage 3) ⟹ any non-trivial cycle is homologous to
   `middleColChain`, so `rowParity c y = 1` for all `y`.
 * Each row contributes ≥ 1 qubit to the support of `c`, giving weight ≥ L.
 
-These remaining steps require substantial Finset bookkeeping over the
-six cases (interior × Z-face, top/bottom-bdy × Z-face) and are deferred
-to follow-up commits.
+These remaining steps require substantial Finset bookkeeping over the six cases
+(interior × Z-face, top/bottom-bdy × Z-face) and are deferred to follow-up
+commits.
 -/
 
 namespace Quantum
@@ -75,9 +74,9 @@ lemma rowParity_smul (a : ZMod 2) (c : RotatedSurface.VtxIdx L → ZMod 2)
 
 /-! ## §B — Row parity of `middleColChain` is `1`
 
-The middle column intersects each row in exactly one qubit (at `x = mid`),
-so the row parity is `1` for every row.  This is the non-zero side of the
-eventual `H₁ → ZMod 2` functional.
+The middle column intersects each row in exactly one qubit (at `x = mid`), so
+the row parity is `1` for every row. This is the non-zero side of the eventual
+`H₁ → ZMod 2` functional.
 -/
 
 omit [Fact (Odd L)] in
@@ -264,9 +263,9 @@ theorem rowParity_eq_zero_of_mem_boundaries
 
 /-! ## §D — `middleColChain ∉ boundaries` and homology characterization
 
-Since `rowParity middleColChain y = 1` (§B) but `rowParity (boundary) y = 0` (§C),
-`middleColChain` cannot be a boundary.  Combined with `dim H₁ = 1` (Stage 3),
-this means every non-trivial cycle is congruent to `middleColChain` modulo
+Since `rowParity middleColChain y = 1` (§B) but `rowParity (boundary) y = 0`
+(§C), `middleColChain` cannot be a boundary. Combined with `dim H₁ = 1` (Stage
+3), this means every non-trivial cycle is congruent to `middleColChain` modulo
 the boundary submodule.
 -/
 
@@ -295,7 +294,8 @@ private lemma middleColChain_class_ne_zero :
   -- which unfolds to: middleColChain ∈ boundaries
   exact middleColChain_not_mem_boundaries L h
 
-/-- Every cycle is `0` or `middleColChain` modulo boundaries (since `dim H₁ = 1`). -/
+/-- Every cycle is `0` or `middleColChain` modulo boundaries (since
+`dim H₁ = 1`). -/
 theorem cycle_sub_middleColChain_mem_boundaries
     {c : RotatedSurface.VtxIdx L → ZMod 2}
     (hc_cycle : c ∈ Z₁ L)
@@ -353,8 +353,8 @@ theorem rowParity_eq_one_of_nontrivial
 
 /-! ## §E — Weight ≥ L for non-trivial X-cycles
 
-The row-parity invariant from §A–D gives a per-row lower bound of 1 on the
-chain support, hence the abstract `chainWeight` (from
+The row-parity invariant from §A–D gives a per-row lower bound of 1 on the chain
+support, hence the abstract `chainWeight` (from
 `Stabilizer.Homological.Distance`) is ≥ L for every non-trivial cycle. -/
 
 open Quantum.Stabilizer.Homological.HomologicalCode
@@ -363,8 +363,8 @@ omit [Fact (Odd L)] [Fact (3 ≤ L)] in
 /-- `rowParity c y = (#{x : c (x, y) ≠ 0} mod 2)`.
 
 Equivalent to the count of `c (x, y) = 1` for `ZMod 2`-valued `c`, stated in
-terms of `≠ 0` so it dovetails with the generic
-`HomologicalCode.chainSupport` predicate. -/
+terms of `≠ 0` so it dovetails with the generic `HomologicalCode.chainSupport`
+predicate. -/
 private lemma rowParity_eq_row_card_cast
     (c : RotatedSurface.VtxIdx L → ZMod 2) (y : Fin L) :
     rowParity L c y =
@@ -430,12 +430,13 @@ theorem chainWeight_ge_L_of_nontrivial
 
 The abstract CSS bridge in `Stabilizer.Homological.Distance` provides
 `weight_ge_chainWeight_xChainOf`, `xChainOf_mem_cycles_of_centralizer`, and
-`not_both_boundary_of_nontrivial`. For an X-type `g`, `zChainOf g = 0`
-(no Z- or Y-components), which is trivially in `dualBoundaries`, so the
-bridge forces `xChainOf g ∉ boundaries`. Combine with the surface-specific
+`not_both_boundary_of_nontrivial`. For an X-type `g`, `zChainOf g = 0` (no Z- or
+Y-components), which is trivially in `dualBoundaries`, so the bridge forces
+`xChainOf g ∉ boundaries`. Combine with the surface-specific
 `chainWeight_ge_L_of_nontrivial` and the weight ≥ chainWeight bridge. -/
 
-/-- Any non-trivial X-type logical of the rotated surface stabilizer code has weight ≥ L. -/
+/-- Any non-trivial X-type logical of the rotated surface stabilizer code has
+weight ≥ L. -/
 theorem weight_ge_L_of_nontrivial_X_logical
     {g : NQubitPauliGroupElement (numQubits L)}
     (hgX : NQubitPauliGroupElement.IsXTypeElement g)

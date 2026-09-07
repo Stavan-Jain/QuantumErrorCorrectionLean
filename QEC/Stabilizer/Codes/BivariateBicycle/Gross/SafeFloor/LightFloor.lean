@@ -51,17 +51,19 @@ def slotIdx (s : ZMod 2 × ZMod 2) : Nat := s.1.val + 2 * s.2.val
 def ringIdx (r : Ring) : Nat :=
   (r (0,0)).val + 4 * (r (1,0)).val + 16 * (r (0,1)).val + 64 * (r (1,1)).val
 
-/-- Slot values of `rmul unitHat r`, packed two bits per `(index, slot)`.
-(A numeric literal cannot wrap lines, hence the long lines in this section.) -/
+/-- Slot values of `rmul unitHat r`, packed two bits per `(index, slot)`. (A
+numeric literal cannot wrap lines, hence the long lines in this section.) -/
 def RMUU : Nat := 0xffead5c0baaf908575605f4a30251a0faebb8491ebfec1d424310e1b61744b5e5d487762180d3227d7c2fde89287b8ad0c192633495c63768693acb9c3d6e9fcabbe8194eefbc4d121340b1e64714e5bfaefd0c5bfaa958070655a4f35201f0a091c23364c5966738396a9bcc6d3ecf9584d72671d083722d2c7f8ed9782bda857427d681207382dddc8f7e2988db2a706132c394356697c8c99a6b3c9dce3f6f5e0dfcab0a59a8f7f6a55403a2f1005a4b18e9be1f4cbde2e3b04116b7e41540316293c46536c79899ca3b6ccd9e6f35247786d17023d28d8cdf2e79d88b7a2a1b48b9ee4f1cedb2b3e01146e7b4451f0e5dacfb5a09f8a7a6f50453f2a1500
 
-/-- Ideal coordinates `a·4 + b` of `rmul Ahat1 r` (so `rmul Ahat1 r = a·Â₁ + b·XY`). -/
+/-- Ideal coordinates `a·4 + b` of `rmul Ahat1 r` (so
+`rmul Ahat1 r = a·Â₁ + b·XY`). -/
 def IC1T : Nat := 0x48c62eabf37d95151d937bfea628c04ae26c840159d73fbfb739d1540c826ae73fb159dc840ae2626ae40c89d15fb73d951bf3762ea048c8c04ea6237bf51d99d15fb7326ae40c8c840ae2673fb159d37bf51d98c04ea6262ea048cd951bf37ea628c0451d937bfbf37d951048c62ea40c826aefb739d15159d73fbae26c840
 
 /-- Ideal coordinates `a·4 + b` of `rmul Bhat2 r`. -/
 def IC2T : Nat := 0x48c51d9ae26fb7362ea37bfc8409d15bf37ea62159d40c8d9518c0473fb26ae73fb26aed9518c04159d40c8bf37ea62c8409d1562ea37bfae26fb73048c51d99d15c84037bf62eafb73ae2651d9048c26ae73fb8c04d95140c8159dea62bf37ea62bf3740c8159d8c04d95126ae73fb51d9048cfb73ae2637bf62ea9d15c840
 
-/-- `wt5OfComps` on `Nat` arguments (same packed table, so the two agree by `rfl`). -/
+/-- `wt5OfComps` on `Nat` arguments (same packed table, so the two agree by
+`rfl`). -/
 @[inline] def wt5P (v0 v1 v2 v3 v4 : Nat) : Nat :=
   (WT5_N >>> (8 * (v0 + 2 * (v1 + 4 * (v2 + 4 * (v3 + 4 * v4)))))) &&& 255
 
@@ -98,7 +100,8 @@ def ib1 (r : Ring) : Fin 4 := fin4 (ic1P (ringIdx r))
 def ia2 (r : Ring) : Fin 4 := fin4 (ic2P (ringIdx r) / 4)
 def ib2 (r : Ring) : Fin 4 := fin4 (ic2P (ringIdx r))
 
-/-! ## §2 The packed frame is correct (kernel sweeps over the 256 ring elements) -/
+/-! ## §2 The packed frame is correct (kernel sweeps over the 256 ring elements)
+-/
 
 private theorem ringIdx_lt_core : ∀ a b c d : Fin 4, ringIdx (mkRing a b c d) < 256 := by
   decide +kernel
@@ -187,7 +190,8 @@ theorem fadd_val (a b : Fin 4) : (fadd a b).val = a.val ^^^ b.val := by revert a
 
 /-! ## §3 List helpers (the fold-min bound and the range sweep) -/
 
-/-- The fold-min bound (`LightStabClassify.foldl_min_le`) specialized to `List.range`. -/
+/-- The fold-min bound (`LightStabClassify.foldl_min_le`) specialized to
+`List.range`. -/
 theorem foldl_min_le_range (g : Nat → Nat) (n init k : Nat) (hk : k < n) :
     (List.range n).foldl (fun m i => min m (g i)) init ≤ g k :=
   foldl_min_le g _ init k (List.mem_range.mpr hk)
@@ -199,7 +203,7 @@ theorem range_all_apply {n : Nat} {p : Nat → Bool} (h : (List.range n).all p =
 /-! ## §4 The spine-cell checker
 
 `w₀…w₃` are the four `F₂` slot values of the shared component-0 datum `V₀`;
-`(a₃, a₄, b₄)` is the spine cell (`b₄ᴿ = ω·b₄` by the comp-4 linkage).  The
+`(a₃, a₄, b₄)` is the spine cell (`b₄ᴿ = ω·b₄` by the comp-4 linkage). The
 A-block knobs are `(a₁, b₁, b₃ᴸ)`, the B-block's `(a₂, b₂, b₃ᴿ)`; `v₁`/`v₂` are
 ring indices of the comp-1 / comp-2 free data, which link the two blocks. -/
 
@@ -247,10 +251,10 @@ def minRP (U2 U3 U4 w0 w1 w2 w3 a3 a4 b4R : Nat) : Nat :=
   (List.range 16).foldl
     (fun m p => min m (mR2P U2 U3 U4 w0 w1 w2 w3 (p >>> 2) (p &&& 3) a3 a4 b4R)) 99
 
-/-- **The per-cell certificate.**  Either the cell's two block minima already sum
-to `12`, or the cell is `10`-tight and every knob choice within `1` of the minima
-is killed: by the exact comp-2 cost the ρ-link forces (`exLP … v₂`), or failing
-that by the exact comp-1 cost on the other block (`exRP … v₁`). -/
+/-- **The per-cell certificate.** Either the cell's two block minima already sum
+to `12`, or the cell is `10`-tight and every knob choice within `1` of the
+minima is killed: by the exact comp-2 cost the ρ-link forces (`exLP … v₂`), or
+failing that by the exact comp-1 cost on the other block (`exRP … v₁`). -/
 def killCell (T1 T3 T4 U2 U3 U4 O1R w0 w1 w2 w3 a3 a4 b4 : Nat) : Bool :=
   let b4R := fmulP 2 b4
   let mL := minLP T1 T3 T4 w0 w1 w2 w3 a3 a4 b4
@@ -274,7 +278,8 @@ def killCell (T1 T3 T4 U2 U3 U4 O1R w0 w1 w2 w3 a3 a4 b4 : Nat) : Bool :=
                                 a3 a4 b4 v2
                           + exRP U2 U3 U4 O1R w0 w1 w2 w3 (p >>> 2) (p &&& 3) b3R a3 a4 b4R v1))
 
-/-- **The orbit certificate**: every one of the `16 · 4³ = 1024` spine cells is killed. -/
+/-- **The orbit certificate**: every one of the `16 · 4³ = 1024` spine cells is
+killed. -/
 def killOK (T1 T3 T4 U2 U3 U4 O1R : Nat) : Bool :=
   (List.range 2).all fun w0 => (List.range 2).all fun w1 => (List.range 2).all fun w2 =>
     (List.range 2).all fun w3 => (List.range 4).all fun a3 => (List.range 4).all fun a4 =>
@@ -294,11 +299,13 @@ theorem ruP_lt (v sn : Nat) : ruP v sn < 4 := and3_lt _
 theorem ovP_lt (t sn : Nat) : ovP t sn < 4 := and3_lt _
 theorem pcP_lt (T a b sn : Nat) : pcP T a b sn < 4 := and3_lt _
 
-/-- `mFree2` (as `mf2P`) lower-bounds the exact per-slot cost, for any comp-2 value. -/
+/-- `mFree2` (as `mf2P`) lower-bounds the exact per-slot cost, for any comp-2
+value. -/
 theorem mf2P_le (v0 v1 v3 v4 x : Nat) (hx : x < 4) : mf2P v0 v1 v3 v4 ≤ wt5P v0 v1 x v3 v4 := by
   interval_cases x <;> unfold mf2P <;> omega
 
-/-- `mFree1` (as `mf1P`) lower-bounds the exact per-slot cost, for any comp-1 value. -/
+/-- `mFree1` (as `mf1P`) lower-bounds the exact per-slot cost, for any comp-1
+value. -/
 theorem mf1P_le (v0 v2 v3 v4 x : Nat) (hx : x < 4) : mf1P v0 v2 v3 v4 ≤ wt5P v0 x v2 v3 v4 := by
   interval_cases x <;> unfold mf1P <;> omega
 
@@ -331,7 +338,7 @@ theorem blockRP_le_exRP (U2 U3 U4 O1R w0 w1 w2 w3 a2 b2 b3R a3 a4 b4R v1 : Nat) 
 /-- `fadd` has `0` as a left unit. -/
 theorem fadd_zero_left (x : Fin 4) : fadd 0 x = x := by revert x; decide
 
-/-- **Coset extraction.**  Every Smith-coset element's weight is the exact
+/-- **Coset extraction.** Every Smith-coset element's weight is the exact
 `exLP + exRP` of a spine cell, with the comp-1 / comp-2 free data appearing as
 ring indices whose packed ideal coordinates are the two blocks' confined knobs —
 the ρ-links, in the frame the certificate checks. -/
@@ -506,12 +513,12 @@ theorem coset_ex (ζ f : BaseGroup → ZMod 2) (hz : bbBoundary2Fn baseA baseB �
 
 /-! ## §7 The certificate implies the floor -/
 
-/-- **The light-orbit floor from the certificate.**  A verified `killOK` bounds
-every element of the Smith coset `[seamC ζ]` below by `12`.  The case split is the
-Prop 30 / Prop 31 dichotomy: a cell whose minima already reach `12` is done by
-monotonicity; a `10`-tight cell is closed by the exact ρ-linked comp-2 cost, or —
-when even that is `10` — by the exact comp-1 cost on the opposite block.  Knobs
-more than `1` above a block minimum are absorbed by the arithmetic. -/
+/-- **The light-orbit floor from the certificate.** A verified `killOK` bounds
+every element of the Smith coset `[seamC ζ]` below by `12`. The case split is
+the Prop 30 / Prop 31 dichotomy: a cell whose minima already reach `12` is done
+by monotonicity; a `10`-tight cell is closed by the exact ρ-linked comp-2 cost,
+or — when even that is `10` — by the exact comp-1 cost on the opposite block.
+Knobs more than `1` above a block minimum are absorbed by the arithmetic. -/
 theorem floor_of_killOK (ζ : BaseGroup → ZMod 2) (hz : bbBoundary2Fn baseA baseB ζ = 0)
     (T1 T3 T4 U2 U3 U4 O1R : Nat)
     (hT1 : ∀ (a b : Fin 4) (s : ZMod 2 × ZMod 2), pcP T1 a.val b.val (slotIdx s)

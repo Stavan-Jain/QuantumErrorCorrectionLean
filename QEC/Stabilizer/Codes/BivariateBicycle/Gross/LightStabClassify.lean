@@ -109,7 +109,8 @@ def supMask (sup : List (Fin 36)) : Nat := sup.foldl (fun acc i => acc ^^^ (1 <<
 def gateM (m : Nat) : Bool :=
   HA_rows.all (fun row => (row.foldl (fun acc i => acc ^^^ ((m >>> i) &&& 1)) 0) == 0)
 def wtM (m : Nat) : Nat := (List.range 36).foldl (fun acc i => acc + ((m >>> i) &&& 1)) 0
-/-- Generic "select-and-XOR": XOR of `cols i` over the set bits `i < n` of `m`. -/
+/-- Generic "select-and-XOR": XOR of `cols i` over the set bits `i < n` of `m`.
+-/
 def selXor (cols : Nat → Nat) (n : Nat) (m : Nat) : Nat :=
   (List.range n).foldl (fun acc i => if m.testBit i then acc ^^^ cols i else acc) 0
 def applyCols (cols : Array Nat) (m : Nat) : Nat :=
@@ -302,8 +303,8 @@ The two scan cores `classifyCore` / `classifyCoreEven` are stated and proved in
 §G″ below (after the `supMask` reshaping lemmas they depend on), against a
 packed row-syndrome sweep instead of a per-tuple `gateM` evaluation. -/
 
-/-- Convolving with a point mass on the right translates:
-`P ⋆ δ_c = P (· - c)` (right-handed sibling of `conv_single_left`). -/
+/-- Convolving with a point mass on the right translates: `P ⋆ δ_c = P (· - c)`
+(right-handed sibling of `conv_single_left`). -/
 private theorem conv_single_right (P : BaseGroup → ZMod 2) (c : BaseGroup) :
     P ⋆ Pi.single c 1 = fun g => P (g - c) := by
   rw [conv_comm, conv_single_left]
@@ -326,7 +327,8 @@ theorem hexB_correct : ∀ g : Fin 36,
   rw [conv_single_right]
   exact tab g
 
-/-! ## Generic XOR-lift (additive map into an XOR-closed predicate, basis ⟹ all) -/
+/-! ## Generic XOR-lift (additive map into an XOR-closed predicate, basis ⟹ all)
+-/
 
 theorem xorLift (M : (BaseGroup → ZMod 2) → Nat) (P : Nat → Prop)
     (hM0 : M 0 = 0)
@@ -433,7 +435,8 @@ theorem inBspan_xor {x y : Nat} (hx : inBspan x) (hy : inBspan y) : inBspan (x ^
     have h := Nat.xor_lt_two_pow hc6 hc'6; rwa [e] at h
   exact ⟨⟨c.val ^^^ c'.val, hlt⟩, by rw [bOffset_xor, hc, hc']⟩
 
-/-- The coset-defect map: `Φ f = MBA·(Â-block) ⊕ (B̂-block)`, lands in `Bspan`. -/
+/-- The coset-defect map: `Φ f = MBA·(Â-block) ⊕ (B̂-block)`, lands in `Bspan`.
+-/
 def Phi (f : BaseGroup → ZMod 2) : Nat :=
   applyCols MBAcols (bitmaskOf (baseA ⋆ f)) ^^^ bitmaskOf (baseB ⋆ f)
 
@@ -504,8 +507,8 @@ theorem minBcoset_le_bwt (f : BaseGroup → ZMod 2) :
 
 /-! ## §F isHexDpairA → function-level hexagon / D-pair witness -/
 
-/-- The 12 D-pair directions, in the order matching `gdMaps`
-(identical to `pairDirections`). -/
+/-- The 12 D-pair directions, in the order matching `gdMaps` (identical to
+`pairDirections`). -/
 def dpairDirList : List BaseGroup :=
   [(0, 1), (0, 5), (3, 1), (3, 2), (3, 4), (3, 5),
    (1, 0), (1, 3), (2, 3), (4, 3), (5, 0), (5, 3)]
@@ -519,8 +522,9 @@ theorem gdMaps_dir : ∀ k : Fin 12, ∀ g : Fin 36,
 
 theorem dpairDirList_mem : ∀ k : Fin 12, dpairDirList.getD k.val 0 ∈ pairDirections := by decide
 
-/-- A gated A-block recognised as hexagon/D-pair lifts to a function-level witness:
-its `conv baseA` equals that of a single hexagon, or of a D-pair `δ_g + δ_{g+d}`. -/
+/-- A gated A-block recognised as hexagon/D-pair lifts to a function-level
+witness: its `conv baseA` equals that of a single hexagon, or of a D-pair
+`δ_g + δ_{g+d}`. -/
 theorem isHexDpairA_witness (f : BaseGroup → ZMod 2)
     (h : isHexDpairA (bitmaskOf (baseA ⋆ f)) = true) :
     (∃ g : BaseGroup, baseA ⋆ f = baseA ⋆ Pi.single g 1) ∨
@@ -558,7 +562,8 @@ theorem isHexDpairA_witness (f : BaseGroup → ZMod 2)
 
 
 
-/-! ## §G support extraction: `bitmaskOf a` as a `supMask` of explicit indices -/
+/-! ## §G support extraction: `bitmaskOf a` as a `supMask` of explicit indices
+-/
 
 theorem foldl_xor_init (g : Fin 36 → Nat) :
     ∀ (L : List (Fin 36)) (s : Nat),
@@ -611,7 +616,8 @@ theorem supMask_perm {L L' : List (Fin 36)} (h : L.Perm L') : supMask L = supMas
   apply Nat.eq_of_testBit_eq; intro j
   rw [testBit_supMask, testBit_supMask, h.countP_eq]
 
-/-- The set-bit indices of the chain `a` (as `Fin 36` cell indices), in ascending order. -/
+/-- The set-bit indices of the chain `a` (as `Fin 36` cell indices), in
+ascending order. -/
 def setBits (a : BaseGroup → ZMod 2) : List (Fin 36) :=
   (List.finRange 36).filter (fun i => decide (a (cellOf i.val) = 1))
 
@@ -654,8 +660,8 @@ theorem origin_mem_setBits {a : BaseGroup → ZMod 2} (horig : a (0, 0) = 1) :
   rw [List.mem_filter]
   exact ⟨List.mem_finRange _, by simp only [decide_eq_true_eq]; exact horig⟩
 
-/-- Padding the (origin-erased) support with an even number of origin indices and
-prepending the origin recovers `bitmaskOf a` — the key reshape identity. -/
+/-- Padding the (origin-erased) support with an even number of origin indices
+and prepending the origin recovers `bitmaskOf a` — the key reshape identity. -/
 theorem supMask_pad_eq (a : BaseGroup → ZMod 2) (horig : a (0, 0) = 1)
     (pad : Nat) (hpad : Even pad) :
     supMask ((0 : Fin 36) :: ((setBits a).erase 0 ++ List.replicate pad 0)) = bitmaskOf a := by
@@ -684,7 +690,8 @@ theorem exists_supMask5 (a : BaseGroup → ZMod 2) (horig : a (0, 0) = 1)
     rw [hq]]
   exact supMask_pad_eq a horig (5 - bwt a) hpad_even
 
-/-- Even-weight (≤5, ≥1) origin-containing A-blocks are `supMask [0,q₁,q₂,q₃]`. -/
+/-- Even-weight (≤5, ≥1) origin-containing A-blocks are `supMask [0,q₁,q₂,q₃]`.
+-/
 theorem exists_supMask4 (a : BaseGroup → ZMod 2) (horig : a (0, 0) = 1)
     (hwt : bwt a ≤ 5) (hge : 1 ≤ bwt a) (heven : Even (bwt a)) :
     ∃ q1 q2 q3 : Fin 36, supMask [0, q1, q2, q3] = bitmaskOf a := by
@@ -735,26 +742,26 @@ theorem gated_bwt_ge3 (b : BaseGroup → ZMod 2) (hgate : gateM (bitmaskOf b) = 
 
 /-! ## §G″ the scan cores, kernel-checked (packed syndrome sweep)
 
-The combinatorial heart of the classification: the odd scan (`classifyCore`,
-36⁴ tuples) and the even scan (`classifyCoreEven`, 36³ tuples).  A per-tuple
-kernel evaluation of `gateM` (12 six-term row folds) is far too slow, so the
-sweep is restructured around three ideas, with the public statements unchanged:
+The combinatorial heart of the classification: the odd scan (`classifyCore`, 36⁴
+tuples) and the even scan (`classifyCoreEven`, 36³ tuples). A per-tuple kernel
+evaluation of `gateM` (12 six-term row folds) is far too slow, so the sweep is
+restructured around three ideas, with the public statements unchanged:
 
-* **Packed row syndromes.** Each `HA_rows` parity is `F₂`-linear in the mask,
-  so the 12-bit row syndrome of `supMask [0,q₁,…]` is the XOR of per-bit
-  signatures `sigOfN i` read out of one 432-bit constant `SIGN`.  The bridge
+* **Packed row syndromes.** Each `HA_rows` parity is `F₂`-linear in the mask, so
+  the 12-bit row syndrome of `supMask [0,q₁,…]` is the XOR of per-bit signatures
+  `sigOfN i` read out of one 432-bit constant `SIGN`. The bridge
   `gateM (supMask L) = true → signature XOR = 0` is proved structurally:
   `rowsSyn` packs the 12 row folds into one `Nat` (`two_mul_add_xor` gives
-  XOR-linearity of the packing), and a 36-case `decide` identifies its value
-  on single-bit masks with the signature table.
-* **Reverse syndrome lookup.** The 36 signatures are distinct, so the last
-  scan index is determined by the previous ones: `sigRev` reads the unique
-  matching index (plus one, `0` = no match) out of a 4096-entry table `SREV`.
-  The 36⁴ odd scan thereby collapses to a 36³ `Bool` sweep (`oddSweep`), and
-  the even scan to 36² (`evenSweep`).
+  XOR-linearity of the packing), and a 36-case `decide` identifies its value on
+  single-bit masks with the signature table.
+* **Reverse syndrome lookup.** The 36 signatures are distinct, so the last scan
+  index is determined by the previous ones: `sigRev` reads the unique matching
+  index (plus one, `0` = no match) out of a 4096-entry table `SREV`. The 36⁴ odd
+  scan thereby collapses to a 36³ `Bool` sweep (`oddSweep`), and the even scan
+  to 36² (`evenSweep`).
 * **Verdict lists.** A sweep survivor is only checked for *membership* in a
-  precomputed list of its possible masks (`okList4`, 68 entries, ordered by
-  hit frequency; `okList3`, 14 entries).  The expensive per-mask conclusion —
+  precomputed list of its possible masks (`okList4`, 68 entries, ordered by hit
+  frequency; `okList3`, 14 entries). The expensive per-mask conclusion —
   hexagon/D-pair recognition or the `minBcoset` bound — is evaluated once per
   listed mask (`okList4_verdict`, `okList3_verdict`), not once per tuple.
   `minBcoset` is evaluated through `minBK`, a clone whose column tables are
@@ -1028,9 +1035,9 @@ theorem classifyCoreEven : ∀ q₁ q₂ q₃ : Fin 36,
 
 /-! ## §H master classification of a light A-block (origin-normalized) -/
 
-/-- The heart of the classification: an origin-normalized A-block `conv baseA f` of
-weight ≤ 5 whose boundary is light (`bwt A + bwt B ≤ 10`) is a hexagon or D-pair
-A-block. -/
+/-- The heart of the classification: an origin-normalized A-block `conv baseA f`
+of weight ≤ 5 whose boundary is light (`bwt A + bwt B ≤ 10`) is a hexagon or
+D-pair A-block. -/
 theorem classify_master (f : BaseGroup → ZMod 2)
     (horig : (baseA ⋆ f) (0, 0) = 1)
     (hwt5 : bwt (baseA ⋆ f) ≤ 5)
@@ -1063,7 +1070,8 @@ theorem classify_master (f : BaseGroup → ZMod 2)
 
 /-! ## §H translation normalization and the A-lighter classification -/
 
-/-- A boundary of weight ≤ 11 has weight ≤ 10 (it is a cycle, hence even weight). -/
+/-- A boundary of weight ≤ 11 has weight ≤ 10 (it is a cycle, hence even
+weight). -/
 theorem boundary_weight_le_ten (f : BaseGroup → ZMod 2)
     (h11 : (Finset.univ.filter fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0).card ≤ 11) :
@@ -1107,8 +1115,8 @@ theorem bwt_translate (c : BaseGroup) (v : BaseGroup → ZMod 2) :
   · intro g _; show g + c - c = g; abel
   · intro g _; show g - c + c = g; abel
 
-/-- The A-lighter classification: if the (necessarily nonzero) A-block of a light
-boundary has weight ≤ 5, the boundary is a hexagon or D-pair. -/
+/-- The A-lighter classification: if the (necessarily nonzero) A-block of a
+light boundary has weight ≤ 5, the boundary is a hexagon or D-pair. -/
 theorem classify_Alighter (f : BaseGroup → ZMod 2)
     (hAne : baseA ⋆ f ≠ 0)
     (hle10 : (Finset.univ.filter fun j : BaseGroup × Fin 2 =>
@@ -1251,8 +1259,8 @@ theorem bwt_swapFn (v : BaseGroup → ZMod 2) : bwt (swapFn v) = bwt v := by
   · intro g _; exact swap_swap g
   · intro g _; exact swap_swap g
 
-/-- B-side one-block lemma (via the swap): `conv baseB w = 0`, `conv baseA w ≠ 0`
-forces `|conv baseA w| ≥ 16`. -/
+/-- B-side one-block lemma (via the swap): `conv baseB w = 0`,
+`conv baseA w ≠ 0` forces `|conv baseA w| ≥ 16`. -/
 theorem oneBlock_ge16_B (w : BaseGroup → ZMod 2) (hB : baseB ⋆ w = 0)
     (hA : baseA ⋆ w ≠ 0) : 16 ≤ bwt (baseA ⋆ w) := by
   have hA' : baseA ⋆ swapFn w = 0 := by rw [swap_convA, hB, swapFn_zero]
@@ -1341,10 +1349,12 @@ theorem classify_Blighter (f : BaseGroup → ZMod 2)
       show swap (g + d) = swap g + swap d from rfl] at this
     exact this
 
-/-! ## The main theorem: the light-stabilizer classification, unconditionally. -/
+/-! ## The main theorem: the light-stabilizer classification, unconditionally.
+-/
 
-/-- **The light-stabilizer classification holds** (discharges the `hC` hypothesis):
-every nonzero base boundary of weight ≤ 11 is a hexagon or a D-pair. -/
+/-- **The light-stabilizer classification holds** (discharges the `hC`
+hypothesis): every nonzero base boundary of weight ≤ 11 is a hexagon or a
+D-pair. -/
 theorem lightStabilizerClassification_holds : LightStabilizerClassification := by
   intro f hne hle11
   have hle10 := boundary_weight_le_ten f hle11
@@ -1373,8 +1383,9 @@ theorem lightStabilizerClassification_holds : LightStabilizerClassification := b
   · exact classify_Alighter f hAne hle10 (by omega)
   · exact classify_Blighter f hBne hle10 (by omega)
 
-/-- **The dangerous sector is now unconditional** (`hC` discharged): the (M)-bound
-`DangerousSectorGe12` follows from `lightStabilizerClassification_holds`. -/
+/-- **The dangerous sector is now unconditional** (`hC` discharged): the
+(M)-bound `DangerousSectorGe12` follows from
+`lightStabilizerClassification_holds`. -/
 theorem dangerous_sector_unconditional : DangerousSectorGe12 :=
   dangerous_sector_of_classification lightStabilizerClassification_holds
 

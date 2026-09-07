@@ -14,19 +14,19 @@ import ProofWidgets.Presentation.Expr
 Renders concrete Pauli objects as colored per-qubit strips:
 
 - `#pauli_strip e` — display `e` below the command, where `e` is an
-  `NQubitPauliGroupElement n`, an `NQubitPauliOperator n`, an
-  `Anticommute p q` proposition, or an equality between Pauli terms
-  (commutation goals). For the proposition shapes the widget shows both
-  operands aligned, rings the qubit positions where the single-qubit factors
-  anticommute (resp. differ), and states the parity verdict — the visual form
-  of `commutes_iff_even_anticommutes`.
-- The `Pauli strip` expression presenter: shift-click any such expression in
-  the goal panel with `ProofWidgets.SelectionPanel` open (or put
-  `ProofWidgets.GoalTypePanel` on a goal of one of the proposition shapes)
-  to see the same rendering during a proof.
+  `NQubitPauliGroupElement n`, an `NQubitPauliOperator n`, an `Anticommute p q`
+  proposition, or an equality between Pauli terms (commutation goals). For the
+  proposition shapes the widget shows both operands aligned, rings the qubit
+  positions where the single-qubit factors anticommute (resp. differ), and
+  states the parity verdict — the visual form of
+  `commutes_iff_even_anticommutes`.
+- The `Pauli strip` expression presenter: shift-click any such expression in the
+  goal panel with `ProofWidgets.SelectionPanel` open (or put
+  `ProofWidgets.GoalTypePanel` on a goal of one of the proposition shapes) to
+  see the same rendering during a proof.
 
-Card names are interactive (`exprName`): hover for types, click to jump to
-the definition. Look and feel comes from `QECWidgets.Style`.
+Card names are interactive (`exprName`): hover for types, click to jump to the
+definition. Look and feel comes from `QECWidgets.Style`.
 -/
 
 namespace QECWidgets
@@ -88,9 +88,9 @@ strips shown together stay column-aligned even when only one has a glyph). -/
 def phaseGlyphHtml (g : String) : Html :=
   cls "span" "qecw-glyph" #[("title", Json.str "global phase")] #[.text g]
 
-/-- The strip proper: rows of qubit cells. Row index labels appear only when
-the strip wraps; `marks` (when nonempty) rings the flagged positions;
-`leading` (when present) is drawn before the first row's cells. -/
+/-- The strip proper: rows of qubit cells. Row index labels appear only when the
+strip wraps; `marks` (when nonempty) rings the flagged positions; `leading`
+(when present) is drawn before the first row's cells. -/
 def stripHtml (v : PauliView) (marks : Array Bool := #[])
     (leading : Option Html := none) : Html := Id.run do
   let numRows := (v.numQubits + stripRowSize - 1) / stripRowSize
@@ -118,8 +118,8 @@ def phaseStr : Option Nat → String
   | some k => s!"i^{k}"
   | none => "?"
 
-/-- Standard header facts for a view: weight, phase (only when the strip
-wraps and cannot carry the leading glyph), unresolved count. -/
+/-- Standard header facts for a view: weight, phase (only when the strip wraps
+and cannot carry the leading glyph), unresolved count. -/
 private def viewFacts (v : PauliView) (showPhase : Bool) : Array Html := Id.run do
   let mut fs : Array Html := #[headerFact s!"wt {v.weight}" "number of non-identity qubits"]
   if showPhase && v.numQubits > stripRowSize then
@@ -128,17 +128,17 @@ private def viewFacts (v : PauliView) (showPhase : Bool) : Array Html := Id.run 
     fs := fs.push (headerFact s!"? {v.numStuck}" "cells that did not reduce" (some warnColor))
   return fs
 
-/-- Single-term view: header plus strip. The phase is drawn as a leading
-glyph on single-row strips, and as a header fact on wrapped ones (a glyph
-would misalign the first row there). -/
+/-- Single-term view: header plus strip. The phase is drawn as a leading glyph
+on single-row strips, and as a header fact on wrapped ones (a glyph would
+misalign the first row there). -/
 def stripCard (name : Html) (v : PauliView) (showPhase : Bool) : Html :=
   let leading :=
     if showPhase && v.numQubits ≤ stripRowSize then (phaseGlyph v.phasePower).map phaseGlyphHtml
     else none
   card #[headerHtml name (viewFacts v showPhase), stripHtml v #[] leading]
 
-/-- Compact text form of a strip: one letter per qubit (`·` for identity,
-`?` for unresolved), with a space every 8 qubits. -/
+/-- Compact text form of a strip: one letter per qubit (`·` for identity, `?`
+for unresolved), with a space every 8 qubits. -/
 def PauliView.letters (v : PauliView) : String := Id.run do
   let mut s := ""
   for i in [0:v.numQubits] do
@@ -170,10 +170,10 @@ def marksDiffer (vp vq : PauliView) : Array Bool :=
 private def countMarks (marks : Array Bool) : Nat :=
   marks.foldl (fun acc b => if b then acc + 1 else acc) 0
 
-/-- Two aligned strips with shared marks and a verdict line; `accent` colors
-the card's state bar. Phase glyphs are drawn on both strips whenever either
-side has one, so the columns stay aligned; wrapped strips carry the phase in
-their header facts instead. -/
+/-- Two aligned strips with shared marks and a verdict line; `accent` colors the
+card's state bar. Phase glyphs are drawn on both strips whenever either side has
+one, so the columns stay aligned; wrapped strips carry the phase in their header
+facts instead. -/
 def dualCard (nameP nameQ : Html) (vp vq : PauliView) (marks : Array Bool)
     (verdict : Html) (showPhase : Bool) (accent : Option String := none) : Html :=
   let glyphs : Option Html × Option Html :=
@@ -196,8 +196,8 @@ private def countNoun (c : Nat) (single : String) (plural : String) : String :=
 
 /-- Verdict for an `Anticommute p q` proposition, as (color, short, long):
 parity of the number of anticommuting positions, as in
-`commutes_iff_even_anticommutes`. The short form goes on the card, the long
-form into its tooltip and the logged text. -/
+`commutes_iff_even_anticommutes`. The short form goes on the card, the long form
+into its tooltip and the logged text. -/
 def anticommuteVerdictData (vp vq : PauliView) (marks : Array Bool) :
     String × String × String :=
   let c := countMarks marks
@@ -248,9 +248,9 @@ def eqVerdictData (isElement : Bool) (vp vq : PauliView) (marks : Array Bool) :
 /-- Strips wider than this are refused (each cell costs a reduction). -/
 def maxStripQubits : Nat := 512
 
-/-- Render any recognized Pauli shape (term, `Anticommute`, or equality) as
-HTML plus a plain-text summary (logged by `#pauli_strip` so terminals see
-something too), or `none` when `e` is not one / is not concrete enough. -/
+/-- Render any recognized Pauli shape (term, `Anticommute`, or equality) as HTML
+plus a plain-text summary (logged by `#pauli_strip` so terminals see something
+too), or `none` when `e` is not one / is not concrete enough. -/
 def pauliRender? (e : Expr) : MetaM (Option (Html × String)) := do
   let e ← instantiateMVars e
   match ← pauliShape? e with
@@ -287,9 +287,9 @@ def pauliPresent (e : Expr) : MetaM Html := do
   | none => throwError "not a concrete Pauli expression"
 
 /-- Infoview presenter for Pauli terms and commutation propositions. With
-`ProofWidgets.SelectionPanel` open, shift-click a Pauli expression in the
-goal to render it; `ProofWidgets.GoalTypePanel` renders goals of the
-proposition shapes directly. -/
+`ProofWidgets.SelectionPanel` open, shift-click a Pauli expression in the goal
+to render it; `ProofWidgets.GoalTypePanel` renders goals of the proposition
+shapes directly. -/
 @[expr_presenter]
 def pauliStripPresenter : ExprPresenter where
   userName := "Pauli strip"

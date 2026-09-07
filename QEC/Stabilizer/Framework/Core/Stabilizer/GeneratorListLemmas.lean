@@ -14,7 +14,8 @@ lemma mem_finRange_product (L : ℕ) (p : Fin L × Fin L) :
   rcases p with ⟨x, y⟩
   simp
 
-/-- Mapping a complete `L×L` coordinate list gives exactly the range of the map in `listToSet`. -/
+/-- Mapping a complete `L×L` coordinate list gives exactly the range of the map
+in `listToSet`. -/
 lemma listToSet_map_product_finRange_eq_range {n L : ℕ}
     (f : Fin L × Fin L → NQubitPauliGroupElement n) :
     NQubitPauliGroupElement.listToSet

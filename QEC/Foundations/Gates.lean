@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.Data.Complex.Basic
 import Mathlib.Tactic
 import Mathlib.LinearAlgebra.UnitaryGroup
-import QEC.Foundations.Basic
+import QEC.Foundations.KetNotation
 
 namespace Quantum
 open Matrix
@@ -11,24 +11,26 @@ open Matrix
 /-!
 # Unitary gates as matrices
 
-This file builds the **gate** layer on top of `Basic.lean`: unitary matrices acting on
-finite-dimensional complex Hilbert spaces indexed by a basis type `α`.
+This file builds the **gate** layer on top of `Basic.lean`: unitary matrices
+acting on finite-dimensional complex Hilbert spaces indexed by a basis type `α`.
 
 ## Main idea
 
-- A **`QuantumGate α`** is an element of `Matrix.unitaryGroup α ℂ`: a matrix `U` with
-  `Uᴴ U = 1` (stored as a subtype with the unitary proof).
-- **Composition** is matrix multiplication; **inverse** is conjugate transpose (`star`),
-  see lemmas `gate_inv_val`, `gate_val_inv`, `gate_mul_val`.
-- Fixed sizes use the basis types from `Basic`: `QubitBasis` (Fin 2), `TwoQubitBasis`,
-  `ThreeQubitBasis`, and parametric `NQubitBasis n` for `NQubitGate n`.
+- A **`QuantumGate α`** is an element of `Matrix.unitaryGroup α ℂ`: a matrix `U`
+  with `Uᴴ U = 1` (stored as a subtype with the unitary proof).
+- **Composition** is matrix multiplication; **inverse** is conjugate transpose
+  (`star`), see lemmas `gate_inv_val`, `gate_val_inv`, `gate_mul_val`.
+- Fixed sizes use the basis types from `Basic`: `QubitBasis` (Fin 2),
+  `TwoQubitBasis`, `ThreeQubitBasis`, and parametric `NQubitBasis n` for
+  `NQubitGate n`.
 
 ## Contents
 
-- Abbreviations `OneQubitGate`, `TwoQubitGate`, `ThreeQubitGate`, `NQubitGate n`.
+- Abbreviations `OneQubitGate`, `TwoQubitGate`, `ThreeQubitGate`,
+  `NQubitGate n`.
 - `UnitComplex` and phase factors for controlled/phase gates.
-- Concrete gates (Pauli, Hadamard, CNOT, etc.) and tensor-product style combinators
-  used by the repetition code and stabilizer formalism.
+- Concrete gates (Pauli, Hadamard, CNOT, etc.) and tensor-product style
+  combinators used by the repetition code and stabilizer formalism.
 
 Depends on `Basic.lean` for `QubitBasis`, `NQubitBasis`, and state types.
 -/
@@ -44,7 +46,8 @@ abbrev OneQubitGate : Type :=
 /-- Two-qubit gates: unitaries on `QubitBasis × QubitBasis`. -/
 abbrev TwoQubitGate : Type := QuantumGate TwoQubitBasis
 
-/-- Three-qubit gates: unitaries on `ThreeQubitBasis` (product of three qubit bases). -/
+/-- Three-qubit gates: unitaries on `ThreeQubitBasis` (product of three qubit
+bases). -/
 abbrev ThreeQubitGate : Type := QuantumGate ThreeQubitBasis
 
 /-- Gate type for n-qubit systems (indexed by NQubitBasis n). -/
@@ -101,17 +104,18 @@ abbrev NQubitGate (n : ℕ) : Type := QuantumGate (NQubitBasis n)
 /--
 Conjugation of a matrix by a gate.
 
-This is the matrix-level helper `U M U†`, intended as a bridge for proofs that still work
-directly with matrix expressions.
+This is the matrix-level helper `U M U†`, intended as a bridge for proofs that
+still work directly with matrix expressions.
 -/
 noncomputable def conjBy
   {α : Type*} [Fintype α] [DecidableEq α]
   (U : QuantumGate α) (M : Matrix α α ℂ) : Matrix α α ℂ :=
   U.val * M * star U.val
 
-/-- `U ⊳ M` is the conjugation `conjBy U M = U M U†` of a matrix by a gate. Scoped to
-`Quantum` (active throughout the library's namespace). Precedence `70`, like `*`; the
-result is a matrix, so `U ⊳ M = N` needs no parentheses and `(U ⊳ M) i j` does. -/
+/-- `U ⊳ M` is the conjugation `conjBy U M = U M U†` of a matrix by a gate.
+Scoped to `Quantum` (active throughout the library's namespace). Precedence
+`70`, like `*`; the result is a matrix, so `U ⊳ M = N` needs no parentheses and
+`(U ⊳ M) i j` does. -/
 scoped notation:70 U:71 " ⊳ " M:71 => conjBy U M
 
 /-- Definitional expansion of `conjBy`. -/
@@ -306,8 +310,8 @@ open Lean in
 /--
 `vec_expand_simp [rules]`:
 
-Proves goals equating `QuantumState`s by calling `vec_expand` and
-then solving each goal with `simp[rules]`
+Proves goals equating `QuantumState`s by calling `vec_expand` and then solving
+each goal with `simp[rules]`
 -/
 syntax (name := vec_expand_simp) "vec_expand_simp"
   (" [" ((simpStar <|> simpErase <|> simpLemma),*,?) "]")? : tactic
@@ -335,7 +339,8 @@ noncomputable abbrev applyMatrixVec
   Matrix.mulVec
 
 
-/-- Unitary gates are norm-preserving: `‖Uv‖ = ‖v‖` for every amplitude vector `v`. -/
+/-- Unitary gates are norm-preserving: `‖Uv‖ = ‖v‖` for every amplitude vector
+`v`. -/
 lemma gate_preserves_norm
   {α : Type*} [Fintype α] [DecidableEq α]
   (G : QuantumGate α) :
@@ -384,7 +389,8 @@ by
   rw [ψ.property] at h
   exact h
 
-/-- The amplitude vector of `applyGate G ψ` is the matrix-vector product `G ψ`. -/
+/-- The amplitude vector of `applyGate G ψ` is the matrix-vector product `G ψ`.
+-/
 @[simp] lemma applyGate_val
   {α : Type*} [Fintype α] [DecidableEq α]
   (G : QuantumGate α) (ψ : QuantumState α) :

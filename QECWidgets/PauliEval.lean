@@ -13,17 +13,16 @@ Support layer for the QEC infoview widgets: turns an `Expr` denoting a
 generators, a commutation proposition between them, …) into plain meta-level
 data (`PauliView`) that the renderers in `QECWidgets.PauliStrip` can draw.
 
-Everything here is display-only meta code. Nothing is trusted: the widgets
-show what weak-head reduction finds, and any proof the user writes is still
-checked by the kernel as usual.
+Everything here is display-only meta code. Nothing is trusted: the widgets show
+what weak-head reduction finds, and any proof the user writes is still checked
+by the kernel as usual.
 
 The reduction strategy matters. `Mul` on `NQubitPauliGroupElement` is
 `noncomputable`, so `#eval`-style compilation is unavailable, but the terms
 still *reduce* — the same fact that lets `decide` close `Anticommute` goals
-through the kernel. We therefore evaluate by weak-head normalization,
-escalating through transparency levels and finishing with the kernel
-evaluator (which ignores `@[irreducible]` markers, i.e. sees exactly what
-`decide` sees).
+through the kernel. We therefore evaluate by weak-head normalization, escalating
+through transparency levels and finishing with the kernel evaluator (which
+ignores `@[irreducible]` markers, i.e. sees exactly what `decide` sees).
 -/
 
 namespace QECWidgets
@@ -45,8 +44,8 @@ def whnfCandidates (e : Expr) : MetaM (List Expr) := do
   catch _ => pure ()
   return out
 
-/-- Extract a `Nat` literal from `e`, reducing and unwrapping `OfNat.ofNat`
-as needed. -/
+/-- Extract a `Nat` literal from `e`, reducing and unwrapping `OfNat.ofNat` as
+needed. -/
 partial def natOfExpr? (e : Expr) : MetaM (Option Nat) := do
   if let some k := e.rawNatLit? then return some k
   for e' in ← whnfCandidates e do
@@ -55,8 +54,8 @@ partial def natOfExpr? (e : Expr) : MetaM (Option Nat) := do
       if let some k ← natOfExpr? (e'.getArg! 1) then return some k
   return none
 
-/-- Extract the value of a `Fin`-like literal (this covers `ZMod (k+1)`,
-which reduces to `Fin (k+1)`): reduce to `Fin.mk v _` and read off `v`. -/
+/-- Extract the value of a `Fin`-like literal (this covers `ZMod (k+1)`, which
+reduces to `Fin (k+1)`): reduce to `Fin.mk v _` and read off `v`. -/
 def finValOfExpr? (e : Expr) : MetaM (Option Nat) := do
   for e' in ← whnfCandidates e do
     if e'.isAppOfArity ``Fin.mk 3 then
@@ -80,13 +79,13 @@ def mkFinLit (n i : Nat) : MetaM Expr := do
   mkAppOptM ``Fin.mk #[some (mkNatLit n), some (mkNatLit i), some prf]
 
 /-- The result of evaluating a Pauli expression: an optional phase exponent
-(`i^k`; `none` for bare operators or when the phase is stuck) and the
-per-qubit factors (`none` where reduction got stuck, e.g. at a variable). -/
+(`i^k`; `none` for bare operators or when the phase is stuck) and the per-qubit
+factors (`none` where reduction got stuck, e.g. at a variable). -/
 structure PauliView where
   /-- Number of qubits. -/
   numQubits : Nat
-  /-- Phase exponent `k` in `i^k`, when the expression is a group element
-  whose phase reduced to a literal. -/
+  /-- Phase exponent `k` in `i^k`, when the expression is a group element whose
+phase reduced to a literal. -/
   phasePower : Option Nat := none
   /-- Per-qubit single-qubit factors; `none` where reduction got stuck. -/
   ops : Array (Option PauliOperator)
@@ -149,9 +148,9 @@ def viewOfTerm (k : PauliTermKind) (e : Expr) : MetaM PauliView :=
   | .element n => elementView e n
   | .operator n => operatorView e n
 
-/-- The shapes of expressions the Pauli strip widgets can present: Pauli
-terms, `Anticommute p q` propositions, and equalities between Pauli terms
-(the form commutation goals take). -/
+/-- The shapes of expressions the Pauli strip widgets can present: Pauli terms,
+`Anticommute p q` propositions, and equalities between Pauli terms (the form
+commutation goals take). -/
 inductive PauliShape where
   /-- A Pauli-valued term. -/
   | term (k : PauliTermKind) (e : Expr)

@@ -61,11 +61,11 @@ set_option maxRecDepth 4096
 
 /-! ## A basis-lift combinator for `𝔽₂`-chain identities
 
-Generic form of the `funLift` pattern used throughout the gross
-development: an additive identity between two maps out of a finite
-`𝔽₂`-function space holds everywhere once it holds on the `δ`-basis.
-(Named `funLiftF2`/`indF2` to avoid clashing with the `BaseGroup`-specific
-`funLift`/`ind` in `Codes/BivariateBicycle/LightStabClassify.lean`.) -/
+Generic form of the `funLift` pattern used throughout the gross development: an
+additive identity between two maps out of a finite `𝔽₂`-function space holds
+everywhere once it holds on the `δ`-basis. (Named `funLiftF2`/`indF2` to avoid
+clashing with the `BaseGroup`-specific `funLift`/`ind` in
+`Codes/BivariateBicycle/LightStabClassify.lean`.) -/
 
 section FunLift
 
@@ -116,8 +116,8 @@ end FunLift
 namespace XDoubleCoverData
 
 /-- Support split of a chain by a decidable predicate:
-`|u| = |u on P| + |u off P|`.  (Lives in this namespace to avoid clashing
-with the identical `BB.card_filter_split` in
+`|u| = |u on P| + |u off P|`. (Lives in this namespace to avoid clashing with
+the identical `BB.card_filter_split` in
 `Codes/BivariateBicycle/DangerousSector.lean`.) -/
 lemma card_filter_split {I : Type} [Fintype I] (u : I → ZMod 2)
     (P : I → Prop) [DecidablePred P] :
@@ -134,18 +134,18 @@ variable {G H : Type}
 
 /-! ## The five per-instance inputs, as named `Prop`s -/
 
-/-- **The base small-cycle floor** (Theorem-A shape): every nonzero base
-1-cycle — logical *or* stabilizer — has weight ≥ `d`. -/
+/-- **The base small-cycle floor** (Theorem-A shape): every nonzero base 1-cycle
+— logical *or* stabilizer — has weight ≥ `d`. -/
 def StrongBaseFloor (d : ℕ) : Prop :=
   ∀ u : H × Fin 2 → ZMod 2,
     bbBoundary1Fn D.Ab D.Bb u = 0 → u ≠ 0 →
     d ≤ D.baseComplex.chainWeight u
 
-/-- **The logical base floor** (plain code-distance shape): every base
-1-cycle that is *not a boundary* has weight ≥ `d`.  Strictly weaker than
-`StrongBaseFloor d`, and the right input for `d ≥ 7` bases of
-weight-(3,3) BB codes, where `StrongBaseFloor d` is outright false:
-every generator column `∂₂ δ_g` is a nonzero cycle of weight 6 < `d`. -/
+/-- **The logical base floor** (plain code-distance shape): every base 1-cycle
+that is *not a boundary* has weight ≥ `d`. Strictly weaker than
+`StrongBaseFloor d`, and the right input for `d ≥ 7` bases of weight-(3,3) BB
+codes, where `StrongBaseFloor d` is outright false: every generator column
+`∂₂ δ_g` is a nonzero cycle of weight 6 < `d`. -/
 def LogicalFloor (d : ℕ) : Prop :=
   ∀ u : H × Fin 2 → ZMod 2,
     bbBoundary1Fn D.Ab D.Bb u = 0 → u ∉ D.baseComplex.boundaries →
@@ -158,8 +158,8 @@ def DeckTrivialOnH1 : Prop :=
     v + D.deckShift1 v ∈ D.coverComplex.boundaries
 
 /-- **The dangerous floor at nonzero slice** ((M), `b ≠ 0` rungs): every
-nontrivial cover cycle whose pushforward is a *nonzero* base boundary has
-weight ≥ `m`. -/
+nontrivial cover cycle whose pushforward is a *nonzero* base boundary has weight
+≥ `m`. -/
 def DangerousFloorNZ (m : ℕ) : Prop :=
   ∀ v : G × Fin 2 → ZMod 2,
     v ∈ D.coverComplex.cycles → v ∉ D.coverComplex.boundaries →
@@ -174,8 +174,8 @@ def SafeFloor (m : ℕ) : Prop :=
     m ≤ D.coverComplex.chainWeight v
 
 /-- **The Smith-coset floor** ((M-im) shape): every chain in a seam-coset
-`seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) that is not itself a base boundary has
-weight ≥ `m`. -/
+`seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) that is not itself a base boundary has weight ≥
+`m`. -/
 def SeamCosetFloor (m : ℕ) : Prop :=
   ∀ ζ : H → ZMod 2, bbBoundary2Fn D.Ab D.Bb ζ = 0 →
     ∀ f : H → ZMod 2,
@@ -194,12 +194,12 @@ lemma logicalFloor_of_strongBaseFloor {d : ℕ}
 
 /-! ## The homotopy (R) from a finite matrix certificate
 
-A chain homotopy `1 + σ = ∂₂ ∘ C + E ∘ ∂₁` certifies `DeckTrivialOnH1`.
-The hypothesis `hbasis` is a finite (`native_decide`-able) statement: the
-identity on the `δ`-basis of 1-chains.  The gross polynomial route
-(`homotopyChain v = (1+x²)⋆B⋆v_R` with `(1+x²)·B² = 1+x⁶`) is one concrete
-way to build such a homotopy; the matrix form also covers instances where
-no short polynomial identity exists. -/
+A chain homotopy `1 + σ = ∂₂ ∘ C + E ∘ ∂₁` certifies `DeckTrivialOnH1`. The
+hypothesis `hbasis` is a finite (`native_decide`-able) statement: the identity
+on the `δ`-basis of 1-chains. The gross polynomial route
+(`homotopyChain v = (1+x²)⋆B⋆v_R` with `(1+x²)·B² = 1+x⁶`) is one concrete way
+to build such a homotopy; the matrix form also covers instances where no short
+polynomial identity exists. -/
 
 lemma bbBoundary1Fn_zero_chain :
     bbBoundary1Fn D.Ac D.Bc (0 : G × Fin 2 → ZMod 2) = 0 := by
@@ -217,8 +217,8 @@ lemma deckShift1_add (a b : G × Fin 2 → ZMod 2) :
 lemma deckShift1_zero : D.deckShift1 (0 : G × Fin 2 → ZMod 2) = 0 := rfl
 
 /-- **The homotopy certificate lemma**: additive maps `C : C₁ → C₂` and
-`E : C₀ → C₁` with `(1 + σ) = ∂₂ ∘ C + E ∘ ∂₁` on the `δ`-basis certify
-that the deck acts trivially on `H₁(cover)`. -/
+`E : C₀ → C₁` with `(1 + σ) = ∂₂ ∘ C + E ∘ ∂₁` on the `δ`-basis certify that the
+deck acts trivially on `H₁(cover)`. -/
 theorem deckTrivial_of_homotopy_certificate
     (Cmap : (G × Fin 2 → ZMod 2) → (G → ZMod 2))
     (Emap : (G → ZMod 2) → (G × Fin 2 → ZMod 2))
@@ -268,16 +268,14 @@ theorem deckTrivial_of_homotopy_certificate
 
 By A12 (`qec-lab:experiments/bb_lab/notes/A12_deck_homotopy_R.md`), (R) holds
 **iff** the deck polynomial `1 + x^{deckS}` lies in the ideal `(A, B)` of
-`𝔽₂[G]` — equivalently, iff `k(cover) = k(base)`.  The sufficiency
-direction is constructive and packaged here: a Bezout witness
-`P⋆A + Q⋆B = 1 + x^{deckS}` yields the chain homotopy of
-`deckTrivial_of_homotopy_certificate` with *module* maps
-`C v = P⋆v_L + Q⋆v_R` and `E h = (Q⋆h | P⋆h)` — the standard fact that
-Koszul homology is annihilated by its ideal, made explicit.  Both existing
-instance certificates are the special case `P = 0`: gross's
-`(1+x²)⋆B⋆B = 1+x⁶` and pair72's `p⋆B = 1+x³`.  Checking the witness is a
-single `G`-indexed kernel identity (vs the `G × Fin 2`-basis sweep needed
-by the raw certificate). -/
+`𝔽₂[G]` — equivalently, iff `k(cover) = k(base)`. The sufficiency direction is
+constructive and packaged here: a Bezout witness `P⋆A + Q⋆B = 1 + x^{deckS}`
+yields the chain homotopy of `deckTrivial_of_homotopy_certificate` with *module*
+maps `C v = P⋆v_L + Q⋆v_R` and `E h = (Q⋆h | P⋆h)` — the standard fact that
+Koszul homology is annihilated by its ideal, made explicit. Both existing
+instance certificates are the special case `P = 0`: gross's `(1+x²)⋆B⋆B = 1+x⁶`
+and pair72's `p⋆B = 1+x³`. Checking the witness is a single `G`-indexed kernel
+identity (vs the `G × Fin 2`-basis sweep needed by the raw certificate). -/
 
 /-- The deck polynomial `1 + x^{deckS}` as a 0-chain. -/
 def deckPoly : G → ZMod 2 :=
@@ -372,8 +370,8 @@ lemma bezout_blockR (P Q : G → ZMod 2)
   linear_combination
     (CharTwo.add_self_eq_zero (((P ⋆ D.Ac) ⋆ wR) g))
 
-/-- The full chain-level Bezout homotopy identity
-`(1 + σ) + E∘∂₁ = ∂₂∘C` on every 1-chain. -/
+/-- The full chain-level Bezout homotopy identity `(1 + σ) + E∘∂₁ = ∂₂∘C` on
+every 1-chain. -/
 lemma bezout_chain_identity (P Q : G → ZMod 2)
     (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly)
     (v : G × Fin 2 → ZMod 2) :
@@ -399,7 +397,7 @@ lemma bezout_chain_identity (P Q : G → ZMod 2)
 
 /-- **The Bezout route to (R)** (A12): a polynomial witness
 `P⋆A + Q⋆B = 1 + x^{deckS}` certifies that the deck acts trivially on
-`H₁(cover)`.  By A12 such a witness exists iff `k(cover) = k(base)`. -/
+`H₁(cover)`. By A12 such a witness exists iff `k(cover) = k(base)`. -/
 theorem deckTrivial_of_bezout (P Q : G → ZMod 2)
     (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly) :
     D.DeckTrivialOnH1 :=
@@ -452,11 +450,11 @@ theorem dangerous_zero_rung {d : ℕ} (hbase : D.StrongBaseFloor d)
   rw [D.chainWeight_pull1]
   omega
 
-/-- **The `b = 0` rung from the logical floor alone**: the descended chain
-of a nontrivial diagonal cycle is automatically a non-boundary (pullbacks
-of boundaries are boundaries), so the plain base distance floor suffices —
-`StrongBaseFloor` is not needed.  This is the rung for `d ≥ 7` bases,
-where light stabilizer generators make the strong floor false. -/
+/-- **The `b = 0` rung from the logical floor alone**: the descended chain of a
+nontrivial diagonal cycle is automatically a non-boundary (pullbacks of
+boundaries are boundaries), so the plain base distance floor suffices —
+`StrongBaseFloor` is not needed. This is the rung for `d ≥ 7` bases, where light
+stabilizer generators make the strong floor false. -/
 theorem dangerous_zero_rung_of_logicalFloor {d : ℕ}
     (hbase : D.LogicalFloor d)
     {v : G × Fin 2 → ZMod 2}
@@ -472,9 +470,9 @@ theorem dangerous_zero_rung_of_logicalFloor {d : ℕ}
   omega
 
 /-- **The generic single-shape rung** (subsumes the gross hexagon rung): a
-nontrivial dangerous cycle over the boundary `b = ∂₂ f₀`, where `b` has
-weight `2d − 2t` (`t ≥ 1`) and the sheet-0 seam of the lifted `f₀` is
-supported inside `supp b`, has weight ≥ `2d`. -/
+nontrivial dangerous cycle over the boundary `b = ∂₂ f₀`, where `b` has weight
+`2d − 2t` (`t ≥ 1`) and the sheet-0 seam of the lifted `f₀` is supported inside
+`supp b`, has weight ≥ `2d`. -/
 theorem dangerous_bound_of_single_shape {d t : ℕ}
     (hbase : D.StrongBaseFloor d) (ht : 1 ≤ t)
     (f₀ : H → ZMod 2)
@@ -839,11 +837,11 @@ theorem dangerous_bound_of_pair_shape {d t : ℕ}
 
 /-! ## The rungs from the logical floor (`d ≥ 7` bases)
 
-The same three-step normalizations, consuming the plain distance floor:
-where the strong-floor rungs concluded that the light residual cycle is
-*zero*, the weak versions conclude it is a *boundary* — which is all the
-final contradiction needs.  These are the shape rungs every `d ≥ 7`
-instance dispatches over (`StrongBaseFloor` is false there). -/
+The same three-step normalizations, consuming the plain distance floor: where
+the strong-floor rungs concluded that the light residual cycle is *zero*, the
+weak versions conclude it is a *boundary* — which is all the final contradiction
+needs. These are the shape rungs every `d ≥ 7` instance dispatches over
+(`StrongBaseFloor` is false there). -/
 
 /-- **The single-shape rung from the logical floor.** -/
 theorem dangerous_bound_of_single_shape_of_logicalFloor {d t : ℕ}
@@ -1188,14 +1186,13 @@ theorem dangerous_bound_of_pair_shape_of_logicalFloor {d t : ℕ}
     exact add_mem (D.pull1_mem_boundaries hu_bd)
       (D.liftStab_mem_boundaries _)
 
-/-- **The window rung** (`t = 1`, floor-free): a dangerous cycle over a
-boundary `b = ∂₂ f₀` of weight `2d − 2` either meets an off-slice cell
-(weight `≥ 2d` directly from the slice identity) or normalizes to a base
-cycle supported inside the finite window `supp b ∪ supp (seam f₀)`.  If
-every base cycle supported in that window is a boundary — a per-instance
-`2^{|W|}` kernel check — the dangerous cycle would be a boundary,
-contradiction.  This is the rung for seam-hostile `|b| = 2d − 2` cells
-that neither shape rung covers. -/
+/-- **The window rung** (`t = 1`, floor-free): a dangerous cycle over a boundary
+`b = ∂₂ f₀` of weight `2d − 2` either meets an off-slice cell (weight `≥ 2d`
+directly from the slice identity) or normalizes to a base cycle supported inside
+the finite window `supp b ∪ supp (seam f₀)`. If every base cycle supported in
+that window is a boundary — a per-instance `2^{|W|}` kernel check — the
+dangerous cycle would be a boundary, contradiction. This is the rung for
+seam-hostile `|b| = 2d − 2` cells that neither shape rung covers. -/
 theorem dangerous_bound_of_window {d : ℕ}
     (f₀ : H → ZMod 2)
     (hwb : D.baseComplex.chainWeight (bbBoundary2Fn D.Ab D.Bb f₀) + 2
@@ -1273,9 +1270,8 @@ theorem dangerous_bound_of_window {d : ℕ}
 
 /-! ## The safe-sector reduction -/
 
-/-- **The safe-sector reduction**: the homotopy (R) confines safe
-projections to the Smith seam-cosets, so the seam-coset floor transfers to
-the safe sector. -/
+/-- **The safe-sector reduction**: the homotopy (R) confines safe projections to
+the Smith seam-cosets, so the seam-coset floor transfers to the safe sector. -/
 theorem safeFloor_of_seamCosetFloor {m : ℕ}
     (hR : D.DeckTrivialOnH1) (hMim : D.SeamCosetFloor m) :
     D.SafeFloor m := by
@@ -1359,8 +1355,8 @@ theorem chainWeight_ge_double_of_sectors {d : ℕ}
     · exact hM v hv hnb hb h0
   · exact hS v hv hb
 
-/-- **Chain-level `d(cover) = 2·d(base)`**: the doubled weight is attained
-(by the diagonal lift of the tight witness) and minimal (by the sectors). -/
+/-- **Chain-level `d(cover) = 2·d(base)`**: the doubled weight is attained (by
+the diagonal lift of the tight witness) and minimal (by the sectors). -/
 theorem chain_distance_eq_double {d : ℕ}
     (hbase : D.StrongBaseFloor d)
     (hM : D.DangerousFloorNZ (2 * d)) (hS : D.SafeFloor (2 * d))
@@ -1379,16 +1375,15 @@ theorem chain_distance_eq_double {d : ℕ}
 
 /-! ## The assembly from the logical floor (`d ≥ 7` bases)
 
-The same sector dichotomy with `dangerous_zero_rung_of_logicalFloor` in
-place of the strong rung.  The three floors are exactly the
-certificate-checked inputs of an A17-track instance: the base distance
-(SAT: witness + UNSAT at `d − 1`), the dangerous floor, and the
-seam-coset floor (S4: XOR-native UNSAT at `2d − 2` per orbit rep +
-parity). -/
+The same sector dichotomy with `dangerous_zero_rung_of_logicalFloor` in place of
+the strong rung. The three floors are exactly the certificate-checked inputs of
+an A17-track instance: the base distance (SAT: witness + UNSAT at `d − 1`), the
+dangerous floor, and the seam-coset floor (S4: XOR-native UNSAT at `2d − 2` per
+orbit rep + parity). -/
 
-/-- **Sector-dichotomy assembly from the logical floor**: given the plain
-base distance floor and the two sector floors, every nontrivial cover
-cycle has weight ≥ `2d`. -/
+/-- **Sector-dichotomy assembly from the logical floor**: given the plain base
+distance floor and the two sector floors, every nontrivial cover cycle has
+weight ≥ `2d`. -/
 theorem chainWeight_ge_double_of_logicalFloor {d : ℕ}
     (hbase : D.LogicalFloor d)
     (hM : D.DangerousFloorNZ (2 * d)) (hS : D.SafeFloor (2 * d)) :
@@ -1447,9 +1442,9 @@ theorem logical_weight_ge_double_of_sectors {d : ℕ}
     (fun c hc hnb => D.chainWeight_ge_double_of_sectors hbase hM hS c hc hnb)
     (D.dual_chainWeight_ge_double_of_sectors hbase hM hS) g hg
 
-/-- **Pauli-level `d(cover) = 2·d(base)`**: given the base floor, the two
-sector floors and the tight witness, `2d` is the least weight of a
-nontrivial logical operator of the cover's homological stabilizer group. -/
+/-- **Pauli-level `d(cover) = 2·d(base)`**: given the base floor, the two sector
+floors and the tight witness, `2d` is the least weight of a nontrivial logical
+operator of the cover's homological stabilizer group. -/
 theorem pauli_distance_eq_double {d : ℕ}
     (hbase : D.StrongBaseFloor d)
     (hM : D.DangerousFloorNZ (2 * d)) (hS : D.SafeFloor (2 * d))
@@ -1482,9 +1477,8 @@ theorem dual_chainWeight_ge_double_of_logicalFloor {d : ℕ}
     D.chainWeight_ge_double_of_logicalFloor hbase hM hS c hc hnb
   exact (bb_cycle_bound_iff_dual_bound D.Ac D.Bc (2 * d)).mp hX
 
-/-- Pauli-level lower bound from the logical floor: every nontrivial
-logical operator of the cover's homological stabilizer group has weight
-≥ `2d`. -/
+/-- Pauli-level lower bound from the logical floor: every nontrivial logical
+operator of the cover's homological stabilizer group has weight ≥ `2d`. -/
 theorem logical_weight_ge_double_of_logicalFloor {d : ℕ}
     (hbase : D.LogicalFloor d)
     (hM : D.DangerousFloorNZ (2 * d)) (hS : D.SafeFloor (2 * d))
@@ -1496,8 +1490,8 @@ theorem logical_weight_ge_double_of_logicalFloor {d : ℕ}
     (fun c hc hnb => D.chainWeight_ge_double_of_logicalFloor hbase hM hS c hc hnb)
     (D.dual_chainWeight_ge_double_of_logicalFloor hbase hM hS) g hg
 
-/-- **Pauli-level `d(cover) = 2·d(base)` from the logical floor**: the
-assembly for `d ≥ 7` bases, whose light stabilizer generators rule out
+/-- **Pauli-level `d(cover) = 2·d(base)` from the logical floor**: the assembly
+for `d ≥ 7` bases, whose light stabilizer generators rule out
 `StrongBaseFloor d`. -/
 theorem pauli_distance_eq_double_of_logicalFloor {d : ℕ}
     (hbase : D.LogicalFloor d)

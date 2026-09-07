@@ -17,8 +17,9 @@ variable {n : ℕ}
 /-!
 # Symplectic inner product
 
-The symplectic inner product ⟨v,w⟩_s = (X-part of v)·(Z-part of w) + (Z-part of v)·(X-part of w)
-in ZMod 2. Two Pauli group elements commute iff their symplectic inner product is 0.
+The symplectic inner product ⟨v,w⟩_s = (X-part of v)·(Z-part of w) + (Z-part of
+v)·(X-part of w) in ZMod 2. Two Pauli group elements commute iff their
+symplectic inner product is 0.
 -/
 
 namespace PauliOperator
@@ -35,9 +36,9 @@ lemma symplecticProductSingle_eq_zero_iff_commute (P Q : PauliOperator) :
 
 /-! ### Single-qubit evaluations
 
-`toSymplecticSingle P = (x-bit, z-bit)`. Pairing against `Z` reads off the `X`-bit and pairing
-against `X` reads off the `Z`-bit — the single-qubit content of "a `Z`-check detects `X`-errors
-and an `X`-check detects `Z`-errors". -/
+`toSymplecticSingle P = (x-bit, z-bit)`. Pairing against `Z` reads off the
+`X`-bit and pairing against `X` reads off the `Z`-bit — the single-qubit content
+of "a `Z`-check detects `X`-errors and an `X`-check detects `Z`-errors". -/
 
 @[simp] lemma symplecticProductSingle_I_left (Q : PauliOperator) :
     symplecticProductSingle I Q = 0 := by
@@ -73,8 +74,9 @@ end PauliOperator
 
 namespace NQubitPauliOperator
 
-/-- Symplectic inner product of two n-qubit Pauli operators (sum over qubits, in ZMod 2).
-  Zero iff the two operators commute (as n-qubit Pauli group elements). -/
+/-- Symplectic inner product of two n-qubit Pauli operators (sum over qubits, in
+ZMod 2). Zero iff the two operators commute (as n-qubit Pauli group elements).
+-/
 def symplecticInner (op₁ op₂ : NQubitPauliOperator n) : ZMod 2 :=
   (Finset.univ : Finset (Fin n)).sum (fun i =>
     PauliOperator.symplecticProductSingle (op₁ i) (op₂ i))
@@ -83,34 +85,36 @@ end NQubitPauliOperator
 
 /-! ## Group-element level: `⟪p, q⟫ₛ` and `symp`
 
-Statements about Pauli group elements read the symplectic form off the operator parts,
-`symplecticInner p.operators q.operators`, and the symplectic vector as
+Statements about Pauli group elements read the symplectic form off the operator
+parts, `symplecticInner p.operators q.operators`, and the symplectic vector as
 `toSymplectic g.operators`. The scoped notation `⟪p, q⟫ₛ` (scope
 `Quantum.NQubitPauliGroupElement`: active in that namespace and under
-`open NQubitPauliGroupElement` / `open scoped NQubitPauliGroupElement`) is a **macro onto
-exactly that operator-level form** — so `commutes_iff_symplectic_inner_zero`,
-`unfold NQubitPauliOperator.symplecticInner` and every existing lemma apply verbatim — and
-the delaborator prints the form back as `⟪p, q⟫ₛ`. The `ₛ` suffix keeps it clear of
-mathlib's inner-product brackets `⟪x, y⟫_𝕜`.
+`open NQubitPauliGroupElement` / `open scoped NQubitPauliGroupElement`) is a
+**macro onto exactly that operator-level form** — so
+`commutes_iff_symplectic_inner_zero`,
+`unfold NQubitPauliOperator.symplecticInner` and every existing lemma apply
+verbatim — and the delaborator prints the form back as `⟪p, q⟫ₛ`. The `ₛ` suffix
+keeps it clear of mathlib's inner-product brackets `⟪x, y⟫_𝕜`.
 
-The delaborator is `scoped` with the notation, so `⟪p, q⟫ₛ` only appears in files that can
-parse it; elsewhere the operator-level form prints as is. There is deliberately no
-group-level definition behind the notation: the operator-level function is the single
-normal form every lemma is stated in. -/
+The delaborator is `scoped` with the notation, so `⟪p, q⟫ₛ` only appears in
+files that can parse it; elsewhere the operator-level form prints as is. There
+is deliberately no group-level definition behind the notation: the
+operator-level function is the single normal form every lemma is stated in. -/
 
 namespace NQubitPauliGroupElement
 
-/-- `⟪p, q⟫ₛ` is the symplectic inner product of the operator parts of the Pauli group
-elements `p`, `q`: it elaborates to exactly
-`NQubitPauliOperator.symplecticInner p.operators q.operators`. Scoped: enable with
-`open scoped NQubitPauliGroupElement`. -/
+/-- `⟪p, q⟫ₛ` is the symplectic inner product of the operator parts of the Pauli
+group elements `p`, `q`: it elaborates to exactly
+`NQubitPauliOperator.symplecticInner p.operators q.operators`. Scoped: enable
+with `open scoped NQubitPauliGroupElement`. -/
 scoped notation:max "⟪" p ", " q "⟫ₛ" =>
   NQubitPauliOperator.symplecticInner (NQubitPauliGroupElement.operators p)
     (NQubitPauliGroupElement.operators q)
 
 open Lean PrettyPrinter Delaborator SubExpr in
-/-- Display `NQubitPauliOperator.symplecticInner p.operators q.operators` as `⟪p, q⟫ₛ`;
-any other application of `symplecticInner` keeps the default printer. -/
+/-- Display `NQubitPauliOperator.symplecticInner p.operators q.operators` as
+`⟪p, q⟫ₛ`; any other application of `symplecticInner` keeps the default printer.
+-/
 @[scoped app_delab Quantum.NQubitPauliOperator.symplecticInner]
 def delabSymplecticInner : Delab :=
   whenPPOption getPPNotation <| whenNotPPOption getPPExplicit do
@@ -128,8 +132,9 @@ example (p q : NQubitPauliGroupElement n) :
     ⟪p, q⟫ₛ = NQubitPauliOperator.symplecticInner p.operators q.operators := rfl
 
 open Lean Elab Command in
-/-- Display test: elaborate `stx` and check that its pretty-printed text is `expected`
-(`exact := false`: contains `expected`). Run through `run_cmd` so no `#`-command is needed. -/
+/-- Display test: elaborate `stx` and check that its pretty-printed text is
+`expected` (`exact := false`: contains `expected`). Run through `run_cmd` so no
+`#`-command is needed. -/
 private def checkDisplay (stx : Syntax) (expected : String) (exact : Bool := true) :
     CommandElabM Unit :=
   liftTermElabM do
@@ -157,8 +162,8 @@ namespace NQubitPauliOperator
 
 open scoped NQubitPauliGroupElement
 
-/-- The symplectic vector of the product operator is the pointwise sum (in ZMod 2)
-  of the two symplectic vectors. -/
+/-- The symplectic vector of the product operator is the pointwise sum (in ZMod
+2) of the two symplectic vectors. -/
 lemma toSymplectic_add (p q : NQubitPauliOperator n) (j : Fin (n + n)) :
     toSymplectic (NQubitPauliGroupElement.mulOp p q).operators j = toSymplectic
     p j + toSymplectic q j := by
@@ -169,9 +174,9 @@ lemma toSymplectic_add (p q : NQubitPauliOperator n) (j : Fin (n + n)) :
   · exact congr_arg Prod.snd
       (PauliOperator.toSymplecticSingle_add (p ⟨j.val - n, by omega⟩) (q ⟨j.val - n, by omega⟩))
 
-/-- Two n-qubit Pauli group elements commute iff their symplectic inner product (on the
-  operator parts) is 0. The equivalence with the existing `commutes_iff_even_anticommutes`
-  is proved later. -/
+/-- Two n-qubit Pauli group elements commute iff their symplectic inner product
+(on the operator parts) is 0. The equivalence with the existing
+`commutes_iff_even_anticommutes` is proved later. -/
 theorem commutes_iff_symplectic_inner_zero (p q : NQubitPauliGroupElement n) :
     p * q = q * p ↔ ⟪p, q⟫ₛ = 0 := by
   rw [NQubitPauliGroupElement.commutes_iff_even_anticommutes]
@@ -185,8 +190,8 @@ theorem commutes_iff_symplectic_inner_zero (p q : NQubitPauliGroupElement n) :
   congr! 2
   ext; simp [Quantum.NQubitPauliGroupElement.anticommutesAt]
 
-/-- Two n-qubit Pauli group elements anticommute iff their symplectic inner product
-  (on the operator parts) is 1. -/
+/-- Two n-qubit Pauli group elements anticommute iff their symplectic inner
+product (on the operator parts) is 1. -/
 theorem anticommutes_iff_symplectic_inner_one (p q : NQubitPauliGroupElement n) :
     NQubitPauliGroupElement.Anticommute p q ↔ ⟪p, q⟫ₛ = 1 := by
   rw [NQubitPauliGroupElement.anticommutes_iff_odd_anticommutes, Nat.odd_iff]
@@ -215,7 +220,8 @@ theorem anticommutes_iff_symplectic_inner_one (p q : NQubitPauliGroupElement n) 
   rw [hcast]
   rw [ZMod.natCast_eq_one_iff_odd, Nat.odd_iff]
 
-/-- The all-X and all-Z n-qubit operators (with phase 0) anticommute when n is odd:
+/-- The all-X and all-Z n-qubit operators (with phase 0) anticommute when n is
+odd:
     symplectic inner product is 1 at each qubit, so total is n ≡ 1 (mod 2). -/
 theorem allX_allZ_anticommute (n : ℕ) (hn : Odd n) :
     NQubitPauliGroupElement.Anticommute (⟨0, X n⟩ : NQubitPauliGroupElement n)
@@ -232,14 +238,15 @@ end NQubitPauliOperator
 
 /-! ## Closure → span (general set)
 
-The same proof idea as `mem_closure_implies_symp_in_span` in `SymplecticSpan.lean` (for
-`S = listToSet L`), but for an arbitrary set `S`. Used by `IndependentEquiv` for
-`S = listToSet L \ {g}`. -/
+The same proof idea as `mem_closure_implies_symp_in_span` in
+`SymplecticSpan.lean` (for `S = listToSet L`), but for an arbitrary set `S`.
+Used by `IndependentEquiv` for `S = listToSet L \ {g}`. -/
 
 open NQubitPauliOperator Submodule
 open scoped NQubitPauliGroupElement
 
-/-- The symplectic vector of the product is the sum of the symplectic vectors. -/
+/-- The symplectic vector of the product is the sum of the symplectic vectors.
+-/
 lemma toSymplectic_mul (p q : NQubitPauliGroupElement n) (j : Fin (n + n)) :
     toSymplectic (p * q).operators j = toSymplectic p.operators j + toSymplectic q.operators j := by
   rw [NQubitPauliGroupElement.mul_eq p q]
@@ -258,8 +265,8 @@ lemma toSymplectic_inv_operators (g : NQubitPauliGroupElement n) :
     toSymplectic (g⁻¹).operators = toSymplectic g.operators := by
   simp only [NQubitPauliGroupElement.inv_eq, NQubitPauliGroupElement.inv]
 
-/-- If an element is in the subgroup closure of a set, its symplectic vector is in the
-  span of the symplectic vectors of the set. -/
+/-- If an element is in the subgroup closure of a set, its symplectic vector is
+in the span of the symplectic vectors of the set. -/
 lemma toSymplectic_mem_span_of_mem_closure {S : Set (NQubitPauliGroupElement n)}
     {x : NQubitPauliGroupElement n} (hx : x ∈ Subgroup.closure S) :
     toSymplectic x.operators ∈ span (ZMod 2) ((fun g => toSymplectic g.operators) '' S) := by

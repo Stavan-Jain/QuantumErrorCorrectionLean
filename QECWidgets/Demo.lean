@@ -14,12 +14,12 @@ import ProofWidgets.Component.Panel.GoalTypePanel
 /-!
 # Widget demos
 
-Living usage examples for the QEC infoview widgets. Open this file in an
-editor to see every widget render; it is imported by the `QECWidgets`
-umbrella so the demos are compiled (and therefore cannot silently rot).
+Living usage examples for the QEC infoview widgets. Open this file in an editor
+to see every widget render; it is imported by the `QECWidgets` umbrella so the
+demos are compiled (and therefore cannot silently rot).
 
-Each `#pauli_strip` below puts a widget in the infoview when the cursor is
-on the command. The `example`s at the bottom show the in-proof panels.
+Each `#pauli_strip` below puts a widget in the infoview when the cursor is on
+the command. The `example`s at the bottom show the in-proof panels.
 -/
 
 namespace QECWidgets.Demo
@@ -74,8 +74,8 @@ section Toric
 
 open Quantum.Stabilizer.Lattice
 
-/-- A vertical non-contractible loop on the 4 × 4 torus: the `v`-edges of
-column `x = 1`. Its class generates one factor of `H₁`. -/
+/-- A vertical non-contractible loop on the 4 × 4 torus: the `v`-edges of column
+`x = 1`. Its class generates one factor of `H₁`. -/
 def zLoop : C1 4 := fun e =>
   match e with
   | .h _ _ => 0
@@ -108,14 +108,14 @@ end Toric
 /-! ## In-proof panels
 
 With `GoalTypePanel`, a goal of one of the recognized proposition shapes is
-rendered directly above the tactic state. With `SelectionPanel`, shift-click
-any Pauli subexpression in the goal to render it. Put the cursor inside the
-proofs below to try both.
+rendered directly above the tactic state. With `SelectionPanel`, shift-click any
+Pauli subexpression in the goal to render it. Put the cursor inside the proofs
+below to try both.
 
-The `decide` calls need `Decidable` instances at the group-element level.
-Same pattern as `FiveQubit_5_1_3.lean`: these stay `local instance` because
-adding them to the global pool once disrupted unrelated typeclass synthesis —
-see the note in `PauliGroup/Commutation.lean`.
+The `decide` calls need `Decidable` instances at the group-element level. Same
+pattern as `FiveQubit_5_1_3.lean`: these stay `local instance` because adding
+them to the global pool once disrupted unrelated typeclass synthesis — see the
+note in `PauliGroup/Commutation.lean`.
 -/
 
 /-- `DecidableEq` on `NQubitPauliGroupElement n` via field-wise decision.

@@ -22,9 +22,9 @@ Status: **All sub-lemmas proven.**
   * `toric_logicalOps`, `toric_logical_commute_cross` — the four logical loop
     operators and their commutation matrix.
   * `generators_independent_packaged` — symplectic linear independence of the
-    `2L² - 2` trimmed rows (the toric rank theorem). Proven via block-anti-diagonal
-    structure of the check matrix and the kernel characterizations
-    `mem_ker_cutMap_iff` / `mem_ker_boundary2_iff`.
+    `2L² - 2` trimmed rows (the toric rank theorem). Proven via
+    block-anti-diagonal structure of the check matrix and the kernel
+    characterizations `mem_ker_cutMap_iff` / `mem_ker_boundary2_iff`.
 -/
 
 namespace Quantum
@@ -57,8 +57,8 @@ def generatorsListXTrimmed (L : ℕ) [Fact (0 < L)] :
     List (NQubitPauliGroupElement (numQubits L)) :=
   (coordsTrimmed L).map (fun p => faceStab L p.1 p.2)
 
-/-- Packaged generator list: trimmed Z-generators followed by trimmed X-generators.
-Length is `2L² - 2 = numQubits L - 2`. -/
+/-- Packaged generator list: trimmed Z-generators followed by trimmed
+X-generators. Length is `2L² - 2 = numQubits L - 2`. -/
 def generatorsListPackaged (L : ℕ) [Fact (0 < L)] :
     List (NQubitPauliGroupElement (numQubits L)) :=
   generatorsListZTrimmed L ++ generatorsListXTrimmed L
@@ -149,7 +149,8 @@ private lemma listToSet_genListXTrimmed_subset (L : ℕ) [Fact (0 < L)] :
   rcases List.mem_map.mp hg with ⟨p, _, rfl⟩
   exact ⟨p, rfl⟩
 
-/-- The packaged list is a subset of the union of the original Z- and X-generator sets. -/
+/-- The packaged list is a subset of the union of the original Z- and
+X-generator sets. -/
 lemma listToSet_packaged_subset_full (L : ℕ) [Fact (0 < L)] :
     listToSet (generatorsListPackaged L) ⊆ generators L := by
   intro g hg
@@ -159,8 +160,9 @@ lemma listToSet_packaged_subset_full (L : ℕ) [Fact (0 < L)] :
 
 /-- The packaged generators pairwise commute.
 
-Delegates to the generic `Homological.HomologicalCode.homologicalGenerators_commute`
-on `Stabilizer.Lattice.toricHomologicalCode L`, via the generator-set bridges. -/
+Delegates to the generic
+`Homological.HomologicalCode.homologicalGenerators_commute` on
+`Stabilizer.Lattice.toricHomologicalCode L`, via the generator-set bridges. -/
 lemma generators_commute_packaged (L : ℕ) [Fact (2 ≤ L)] :
     ∀ g ∈ listToSet (generatorsListPackaged L),
     ∀ h ∈ listToSet (generatorsListPackaged L), g * h = h * g := by
@@ -189,7 +191,8 @@ private lemma toricVertexCutMap_constOne (L : ℕ) [Fact (0 < L)] :
   have h : (1 : ZMod 2) + 1 = 0 := by decide
   cases e <;> simp [Stabilizer.Lattice.toricVertexCutMap, h]
 
-/-- `∂₂` sends the constant-1 2-chain to zero (each edge collects `1 + 1 = 0`). -/
+/-- `∂₂` sends the constant-1 2-chain to zero (each edge collects `1 + 1 = 0`).
+-/
 private lemma toricBoundary2_constOne (L : ℕ) [Fact (0 < L)] :
     ∂₂ (L := L) (fun _ : Fin L × Fin L => (1 : ZMod 2)) = 0 := by
   ext e
@@ -215,8 +218,8 @@ private lemma vertexStab_listProd_eq_chain (L : ℕ) [Fact (2 ≤ L)]
       rw [LinearMap.map_add, Stabilizer.Lattice.toricZOperatorOfChain_add,
         Stabilizer.Lattice.toricZOperatorOfChain_cutMap_singleVtx, ih]
 
-/-- Symmetric version for X-side: list product of face stabs = X-operator of `∂₂` of
-sum of single-face indicators. -/
+/-- Symmetric version for X-side: list product of face stabs = X-operator of
+`∂₂` of sum of single-face indicators. -/
 private lemma faceStab_listProd_eq_chain (L : ℕ) [Fact (2 ≤ L)]
     (lst : List (Fin L × Fin L)) :
     (lst.map (fun p => faceStab L p.1 p.2)).prod =
@@ -258,7 +261,8 @@ private lemma sum_singleVtx_coords (L : ℕ) [Fact (0 < L)] :
   · rw [show (Finset.univ : Finset (Fin L × Fin L)) = (coords L).toFinset from h_finset_eq.symm]
     exact (List.sum_toFinset _ h_nodup).symm
 
-/-- Symmetric: sum of `singleFace p` over `coords L` is the constant-1 2-chain. -/
+/-- Symmetric: sum of `singleFace p` over `coords L` is the constant-1 2-chain.
+-/
 private lemma sum_singleFace_coords (L : ℕ) [Fact (0 < L)] :
     ((coords L).map (fun p => Stabilizer.Lattice.singleFace p)).sum =
       (fun _ => (1 : ZMod 2)) := by
@@ -415,9 +419,9 @@ private theorem dropped_vertex_in_closure_remaining (L : ℕ) [Fact (2 ≤ L)] :
   -- Conclude
   exact h_prod_eq ▸ h_prod_in_closure
 
-/-- Homological identity: dropped face stab is in the closure of the remaining face
-stabs. Equivalent to `∏ all face stabs = I`. Symmetric proof to the vertex case via
-`toricXOperatorOfChain_boundary_singleFace` and `toricBoundary2`. -/
+/-- Homological identity: dropped face stab is in the closure of the remaining
+face stabs. Equivalent to `∏ all face stabs = I`. Symmetric proof to the vertex
+case via `toricXOperatorOfChain_boundary_singleFace` and `toricBoundary2`. -/
 private theorem dropped_face_in_closure_remaining (L : ℕ) [Fact (2 ≤ L)] :
     faceStab L (zeroCoord L) (zeroCoord L) ∈
       Subgroup.closure (listToSet (generatorsListXTrimmed L)) := by
@@ -476,8 +480,8 @@ private theorem dropped_face_in_closure_remaining (L : ℕ) [Fact (2 ≤ L)] :
 -- ---------------------------------------------------------------------------
 
 /-- The closure of the packaged trimmed list equals the closure of the full
-generator set, hence equals `(stabilizerGroup L).toSubgroup`. Uses the homological
-identities (dropped generator ∈ closure of remaining). -/
+generator set, hence equals `(stabilizerGroup L).toSubgroup`. Uses the
+homological identities (dropped generator ∈ closure of remaining). -/
 lemma closure_packaged_eq_full (L : ℕ) [Fact (2 ≤ L)] :
     Subgroup.closure (listToSet (generatorsListPackaged L)) =
       (stabilizerGroup L).toSubgroup := by
@@ -530,8 +534,8 @@ lemma closure_packaged_eq_full (L : ℕ) [Fact (2 ≤ L)] :
 /-- `-I` is not in the closure of the packaged generator list.
 
 Delegates to the generic `negIdentity_not_mem_closure_homologicalGenerators` on
-`Stabilizer.Lattice.toricHomologicalCode L`, via the generator-set bridges and the
-`closure_packaged_eq_full` identity. -/
+`Stabilizer.Lattice.toricHomologicalCode L`, via the generator-set bridges and
+the `closure_packaged_eq_full` identity. -/
 lemma negIdentity_not_mem_packaged (L : ℕ) [Fact (2 ≤ L)] :
     StabilizerGroup.negIdentity (numQubits L) ∉
       Subgroup.closure (listToSet (generatorsListPackaged L)) := by
@@ -562,14 +566,15 @@ private noncomputable def packagedStabilizerGroup (L : ℕ) [Fact (2 ≤ L)] :
   StabilizerGroup.mkStabilizerFromGenerators (numQubits L) (generatorsListPackaged L)
     (generators_commute_packaged L) (negIdentity_not_mem_packaged L)
 
-/-- The packaged stabilizer group has the same toSubgroup as the canonical one. -/
+/-- The packaged stabilizer group has the same toSubgroup as the canonical one.
+-/
 private lemma packagedStabilizerGroup_toSubgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
     (packagedStabilizerGroup L).toSubgroup = (stabilizerGroup L).toSubgroup := by
   change Subgroup.closure (listToSet (generatorsListPackaged L)) = _
   exact closure_packaged_eq_full L
 
-/-- The two logical X-chains have disjoint support (one has h-edges only, the other has
-v-edges only). Used to prove cross-commutation. -/
+/-- The two logical X-chains have disjoint support (one has h-edges only, the
+other has v-edges only). Used to prove cross-commutation. -/
 private lemma verticalLoopChain_horizontalLoopChain_supports_disjoint (L : ℕ) [Fact (0 < L)] :
     ∀ e : Stabilizer.Lattice.EdgeIdx L,
       ¬ (verticalLoopChain L e = 1 ∧ horizontalLoopChain L e = 1) := by
@@ -610,8 +615,8 @@ private lemma horizontalHRowChain_verticalVRowChain_supports_disjoint (L : ℕ) 
 -- (`toricXOperatorOfChain_op_at` and `toricZOperatorOfChain_op_at` live in
 -- `ToricLogicalCorrespondenceX.lean` / `ToricLogicalCorrespondenceZ.lean`.)
 
-/-- If two chains have disjoint supports, then their Pauli operators (X-type, Z-type)
-commute. -/
+/-- If two chains have disjoint supports, then their Pauli operators (X-type,
+Z-type) commute. -/
 private lemma toricXZ_commute_of_disjoint_supports (L : ℕ) [Fact (0 < L)]
     (cX cZ : Stabilizer.Lattice.C1 L)
     (h_disj : ∀ e, ¬ (cX e = 1 ∧ cZ e = 1)) :
@@ -653,14 +658,16 @@ private lemma horizontalLoop_verticalLoop_X_commute (L : ℕ) [Fact (0 < L)] :
   StabilizerGroup.CSSCommutationLemmas.XType_commutes
     (horizontalLoopXOperator_isXType L) (verticalLoopXOperator_isXType L)
 
-/-- Cross-commutation: horizontalLoopX vs verticalVRowZ via disjoint supports. -/
+/-- Cross-commutation: horizontalLoopX vs verticalVRowZ via disjoint supports.
+-/
 private lemma horizontalLoopX_verticalVRowZ_commute (L : ℕ) [Fact (0 < L)] :
     horizontalLoopXOperator L * verticalVRowZOperator L =
       verticalVRowZOperator L * horizontalLoopXOperator L :=
   toricXZ_commute_of_disjoint_supports L (horizontalLoopChain L) (verticalVRowChain L)
     (horizontalLoopChain_verticalVRowChain_supports_disjoint L)
 
-/-- Cross-commutation: horizontalHRowZ vs verticalLoopX via disjoint supports. -/
+/-- Cross-commutation: horizontalHRowZ vs verticalLoopX via disjoint supports.
+-/
 private lemma horizontalHRowZ_verticalLoopX_commute (L : ℕ) [Fact (0 < L)] :
     horizontalHRowZOperator L * verticalLoopXOperator L =
       verticalLoopXOperator L * horizontalHRowZOperator L := by
@@ -670,7 +677,8 @@ private lemma horizontalHRowZ_verticalLoopX_commute (L : ℕ) [Fact (0 < L)] :
   -- h : verticalLoopX * horizontalHRowZ = horizontalHRowZ * verticalLoopX
   exact h.symm
 
-/-- Anticommute: horizontalLoopX and horizontalHRowZ share exactly one edge h(0, 0). -/
+/-- Anticommute: horizontalLoopX and horizontalHRowZ share exactly one edge h(0,
+0). -/
 private theorem horizontalLoopX_anticommute_horizontalHRowZ (L : ℕ) [Fact (2 ≤ L)] :
     NQubitPauliGroupElement.Anticommute
       (horizontalLoopXOperator L) (horizontalHRowZOperator L) := by
@@ -736,7 +744,8 @@ private theorem horizontalLoopX_anticommute_horizontalHRowZ (L : ℕ) [Fact (2 �
   rw [hfilter, Finset.card_singleton]
   exact ⟨0, rfl⟩
 
-/-- Anticommute: verticalLoopX and verticalVRowZ share exactly one edge v(0, 0). -/
+/-- Anticommute: verticalLoopX and verticalVRowZ share exactly one edge v(0, 0).
+-/
 private theorem verticalLoopX_anticommute_verticalVRowZ (L : ℕ) [Fact (2 ≤ L)] :
     NQubitPauliGroupElement.Anticommute
       (verticalLoopXOperator L) (verticalVRowZOperator L) := by
@@ -802,7 +811,8 @@ private theorem verticalLoopX_anticommute_verticalVRowZ (L : ℕ) [Fact (2 ≤ L
   rw [hfilter, Finset.card_singleton]
   exact ⟨0, rfl⟩
 
-/-- Centralizer membership: horizontalLoopX in centralizer of packaged stabilizer. -/
+/-- Centralizer membership: horizontalLoopX in centralizer of packaged
+stabilizer. -/
 private theorem horizontalLoopXOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L)] :
     horizontalLoopXOperator L ∈ StabilizerGroup.centralizer (packagedStabilizerGroup L) := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -811,7 +821,8 @@ private theorem horizontalLoopXOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L
   exact (Stabilizer.Lattice.toricXOperatorOfChain_mem_centralizer_iff_cycle L
     (horizontalLoopChain L)).mpr (horizontalLoopChain_mem_toricCycles L)
 
-/-- Centralizer membership: verticalLoopX in centralizer of packaged stabilizer. -/
+/-- Centralizer membership: verticalLoopX in centralizer of packaged stabilizer.
+-/
 private theorem verticalLoopXOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L)] :
     verticalLoopXOperator L ∈ StabilizerGroup.centralizer (packagedStabilizerGroup L) := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -820,7 +831,8 @@ private theorem verticalLoopXOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L)]
   exact (Stabilizer.Lattice.toricXOperatorOfChain_mem_centralizer_iff_cycle L
     (verticalLoopChain L)).mpr (verticalLoopChain_mem_toricCycles L)
 
-/-- Centralizer membership: horizontalHRowZ in centralizer of packaged stabilizer. -/
+/-- Centralizer membership: horizontalHRowZ in centralizer of packaged
+stabilizer. -/
 private theorem horizontalHRowZOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L)] :
     horizontalHRowZOperator L ∈ StabilizerGroup.centralizer (packagedStabilizerGroup L) := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -829,7 +841,8 @@ private theorem horizontalHRowZOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L
   exact (Stabilizer.Lattice.toricZOperatorOfChain_mem_centralizer_iff_dualCycle L
     (horizontalHRowChain L)).mpr (horizontalHRowChain_mem_toricDualCycles L)
 
-/-- Centralizer membership: verticalVRowZ in centralizer of packaged stabilizer. -/
+/-- Centralizer membership: verticalVRowZ in centralizer of packaged stabilizer.
+-/
 private theorem verticalVRowZOperator_mem_centralizer (L : ℕ) [Fact (2 ≤ L)] :
     verticalVRowZOperator L ∈ StabilizerGroup.centralizer (packagedStabilizerGroup L) := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -931,7 +944,8 @@ private lemma card_edgeIdx_eq_numQubits (L : ℕ) :
     Fintype.card (Stabilizer.Lattice.EdgeIdx L) = numQubits L := by
   simp [numQubits]
 
-/-- `edgeToQubitIdx` is a bijection (injection between equal-size finite types). -/
+/-- `edgeToQubitIdx` is a bijection (injection between equal-size finite types).
+-/
 private lemma edgeToQubitIdx_bijective (L : ℕ) [Fact (0 < L)] :
     Function.Bijective (Stabilizer.Lattice.edgeToQubitIdx L) := by
   rw [Fintype.bijective_iff_injective_and_card]
@@ -1076,8 +1090,8 @@ private lemma get_packaged_Z (L : ℕ) [Fact (0 < L)]
   rw [List.getElem_map]
   rfl
 
-/-- The packaged list at an X-block index `j` (with `j ≥ nZ`) equals a face stab at
-the `(j - nZ)`-th trimmed coord. -/
+/-- The packaged list at an X-block index `j` (with `j ≥ nZ`) equals a face stab
+at the `(j - nZ)`-th trimmed coord. -/
 private lemma get_packaged_X (L : ℕ) [Fact (0 < L)]
     (j : ℕ) (hj : j < (generatorsListPackaged L).length)
     (hge : (coordsTrimmed L).length ≤ j)
@@ -1119,8 +1133,8 @@ private lemma coordsTrimmed_not_mem_origin (L : ℕ) [Fact (0 < L)] :
   rcases List.mem_filter.mp h with ⟨_, h2⟩
   simp at h2
 
-/-- Vertex-side block kernel collapse: a linear combination of `singleVtx` over the
-trimmed coords whose `cutMap` is `0` must have all-zero coefficients. -/
+/-- Vertex-side block kernel collapse: a linear combination of `singleVtx` over
+the trimmed coords whose `cutMap` is `0` must have all-zero coefficients. -/
 private lemma trimmed_combo_singleVtx_eq_zero (L : ℕ) [Fact (0 < L)]
     (c : Fin (coordsTrimmed L).length → ZMod 2)
     (hker : (∑ i, c i • Stabilizer.Lattice.singleVtx ((coordsTrimmed L).get i)) ∈
@@ -1174,7 +1188,8 @@ private lemma trimmed_combo_singleVtx_eq_zero (L : ℕ) [Fact (0 < L)]
     ring
   · intro hcontra; exact absurd (Finset.mem_univ j) hcontra
 
-/-- Face-side block kernel collapse: same as Z-side but for `singleFace` and `boundary2`. -/
+/-- Face-side block kernel collapse: same as Z-side but for `singleFace` and
+`boundary2`. -/
 private lemma trimmed_combo_singleFace_eq_zero (L : ℕ) [Fact (0 < L)]
     (c : Fin (coordsTrimmed L).length → ZMod 2)
     (hker : (∑ i, c i • Stabilizer.Lattice.singleFace ((coordsTrimmed L).get i)) ∈
@@ -1541,7 +1556,8 @@ noncomputable def toricStabilizerCode (L : ℕ) [Fact (2 ≤ L)] :
   logicalOps := toric_logicalOps L
   logical_commute_cross := toric_logical_commute_cross L
 
-/-- The toric stabilizer code's subgroup matches the canonical `stabilizerGroup L`. -/
+/-- The toric stabilizer code's subgroup matches the canonical
+`stabilizerGroup L`. -/
 theorem toricStabilizerCode_subgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
     (toricStabilizerCode L).toStabilizerGroup.toSubgroup = (stabilizerGroup L).toSubgroup := by
   change Subgroup.closure (listToSet (generatorsListPackaged L)) = _
@@ -1551,8 +1567,10 @@ theorem toricStabilizerCode_subgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
 `(toricHomologicalCode L).homologicalStabilizerGroup`'s subgroup.
 
 Useful for delegating `IsNontrivialLogicalOperator` and centralizer membership
-through the generic `HomologicalCode` API.  Chains `toricStabilizerCode_subgroup_eq`
-with `Stabilizer.Lattice.toricHomologicalCode_homologicalStabilizerGroup_toSubgroup_eq`. -/
+through the generic `HomologicalCode` API. Chains
+`toricStabilizerCode_subgroup_eq` with
+`Stabilizer.Lattice.toricHomologicalCode_homologicalStabilizerGroup_toSubgroup_eq`.
+-/
 theorem toricStabilizerCode_toSubgroup_eq_homologicalStabilizerGroup
     (L : ℕ) [Fact (2 ≤ L)] :
     (toricStabilizerCode L).toStabilizerGroup.toSubgroup =

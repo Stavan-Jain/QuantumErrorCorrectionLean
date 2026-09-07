@@ -12,7 +12,8 @@ namespace ToricCodeN
 open scoped BigOperators
 open NQubitPauliGroupElement
 
-/-- Canonical horizontal noncontractible cycle used for the X-distance upper bound witness. -/
+/-- Canonical horizontal noncontractible cycle used for the X-distance upper
+bound witness. -/
 def horizontalLoopChain (L : ℕ) [Fact (0 < L)] : Stabilizer.Lattice.C1 L :=
   fun e =>
     match e with
@@ -45,7 +46,8 @@ theorem horizontalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
   unfold Stabilizer.Lattice.toricBoundary1 horizontalLoopChain; simp +decide ;
   ext ⟨ x, y ⟩ ; aesop
 
-/-- Section-8 witness: the canonical horizontal loop is not a toric 1-boundary. -/
+/-- Section-8 witness: the canonical horizontal loop is not a toric 1-boundary.
+-/
 theorem horizontalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
     horizontalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries L := by
   have h_hAt_zero :
@@ -109,7 +111,8 @@ theorem horizontalLoopChain_edgeWeight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     _ = horizAtZero.card := by rw [hsupport]
     _ = L := hcard
 
-/-- Section-8 upper-bound witness packaged as a nontrivial X logical of weight `L`. -/
+/-- Section-8 upper-bound witness packaged as a nontrivial X logical of weight
+`L`. -/
 theorem exists_nontrivial_x_logical_weight_eq_L (L : ℕ) [Fact (2 ≤ L)] :
     ∃ g : NQubitPauliGroupElement (numQubits L),
       NQubitPauliGroupElement.IsXTypeElement g ∧
@@ -387,7 +390,8 @@ theorem verticalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
     decide
   · simp [hx]
 
-/-- The vertical X-loop chain is not a primal boundary (its `vAt` invariant is 1). -/
+/-- The vertical X-loop chain is not a primal boundary (its `vAt` invariant is
+1). -/
 theorem verticalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
     verticalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩

@@ -37,8 +37,8 @@ open Polynomial BBDeckTower
 
 /-! ## §0 Char-two Frobenius, instance-free -/
 
-/-- Frobenius for exponent `2^r`, from the bare hypothesis `2 = 0`
-(no `CharP` instances). -/
+/-- Frobenius for exponent `2^r`, from the bare hypothesis `2 = 0` (no `CharP`
+instances). -/
 lemma add_pow_two_pow_of_two_eq_zero {A : Type*} [CommRing A]
     (h2 : (2 : A) = 0) (a b : A) (r : ℕ) :
     (a + b) ^ 2 ^ r = a ^ 2 ^ r + b ^ 2 ^ r := by
@@ -62,8 +62,8 @@ lemma single_pow_one (σ : G) (j : ℕ) :
       = AddMonoidAlgebra.single (j • σ) 1 := by
   rw [AddMonoidAlgebra.single_pow, one_pow]
 
-/-- **Expansion.** A polynomial in `x^σ` times a single `x^g` is the
-orbit sum `∑_j q_j·x^{g + j•σ}`. -/
+/-- **Expansion.** A polynomial in `x^σ` times a single `x^g` is the orbit sum
+`∑_j q_j·x^{g + j•σ}`. -/
 lemma aeval_single_mul_single (σ g : G) (c : k) {q : k[X]} {N : ℕ}
     (hq : q.natDegree < N) :
     Polynomial.aeval (AddMonoidAlgebra.single σ (1 : k)) q
@@ -75,9 +75,8 @@ lemma aeval_single_mul_single (σ g : G) (c : k) {q : k[X]} {N : ℕ}
   rw [smul_mul_assoc, single_pow_one, AddMonoidAlgebra.single_mul_single,
     AddMonoidAlgebra.smul_single', one_mul, add_comm (j • σ) g]
 
-/-- **Extraction** (pure `Finsupp` level).  Evaluating the orbit sum at
-`g + m•σ` picks out the `m`-th coefficient, provided `j ↦ j•σ` is
-injective below `N`. -/
+/-- **Extraction** (pure `Finsupp` level). Evaluating the orbit sum at `g + m•σ`
+picks out the `m`-th coefficient, provided `j ↦ j•σ` is injective below `N`. -/
 lemma sum_single_orbit_apply (σ g : G) (co : ℕ → k) {N : ℕ}
     (hinj : ∀ j < N, ∀ m < N, j • σ = m • σ → j = m)
     (m : ℕ) (hm : m < N) :
@@ -99,8 +98,8 @@ end GroupAlgebra
 
 /-! ## §2 `EpsFree` at the `AdjoinRoot` presentation of the chain ring -/
 
-/-- `epsFree_quotXpow` restated at `AdjoinRoot ((X)^N)` (definitionally the
-same quotient; this is the form the algebra map below consumes). -/
+/-- `epsFree_quotXpow` restated at `AdjoinRoot ((X)^N)` (definitionally the same
+quotient; this is the form the algebra map below consumes). -/
 lemma epsFree_adjoinRoot_root {R : Type*} [CommRing R] (N : ℕ) :
     EpsFree (AdjoinRoot.root ((X : R[X]) ^ N)) N :=
   epsFree_quotXpow N
@@ -109,7 +108,7 @@ lemma epsFree_adjoinRoot_root {R : Type*} [CommRing R] (N : ℕ) :
 
 Context: `Λ = AdjoinRoot (X^N)` acts on `k[G]` through an algebra structure
 characterized by `halg : algebraMap (mk p) = aeval (x^σ − 1) p` (supplied by
-`AdjoinRoot.lift` in the main theorem).  The family `i ↦ x^{t i}` for a
+`AdjoinRoot.lift` in the main theorem). The family `i ↦ x^{t i}` for a
 transversal `t : T → G` spans and is independent over `Λ`. -/
 
 section Transversal
@@ -118,8 +117,8 @@ variable {k : Type*} [CommRing k] {G : Type*} [AddCommGroup G]
 variable {σ : G} {N : ℕ}
 variable [Algebra (AdjoinRoot ((X : k[X]) ^ N)) (AddMonoidAlgebra k G)]
 
-/-- Spanning: every single `x^g c` is a `Λ`-multiple of a transversal
-element (`g = t i + j•σ` ⟹ `x^g c = mk (C c·(X+1)^j) • x^{t i}`). -/
+/-- Spanning: every single `x^g c` is a `Λ`-multiple of a transversal element
+(`g = t i + j•σ` ⟹ `x^g c = mk (C c·(X+1)^j) • x^{t i}`). -/
 lemma span_transversal_eq_top
     (halg : ∀ p : k[X],
       algebraMap (AdjoinRoot ((X : k[X]) ^ N)) (AddMonoidAlgebra k G)
@@ -150,10 +149,10 @@ lemma span_transversal_eq_top
   rw [← key]
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
 
-/-- Independence of the transversal family: expand each coefficient
-`l i ∈ Λ` by its canonical `modByMonic` representative, change variables
-`p ↦ p ∘ (X−1)` to turn `ε`-polynomials into `x^σ`-polynomials, and
-extract group-algebra coefficients along the orbit `t i₀ + m•σ`. -/
+/-- Independence of the transversal family: expand each coefficient `l i ∈ Λ` by
+its canonical `modByMonic` representative, change variables `p ↦ p ∘ (X−1)` to
+turn `ε`-polynomials into `x^σ`-polynomials, and extract group-algebra
+coefficients along the orbit `t i₀ + m•σ`. -/
 lemma linearIndependent_transversal
     (halg : ∀ p : k[X],
       algebraMap (AdjoinRoot ((X : k[X]) ^ N)) (AddMonoidAlgebra k G)
@@ -286,12 +285,11 @@ end Transversal
 
 /-! ## §4 The main theorem: `EpsFree` in the group algebra -/
 
-/-- **The L2a wildcard, char-free core.** If `(i, j) ↦ t i + j•σ` is a
-bijection `T × Fin N ≃ G` (coset transversal + exact order) and
-`ε = x^σ − 1` satisfies `ε^N = 0`, then `EpsFree ε N` holds in
-`AddMonoidAlgebra k G`: the group algebra is free over the chain ring
-`k[X]/(X^N)` on the transversal, so `epsFree_quotXpow` transports across
-(`epsFree_of_free`). -/
+/-- **The L2a wildcard, char-free core.** If `(i, j) ↦ t i + j•σ` is a bijection
+`T × Fin N ≃ G` (coset transversal + exact order) and `ε = x^σ − 1` satisfies
+`ε^N = 0`, then `EpsFree ε N` holds in `AddMonoidAlgebra k G`: the group algebra
+is free over the chain ring `k[X]/(X^N)` on the transversal, so
+`epsFree_quotXpow` transports across (`epsFree_of_free`). -/
 theorem epsFree_single_sub_one_of_transversal
     {k : Type*} [CommRing k] {G : Type*} [AddCommGroup G] {σ : G} {N : ℕ}
     (hN : 0 < N)
@@ -330,8 +328,8 @@ theorem epsFree_single_sub_one_of_transversal
 /-! ## §5 The canonical transversal: `Quotient.out` on `G ⧸ ⟨σ⟩` -/
 
 /-- For `σ` of exact order `N`, `(q, j) ↦ q.out + j•σ` is a bijection
-`(G ⧸ ⟨σ⟩) × Fin N ≃ G`: `Quotient.out` is a coset transversal, and the
-orbit coordinates below the order are distinct. -/
+`(G ⧸ ⟨σ⟩) × Fin N ≃ G`: `Quotient.out` is a coset transversal, and the orbit
+coordinates below the order are distinct. -/
 lemma transversal_out_bijective {G : Type*} [AddCommGroup G] (σ : G) {N : ℕ}
     (hord : addOrderOf σ = N) (hN : 0 < N) :
     Function.Bijective
@@ -408,10 +406,10 @@ lemma transversal_out_bijective {G : Type*} [AddCommGroup G] (σ : G) {N : ℕ}
 
 /-! ## §6 The deck corollary: `EpsFree (1 + x^σ) (2^r)` -/
 
-/-- **The L2a wildcard, deck form.** Over a char-2 base, a deck `σ` of
-exact order `2^r` yields `EpsFree (1 + x^σ) (2^r)` in `k[G]` — the shared
-ring hypothesis of the OQ1 tower (`BBDeckTower.eps_mem_of_deckTrivial`)
-and, through `hann_of_epsFree`, of the OQ2 element form
+/-- **The L2a wildcard, deck form.** Over a char-2 base, a deck `σ` of exact
+order `2^r` yields `EpsFree (1 + x^σ) (2^r)` in `k[G]` — the shared ring
+hypothesis of the OQ1 tower (`BBDeckTower.eps_mem_of_deckTrivial`) and, through
+`hann_of_epsFree`, of the OQ2 element form
 (`BocksteinLift.bockstein_element_form`). -/
 theorem epsFree_one_add_single_of_addOrderOf
     {k : Type*} [CommRing k] (h2 : (2 : k) = 0)
@@ -443,21 +441,20 @@ theorem epsFree_one_add_single_of_addOrderOf
 
 /-! ## §7 Wiring L2a into L1: the element form for real deck group algebras -/
 
-/-- **Element form for order-4 deck group algebras (L1 ∘ L2a).**  The L2a
+/-- **Element form for order-4 deck group algebras (L1 ∘ L2a).** The L2a
 freeness (`epsFree_one_add_single_of_addOrderOf` at `r = 2`, so
 `addOrderOf σ = 4`) supplies through `hann_of_epsFree` exactly the
 `Ann(ε) = (ε³)` hypothesis that L1's abstract capstone
-`BocksteinLift.bockstein_element_form` consumes.  Composing them: for a
-deck `σ` of exact order 4 over any char-2 base, with `ε = 1 + x^σ`, the
-Bockstein element form `δ₁ ∘ δ₂ = 0` holds **unconditionally** in the
-cover quotient `k[G] ⧸ (ε²)` — whenever `A z̄ = ε ā` and `B z̄ = ε b̄`, the
-representative `A b̄ + B ā` lies in `ε·(A, B)`.
+`BocksteinLift.bockstein_element_form` consumes. Composing them: for a deck `σ`
+of exact order 4 over any char-2 base, with `ε = 1 + x^σ`, the Bockstein element
+form `δ₁ ∘ δ₂ = 0` holds **unconditionally** in the cover quotient `k[G] ⧸ (ε²)`
+— whenever `A z̄ = ε ā` and `B z̄ = ε b̄`, the representative `A b̄ + B ā` lies
+in `ε·(A, B)`.
 
-This discharges, for the Frattini-lift ring of every genuine BB double
-cover, the ring hypothesis L1 had to assume.  What remains to reach the
-homological equality `E = k̃ − k` (`BBTransferH1.BocksteinVanishes`) is the
-seam↔connecting-map identification transporting this element fact onto
-`H₁`. -/
+This discharges, for the Frattini-lift ring of every genuine BB double cover,
+the ring hypothesis L1 had to assume. What remains to reach the homological
+equality `E = k̃ − k` (`BBTransferH1.BocksteinVanishes`) is the
+seam↔connecting-map identification transporting this element fact onto `H₁`. -/
 theorem bockstein_element_form_group_algebra
     {k : Type*} [CommRing k] (h2 : (2 : k) = 0)
     {G : Type*} [AddCommGroup G] (σ : G) (hord : addOrderOf σ = 4)

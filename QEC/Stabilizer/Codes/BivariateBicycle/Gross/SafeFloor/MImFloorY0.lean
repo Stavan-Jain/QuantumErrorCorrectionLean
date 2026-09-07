@@ -30,7 +30,8 @@ set_option maxRecDepth 8192
 /-- Y-orbit-0 representative `ker ∂₂` element. -/
 def zrep : BaseGroup → ZMod 2 := kcombo 1 0 0 0 0 0
 
-/-! ### The orbit's packed component tables (A-block `T`, B-block `U`, comp-1 offset). -/
+/-! ### The orbit's packed component tables (A-block `T`, B-block `U`, comp-1
+offset). -/
 
 def T1 : Nat := 0x1e4bb4e1396c93c627728dd80055aaff
 def T3 : Nat := 0x96c33c69b1e41b4eaffa055088dd2277
@@ -41,7 +42,8 @@ def U4 : Nat := 0xebbe4114f0a55a0fc6936c39dd887722
 def O1R : Nat := 0x33
 
 /-! ### The tables are the orbit's seam-shifted components (kernel sweeps over the
-`4² · 4` knob/slot tuples, with the seam offsets read through the packed mask). -/
+`4² · 4` knob/slot tuples, with the seam offsets read through the packed mask).
+-/
 
 theorem hT1 : ∀ (a b : Fin 4) (s : ZMod 2 × ZMod 2), pcP T1 a.val b.val (slotIdx s)
     = (fadd (seamOffL zrep psi1 s) (fadd (fmul a (Ahat1 s)) (fmul b (uv s)))).val := by
@@ -94,13 +96,14 @@ theorem hO1R : ∀ s : ZMod 2 × ZMod 2, ovP O1R (slotIdx s) = (seamOffR zrep ps
 /-- The orbit lies in `ker ∂₂`. -/
 theorem zrep_ker : bbBoundary2Fn baseA baseB zrep = 0 := bb2_kcombo _ _ _ _ _ _
 
-/-- **The spine certificate** (Props 30-31 for this orbit): every one of the `1024`
-spine cells either clears `12` outright or has its `10`-tight configurations killed
-by a ρ-link.  Kernel `decide` — no `native_decide`, no `2³⁰` walk. -/
+/-- **The spine certificate** (Props 30-31 for this orbit): every one of the
+`1024` spine cells either clears `12` outright or has its `10`-tight
+configurations killed by a ρ-link. Kernel `decide` — no `native_decide`, no
+`2³⁰` walk. -/
 theorem kill_holds : killOK T1 T3 T4 U2 U3 U4 O1R = true := by decide +kernel
 
-/-- **Y-orbit-0 safe-sector floor** (analytic): every base 1-cycle in `[seamC zrep]`
-has weight `≥ 12`. -/
+/-- **Y-orbit-0 safe-sector floor** (analytic): every base 1-cycle in
+`[seamC zrep]` has weight `≥ 12`. -/
 theorem floor (f : BaseGroup → ZMod 2) :
     12 ≤ bb72Complex.chainWeight (seamC zrep + bbBoundary2Fn baseA baseB f) :=
   floor_of_killOK zrep zrep_ker T1 T3 T4 U2 U3 U4 O1R hT1 hT3 hT4 hU2 hU3 hU4 hO1R
