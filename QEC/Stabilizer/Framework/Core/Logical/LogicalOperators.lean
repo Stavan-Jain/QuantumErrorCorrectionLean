@@ -184,6 +184,18 @@ theorem IsNontrivialLogicalOperator_of_toSubgroup_eq (g : NQubitPauliGroupElemen
     (IsNontrivialLogicalOperator g S ↔ IsNontrivialLogicalOperator g T) :=
   RepresentsNontrivialCoset_of_toSubgroup_eq g h
 
+/-- A centralizer element that anticommutes with some other centralizer element is a nontrivial
+logical operator. It cannot lie in the stabilizer, which commutes with the whole centralizer, and
+neither can any stabilizer element sharing its operator part, since anticommutation only sees
+operator parts (`anticommute_congr_left`). This is how a low-weight representative `X̄·s`
+(`s` a stabilizer) is certified nontrivial: it still anticommutes with `Z̄`. -/
+theorem isNontrivialLogicalOperator_of_anticommute_centralizer (S : StabilizerGroup n)
+    {g h : NQubitPauliGroupElement n} (hg : g ∈ centralizer S) (hh : h ∈ centralizer S)
+    (hgh : NQubitPauliGroupElement.Anticommute g h) : IsNontrivialLogicalOperator g S :=
+  ⟨hg, not_mem_stabilizer_of_anticommutes_centralizer S g h hh hgh, fun s hs h_ops =>
+    not_mem_stabilizer_of_anticommutes_centralizer S s h hh
+      ((NQubitPauliGroupElement.anticommute_congr_left h_ops).mpr hgh) hs⟩
+
 /-- Data for one logical qubit: a pair of logical X and Z operators that commute with
     the stabilizer and anticommute with each other. -/
 structure LogicalQubitOps (n : ℕ) (S : StabilizerGroup n) where

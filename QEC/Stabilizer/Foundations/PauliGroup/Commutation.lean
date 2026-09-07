@@ -272,6 +272,12 @@ lemma anticommutes_iff_mulOp_phasePower (p q : NQubitPauliGroupElement n) :
       simp only [mul, mul_eq, minusOne_operators, mulOp_operators_at, mulOp_identity_left_op,
         PauliOperator.mulOp_operator_comm]
 
+/-- Anticommutation only sees operator parts: elements with equal operator parts anticommute
+with the same things. -/
+lemma anticommute_congr_left {p q r : NQubitPauliGroupElement n} (h : p.operators = q.operators) :
+    Anticommute p r ↔ Anticommute q r := by
+  rw [anticommutes_iff_mulOp_phasePower, anticommutes_iff_mulOp_phasePower, h]
+
 /-- When two Pauli elements anticommute, their product's matrix is -1 times the reversed product. -/
 lemma Anticommute.toMatrix_neg (p q : NQubitPauliGroupElement n) (h : Anticommute p q) :
     (p * q).toMatrix = (-1 : ℂ) • (q * p).toMatrix := by

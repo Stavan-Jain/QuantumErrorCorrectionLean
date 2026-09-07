@@ -155,7 +155,7 @@ Contributions are welcome! If you add new modules or definitions, please:
 
 - Extend the class small-cycle theorem (analytic `d ≥ 6` for a characterized family of weight-3 BB codes) toward weight-5 / `d ≥ 10` classes
 - Certify a BB code with distance `> 12` end-to-end through the doubling framework (the `[[300,8,16]]` two-tier instance's remaining dangerous-sector work)
-- Restore the parked formalizations on `claude/z3z6-parked` (`Z3Z6/`, `Z5Z15F2A6/`, `BaseFloors/`, the two Steane concatenations, the 3×3 rotated surface, Steane7's distance proof) by replacing their `native_decide` leaves with kernel checks or certificates
+- Restore the parked formalizations on `claude/z3z6-parked` (`Z3Z6/`, `Z5Z15F2A6/`, `BaseFloors/`, the two Steane concatenations, the 3×3 rotated surface) by replacing their `native_decide` leaves with kernel checks or certificates
 
 ### Long-Term Goals
 
