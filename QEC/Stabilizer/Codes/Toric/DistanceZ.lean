@@ -16,7 +16,7 @@ open NQubitPauliGroupElement
 
 Mirror of `ToricCodeNDistanceX`, using the dual chain complex:
   - `HasToricZDistance` predicate (analogue of `HasToricXDistance`)
-  - Witness: vertical row of V-edges at y = 0  (weight L)
+  - Witness: vertical row of V-edges at y = 0 (weight L)
   - Lower bound: dual wrapping invariant argument
 -/
 
@@ -24,7 +24,8 @@ Mirror of `ToricCodeNDistanceX`, using the dual chain complex:
 -- 1.  Z-distance predicate
 -- ---------------------------------------------------------------------------
 
-/-- Z-distance predicate: minimum weight of nontrivial Z-type logical operators. -/
+/-- Z-distance predicate: minimum weight of nontrivial Z-type logical operators.
+-/
 def HasToricZDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
   d ≥ 1 ∧
   (∀ g : NQubitPauliGroupElement (numQubits L),
@@ -445,7 +446,8 @@ theorem horizontalHRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
     decide
   · simp [hx]
 
-/-- The horizontal Z-row chain is not a dual boundary (its `hRowAt` invariant is 1). -/
+/-- The horizontal Z-row chain is not a dual boundary (its `hRowAt` invariant is
+1). -/
 theorem horizontalHRowChain_not_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] :
     horizontalHRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩

@@ -19,9 +19,10 @@ variable {n : ℕ}
 /-!
 # Symplectic span and closure
 
-For phase-0 stabilizer generators given as a list `L`, the subgroup closure equals
-(the operator parts corresponding to) the F₂-linear span of their symplectic vectors.
-So "logical L ∉ subgroup" reduces to "symp(L.operators) ∉ sympSpan(generators)".
+For phase-0 stabilizer generators given as a list `L`, the subgroup closure
+equals (the operator parts corresponding to) the F₂-linear span of their
+symplectic vectors. So "logical L ∉ subgroup" reduces to "symp(L.operators) ∉
+sympSpan(generators)".
 -/
 
 namespace NQubitPauliGroupElement
@@ -29,11 +30,13 @@ namespace NQubitPauliGroupElement
 open NQubitPauliOperator
 open Submodule
 
-/-- The F₂-submodule spanned by the symplectic vectors (rows) of the check matrix of `L`. -/
+/-- The F₂-submodule spanned by the symplectic vectors (rows) of the check
+matrix of `L`. -/
 def sympSpan (L : List (NQubitPauliGroupElement n)) : Submodule (ZMod 2) (Fin (n + n) → ZMod 2) :=
   span (ZMod 2) (Set.range (checkMatrix L))
 
-/-- The span of the check-matrix rows equals the span of the symplectic image of `listToSet L`. -/
+/-- The span of the check-matrix rows equals the span of the symplectic image of
+`listToSet L`. -/
 lemma sympSpan_eq_span_listToSet (L : List (NQubitPauliGroupElement n)) :
     sympSpan L = span (ZMod 2)
       ((fun g => NQubitPauliOperator.toSymplectic g.operators) '' listToSet L) := by
@@ -53,7 +56,8 @@ lemma sympSpan_eq_span_listToSet (L : List (NQubitPauliGroupElement n)) :
     rw [← hg]
     ext j; rfl
 
-/-- If `g` is in the list `L`, then its symplectic vector is a row of the check matrix. -/
+/-- If `g` is in the list `L`, then its symplectic vector is a row of the check
+matrix. -/
 lemma mem_listToSet_symp_in_range (L : List (NQubitPauliGroupElement n))
     (g : NQubitPauliGroupElement n) (hg : g ∈ listToSet L) :
     NQubitPauliOperator.toSymplectic g.operators ∈ Set.range (checkMatrix L) := by
@@ -64,9 +68,9 @@ lemma mem_listToSet_symp_in_range (L : List (NQubitPauliGroupElement n))
     ext j; rfl
   rw [h_row, congr_arg (fun e => NQubitPauliOperator.toSymplectic e.operators) hi]
 
-/-- For phase-0 generators, closure is contained in the symplectic span:
-  if `g ∈ Subgroup.closure (listToSet L)` then
-  `NQubitPauliOperator.toSymplectic g.operators ∈ sympSpan L`. -/
+/-- For phase-0 generators, closure is contained in the symplectic span: if
+`g ∈ Subgroup.closure (listToSet L)` then
+`NQubitPauliOperator.toSymplectic g.operators ∈ sympSpan L`. -/
 theorem mem_closure_implies_symp_in_span (L : List (NQubitPauliGroupElement n))
     (_ : AllPhaseZero L) (g : NQubitPauliGroupElement n)
     (hg : g ∈ Subgroup.closure (listToSet L)) :
@@ -75,8 +79,8 @@ theorem mem_closure_implies_symp_in_span (L : List (NQubitPauliGroupElement n))
   exact Quantum.toSymplectic_mem_span_of_mem_closure hg
 
 /-- Linear relation on the span: zero/add/smul cases are handled once. To prove
-  ∀ v ∈ sympSpan L, (Finset.sum indices fun j => v j) = 0, it suffices to prove that
-  each row of the check matrix sums to 0 on `indices` (the mem case). -/
+∀ v ∈ sympSpan L, (Finset.sum indices fun j => v j) = 0, it suffices to prove
+that each row of the check matrix sums to 0 on `indices` (the mem case). -/
 theorem sympSpan_sum_eq_zero (L : List (NQubitPauliGroupElement n)) (indices : Finset (Fin (n + n)))
     (h_mem : ∀ k : Fin L.length, Finset.sum indices (fun j => (checkMatrix L k) j) = 0) :
     ∀ v ∈ sympSpan L, Finset.sum indices (fun j => v j) = 0 := by
@@ -96,9 +100,9 @@ theorem sympSpan_sum_eq_zero (L : List (NQubitPauliGroupElement n)) (indices : F
     rw [← Finset.mul_sum]
     rw [hx, mul_zero]
 
-/-- Generic "logical not in subgroup" via symplectic span: if `L` has phase 0 and its
-  symplectic vector is not in the span of the generators' symplectic vectors, then
-  `L` is not in the subgroup closure. -/
+/-- Generic "logical not in subgroup" via symplectic span: if `L` has phase 0
+and its symplectic vector is not in the span of the generators' symplectic
+vectors, then `L` is not in the subgroup closure. -/
 theorem not_mem_closure_of_symp_not_in_span (L : List (NQubitPauliGroupElement n))
     (hPhase : AllPhaseZero L) (g : NQubitPauliGroupElement n) (_ : g.phasePower = 0)
     (hg_symp : NQubitPauliOperator.toSymplectic g.operators ∉ sympSpan L) :
@@ -107,7 +111,7 @@ theorem not_mem_closure_of_symp_not_in_span (L : List (NQubitPauliGroupElement n
   exact hg_symp (mem_closure_implies_symp_in_span L hPhase g h)
 
 /-- When `Subgroup.closure (listToSet L) = H`, use this to reduce "g ∉ H" to
-  "g's symplectic vector is not in sympSpan L". Cuts boilerplate per code. -/
+"g's symplectic vector is not in sympSpan L". Cuts boilerplate per code. -/
 theorem not_mem_subgroup_of_symp_not_in_span (L : List (NQubitPauliGroupElement n))
     (H : Subgroup (NQubitPauliGroupElement n)) (h_eq : Subgroup.closure (listToSet L) = H)
     (hPhase : AllPhaseZero L) (g : NQubitPauliGroupElement n) (hg_phase : g.phasePower = 0)
@@ -115,8 +119,9 @@ theorem not_mem_subgroup_of_symp_not_in_span (L : List (NQubitPauliGroupElement 
   rw [← h_eq]
   exact not_mem_closure_of_symp_not_in_span L hPhase g hg_phase hg_symp
 
-/-- If the symplectic vector of an operator is in the symplectic span of the generators,
-  there exists an element of the subgroup closure with that operator part. -/
+/-- If the symplectic vector of an operator is in the symplectic span of the
+generators, there exists an element of the subgroup closure with that operator
+part. -/
 theorem exists_mem_closure_of_symp_in_span (L : List (NQubitPauliGroupElement n))
     (op : NQubitPauliOperator n)
     (h_in_span : NQubitPauliOperator.toSymplectic op ∈ sympSpan L) :
@@ -151,16 +156,16 @@ theorem exists_mem_closure_of_symp_in_span (L : List (NQubitPauliGroupElement n)
 /-!
 ## No `-I` for general (non-CSS) phase-0 commuting independent generators
 
-Generalises `CSS.negIdentity_not_mem_closure_union` (which requires Z-type / X-type
-partition) to any phase-0 pairwise-commuting generator list with linearly-
-independent symplectic rows. First used by the [[5,1,3]] five-qubit perfect code
-(`Codes/FiveQubit_5_1_3.lean`), the first non-CSS code in the repo.
+Generalises `CSS.negIdentity_not_mem_closure_union` (which requires Z-type /
+X-type partition) to any phase-0 pairwise-commuting generator list with
+linearly- independent symplectic rows. First used by the [[5,1,3]] five-qubit
+perfect code (`Codes/FiveQubit_5_1_3.lean`), the first non-CSS code in the repo.
 
 Proof outline: the closure of phase-0 commuting generators with `Lᵢ² = 1` is
 elementary abelian — every element factors as a `Finset.noncommProd` over a
 unique subset of indices (`subsetProd`). Symplectic independence pins down the
-subset from the operator part: if the operator part is identity, the
-subset is empty, so the element is `1` (not `-I`).
+subset from the operator part: if the operator part is identity, the subset is
+empty, so the element is `1` (not `-I`).
 -/
 
 variable (L : List (NQubitPauliGroupElement n))
@@ -221,7 +226,8 @@ private lemma toSymplectic_subsetProd
     have := congrFun ih j
     simp only [Pi.add_apply, this]
 
-/-- If `subsetProd L hC S` has identity operators, the symplectic rows on `S` sum to 0. -/
+/-- If `subsetProd L hC S` has identity operators, the symplectic rows on `S`
+sum to 0. -/
 private lemma sum_symp_zero_of_subsetProd_operators_identity
     (hC : ∀ g ∈ listToSet L, ∀ h ∈ listToSet L, g * h = h * g)
     {S : Finset (Fin L.length)}
@@ -232,7 +238,8 @@ private lemma sum_symp_zero_of_subsetProd_operators_identity
   unfold NQubitPauliOperator.toSymplectic NQubitPauliOperator.identity
   split_ifs <;> rfl
 
-/-- For linearly independent rows, a sum of selected rows being zero forces empty selection. -/
+/-- For linearly independent rows, a sum of selected rows being zero forces
+empty selection. -/
 private lemma empty_of_sum_symp_zero
     (hIndep : rowsLinearIndependent L)
     {S : Finset (Fin L.length)}
@@ -284,8 +291,9 @@ private lemma subsetProd_commute_get
     exact hC (L.get j) (List.mem_iff_get.mpr ⟨j, rfl⟩)
               (L.get i) (List.mem_iff_get.mpr ⟨i, rfl⟩)
 
-/-- Pre-step: multiplication by a single generator from the right shifts membership
-of that generator's index in the subset by symmetric difference with `{i}`. -/
+/-- Pre-step: multiplication by a single generator from the right shifts
+membership of that generator's index in the subset by symmetric difference with
+`{i}`. -/
 private lemma subsetProd_mul_get
     (hPhase : AllPhaseZero L)
     (hC : ∀ g ∈ listToSet L, ∀ h ∈ listToSet L, g * h = h * g)
@@ -316,7 +324,8 @@ private lemma subsetProd_mul_get
     rw [hSym, subsetProd_insert L hC hi_S]
     exact subsetProd_commute_get L hC S i
 
-/-- Multiplication law for `subsetProd`: `subsetProd S * subsetProd T = subsetProd (S Δ T)`. -/
+/-- Multiplication law for `subsetProd`:
+`subsetProd S * subsetProd T = subsetProd (S Δ T)`. -/
 private lemma subsetProd_mul_eq_symmDiff
     (hPhase : AllPhaseZero L)
     (hC : ∀ g ∈ listToSet L, ∀ h ∈ listToSet L, g * h = h * g)

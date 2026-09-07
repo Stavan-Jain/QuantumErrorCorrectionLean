@@ -69,10 +69,10 @@ set_option maxRecDepth 8192
 /-! ## §1 Radical-multiplier image membership and the ideal-element witness
 
 A coset's constrained component is `offset ⊕ D·(Vⱼ f)` for a radical multiplier
-`D ∈ {Â₁, Â₄, B̂₂}`.  Since `D² = 0`, the image `rmul D r` lies in the
-16-element ideal `{αD + β·uv}` for every `r` (a finite check over the 256-element
-`Ring`, which is a `Fintype`).  `inIdeal_to_exists` turns the `Bool` certificate
-into the `Prop` existential the rewrite needs. -/
+`D ∈ {Â₁, Â₄, B̂₂}`. Since `D² = 0`, the image `rmul D r` lies in the 16-element
+ideal `{αD + β·uv}` for every `r` (a finite check over the 256-element `Ring`,
+which is a `Fintype`). `inIdeal_to_exists` turns the `Bool` certificate into the
+`Prop` existential the rewrite needs. -/
 
 /-- `B̂₂·r` lies in the ideal `{α·B̂₂ + β·uv}` for every `r` (`Ring` is a
 `Fintype`; kernel `decide` over its 256 elements via `mkRing`). -/
@@ -139,7 +139,8 @@ theorem slotCostL_le' (v0 v1 v2 v3 v4 : Fin 4) (h0 : v0.val < 2) :
 `V ψ₀` is a parity sum (`ψ₀ ≡ 1`), so every coset element's component 0 lands in
 `{0, 1}` — discharging the `v₀ < 2` side-conditions of `slotCost(L)_le'`. -/
 
-/-- The `fadd`-fold of `1`s keeps the accumulator in `{0, 1}` (an `F₂` parity). -/
+/-- The `fadd`-fold of `1`s keeps the accumulator in `{0, 1}` (an `F₂` parity).
+-/
 theorem foldl_fadd_one_lt2 (P : BaseGroup → Bool) :
     ∀ (L : List BaseGroup) (acc : Fin 4), acc.val < 2 →
       (L.foldl (fun a h => if P h then fadd a 1 else a) acc).val < 2 := by
@@ -178,13 +179,14 @@ theorem comp0_lt2_R (ζ f : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
 /-! ## §4 The block split (first half of the bridge)
 
 `costFromComps` is bounded below by the sum of the two per-block `slotCost` slot
-sums: the A/left block frees its unit-side component 2 (`slotCostL` frees `v₀, v₂`)
-and the B/right block frees its unit-side component 1 (`slotCost` frees `v₀, v₁`).
-This is the link-free reduction; the per-block `≥ 6` second half needs the
-standard-form reduction (see the module header). -/
+sums: the A/left block frees its unit-side component 2 (`slotCostL` frees
+`v₀, v₂`) and the B/right block frees its unit-side component 1 (`slotCost`
+frees `v₀, v₁`). This is the link-free reduction; the per-block `≥ 6` second
+half needs the standard-form reduction (see the module header). -/
 
-/-- **Block split.**  `costFromComps` dominates the sum of the A-block `slotCostL`
-slot sum and the B-block `slotCost` slot sum (component 0 `F₂`-valued on both). -/
+/-- **Block split.** `costFromComps` dominates the sum of the A-block
+`slotCostL` slot sum and the B-block `slotCost` slot sum (component 0
+`F₂`-valued on both). -/
 theorem costFromComps_ge_blockSlotCost
     (oL0 oL1 oL2 oL3 oL4 oR0 oR1 oR2 oR3 oR4 : Ring)
     (hL0 : ∀ s, (oL0 s).val < 2) (hR0 : ∀ s, (oR0 s).val < 2) :
@@ -196,12 +198,12 @@ theorem costFromComps_ge_blockSlotCost
   · intro s _; exact slotCostL_le' (oL0 s) (oL1 s) (oL2 s) (oL3 s) (oL4 s) (hL0 s)
   · intro s _; exact slotCost_le' (oR0 s) (oR1 s) (oR2 s) (oR3 s) (oR4 s) (hR0 s)
 
-/-- **The wt-24 close (assembly).**  When both per-block `slotCost` slot sums of a
-coset's ten components are `≥ 6`, the closed coset weight is `≥ 12`.  This is the
-full bridge for a weight-24 orbit rep: the per-block `≥ 6` bounds (proved per rep
-from the radical-ideal image + the standard-form walk) feed straight into
-`floor_of_data_analytic`.  Component 0's `F₂`-valuedness is discharged internally
-by `comp0_lt2_{L,R}`. -/
+/-- **The wt-24 close (assembly).** When both per-block `slotCost` slot sums of
+a coset's ten components are `≥ 6`, the closed coset weight is `≥ 12`. This is
+the full bridge for a weight-24 orbit rep: the per-block `≥ 6` bounds (proved
+per rep from the radical-ideal image + the standard-form walk) feed straight
+into `floor_of_data_analytic`. Component 0's `F₂`-valuedness is discharged
+internally by `comp0_lt2_{L,R}`. -/
 theorem costFromComps_ge_12_of_blocks (ζ f : BaseGroup → ZMod 2)
     (hL : 6 ≤ ∑ s, slotCostL (shifted (seamOffL ζ psi1) Ahat1 (compF f psi1) s)
                              (shifted (seamOffL ζ psi3) Ahat1 (compF f psi3) s)
@@ -238,11 +240,11 @@ theorem costFromComps_ge_12_of_blocks (ζ f : BaseGroup → ZMod 2)
 
 The per-slot cost is invariant under the cost-preserving moves used to reduce a
 raw weight-24 block to standard form: entrywise Frobenius (a value-table
-symmetry, both blocks) and the rigidity-preserving scaling `s₂² = s₃s₄` (the nine
-cell symmetries; for the right block, whose confined component is component 2).
-The scaling does *not* hold for the left block as stated (`slotCostL` confines
-component 1 and scaling the `F₂` component 0 breaks its parity), so the L-block
-reduction routes through its own frame `ℓ' = κ(Â₃)`. -/
+symmetry, both blocks) and the rigidity-preserving scaling `s₂² = s₃s₄` (the
+nine cell symmetries; for the right block, whose confined component is component
+2). The scaling does *not* hold for the left block as stated (`slotCostL`
+confines component 1 and scaling the `F₂` component 0 breaks its parity), so the
+L-block reduction routes through its own frame `ℓ' = κ(Â₃)`. -/
 
 /-- **Lemma 25 (Frobenius), right block.** `slotCost` is invariant under
 entrywise squaring. -/
@@ -265,13 +267,14 @@ theorem slotCost_scale : ∀ s2 s3 s4 v2 v3 v4 : Fin 4,
 With the standard offsets (component 2 confined to `⟨ℓ⟩` through the origin,
 component 3 on `⟨ℓ⟩`, component 4 at `ωθ = (ω,0,ω,0)` off the line), the right
 block sums to `≥ 6` over the four slots even after freeing the spine direction —
-exactly `Prop 29` realized through `slotCost`.  (The raw `Y4` offsets do *not*
+exactly `Prop 29` realized through `slotCost`. (The raw `Y4` offsets do *not*
 satisfy this; they must first be reduced via §5, the remaining M1b work.) -/
 
-/-- **Standard right block `≥ 6`.**  With `off₂ = off₃ = 0` and `off₄ = ωθ`, the
+/-- **Standard right block `≥ 6`.** With `off₂ = off₃ = 0` and `off₄ = ωθ`, the
 B/right block's `slotCost` slot sum is `≥ 6` for every confined/spine ideal
-datum (`B̂₂` slot values `(ω²,ω,1,0)`, `uv ≡ 1`).  The 4⁶-knob walk stays
-kernel-checked (axiom-clean); `+kernel` and the packed-`Nat` tables keep it cheap. -/
+datum (`B̂₂` slot values `(ω²,ω,1,0)`, `uv ≡ 1`). The 4⁶-knob walk stays
+kernel-checked (axiom-clean); `+kernel` and the packed-`Nat` tables keep it
+cheap. -/
 theorem RBlock_std_ge6 : ∀ a2 b2 a3 b3 a4 b4 : Fin 4,
     6 ≤ slotCost (fadd 0 (fadd (fmul a2 3) (fmul b2 1)))
                  (fadd 0 (fadd (fmul a3 3) (fmul b3 1)))

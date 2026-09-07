@@ -55,8 +55,7 @@ lemma deckS_add_deckS : deckS + deckS = 0 := by decide
 lemma coverPi_add_deckS (g : GrossGroup) : coverPi (g + deckS) = coverPi g :=
   (coverPi_fiber g (g + deckS)).mpr (Or.inr rfl)
 
-/-- Every cover point is the section point of its fiber or its deck
-partner. -/
+/-- Every cover point is the section point of its fiber or its deck partner. -/
 lemma cover_point_dichotomy (g : GrossGroup) :
     g = coverSec (coverPi g) ∨ g = coverSec (coverPi g) + deckS :=
   (coverPi_fiber (coverSec (coverPi g)) g).mp (coverPi_coverSec (coverPi g)).symm
@@ -117,14 +116,14 @@ lemma liftC2_add (ξ η : BaseGroup → ZMod 2) :
 
 /-! ## The seam decomposition `∂₂ = N + C` -/
 
-/-- The non-crossing seam part: sheet-0 component of the lifted stabilizer
-(the lab's `d2nc`). -/
+/-- The non-crossing seam part: sheet-0 component of the lifted stabilizer (the
+lab's `d2nc`). -/
 def seamN (ξ : BaseGroup → ZMod 2) : BaseGroup × Fin 2 → ZMod 2 :=
   sheet0 (liftStab ξ)
 
-/-- The seam-crossing part: sheet-1 component of the lifted stabilizer
-(the lab's `d2c`).  The Smith connecting map at chain level is
-`ζ ↦ seamC ζ` on 2-cycles. -/
+/-- The seam-crossing part: sheet-1 component of the lifted stabilizer (the
+lab's `d2c`). The Smith connecting map at chain level is `ζ ↦ seamC ζ` on
+2-cycles. -/
 def seamC (ξ : BaseGroup → ZMod 2) : BaseGroup × Fin 2 → ZMod 2 :=
   sheet1 (liftStab ξ)
 
@@ -173,16 +172,16 @@ lemma sheet1_self_add_deck (v : GrossGroup × Fin 2 → ZMod 2)
 /-! ## The (M-im) hypothesis and the reduction -/
 
 /-- **(M-im)** (A4 Part II / Theorem D): every chain in a Smith seam-coset
-`seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) that is not itself a base boundary has
-weight ≥ 12.  This is the single remaining analytic input for the safe
-sector; its paper proof is the confined-floor program of A4 §§9–13. -/
+`seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) that is not itself a base boundary has weight ≥
+12. This is the single remaining analytic input for the safe sector; its paper
+proof is the confined-floor program of A4 §§9–13. -/
 def MImBound : Prop :=
   ∀ ζ : BaseGroup → ZMod 2, bbBoundary2Fn baseA baseB ζ = 0 →
     ∀ f : BaseGroup → ZMod 2,
       seamC ζ + bbBoundary2Fn baseA baseB f ∉ bb72Complex.boundaries →
       12 ≤ bb72Complex.chainWeight (seamC ζ + bbBoundary2Fn baseA baseB f)
 
-/-- **The safe-sector reduction**: (M-im) implies `SafeSectorGe12`.  The
+/-- **The safe-sector reduction**: (M-im) implies `SafeSectorGe12`. The
 Smith-coset membership of `p(v)` is derived from the deck homotopy (R). -/
 theorem safe_sector_of_mim (hMim : MImBound) : SafeSectorGe12 := by
   intro v hv hb
@@ -255,26 +254,25 @@ theorem safe_sector_of_mim (hMim : MImBound) : SafeSectorGe12 := by
 
 /-! ## Warm-up: the connecting map lands in cycles, and the ≥ 6 floor
 
-The chain-level Smith connecting map `ζ ↦ seamC ζ` carries 2-cycles to
-1-cycles, so every element of a Smith seam-coset `seamC ζ + im ∂₂`
-(`ζ ∈ ker ∂₂`) is itself a base 1-cycle.  Combined with the unconditional
-base small-cycle theorem (`base_cycle_weight_ge_6`, A4 Theorem A) this gives
-the ≥ 6 floor on the safe sector with no CRT engine — the honest partial
-result toward the ≥ 12 target of `MImBound`.  The engine (A4 §§9–13) is what
-lifts this 6 to 12; `seamC_mem_cycles` is the foundation it builds on, since
-it is what makes `chainWeight (seamC ζ + ∂₂ f)` a *cycle* weight for the
-confined-floor program to bound. -/
+The chain-level Smith connecting map `ζ ↦ seamC ζ` carries 2-cycles to 1-cycles,
+so every element of a Smith seam-coset `seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) is
+itself a base 1-cycle. Combined with the unconditional base small-cycle theorem
+(`base_cycle_weight_ge_6`, A4 Theorem A) this gives the ≥ 6 floor on the safe
+sector with no CRT engine — the honest partial result toward the ≥ 12 target of
+`MImBound`. The engine (A4 §§9–13) is what lifts this 6 to 12;
+`seamC_mem_cycles` is the foundation it builds on, since it is what makes
+`chainWeight (seamC ζ + ∂₂ f)` a *cycle* weight for the confined-floor program
+to bound. -/
 
-/-- **The chain-level Smith connecting map lands in cycles.**  For a base
-2-cycle `ζ` (`∂₂ ζ = 0`), the seam-crossing component `seamC ζ` is a base
-1-cycle.
+/-- **The chain-level Smith connecting map lands in cycles.** For a base 2-cycle
+`ζ` (`∂₂ ζ = 0`), the seam-crossing component `seamC ζ` is a base 1-cycle.
 
-The proof is exactness of the double cover, *not* seam geometry: `liftStab ζ`
-is a gross 1-cycle (a gross boundary) that pushes forward to `∂₂ ζ = 0`, so
-by `ker p = im τ` (`coverPush1_eq_zero_iff`) it equals `coverPull1 u` for a
-base 1-chain `u`; `u` is a base cycle because `τ` is an injective chain map,
-and `seamC ζ = seamN ζ = sheet0 (liftStab ζ) = u` (the first equality is
-char 2 applied to `seamN ζ + seamC ζ = ∂₂ ζ = 0`). -/
+The proof is exactness of the double cover, *not* seam geometry: `liftStab ζ` is
+a gross 1-cycle (a gross boundary) that pushes forward to `∂₂ ζ = 0`, so by
+`ker p = im τ` (`coverPush1_eq_zero_iff`) it equals `coverPull1 u` for a base
+1-chain `u`; `u` is a base cycle because `τ` is an injective chain map, and
+`seamC ζ = seamN ζ = sheet0 (liftStab ζ) = u` (the first equality is char 2
+applied to `seamN ζ + seamC ζ = ∂₂ ζ = 0`). -/
 theorem seamC_mem_cycles {ζ : BaseGroup → ZMod 2}
     (hζ : bbBoundary2Fn baseA baseB ζ = 0) :
     seamC ζ ∈ bb72Complex.cycles := by
@@ -309,12 +307,12 @@ theorem seamC_mem_cycles {ζ : BaseGroup → ZMod 2}
     exact hkey _ _ hsum
   rw [hseamC]; exact hu_cyc
 
-/-- **(M-im) warm-up: the ≥ 6 floor on the safe sector.**  Every element of a
+/-- **(M-im) warm-up: the ≥ 6 floor on the safe sector.** Every element of a
 Smith seam-coset `seamC ζ + im ∂₂` (`ζ ∈ ker ∂₂`) that is not itself a base
-boundary has weight ≥ 6.  This is `MImBound` with the target relaxed from 12
-to 6: it is unconditional (no CRT engine), resting only on `seamC_mem_cycles`
-and the base small-cycle theorem.  Discharging the full `MImBound` is the
-A4 §§9–13 confined-floor program that lifts this 6 to 12. -/
+boundary has weight ≥ 6. This is `MImBound` with the target relaxed from 12 to
+6: it is unconditional (no CRT engine), resting only on `seamC_mem_cycles` and
+the base small-cycle theorem. Discharging the full `MImBound` is the A4 §§9–13
+confined-floor program that lifts this 6 to 12. -/
 theorem mim_bound_ge_6 :
     ∀ ζ : BaseGroup → ZMod 2, bbBoundary2Fn baseA baseB ζ = 0 →
       ∀ f : BaseGroup → ZMod 2,
@@ -337,11 +335,11 @@ theorem mim_bound_ge_6 :
 
 `d(gross) = 12` from exactly the two CRT-engine inputs. -/
 
-/-- **Conditional Pauli-level `d(gross) = 12` on the two CRT-engine
-inputs**: the light-stabilizer classification (A4 §6.3) and (M-im)
-(A4 Part II).  Everything else — Theorems A and B, the slice machinery, the
-m-rungs, (R), the duality, the sector assembly, and the weight-12 witness —
-is unconditionally proven in this development. -/
+/-- **Conditional Pauli-level `d(gross) = 12` on the two CRT-engine inputs**:
+the light-stabilizer classification (A4 §6.3) and (M-im) (A4 Part II).
+Everything else — Theorems A and B, the slice machinery, the m-rungs, (R), the
+duality, the sector assembly, and the weight-12 witness — is unconditionally
+proven in this development. -/
 theorem gross_pauli_distance_eq_12_of_engine
     (hC : LightStabilizerClassification) (hMim : MImBound) :
     IsLeast {w : ℕ | ∃ g : NQubitPauliGroupElement grossComplex.numQubits,
@@ -364,10 +362,10 @@ theorem gross_chain_distance_eq_12_of_engine
 
 `seamC`'s definitional form evaluates a 72-term `Finset.sum` (`conv` over
 `GrossGroup`) through the bundled `coverPi` tower at every point — opaque to
-kernel reduction.  The lemmas below collapse it to three sheet-indicator
-translate terms per block, which the kernel evaluates in a few hundred steps
-per point.  This is the evaluation substrate for the seam-offset read-offs and
-the seam covariance certificates (all kernel `decide`, no `native_decide`). -/
+kernel reduction. The lemmas below collapse it to three sheet-indicator
+translate terms per block, which the kernel evaluates in a few hundred steps per
+point. This is the evaluation substrate for the seam-offset read-offs and the
+seam covariance certificates (all kernel `decide`, no `native_decide`). -/
 
 /-- Three-monomial sparse form of `conv`: convolving against an explicit
 three-point indicator collapses the `Finset.sum` to three translates. -/

@@ -26,8 +26,8 @@ code in this repo. It is *not* a working code — the actual content is in the
 embedded code samples below. Copy this file, rename it to `<CodeName>.lean`,
 fill in the parameters / Pauli strings, and adapt section by section.
 
-The pattern was first established in `Steane7.lean`; this file is the
-explicit, copy-paste-ready version. The skeleton-drafter agent
+The pattern was first established in `Steane7.lean`; this file is the explicit,
+copy-paste-ready version. The skeleton-drafter agent
 (`.claude/agents/qec-skeleton-drafter.md`) uses this file as its primary
 structural reference.
 
@@ -41,18 +41,17 @@ straightforwardly to:
   (logical operators). The only field that genuinely changes is
   `logical_commute_cross` — for `k = 1` the `Subsingleton.elim` shortcut
   suffices; for `k ≥ 2` you need explicit case-splits on `Fin k × Fin k`.
-- **Parametric families** (toric, rotated surface, …) — generators are
-  defined as functions of `L` (the toric, repetition and iceberg families
-  write theirs with the symbolic `σ[n | i ↦ Z, …]` form, see §1; the rotated
-  surface code builds them through the homological-code layer instead),
-  the subgroup is parametric, and the
-  `StabilizerCode` packaging often requires a *trimmed* generator list (see
-  `ToricCodeNStabilizerCode.lean` for the pattern). The distance proof
-  typically lives in a *separate file* (`<Code>Distance.lean`).
+- **Parametric families** (toric, rotated surface, …) — generators are defined
+  as functions of `L` (the toric, repetition and iceberg families write theirs
+  with the symbolic `σ[n | i ↦ Z, …]` form, see §1; the rotated surface code
+  builds them through the homological-code layer instead), the subgroup is
+  parametric, and the `StabilizerCode` packaging often requires a *trimmed*
+  generator list (see `ToricCodeNStabilizerCode.lean` for the pattern). The
+  distance proof typically lives in a *separate file* (`<Code>Distance.lean`).
 - **Non-CSS codes** (Pauli-mixed generators) — see variant notes under §3
   (typing) and §4 (cross-commutation). The CSS shortcuts (`IsXTypeElement`,
-  `IsZTypeElement`, `CSS.negIdentity_not_mem_closure_union`) don't apply;
-  use the general centralizer machinery instead.
+  `IsZTypeElement`, `CSS.negIdentity_not_mem_closure_union`) don't apply; use
+  the general centralizer machinery instead.
 
 ## Section overview
 
@@ -75,10 +74,9 @@ straightforwardly to:
 
 ## File header pattern
 
-Open with a doc-section citing the original paper and stating the
-generators / logical operators / distance claim explicitly. The
-informal_spec.md produced by the skeleton drafter should populate this
-verbatim.
+Open with a doc-section citing the original paper and stating the generators /
+logical operators / distance claim explicitly. The informal_spec.md produced by
+the skeleton drafter should populate this verbatim.
 -/
 
 namespace Quantum
@@ -91,10 +89,10 @@ open scoped Pauli
 /-!
 ## §1 — Generators
 
-For an `[[n, k, d]]` CSS code, you need `m_Z` Z-type generators and `m_X`
-X-type generators, with `m_Z + m_X = n - k`. Each is an
-`NQubitPauliGroupElement n` with `phasePower = 0`, written with the scoped
-`σ[…]` construction notation (`open scoped Pauli`, provided by
+For an `[[n, k, d]]` CSS code, you need `m_Z` Z-type generators and `m_X` X-type
+generators, with `m_Z + m_X = n - k`. Each is an `NQubitPauliGroupElement n`
+with `phasePower = 0`, written with the scoped `σ[…]` construction notation
+(`open scoped Pauli`, provided by
 `QEC.Stabilizer.Foundations.PauliGroup.Notation` — see this file's header).
 
 Pattern (Steane code, [[7, 1, 3]], `m_Z = m_X = 3`):
@@ -155,8 +153,8 @@ same way. Letters are `X`, `Y`, `Z` only — leave identity qubits out. See
 
 Bundle the generators into `Set`s plus their union, then take the
 `Subgroup.closure`. The subgroup must be `noncomputable` because mathlib's
-`Group` instance on `NQubitPauliGroupElement` is noncomputable as of v4.30
-(see CLAUDE.md).
+`Group` instance on `NQubitPauliGroupElement` is noncomputable as of v4.30 (see
+CLAUDE.md).
 
 Pattern:
 
@@ -178,8 +176,8 @@ mixed-Pauli generators, and `subgroup := Subgroup.closure generators`.
 ## §3 — Z-type and X-type predicates (CSS only)
 
 Prove that every Z-generator is Z-type (operator is `I` or `Z` on every qubit)
-and similarly for X. These predicates feed into the CSS commutation shortcuts
-of §4–6.
+and similarly for X. These predicates feed into the CSS commutation shortcuts of
+§4–6.
 
 Pattern (the trivial direction — case-split on the singleton/finite set):
 
@@ -207,8 +205,8 @@ machinery in §6 / §12 works directly without typing predicates.
 /-!
 ## §4 — Cross-commutation (CSS: Z-generators commute with X-generators)
 
-For each `(z, x) ∈ ZGenerators × XGenerators`, prove `z * x = x * z`. The
-shape of the proof is:
+For each `(z, x) ∈ ZGenerators × XGenerators`, prove `z * x = x * z`. The shape
+of the proof is:
 
 ```lean
 private lemma Z1_comm_X1 : Z1 * X1 = X1 * Z1 := by
@@ -239,19 +237,19 @@ lemma ZGenerators_commute_XGenerators :
       | …
 ```
 
-The `pauli_comm_even_anticommutes` tactic is in `PauliGroup/CommutationTactics.lean`;
-it converts the commutation goal into a parity-of-anticommuting-qubits goal,
-which is then closed by computing the explicit `Finset` and `decide`-ing its
-cardinality is even.
+The `pauli_comm_even_anticommutes` tactic is in
+`PauliGroup/CommutationTactics.lean`; it converts the commutation goal into a
+parity-of-anticommuting-qubits goal, which is then closed by computing the
+explicit `Finset` and `decide`-ing its cardinality is even.
 
-**Performance note.** For small `n` (≤ 9 with few generators), the whole
-batch may close as a single `by decide` on the symplectic check-matrix
-product without spelling out the per-pair filter Finsets. Try that first.
-For larger codes, the explicit-Finset approach is cleaner and reliably fast.
+**Performance note.** For small `n` (≤ 9 with few generators), the whole batch
+may close as a single `by decide` on the symplectic check-matrix product without
+spelling out the per-pair filter Finsets. Try that first. For larger codes, the
+explicit-Finset approach is cleaner and reliably fast.
 
 **Non-CSS variant.** Without Z/X partition, prove pairwise commutation for
-*every* pair of generators (`m * (m-1)/2` cases for `m` generators); fall
-back to the same `pauli_comm_even_anticommutes` machinery.
+*every* pair of generators (`m * (m-1)/2` cases for `m` generators); fall back
+to the same `pauli_comm_even_anticommutes` machinery.
 -/
 
 /-!
@@ -270,20 +268,20 @@ theorem generators_commute :
   · exact XType_commutes (XGenerators_are_XType g hgX) (XGenerators_are_XType h hhX)
 ```
 
-`ZType_commutes` and `XType_commutes` are the CSS-side trivial commutations:
-two Z-type elements always commute (both contain only `I`s and `Z`s, which
-commute pairwise), same for X-type.
+`ZType_commutes` and `XType_commutes` are the CSS-side trivial commutations: two
+Z-type elements always commute (both contain only `I`s and `Z`s, which commute
+pairwise), same for X-type.
 
-**Non-CSS variant.** No CSS shortcuts; you proved pairwise commutation
-directly in §4, so `generators_commute` is just `rcases` + lookup.
+**Non-CSS variant.** No CSS shortcuts; you proved pairwise commutation directly
+in §4, so `generators_commute` is just `rcases` + lookup.
 -/
 
 /-!
 ## §6 — `−I` is not in the stabilizer subgroup
 
 For CSS codes, the lemma `CSS.negIdentity_not_mem_closure_union` in
-`Core/CSSNoNegI.lean` handles this once you have the Z/X partition and
-their cross-commutation:
+`Core/CSSNoNegI.lean` handles this once you have the Z/X partition and their
+cross-commutation:
 
 ```lean
 theorem negIdentity_not_mem :
@@ -298,16 +296,16 @@ theorem negIdentity_not_mem :
 This is a one-line proof reusing §3, §4. Don't reprove it.
 
 **Non-CSS variant.** Use the general lemma in `Core/SubgroupLemmas.lean`:
-`negIdentity_not_mem_of_independent_phase_zero` — requires the generator
-list to be phase-0 and have linearly-independent symplectic rows (§9).
+`negIdentity_not_mem_of_independent_phase_zero` — requires the generator list to
+be phase-0 and have linearly-independent symplectic rows (§9).
 -/
 
 /-!
 ## §7 — Generator list and `listToSet` equality
 
-A `List` form is needed for symplectic-span / bundled-StabilizerGroup
-arguments. Define the list in a canonical order (Z-generators first, then
-X-generators, matching the `generators` set's union order):
+A `List` form is needed for symplectic-span / bundled-StabilizerGroup arguments.
+Define the list in a canonical order (Z-generators first, then X-generators,
+matching the `generators` set's union order):
 
 ```lean
 def generatorsList : List (NQubitPauliGroupElement 7) :=
@@ -325,15 +323,14 @@ lemma listToSet_generatorsList :
 Length must equal `n - k`; this is enforced by
 `StabilizerCode.generators_length` (§13).
 
-**Parametric variant.** For toric / rotated-surface codes with parametric
-`L`, the natural full generator list (e.g., all `2L²` vertex + face
-stabilizers of the toric code) is *redundant* — i.e. its length exceeds
-`n - k`. In that case, define a separate *trimmed* list
-`generatorsListPackaged` with length exactly `n - k`, drop the redundant
-generators, and prove the closures are equal. See
-`ToricCodeNStabilizerCode.lean` for the canonical pattern. The trimmed
-list goes into `StabilizerCode.generatorsList`; the original full list
-stays in the bare `StabilizerGroup` definition.
+**Parametric variant.** For toric / rotated-surface codes with parametric `L`,
+the natural full generator list (e.g., all `2L²` vertex + face stabilizers of
+the toric code) is *redundant* — i.e. its length exceeds `n - k`. In that case,
+define a separate *trimmed* list `generatorsListPackaged` with length exactly
+`n - k`, drop the redundant generators, and prove the closures are equal. See
+`ToricCodeNStabilizerCode.lean` for the canonical pattern. The trimmed list goes
+into `StabilizerCode.generatorsList`; the original full list stays in the bare
+`StabilizerGroup` definition.
 -/
 
 /-!
@@ -359,18 +356,17 @@ theorem GeneratorsIndependent_n_generatorsList :
     rowsLinearIndependent_generatorsList
 ```
 
-`decide` works on small `n` (≤ 9 or so); for larger codes `native_decide`
-may be needed. For parametric codes with `L ≥ 2`, replace `decide` with a
-parametric independence proof — see `ToricCodeNStabilizerCode.lean`
-sections labelled `generatorsListPackaged_independent`.
+`decide` works on small `n` (≤ 9 or so); for larger codes `native_decide` may be
+needed. For parametric codes with `L ≥ 2`, replace `decide` with a parametric
+independence proof — see `ToricCodeNStabilizerCode.lean` sections labelled
+`generatorsListPackaged_independent`.
 -/
 
 /-!
 ## §8 — Bundled `StabilizerGroup n`
 
-Define the canonical `StabilizerGroup n` from `generatorsList` using the
-smart constructor `mkStabilizerFromGenerators` (in
-`Core/StabilizerGroup.lean`):
+Define the canonical `StabilizerGroup n` from `generatorsList` using the smart
+constructor `mkStabilizerFromGenerators` (in `Core/StabilizerGroup.lean`):
 
 ```lean
 noncomputable def stabilizerGroup : StabilizerGroup n :=
@@ -383,12 +379,11 @@ lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := b
   rw [listToSet_generatorsList]
 ```
 
-This bridges the `List`-based packaging (used by `StabilizerCode`) with
-the `Set`-based subgroup (used by `IsNontrivialLogicalOperator` and
-centralizer arguments). The equality lemma `stabilizerGroup_toSubgroup_eq`
-is consumed by downstream proofs that need to translate between the two
-forms — see `IsNontrivialLogicalOperator_of_toSubgroup_eq` in
-`Core/StabilizerCode.lean`.
+This bridges the `List`-based packaging (used by `StabilizerCode`) with the
+`Set`-based subgroup (used by `IsNontrivialLogicalOperator` and centralizer
+arguments). The equality lemma `stabilizerGroup_toSubgroup_eq` is consumed by
+downstream proofs that need to translate between the two forms — see
+`IsNontrivialLogicalOperator_of_toSubgroup_eq` in `Core/StabilizerCode.lean`.
 -/
 
 /-!
@@ -436,9 +431,9 @@ index. The (anti)commutation pattern in §11 expands to *pairwise* relations
 /-!
 ## §11 — Logical anticommutation
 
-For `k = 1`, prove that `logicalX` anticommutes with `logicalZ`. When both
-are all-X / all-Z, the dedicated lemma
-`NQubitPauliOperator.allX_allZ_anticommute` closes this in one line:
+For `k = 1`, prove that `logicalX` anticommutes with `logicalZ`. When both are
+all-X / all-Z, the dedicated lemma `NQubitPauliOperator.allX_allZ_anticommute`
+closes this in one line:
 
 ```lean
 theorem logicalX_anticommutes_logicalZ :
@@ -446,13 +441,13 @@ theorem logicalX_anticommutes_logicalZ :
   NQubitPauliOperator.allX_allZ_anticommute n (by decide)
 ```
 
-The `(by decide)` discharges `Odd n` (anticommutation requires odd `n` for
-the all-X/all-Z pair to anticommute — true for Steane7 (n=7), false for
-[[4,2,2]] (n=4)).
+The `(by decide)` discharges `Odd n` (anticommutation requires odd `n` for the
+all-X/all-Z pair to anticommute — true for Steane7 (n=7), false for [[4,2,2]]
+(n=4)).
 
 **Non-all-X variant.** For partial-support logicals, use
-`pauli_comm_even_anticommutes` like in §4 and compute the anticommute
-filter explicitly.
+`pauli_comm_even_anticommutes` like in §4 and compute the anticommute filter
+explicitly.
 
 **`k ≥ 2` variant.** You need *four* relations per logical qubit *pair*:
 
@@ -517,15 +512,15 @@ theorem logicalX_mem_centralizer :
 
 **Three things that recurrently go wrong here** (per CLAUDE.md):
 
-1. **`one` case fails with `rw [one_mul]`.** The goal is
-   `(fun y _ => …) 1 ⋯`, unreduced. Insert `change (1 : ...) * logicalX
-   = logicalX * 1` before `rw` to beta-reduce.
-2. **Ambiguous `mul_assoc`.** When `open NQubitPauliGroupElement` is in
-   scope, both `_root_.mul_assoc` and `NQubitPauliGroupElement.mul_assoc`
-   resolve. Qualify with `_root_.mul_assoc` (same for `one_mul`, `mul_one`).
-3. **Per-generator commutation lemmas (e.g. `logicalX_commutes_Z1`) need
-   to be separate `private lemma`s** before this theorem — define them with
-   the same `pauli_comm_even_anticommutes` + filter pattern from §4.
+1. **`one` case fails with `rw [one_mul]`.** The goal is `(fun y _ => …) 1 ⋯`,
+   unreduced. Insert `change (1 : ...) * logicalX = logicalX * 1` before `rw` to
+   beta-reduce.
+2. **Ambiguous `mul_assoc`.** When `open NQubitPauliGroupElement` is in scope,
+   both `_root_.mul_assoc` and `NQubitPauliGroupElement.mul_assoc` resolve.
+   Qualify with `_root_.mul_assoc` (same for `one_mul`, `mul_one`).
+3. **Per-generator commutation lemmas (e.g. `logicalX_commutes_Z1`) need to be
+   separate `private lemma`s** before this theorem — define them with the same
+   `pauli_comm_even_anticommutes` + filter pattern from §4.
 -/
 
 /-!
@@ -553,11 +548,11 @@ noncomputable def stabilizerCode : StabilizerCode n k where
 ```
 
 The `logical_commute_cross` shortcut `(h (Subsingleton.elim ℓ ℓ')).elim`
-discharges the field vacuously when `k = 1` (only one possible index, so
-the hypothesis `ℓ ≠ ℓ'` is automatically false).
+discharges the field vacuously when `k = 1` (only one possible index, so the
+hypothesis `ℓ ≠ ℓ'` is automatically false).
 
-**`k ≥ 2` variant.** The `Subsingleton.elim` trick **does not apply**.
-Spell out the cross-commutation by case-split on `Fin k × Fin k`:
+**`k ≥ 2` variant.** The `Subsingleton.elim` trick **does not apply**. Spell out
+the cross-commutation by case-split on `Fin k × Fin k`:
 
 ```lean
 private def logicalOps_<CodeName> : Fin k → LogicalQubitOps n stabilizerGroup
@@ -578,10 +573,10 @@ noncomputable def stabilizerCode : StabilizerCode n k where
                 logicalZ_commutes_logicalZ_offdiag _ _⟩
 ```
 
-The bundled `∧` of four equalities is the off-diagonal commutation
-requirement. See `gap_audit.md` template in
-`.claude/agents/qec-skeleton-drafter.md` for a discussion of why a smart
-constructor `LogicalQubitOps.cross_commute_pair` could clean this up.
+The bundled `∧` of four equalities is the off-diagonal commutation requirement.
+See `gap_audit.md` template in `.claude/agents/qec-skeleton-drafter.md` for a
+discussion of why a smart constructor `LogicalQubitOps.cross_commute_pair` could
+clean this up.
 -/
 
 /-!
@@ -614,14 +609,14 @@ theorem stabilizerCode_distance : HasCodeDistance stabilizerCode d := by
     · decide  -- weight equals d
 ```
 
-For **parametric families**, the distance proof typically lives in a
-*separate file* (`<Code>Distance.lean`, `<Code>DistanceX.lean`,
-`<Code>DistanceZ.lean`). Patterns:
+For **parametric families**, the distance proof typically lives in a *separate
+file* (`<Code>Distance.lean`, `<Code>DistanceX.lean`, `<Code>DistanceZ.lean`).
+Patterns:
 
 - The X-side and Z-side bounds are proved separately (CSS structure).
 - For surface-style codes, the homological framework in
-  `Stabilizer/Homological/Distance.lean` provides the abstract bridge —
-  see `RotatedSurfaceCodeNDistance.lean` and `ToricCodeNDistance.lean`.
+  `Stabilizer/Homological/Distance.lean` provides the abstract bridge — see
+  `RotatedSurfaceCodeNDistance.lean` and `ToricCodeNDistance.lean`.
 - A subgroup-equality bridge between `stabilizerGroup` and
   `stabilizerCode.toStabilizerGroup` is usually needed; package it as
   `<CodeName>StabilizerCode_subgroup_eq_homological`.
@@ -632,18 +627,18 @@ For **parametric families**, the distance proof typically lives in a
 
 Before declaring a CSS-code formalization complete, verify:
 
-- [ ] `lake build QEC.Stabilizer.Codes.<CodeName>` succeeds (no errors,
-      no `sorry` warnings).
+- [ ] `lake build QEC.Stabilizer.Codes.<CodeName>` succeeds (no errors, no
+  `sorry` warnings).
 - [ ] No `set_option linter.* false` in the file (project-wide policy).
-- [ ] All sections from §1 through §13 are present (§14 may be in a
-      separate distance file).
-- [ ] `stabilizerCode_toSubgroup_eq_subgroup` lemma exposed if downstream
-      proofs need to translate between the two forms.
+- [ ] All sections from §1 through §13 are present (§14 may be in a separate
+  distance file).
+- [ ] `stabilizerCode_toSubgroup_eq_subgroup` lemma exposed if downstream proofs
+  need to translate between the two forms.
 - [ ] Module imported in `QEC/Stabilizer/Codes.lean` umbrella (otherwise
-      orphan-module trap — see CLAUDE.md).
+  orphan-module trap — see CLAUDE.md).
 - [ ] Doc-comment header references the original paper.
-- [ ] Logical-operator (anti)commutation pattern matches the codeword basis
-      from the original paper (Stage-3 review point).
+- [ ] Logical-operator (anti)commutation pattern matches the codeword basis from
+  the original paper (Stage-3 review point).
 
 ## See also
 

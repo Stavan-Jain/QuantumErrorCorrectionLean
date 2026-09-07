@@ -14,19 +14,21 @@ import QEC.Stabilizer.Codes.BivariateBicycle.Gross.SafeFloor.MImAssembly
 
 namespace Quantum.Stabilizer.Homological.BB
 
-/-- **Unconditional `HasCodeDistance grossStabilizerCode 12`** — the Gross `[[144,12,12]]`
-bivariate-bicycle code has distance exactly 12, with NO remaining assumed hypotheses.  The
-last analytic input `MImBound` is discharged by `LightStab.mimBound_holds`; the
-`LightStabilizerClassification` input was discharged earlier by
-`LightStab.lightStabilizerClassification_holds`.  **Kernel-only**: the axioms are exactly
-`propext`, `Classical.choice` and `Quot.sound` — no `native_decide`, no `sorry`. -/
+/-- **Unconditional `HasCodeDistance grossStabilizerCode 12`** — the Gross
+`[[144,12,12]]` bivariate-bicycle code has distance exactly 12, with NO
+remaining assumed hypotheses. The last analytic input `MImBound` is discharged
+by `LightStab.mimBound_holds`; the `LightStabilizerClassification` input was
+discharged earlier by `LightStab.lightStabilizerClassification_holds`.
+**Kernel-only**: the axioms are exactly `propext`, `Classical.choice` and
+`Quot.sound` — no `native_decide`, no `sorry`. -/
 theorem grossStabilizerCode_hasCodeDistance_12_uncond :
     Quantum.StabilizerGroup.HasCodeDistance grossStabilizerCode 12 :=
   grossStabilizerCode_hasCodeDistance_12 LightStab.mimBound_holds
 
-/-- **The Gross `[[144, 12, 12]]` code as a fully-parametrized object.**  Bundles the
-stabilizer code (`StabilizerCode 144 12`) with its now-unconditional distance proof into a
-single `StabilizerCodeWithDistance` carrying all three `[[n, k, d]]` parameters in its type. -/
+/-- **The Gross `[[144, 12, 12]]` code as a fully-parametrized object.** Bundles
+the stabilizer code (`StabilizerCode 144 12`) with its now-unconditional
+distance proof into a single `StabilizerCodeWithDistance` carrying all three
+`[[n, k, d]]` parameters in its type. -/
 noncomputable def grossStabilizerCodeWithDistance :
     Quantum.StabilizerGroup.StabilizerCodeWithDistance 144 12 12 where
   toStabilizerCode := grossStabilizerCode

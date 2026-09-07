@@ -53,10 +53,10 @@ open scoped BigOperators
 
 /-! ## Sparse-syndrome helpers
 
-For an indicator chain `χ_S`, the boundary `∂₁(χ_S)(h)` is the `|S|`-term
-sum `syndAt A B S h` — far cheaper to evaluate than the convolution form
-during a `native_decide` sweep.  The `SmallCycle` namespace keeps these
-generic helpers clear of the instance-specific machinery of
+For an indicator chain `χ_S`, the boundary `∂₁(χ_S)(h)` is the `|S|`-term sum
+`syndAt A B S h` — far cheaper to evaluate than the convolution form during a
+`native_decide` sweep. The `SmallCycle` namespace keeps these generic helpers
+clear of the instance-specific machinery of
 `Codes/BivariateBicycle/BaseDistance.lean` (which predates this layer). -/
 
 namespace SmallCycle
@@ -152,12 +152,11 @@ end SmallCycle
 
 /-! ## The bundle -/
 
-/-- The data of a BB code over `G` together with the four finite
-obligations of the small-cycle floor: odd polynomial augmentations and the
-normalized weight-2 / weight-4 kills.  The checks are stated over *tuples*
-(colliding tuples cancel in char 2 down to the weight-2 shape, so the
-statements stay true and the `Decidable` instances synthesize
-structurally). -/
+/-- The data of a BB code over `G` together with the four finite obligations of
+the small-cycle floor: odd polynomial augmentations and the normalized weight-2
+/ weight-4 kills. The checks are stated over *tuples* (colliding tuples cancel
+in char 2 down to the weight-2 shape, so the statements stay true and the
+`Decidable` instances synthesize structurally). -/
 structure SmallCycleData (G : Type)
     [Fintype G] [AddCommGroup G] [DecidableEq G] where
   /-- The polynomial `A`. -/
@@ -168,14 +167,14 @@ structure SmallCycleData (G : Type)
   epsA : ∑ h : G, A h = 1
   /-- `ε(B) = 1`: the support of `B` has odd size. -/
   epsB : ∑ h : G, B h = 1
-  /-- No normalized weight-2 cycle: the origin qubit of either block plus
-  any other qubit has nonzero syndrome. -/
+  /-- No normalized weight-2 cycle: the origin qubit of either block plus any
+other qubit has nonzero syndrome. -/
   check_two : ∀ b : Fin 2, ∀ q : G × Fin 2, q ≠ ((0 : G), b) →
     ∃ h : G, SmallCycle.termAt A B ((0 : G), b) h
       + SmallCycle.termAt A B q h ≠ 0
-  /-- No normalized weight-4 cycle: the origin qubit of either block plus
-  any three qubits has nonzero syndrome (disjunctive form: the
-  `qᵢ ≠ origin` hypotheses are folded into the conclusion). -/
+  /-- No normalized weight-4 cycle: the origin qubit of either block plus any
+three qubits has nonzero syndrome (disjunctive form: the `qᵢ ≠ origin`
+hypotheses are folded into the conclusion). -/
   check_four : ∀ b : Fin 2, ∀ q₁ q₂ q₃ : G × Fin 2,
     q₁ = ((0 : G), b) ∨ q₂ = ((0 : G), b) ∨ q₃ = ((0 : G), b) ∨
     ∃ h : G, SmallCycle.termAt A B ((0 : G), b) h
@@ -189,11 +188,10 @@ variable {G : Type} [Fintype G] [AddCommGroup G] [DecidableEq G]
 
 /-! ## The parity lemma (PAR)
 
-Every cycle has even weight: applying the augmentation `ε(w) = Σ_g w(g)`
-to `B⋆u_L + A⋆u_R = 0` gives `ε(u_L) + ε(u_R) = 0` since
-`ε(A) = ε(B) = 1`.  This kills all odd-weight supports analytically, so
-the finite checks only cover the (normalized) weight-2 and weight-4
-configurations. -/
+Every cycle has even weight: applying the augmentation `ε(w) = Σ_g w(g)` to
+`B⋆u_L + A⋆u_R = 0` gives `ε(u_L) + ε(u_R) = 0` since `ε(A) = ε(B) = 1`. This
+kills all odd-weight supports analytically, so the finite checks only cover the
+(normalized) weight-2 and weight-4 configurations. -/
 
 /-- **(PAR)**: cycles have zero total parity. -/
 lemma cycle_total_parity (u : G × Fin 2 → ZMod 2)
@@ -237,8 +235,8 @@ lemma cycle_weight_even (u : G × Fin 2 → ZMod 2)
 
 /-! ## The small-cycle theorem (strong form) -/
 
-/-- **Small-cycle floor** (strong form): every nonzero 1-cycle of the BB
-complex has weight ≥ 6 — boundaries included. -/
+/-- **Small-cycle floor** (strong form): every nonzero 1-cycle of the BB complex
+has weight ≥ 6 — boundaries included. -/
 theorem cycle_weight_ge_6
     (u : G × Fin 2 → ZMod 2)
     (hcyc : bbBoundary1Fn D.A D.B u = 0) (hne : u ≠ 0) :
@@ -369,8 +367,8 @@ theorem dual_chain_floor :
     D.chain_floor c hc hnb
   exact (bb_cycle_bound_iff_dual_bound D.A D.B 6).mp hX
 
-/-- **Pauli-level logical floor**: every nontrivial logical operator of
-the bundle's homological stabilizer group has weight ≥ 6. -/
+/-- **Pauli-level logical floor**: every nontrivial logical operator of the
+bundle's homological stabilizer group has weight ≥ 6. -/
 theorem logical_weight_ge_6
     (g : NQubitPauliGroupElement D.complex.numQubits)
     (hg : Quantum.StabilizerGroup.IsNontrivialLogicalOperator g
@@ -380,8 +378,8 @@ theorem logical_weight_ge_6
     (fun c hc hnb => D.chain_floor c hc hnb)
     (fun c hc hnb => D.dual_chain_floor c hc hnb) g hg
 
-/-- Nonzero stabilizer chains (images of `∂₂`) also weigh ≥ 6 — the
-`μ ≥ 6` half of the class theorem's conclusion. -/
+/-- Nonzero stabilizer chains (images of `∂₂`) also weigh ≥ 6 — the `μ ≥ 6` half
+of the class theorem's conclusion. -/
 theorem stab_weight_ge_6 (f : G → ZMod 2)
     (hne : bbBoundary2Fn D.A D.B f ≠ 0) :
     6 ≤ (Finset.univ.filter
@@ -392,9 +390,9 @@ end SmallCycleData
 
 /-! ## Bridge into the doubling template -/
 
-/-- A small-cycle bundle on the base of a free ℤ₂ cover discharges the
-doubling template's `StrongBaseFloor 6` hypothesis (Theorem-B transfer and
-the rung theorems of `BBDoubling.lean` then apply). -/
+/-- A small-cycle bundle on the base of a free ℤ₂ cover discharges the doubling
+template's `StrongBaseFloor 6` hypothesis (Theorem-B transfer and the rung
+theorems of `BBDoubling.lean` then apply). -/
 theorem XDoubleCoverData.strongBaseFloor_of_smallCycle
     {G H : Type} [Fintype G] [AddCommGroup G] [DecidableEq G]
     [Fintype H] [AddCommGroup H] [DecidableEq H]

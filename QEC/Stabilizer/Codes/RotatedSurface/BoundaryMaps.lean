@@ -8,10 +8,10 @@ The boundary maps `∂₂ : C₂ → C₁` and `∂₁ : C₁ → C₀` for the 
 code, plus the chain-complex law `∂₁ ∘ ∂₂ = 0`.
 
 The chain-complex law unwinds to: for every `(zf, xf)` pair, the cardinality
-`|zSupport zf ∩ xSupport xf|` is even.  Since all supports have size `2` or
-`4` and the colours alternate, each intersection is either empty or shares
-a single 2-qubit edge.  We prove this case-by-case (3 × 3 = 9 cases) via
-`Nat`-level membership characterisations and `omega`.
+`|zSupport zf ∩ xSupport xf|` is even. Since all supports have size `2` or `4`
+and the colours alternate, each intersection is either empty or shares a single
+2-qubit edge. We prove this case-by-case (3 × 3 = 9 cases) via `Nat`-level
+membership characterisations and `omega`.
 -/
 
 namespace Quantum
@@ -141,21 +141,21 @@ def rscBoundary1 (L : ℕ) :
 ## Notation
 
 The scoped `RotatedSurfaceChain` notation renders the rotated-surface boundary
-maps as `∂₂ L c`, `∂₁ L c` (and `δ⁰ L s` for the Z-side cut map, declared next to
-it in `H1Dimension.lean`), mirroring the toric `ToricChain` scope. The lattice size
-stays an explicit argument, exactly as for the underlying constants, so the
-conversion is purely notational: `rscBoundary1` is still the declaration name
-for `simp [rscBoundary1]`, `unfold`, and lemma names. Enable with
-`open scoped RotatedSurfaceChain`.
+maps as `∂₂ L c`, `∂₁ L c` (and `δ⁰ L s` for the Z-side cut map, declared next
+to it in `H1Dimension.lean`), mirroring the toric `ToricChain` scope. The
+lattice size stays an explicit argument, exactly as for the underlying
+constants, so the conversion is purely notational: `rscBoundary1` is still the
+declaration name for `simp [rscBoundary1]`, `unfold`, and lemma names. Enable
+with `open scoped RotatedSurfaceChain`.
 -/
 
-/-- `∂₂` is the rotated-surface face-boundary map `rscBoundary2 L`.
-Scoped: `open scoped RotatedSurfaceChain`. -/
+/-- `∂₂` is the rotated-surface face-boundary map `rscBoundary2 L`. Scoped:
+`open scoped RotatedSurfaceChain`. -/
 scoped[RotatedSurfaceChain] notation "∂₂" =>
   Quantum.Stabilizer.Lattice.RotatedSurface.rscBoundary2
 
-/-- `∂₁` is the rotated-surface edge-boundary map `rscBoundary1 L`.
-Scoped: `open scoped RotatedSurfaceChain`. -/
+/-- `∂₁` is the rotated-surface edge-boundary map `rscBoundary1 L`. Scoped:
+`open scoped RotatedSurfaceChain`. -/
 scoped[RotatedSurfaceChain] notation "∂₁" =>
   Quantum.Stabilizer.Lattice.RotatedSurface.rscBoundary1
 
@@ -186,7 +186,8 @@ private lemma cast_card_zero_of_eq_empty {α : Type*}
 
 private lemma cast_card_two_zmod : ((2 : ℕ) : ZMod 2) = 0 := by decide
 
-/-- If `s = {v0, v1}` with `v0 ≠ v1`, then the cardinality cast to `ZMod 2` is `0`. -/
+/-- If `s = {v0, v1}` with `v0 ≠ v1`, then the cardinality cast to `ZMod 2` is
+`0`. -/
 private lemma cast_card_zero_of_eq_pair {α : Type*} [DecidableEq α]
     {s : Finset α} {v0 v1 : α} (h_eq : s = {v0, v1}) (hne : v0 ≠ v1) :
     (s.card : ZMod 2) = 0 := by
@@ -228,9 +229,9 @@ private lemma inter_rightBdy_bottomBdy_empty (k k' : RscBdyIdx L) :
 
 /-! ### Interior × boundary
 
-In each case the intersection is *either* empty *or* equals the
-boundary stab's support.  We dispatch the nonempty branch via
-`Finset.inter_eq_right` / `Finset.inter_eq_left`. -/
+In each case the intersection is *either* empty *or* equals the boundary stab's
+support. We dispatch the nonempty branch via `Finset.inter_eq_right` /
+`Finset.inter_eq_left`. -/
 
 private lemma inter_interior_topBdy_card_even
     (zc : ZInteriorCornerIdx L) (k : RscBdyIdx L) :
@@ -379,14 +380,14 @@ private lemma inter_rightBdy_interior_card_even [Fact (Odd L)]
 
 /-! ### Interior × interior
 
-For two opposite-parity 2×2 faces the intersection is either empty
-(anchors farther than `1` apart) or exactly a 2-qubit shared edge.
-We case-split on `Δa, Δb ∈ {0, ±1}` and dispatch each via
-`Finset.ext` to an explicit two-element finset. -/
+For two opposite-parity 2×2 faces the intersection is either empty (anchors
+farther than `1` apart) or exactly a 2-qubit shared edge. We case-split on
+`Δa, Δb ∈ {0, ±1}` and dispatch each via `Finset.ext` to an explicit two-element
+finset. -/
 
-/-- Helper: the intersection of the face supports collapses to a 2-qubit
-edge whenever both anchors are within distance `1` (column-wise and
-row-wise).  Used inside the interior-interior proof. -/
+/-- Helper: the intersection of the face supports collapses to a 2-qubit edge
+whenever both anchors are within distance `1` (column-wise and row-wise). Used
+inside the interior-interior proof. -/
 private lemma inter_inter_two_card
     {α : Type*} [DecidableEq α] {s : Finset α} {q0 q1 : α}
     (h_eq : s = ({q0, q1} : Finset α)) (hne : q0 ≠ q1) :
@@ -550,8 +551,8 @@ end InterCard
 
 /-! ## Main chain-complex law -/
 
-/-- For every `(zf, xf)` pair the intersection has even cardinality in
-`ZMod 2`.  Dispatches to the 9 per-case lemmas above. -/
+/-- For every `(zf, xf)` pair the intersection has even cardinality in `ZMod 2`.
+Dispatches to the 9 per-case lemmas above. -/
 private lemma inter_card_even {L : ℕ} [Fact (Odd L)]
     (zf : ZFaceIdx L) (xf : XFaceIdx L) :
     ((zSupport zf ∩ xSupport xf).card : ZMod 2) = 0 := by

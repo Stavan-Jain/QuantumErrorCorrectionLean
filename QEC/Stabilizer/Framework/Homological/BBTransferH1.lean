@@ -68,8 +68,8 @@ noncomputable def pull1Cycles :
     (D.pull1Cycles (D.push1Cycles v) : D.coverComplex.C1 → ZMod 2)
       = D.pull1 (D.push1 (v : D.coverComplex.C1 → ZMod 2)) := rfl
 
-/-- On cycles, `τ₁ ∘ p₁` is the deck averaging `1 + σ`, pointwise
-(chain level: `pull1_push1`). -/
+/-- On cycles, `τ₁ ∘ p₁` is the deck averaging `1 + σ`, pointwise (chain level:
+`pull1_push1`). -/
 lemma pull1Cycles_push1Cycles_apply (v : D.coverComplex.cycles)
     (p : G × Fin 2) :
     (D.pull1Cycles (D.push1Cycles v) : D.coverComplex.C1 → ZMod 2) p
@@ -170,8 +170,8 @@ lemma epsH1_mk (v : D.coverComplex.cycles) :
     D.epsH1 (Submodule.Quotient.mk v)
       = Submodule.Quotient.mk (D.pull1Cycles (D.push1Cycles v)) := rfl
 
-/-- **The deck-image rank floor `E ≥ k̃ − k`** (A13 rank corollary,
-inequality half): `dim H₁(cover) − dim H₁(base) ≤ dim (1+σ)·H₁(cover)`. -/
+/-- **The deck-image rank floor `E ≥ k̃ − k`** (A13 rank corollary, inequality
+half): `dim H₁(cover) − dim H₁(base) ≤ dim (1+σ)·H₁(cover)`. -/
 theorem finrank_H1_sub_le_finrank_range_epsH1 :
     dim₂ D.coverComplex.H1
       - dim₂ D.baseComplex.H1
@@ -181,10 +181,10 @@ theorem finrank_H1_sub_le_finrank_range_epsH1 :
 
 /-! ## The Bockstein-vanishing criterion and the rank equality -/
 
-/-- **The Bockstein-vanishing criterion** for a cover: `ker τ_* ≤ range p_*`
-on `H₁`.  Equivalently `δ₁ ∘ δ₂ = 0` for the two connecting maps of the
-transfer LES (`im δ₂ = ker τ_*`, `ker δ₁ = range p_*`).  It is exactly the
-hypothesis under which the deck-image floor `E ≥ k̃ − k` is an equality
+/-- **The Bockstein-vanishing criterion** for a cover: `ker τ_* ≤ range p_*` on
+`H₁`. Equivalently `δ₁ ∘ δ₂ = 0` for the two connecting maps of the transfer LES
+(`im δ₂ = ker τ_*`, `ker δ₁ = range p_*`). It is exactly the hypothesis under
+which the deck-image floor `E ≥ k̃ − k` is an equality
 (`BBBocksteinRank.finrank_range_comp_eq_of_ker_le`); the OQ2 element form
 (`BocksteinLift`) + L2a (`BBEpsFreeGroupAlgebra`) are what establish it for
 actual BB covers. -/
@@ -216,11 +216,11 @@ theorem finrank_range_epsH1_eq (h : D.BocksteinVanishes) :
 
 /-! ## The deck endomorphism squares to zero -/
 
-/-- `ε_*² = 0` on `H₁(cover)`: `(1+σ)² = 1 + σ² = 0` in char 2, here read
-off `push_*∘pull_* = 0` (`range τ_* ≤ ker p_*`). This makes `H₁(cover)` a
-module over `D = 𝔽₂[ε]/(ε²)`; with `finrank_range_epsH1_eq` giving
-`dim ε_*H₁ = k̃ − k`, the deck-module structure is
-`H₁ ≅ D^{k̃−k} ⊕ 𝔽₂^{2k−k̃}`. -/
+/-- `ε_*² = 0` on `H₁(cover)`: `(1+σ)² = 1 + σ² = 0` in char 2, here read off
+`push_*∘pull_* = 0` (`range τ_* ≤ ker p_*`). This makes `H₁(cover)` a module
+over `D = 𝔽₂[ε]/(ε²)`; with `finrank_range_epsH1_eq` giving
+`dim ε_*H₁ = k̃ − k`, the deck-module structure is `H₁ ≅ D^{k̃−k} ⊕ 𝔽₂^{2k−k̃}`.
+-/
 theorem epsH1_epsH1_apply (x : D.coverComplex.H1) :
     D.epsH1 (D.epsH1 x) = 0 := by
   have hmid : D.pushH1 (D.pullH1 (D.pushH1 x)) = 0 :=
@@ -228,8 +228,8 @@ theorem epsH1_epsH1_apply (x : D.coverComplex.H1) :
   simp only [epsH1, LinearMap.comp_apply]
   rw [hmid, map_zero]
 
-/-- Under `BocksteinVanishes`, `dim (ker ε_*) = k`: the complementary rank
-to `finrank_range_epsH1_eq`, via rank-nullity for `ε_*`. -/
+/-- Under `BocksteinVanishes`, `dim (ker ε_*) = k`: the complementary rank to
+`finrank_range_epsH1_eq`, via rank-nullity for `ε_*`. -/
 theorem finrank_ker_epsH1_eq (h : D.BocksteinVanishes) :
     dim₂ (LinearMap.ker D.epsH1)
       = dim₂ D.baseComplex.H1 := by

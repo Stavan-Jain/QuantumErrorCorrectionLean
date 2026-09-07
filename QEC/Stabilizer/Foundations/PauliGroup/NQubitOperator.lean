@@ -13,15 +13,15 @@ open scoped BigOperators
 /-!
 # N-Qubit Pauli Operators
 
-This file defines `NQubitPauliOperator n := Fin n → PauliOperator` along with basic
-constructors and the matrix/gate representations.
+This file defines `NQubitPauliOperator n := Fin n → PauliOperator` along with
+basic constructors and the matrix/gate representations.
 -/
 
 /-- An n-qubit Pauli operator.
 
-This assigns a single-qubit Pauli operator to each of the n qubits.
-The matrix representation is the tensor product (Kronecker product) of the individual
-Pauli matrices.
+This assigns a single-qubit Pauli operator to each of the n qubits. The matrix
+representation is the tensor product (Kronecker product) of the individual Pauli
+matrices.
 -/
 def NQubitPauliOperator (n : ℕ) : Type := Fin n → PauliOperator
 
@@ -67,8 +67,8 @@ For n qubits, this computes the tensor product (Kronecker product) of the
 individual single-qubit Pauli matrices: M_0 ⊗ M_1 ⊗ ... ⊗ M_{n-1}
 
 The matrix entry at (b₁, b₂) where b₁, b₂ : Fin n → QubitBasis is the product
-over all qubit positions of the corresponding entries in the individual Pauli matrices:
-  ∏_{i : Fin n} (op i).toMatrix (b₁ i) (b₂ i)
+over all qubit positions of the corresponding entries in the individual Pauli
+matrices: ∏_{i : Fin n} (op i).toMatrix (b₁ i) (b₂ i)
 
 This corresponds to the tensor product of the individual Pauli matrices.
 -/
@@ -78,7 +78,8 @@ noncomputable def toMatrix (op : NQubitPauliOperator n) :
 
 /-- Construct an n-qubit Pauli operator from a list of Pauli operators.
 
-The list should have length n, and the i-th element specifies the operator on qubit i.
+The list should have length n, and the i-th element specifies the operator on
+qubit i.
 -/
 def ofList (ops : List PauliOperator) (h : ops.length = n) :
   NQubitPauliOperator n :=
@@ -114,7 +115,8 @@ lemma identity_toMatrix (n : ℕ) :
 
 /-- The matrix of an n-qubit Pauli operator is unitary.
 
-Each single-qubit Pauli matrix is unitary; the n-qubit matrix is their tensor product.
+Each single-qubit Pauli matrix is unitary; the n-qubit matrix is their tensor
+product.
 -/
 lemma toMatrix_mem_unitaryGroup (op : NQubitPauliOperator n) :
   op.toMatrix ∈ Matrix.unitaryGroup (NQubitBasis n) ℂ := by
@@ -146,8 +148,9 @@ lemma toMatrix_mem_unitaryGroup (op : NQubitPauliOperator n) :
 
 /-- Convert an n-qubit Pauli operator to its underlying gate.
 
-This is the primary representation connecting the Stabilizer layer to Foundations.
-The matrix representation is recovered as `(op.toGate).val = op.toMatrix`.
+This is the primary representation connecting the Stabilizer layer to
+Foundations. The matrix representation is recovered as
+`(op.toGate).val = op.toMatrix`.
 -/
 noncomputable def toGate (op : NQubitPauliOperator n) : QuantumGate (NQubitBasis n) :=
   ⟨op.toMatrix, toMatrix_mem_unitaryGroup op⟩
@@ -158,11 +161,12 @@ noncomputable def toGate (op : NQubitPauliOperator n) : QuantumGate (NQubitBasis
 /-!
 ## Pauli weight and support
 
-The **support** of an n-qubit Pauli operator is the set of qubits on which it acts nontrivially
-(i.e., not as I). The **weight** is the size of the support.
+The **support** of an n-qubit Pauli operator is the set of qubits on which it
+acts nontrivially (i.e., not as I). The **weight** is the size of the support.
 -/
 
-/-- The support of an n-qubit Pauli operator: qubits where the operator is not I. -/
+/-- The support of an n-qubit Pauli operator: qubits where the operator is not
+I. -/
 def support (op : NQubitPauliOperator n) : Finset (Fin n) :=
   Finset.univ.filter (fun i => op i ≠ PauliOperator.I)
 

@@ -87,7 +87,8 @@ lemma overlapCount_eq_two_mul_sheets (v : GrossGroup × Fin 2 → ZMod 2) :
   exact card_overlap_eq_two_mul deckSigma1_ne coverPi_prodMap_fiber
     coverPi_prodMap_coverSec1 v
 
-/-- **Refined slice identity**: `|v| = |p(v)| + 2·|supp(sheet0 v) ∖ supp p(v)|`. -/
+/-- **Refined slice identity**: `|v| = |p(v)| + 2·|supp(sheet0 v) ∖ supp p(v)|`.
+-/
 theorem gross_chainWeight_sheet_eq (v : GrossGroup × Fin 2 → ZMod 2) :
     grossComplex.chainWeight v
       = bb72Complex.chainWeight (coverPush1 v)
@@ -156,13 +157,13 @@ lemma card_filter_split {I : Type} [Fintype I] (u : I → ZMod 2)
 /-! ### Pointwise `∂₂` plumbing (kernel-decide support)
 
 The rung side conditions below are finite checks over `∂₂` of point masses.
-Evaluating the convolution sums inside a kernel `decide` is too slow, so
-each check is first reduced to the pointwise form
+Evaluating the convolution sums inside a kernel `decide` is too slow, so each
+check is first reduced to the pointwise form
 `∂₂(δ_c)(h, j) = if j = 0 then A (h - c) else B (h - c)`
 (`bbBoundary2Fn_single_pt`), the lifted stabilizer of a point mass to a gross
-point mass at the section (`liftC2_single`), and the D-pair statements to
-their `g = 0` translates (`card_filter_comp_equiv`); only the reduced forms
-are swept by `decide +kernel`. -/
+point mass at the section (`liftC2_single`), and the D-pair statements to their
+`g = 0` translates (`card_filter_comp_equiv`); only the reduced forms are swept
+by `decide +kernel`. -/
 
 /-- Pair-argument form of `bbBoundary2Fn_single`. -/
 private lemma bbBoundary2Fn_single_pt {G : Type} [Fintype G] [AddCommGroup G]
@@ -172,8 +173,8 @@ private lemma bbBoundary2Fn_single_pt {G : Type} [Fintype G] [AddCommGroup G]
   obtain ⟨h, j⟩ := p
   exact bbBoundary2Fn_single A B c h j
 
-/-- Sheet-0 lift of a base point mass is the gross point mass at the
-section point. -/
+/-- Sheet-0 lift of a base point mass is the gross point mass at the section
+point. -/
 private lemma liftC2_single : ∀ g : BaseGroup,
     liftC2 (Pi.single g 1) = Pi.single (coverSec g) 1 := by
   decide +kernel
@@ -232,8 +233,8 @@ lemma hexagon_seam_subset : ∀ g : BaseGroup, ∀ j : BaseGroup × Fin 2,
   rw [bbBoundary2Fn_single_pt]
   exact hexagon_seam_check g j hne
 
-/-- **The hexagon rung**: a nontrivial dangerous cycle over a hexagon has
-weight ≥ 12. -/
+/-- **The hexagon rung**: a nontrivial dangerous cycle over a hexagon has weight
+≥ 12. -/
 theorem dangerous_hexagon_bound (g : BaseGroup)
     {v : GrossGroup × Fin 2 → ZMod 2}
     (hv : v ∈ grossComplex.cycles) (hnb : v ∉ grossComplex.boundaries)
@@ -464,8 +465,8 @@ lemma dpair_union_card : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
   exact dpair_union_check d hd
 
 /-- The sheet-0 seam part of a lifted D-pair is supported in the union
-(analytic: the lifted stabilizer is additive, and a nonzero `ZMod 2` sum
-has a nonzero summand, so the hexagon seam lemma applies to each half). -/
+(analytic: the lifted stabilizer is additive, and a nonzero `ZMod 2` sum has a
+nonzero summand, so the hexagon seam lemma applies to each half). -/
 lemma dpair_seam_subset : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
     ∀ j : BaseGroup × Fin 2,
     sheet0 (liftStab (Pi.single g 1 + Pi.single (g + d) 1)) j ≠ 0 →
@@ -487,8 +488,8 @@ lemma dpair_seam_subset : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
   · exact Or.inl (hexagon_seam_subset g j h)
   · exact Or.inr (hexagon_seam_subset (g + d) j h)
 
-/-- **The D-pair rung**: a nontrivial dangerous cycle over a D-pair has
-weight ≥ 12. -/
+/-- **The D-pair rung**: a nontrivial dangerous cycle over a D-pair has weight ≥
+12. -/
 theorem dangerous_dpair_bound (g d : BaseGroup) (hd : d ∈ pairDirections)
     {v : GrossGroup × Fin 2 → ZMod 2}
     (hv : v ∈ grossComplex.cycles) (hnb : v ∉ grossComplex.boundaries)
@@ -664,8 +665,8 @@ theorem dangerous_dpair_bound (g d : BaseGroup) (hd : d ∈ pairDirections)
 
 /-- **The light-stabilizer classification** (A4 §6.3, Theorem "light
 stabilizers"): every nonzero base boundary of weight ≤ 11 is a hexagon or a
-D-pair.  This is the single remaining analytic input for the dangerous
-sector; its paper proof is the CRT-engine analysis of A4 §§6.2–6.3. -/
+D-pair. This is the single remaining analytic input for the dangerous sector;
+its paper proof is the CRT-engine analysis of A4 §§6.2–6.3. -/
 def LightStabilizerClassification : Prop :=
   ∀ f : BaseGroup → ZMod 2,
     bbBoundary2Fn baseA baseB f ≠ 0 →
@@ -676,8 +677,8 @@ def LightStabilizerClassification : Prop :=
     (∃ g : BaseGroup, ∃ d ∈ pairDirections, bbBoundary2Fn baseA baseB f
         = bbBoundary2Fn baseA baseB (Pi.single g 1 + Pi.single (g + d) 1))
 
-/-- **The dangerous sector, conditional only on the classification**:
-(M) holds, i.e. `DangerousSectorGe12`. -/
+/-- **The dangerous sector, conditional only on the classification**: (M) holds,
+i.e. `DangerousSectorGe12`. -/
 theorem dangerous_sector_of_classification
     (hC : LightStabilizerClassification) : DangerousSectorGe12 := by
   intro v hv hnb hbmem hbne

@@ -12,13 +12,13 @@ import QECWidgets.PauliStrip
 Renders a concrete generator list `L : List (NQubitPauliGroupElement n)` as:
 
 - its binary symplectic check matrix, in the `checkMatrix` column convention
-  (first `n` columns the X-components, last `n` the Z-components, X = coral /
-  Z = blue); and
-- the symplectic Gram matrix: cell `(i, j)` is the symplectic inner product
-  of rows `i` and `j` mod 2 — red exactly when generators `i` and `j`
-  anticommute. Color marks only that signal: a valid stabilizer generator
-  list shows a quiet all-hairline Gram matrix, and the header verdict (plus
-  the card's state bar) says so.
+  (first `n` columns the X-components, last `n` the Z-components, X = coral / Z
+  = blue); and
+- the symplectic Gram matrix: cell `(i, j)` is the symplectic inner product of
+  rows `i` and `j` mod 2 — red exactly when generators `i` and `j` anticommute.
+  Color marks only that signal: a valid stabilizer generator list shows a quiet
+  all-hairline Gram matrix, and the header verdict (plus the card's state bar)
+  says so.
 
 Use `#check_matrix gens`, or the `Check matrix` expression presenter via
 `ProofWidgets.SelectionPanel`.
@@ -31,9 +31,8 @@ open Lean Server Meta ProofWidgets Quantum
 /-- Most rows a check-matrix view will draw. -/
 def maxCheckRows : Nat := 64
 
-/-- Walk a list expression into its element expressions by weak-head
-reduction (`none` if some spine cell is stuck or the list is longer than
-`maxLen`). -/
+/-- Walk a list expression into its element expressions by weak-head reduction
+(`none` if some spine cell is stuck or the list is longer than `maxLen`). -/
 def listElems? (e : Expr) (maxLen : Nat := maxCheckRows) : MetaM (Option (Array Expr)) := do
   let mut cur := e
   let mut out : Array Expr := #[]
@@ -54,8 +53,8 @@ def listElems? (e : Expr) (maxLen : Nat := maxCheckRows) : MetaM (Option (Array 
     | none => return none
   return none
 
-/-- Recognize a generator-list expression: type `List (NQubitPauliGroupElement n)`
-with `n` literal. Returns `n`. -/
+/-- Recognize a generator-list expression: type
+`List (NQubitPauliGroupElement n)` with `n` literal. Returns `n`. -/
 def genListShape? (e : Expr) : MetaM (Option Nat) := do
   let t ← instantiateMVars (← inferType e)
   if t.isAppOfArity ``List 1 then
@@ -76,8 +75,8 @@ def zBit : PauliOperator → Bool
   | .Y => true
   | _ => false
 
-/-- Symplectic inner product of two rows mod 2 (`true` = anticommute), or
-`none` when unresolved cells make the parity unknown. -/
+/-- Symplectic inner product of two rows mod 2 (`true` = anticommute), or `none`
+when unresolved cells make the parity unknown. -/
 def gramBit (vp vq : PauliView) : Option Bool := Id.run do
   if vp.numStuck + vq.numStuck > 0 then return none
   let mut c := 0
@@ -140,8 +139,8 @@ private def gramHtml (size : Nat) (views : Array PauliView) : Html := Id.run do
     rows := rows.push (styled "div" (json% { display: "flex", alignItems: "center" }) cells)
   return el "div" #[] rows
 
-/-- Render a generator list as check matrix + Gram matrix, plus a text
-summary, or `none` when the expression is not a concrete generator list. -/
+/-- Render a generator list as check matrix + Gram matrix, plus a text summary,
+or `none` when the expression is not a concrete generator list. -/
 def checkMatrixRender? (e : Expr) : MetaM (Option (Html × String)) := do
   let e ← instantiateMVars e
   let some n ← genListShape? e | return none
@@ -213,8 +212,8 @@ def checkMatrixPresent (e : Expr) : MetaM Html := do
   | some (h, _) => return h
   | none => throwError "not a concrete Pauli generator list"
 
-/-- Infoview presenter for generator lists: check matrix plus Gram matrix.
-With `ProofWidgets.SelectionPanel` open, shift-click a
+/-- Infoview presenter for generator lists: check matrix plus Gram matrix. With
+`ProofWidgets.SelectionPanel` open, shift-click a
 `List (NQubitPauliGroupElement n)` in the goal to render it. -/
 @[expr_presenter]
 def checkMatrixPresenter : ExprPresenter where
@@ -224,9 +223,8 @@ def checkMatrixPresenter : ExprPresenter where
 
 /-- `#check_matrix gens` displays the binary symplectic check matrix of a
 concrete `List (NQubitPauliGroupElement n)` (X block then Z block, matching
-`checkMatrix`), together with the pairwise commutation (Gram) matrix — red
-cells are anticommuting pairs, so a valid stabilizer generator list shows
-none. -/
+`checkMatrix`), together with the pairwise commutation (Gram) matrix — red cells
+are anticommuting pairs, so a valid stabilizer generator list shows none. -/
 syntax (name := checkMatrixCmd) "#check_matrix " term : command
 
 open Elab Command in

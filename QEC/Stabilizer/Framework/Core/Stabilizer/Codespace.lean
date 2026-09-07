@@ -14,9 +14,10 @@ open scoped BigOperators
 /-!
 # Codespace and stabilizer sum
 
-The **codespace** of a stabilizer group is the subspace of states stabilized by every element.
-This file defines the **stabilizer sum** (sum of all group elements' matrices), shows it is
-nonzero and projects onto the codespace, and proves the codespace is non-empty.
+The **codespace** of a stabilizer group is the subspace of states stabilized by
+every element. This file defines the **stabilizer sum** (sum of all group
+elements' matrices), shows it is nonzero and projects onto the codespace, and
+proves the codespace is non-empty.
 -/
 
 noncomputable section
@@ -37,12 +38,14 @@ noncomputable instance : Fintype (NQubitPauliGroupElement n) :=
     left_inv := by intro p; simp
     right_inv := by intro p; cases p; simp }
 
-/-- The sum of matrix representations of all elements in the stabilizer group. -/
+/-- The sum of matrix representations of all elements in the stabilizer group.
+-/
 noncomputable def stabilizerSum (S : StabilizerGroup n) :
     Matrix (NQubitBasis n) (NQubitBasis n) ℂ :=
   ∑ g ∈ (Finset.univ.filter (fun g => g ∈ S.toSubgroup)), g.toMatrix
 
-/-- The only scalar element in a stabilizer group is the identity (since -I is excluded). -/
+/-- The only scalar element in a stabilizer group is the identity (since -I is
+excluded). -/
 lemma eq_one_of_mem_stabilizer_and_is_scalar (S : StabilizerGroup n) (g : NQubitPauliGroupElement n)
     (hg : g ∈ S.toSubgroup) (h_scalar : g.operators = NQubitPauliOperator.identity n) :
     g = 1 := by
@@ -69,7 +72,8 @@ lemma eq_one_of_mem_stabilizer_and_is_scalar (S : StabilizerGroup n) (g : NQubit
       simp [hphase]
     · exact rfl
 
-/-- The trace of a Pauli group element is non-zero only if it is proportional to the identity. -/
+/-- The trace of a Pauli group element is non-zero only if it is proportional to
+the identity. -/
 lemma trace_eq_zero_of_ne_identity (g : NQubitPauliGroupElement n)
     (h_ne_I : g.operators ≠ NQubitPauliOperator.identity n) :
     (g.toMatrix).trace = 0 := by

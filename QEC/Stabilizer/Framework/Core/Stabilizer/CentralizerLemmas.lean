@@ -10,8 +10,8 @@ open NQubitPauliGroupElement
 
 variable {n : ℕ}
 
-/-- Convenience constructor: commute with all generators in `genSet` to conclude centralizer
-membership when `S.toSubgroup = closure genSet`. -/
+/-- Convenience constructor: commute with all generators in `genSet` to conclude
+centralizer membership when `S.toSubgroup = closure genSet`. -/
 lemma mem_centralizer_of_commutes_genSet
     (g : NQubitPauliGroupElement n) (S : StabilizerGroup n)
     (genSet : Set (NQubitPauliGroupElement n))
@@ -30,7 +30,8 @@ lemma mem_centralizer_of_commutes_list
   exact mem_centralizer_of_commutes_genSet g S (NQubitPauliGroupElement.listToSet L)
     h_closure h_comm
 
-/-- Eliminate centralizer membership back to generator-set commutation under closure equality. -/
+/-- Eliminate centralizer membership back to generator-set commutation under
+closure equality. -/
 lemma commutes_genSet_of_mem_centralizer
     (g : NQubitPauliGroupElement n) (S : StabilizerGroup n)
     (genSet : Set (NQubitPauliGroupElement n))

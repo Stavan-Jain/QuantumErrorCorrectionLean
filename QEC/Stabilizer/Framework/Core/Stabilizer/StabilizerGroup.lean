@@ -19,19 +19,20 @@ variable {n : ℕ}
 /-!
 # Stabilizer Groups
 
-This file defines stabilizer groups, which are abelian subgroups of the n-qubit Pauli group
-that do not contain -I. Stabilizer groups are fundamental to the stabilizer formalism for
-quantum error correction.
+This file defines stabilizer groups, which are abelian subgroups of the n-qubit
+Pauli group that do not contain -I. Stabilizer groups are fundamental to the
+stabilizer formalism for quantum error correction.
 
-A stabilizer group stabilizes a quantum state (or subspace) by consisting of all Pauli group
-elements that fix that state with eigenvalue +1.
+A stabilizer group stabilizes a quantum state (or subspace) by consisting of all
+Pauli group elements that fix that state with eigenvalue +1.
 
 ## Key Properties
 
 - **Abelian**: All elements in a stabilizer group commute with each other
 - **No -I**: The negative identity is excluded (it would stabilize no states)
 - **Subgroup structure**: Forms a subgroup of the n-qubit Pauli group
-- **Codespace**: The set of states stabilized by all elements in the group forms the codespace
+- **Codespace**: The set of states stabilized by all elements in the group forms
+  the codespace
 - **Generators**: For an n-qubit system, a stabilizer group can have at most n
 independent generators
 
@@ -74,11 +75,12 @@ lemma negIdentity_ne_one (n : ℕ) : negIdentity n ≠ (1 : NQubitPauliGroupElem
 # Stabilized States
 
 A quantum state is stabilized by a Pauli group element if applying that element
-to the state leaves it unchanged (i.e., the state is an eigenvector
-with eigenvalue +1).
+to the state leaves it unchanged (i.e., the state is an eigenvector with
+eigenvalue +1).
 -/
 
-/-- A vector is stabilized by a Pauli group element if applying the element's matrix
+/-- A vector is stabilized by a Pauli group element if applying the element's
+matrix
     representation to the vector returns the same vector.
 
     This means the vector is an eigenvector with eigenvalue +1.
@@ -86,7 +88,8 @@ with eigenvalue +1).
 def IsStabilizedVec (g : NQubitPauliGroupElement n) (v : NQubitVec n) : Prop :=
   Matrix.mulVec (g.toMatrix) v = v
 
-/-- A quantum state is stabilized by a Pauli group element if its underlying vector
+/-- A quantum state is stabilized by a Pauli group element if its underlying
+vector
     is stabilized by that element.
 
     This means applying the Pauli group element to the state returns the same state.
@@ -96,13 +99,15 @@ def IsStabilizedBy (g : NQubitPauliGroupElement n) (ψ : NQubitState n) : Prop :
 
 end StabilizerGroup
 
-/-- A stabilizer group is an abelian subgroup of the n-qubit Pauli group that does not contain -I.
+/-- A stabilizer group is an abelian subgroup of the n-qubit Pauli group that
+does not contain -I.
 
 Properties:
 - It is a subgroup of the n-qubit Pauli group
 - It is abelian (all elements commute)
 - It does not contain -I
-- For an n-qubit system, a stabilizer group can have at most n independent generators
+- For an n-qubit system, a stabilizer group can have at most n independent
+  generators
 -/
 structure StabilizerGroup (n : ℕ) where
   /-- The underlying subgroup of the n-qubit Pauli group. -/
@@ -119,7 +124,8 @@ namespace StabilizerGroup
 instance : Coe (StabilizerGroup n) (Subgroup (NQubitPauliGroupElement n)) :=
   ⟨StabilizerGroup.toSubgroup⟩
 
-/-- A quantum state is in the codespace of a stabilizer group if it is stabilized
+/-- A quantum state is in the codespace of a stabilizer group if it is
+stabilized
     by every element in the group.
 
     The codespace of a stabilizer group consists of all states stabilized by that group.
@@ -164,7 +170,8 @@ lemma identity_stabilizes_vec (v : NQubitVec n) :
 lemma identity_stabilizes (ψ : NQubitState n) : IsStabilizedBy (1 : NQubitPauliGroupElement n) ψ :=
   identity_stabilizes_vec ψ.val
 
-/-- If a state is in the codespace of a stabilizer group, then it is stabilized by the identity. -/
+/-- If a state is in the codespace of a stabilizer group, then it is stabilized
+by the identity. -/
 lemma IsInCodespace.identity_stabilizes (ψ : NQubitState n) (S : StabilizerGroup n)
   (h : IsInCodespace ψ S) : IsStabilizedBy (1 : NQubitPauliGroupElement n) ψ := by
   have h_one : (1 : NQubitPauliGroupElement n) ∈ S.toSubgroup := S.one_mem
@@ -215,19 +222,22 @@ lemma IsStabilizedBy.inv {g : NQubitPauliGroupElement n} {v : NQubitVec n}
     simpa [one_mulVec] using h1
   exact h2.symm
 
-/-- If a state is stabilized by g, then it is stabilized by g when applied to a quantum state. -/
+/-- If a state is stabilized by g, then it is stabilized by g when applied to a
+quantum state. -/
 lemma IsStabilizedBy.state {g : NQubitPauliGroupElement n} {ψ : NQubitState n}
   (hg : IsStabilizedVec g ψ.val) :
   IsStabilizedBy g ψ := hg
 
-/-- If a state is in the codespace, then applying any group element from the stabilizer
+/-- If a state is in the codespace, then applying any group element from the
+stabilizer
     group to it (via multiplication) keeps it in the codespace. -/
 lemma IsInCodespace.mul {ψ : NQubitState n} {S : StabilizerGroup n}
   (h : IsInCodespace ψ S) {g : NQubitPauliGroupElement n}
   (_ : g ∈ S.toSubgroup) :
   IsInCodespace ψ S := h
 
-/-- Alternative characterization: a state is in the codespace if and only if it is
+/-- Alternative characterization: a state is in the codespace if and only if it
+is
     stabilized by all elements in the stabilizer group. -/
 lemma IsInCodespace.iff_all_stabilizers (ψ : NQubitState n) (S : StabilizerGroup n) :
   IsInCodespace ψ S ↔ ∀ g ∈ S.toSubgroup, IsStabilizedBy g ψ :=
@@ -239,7 +249,8 @@ lemma IsStabilizedBy.mul_in_group {g h : NQubitPauliGroupElement n} {ψ : NQubit
   IsStabilizedBy (g * h) ψ :=
   IsStabilizedBy.mul hg_stab hh_stab
 
-/-- If a state is stabilized by an element, then it is also stabilized by the inverse
+/-- If a state is stabilized by an element, then it is also stabilized by the
+inverse
     of that element. -/
 lemma IsStabilizedBy.inv_in_group {g : NQubitPauliGroupElement n} {ψ : NQubitState n}
   (hg_stab : IsStabilizedBy g ψ) :

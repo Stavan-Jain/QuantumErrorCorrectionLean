@@ -100,8 +100,8 @@ variable {G H : Type} [Fintype G] [AddCommGroup G]
   [Fintype H] [AddCommGroup H] [DecidableEq H]
 variable (π : G →+ H)
 
-/-- Pushforward intertwines convolution: `π_* (a ⋆ b) = (π_* a) ⋆ (π_* b)`.
-No injectivity or surjectivity of `π` is needed. -/
+/-- Pushforward intertwines convolution: `π_* (a ⋆ b) = (π_* a) ⋆ (π_* b)`. No
+injectivity or surjectivity of `π` is needed. -/
 lemma fiberSum_conv (a b : G → ZMod 2) :
     fiberSumFn ⇑π (a ⋆ b) = fiberSumFn ⇑π a ⋆ fiberSumFn ⇑π b := by
   funext j
@@ -147,8 +147,8 @@ lemma fiberSum_conv (a b : G → ZMod 2) :
   rw [lhs_eq, rhs_eq]
 
 /-- Convolving against a pulled-back chain pushes the left factor forward:
-`a ⋆ (u ∘ π) = ((π_* a) ⋆ u) ∘ π`.  No injectivity hypothesis is needed —
-the fiber regrouping works unconditionally. -/
+`a ⋆ (u ∘ π) = ((π_* a) ⋆ u) ∘ π`. No injectivity hypothesis is needed — the
+fiber regrouping works unconditionally. -/
 lemma conv_pullback (a : G → ZMod 2) (u : H → ZMod 2) :
     a ⋆ (u ∘ ⇑π) = (fiberSumFn ⇑π a ⋆ u) ∘ ⇑π := by
   funext g
@@ -171,10 +171,10 @@ end ConvTransfer
 
 /-! ## Double covers: 2:1 maps with a fixed-point-free deck involution
 
-We axiomatize a double cover by a map `f : I → J` together with `σ : I → I`
-such that `σ` has no fixed points and the fibers of `f` are exactly the
-`σ`-orbits: `f i' = f i ↔ i' = i ∨ i' = σ i`.  (That `σ` is an involution
-follows; see `sigma_involutive`.) -/
+We axiomatize a double cover by a map `f : I → J` together with `σ : I → I` such
+that `σ` has no fixed points and the fibers of `f` are exactly the `σ`-orbits:
+`f i' = f i ↔ i' = i ∨ i' = σ i`. (That `σ` is an involution follows; see
+`sigma_involutive`.) -/
 
 section DoubleCover
 
@@ -205,8 +205,8 @@ lemma fiberSumFn_pair [Fintype I] [DecidableEq J] (hσne : ∀ i, σ i ≠ i)
   rw [fiberSumFn_apply, ← Finset.sum_filter, fiber_filter_eq hfiber i,
     Finset.sum_pair (Ne.symm (hσne i))]
 
-/-- Pushforward annihilates pullbacks: `p_* (u ∘ f) = 0` (each fiber
-contributes `u j + u j = 0` in characteristic 2). -/
+/-- Pushforward annihilates pullbacks: `p_* (u ∘ f) = 0` (each fiber contributes
+`u j + u j = 0` in characteristic 2). -/
 lemma fiberSumFn_pullback [Fintype I] [DecidableEq J] (hσne : ∀ i, σ i ≠ i)
     (hfiber : ∀ i i', f i' = f i ↔ i' = i ∨ i' = σ i)
     (u : J → ZMod 2) :
@@ -226,8 +226,8 @@ def lift0 [DecidableEq I] (f : I → J) (sec : J → I) (u : J → ZMod 2) :
     I → ZMod 2 :=
   fun i => if i = sec (f i) then u (f i) else 0
 
-/-- The pushforward of the canonical lift recovers the base chain; in
-particular `fiberSumFn f` is surjective whenever `f` has a section. -/
+/-- The pushforward of the canonical lift recovers the base chain; in particular
+`fiberSumFn f` is surjective whenever `f` has a section. -/
 lemma fiberSumFn_lift0 [Fintype I] [DecidableEq I] [DecidableEq J]
     {sec : J → I} (hsec : ∀ j, f (sec j) = j)
     (u : J → ZMod 2) :
@@ -242,8 +242,8 @@ lemma fiberSumFn_lift0 [Fintype I] [DecidableEq I] [DecidableEq J]
   · intro habs
     exact absurd (Finset.mem_univ _) habs
 
-/-- Exactness at the middle: the kernel of the pushforward is exactly the
-image of the pullback (deck-invariant chains descend). -/
+/-- Exactness at the middle: the kernel of the pushforward is exactly the image
+of the pullback (deck-invariant chains descend). -/
 lemma fiberSumFn_eq_zero_iff [Fintype I] [DecidableEq J] (hσne : ∀ i, σ i ≠ i)
     (hfiber : ∀ i i', f i' = f i ↔ i' = i ∨ i' = σ i)
     {sec : J → I} (hsec : ∀ j, f (sec j) = j)
@@ -268,10 +268,10 @@ lemma fiberSumFn_eq_zero_iff [Fintype I] [DecidableEq J] (hσne : ∀ i, σ i �
 
 /-! ### The support-weight identity
 
-For a double cover, `|supp v| = |supp (p_* v)| + |overlap|`, where the
-overlap filter counts the points of `supp v` whose deck partner is also in
-`supp v` (this double-counts the doubly-covered fibers, matching the
-informal `2 · overlap`). -/
+For a double cover, `|supp v| = |supp (p_* v)| + |overlap|`, where the overlap
+filter counts the points of `supp v` whose deck partner is also in `supp v`
+(this double-counts the doubly-covered fibers, matching the informal
+`2 · overlap`). -/
 
 /-- Support-weight identity for a double cover. -/
 theorem card_support_fiberSum_add_overlap [Fintype I] [Fintype J] [DecidableEq J]
@@ -416,8 +416,7 @@ theorem card_overlap_eq_two_mul [Fintype I] [Fintype J]
     mul_comm]
 
 /-- The support of a pullback along a double cover is exactly twice the base
-support: each base point in the support contributes its full two-point
-fiber. -/
+support: each base point in the support contributes its full two-point fiber. -/
 theorem card_support_pullback [Fintype I] [Fintype J]
     (hσne : ∀ i, σ i ≠ i)
     (hfiber : ∀ i i', f i' = f i ↔ i' = i ∨ i' = σ i)

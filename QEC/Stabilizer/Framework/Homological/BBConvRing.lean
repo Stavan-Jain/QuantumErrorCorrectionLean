@@ -38,8 +38,8 @@ open scoped BigOperators
 
 variable {G : Type} [Fintype G]
 
-/-- The `ZMod 2`-linear equivalence `𝔽₂[G] = (G →₀ 𝔽₂) ≃ (G → 𝔽₂)`
-identifying the group algebra with the repo's function-space chains. -/
+/-- The `ZMod 2`-linear equivalence `𝔽₂[G] = (G →₀ 𝔽₂) ≃ (G → 𝔽₂)` identifying
+the group algebra with the repo's function-space chains. -/
 noncomputable def convEquiv :
     AddMonoidAlgebra (ZMod 2) G ≃ₗ[ZMod 2] (G → ZMod 2) :=
   Finsupp.linearEquivFunOnFinite (ZMod 2) (ZMod 2) G
@@ -76,7 +76,7 @@ lemma convEquiv_mul (a b : AddMonoidAlgebra (ZMod 2) G) :
   rfl
 
 /-- Multiplication by a group generator is a translation: on `0`/`2`-chains
-`conv (x^s) v = translate (-s) v`.  (`x^s := convEquiv (single s 1)`, the
+`conv (x^s) v = translate (-s) v`. (`x^s := convEquiv (single s 1)`, the
 indicator of `s`.) -/
 lemma conv_convEquiv_single (s : G) (v : G → ZMod 2) :
     convEquiv (AddMonoidAlgebra.single s 1) ⋆ v = translate (-s) v := by
@@ -92,8 +92,8 @@ lemma conv_convEquiv_single (s : G) (v : G → ZMod 2) :
     exact absurd (Finset.mem_univ s) hcon
 
 /-- The deck operator `ε = 1 + x^σ` of `BBEpsFreeGroupAlgebra`, transported
-through `convEquiv`, acts on `0`/`2`-chains as `v ↦ v + translate (-σ) v`
-— the repo's `v + σv` once `σ` has order 2. -/
+through `convEquiv`, acts on `0`/`2`-chains as `v ↦ v + translate (-σ) v` — the
+repo's `v + σv` once `σ` has order 2. -/
 lemma conv_convEquiv_one_add_single (σ : G) (v : G → ZMod 2) :
     convEquiv (1 + AddMonoidAlgebra.single σ 1) ⋆ v
       = v + translate (-σ) v := by

@@ -51,11 +51,12 @@ variable {G : Type} [Fintype G] [AddCommGroup G]
 def conv (a b : G → ZMod 2) : G → ZMod 2 :=
   fun g => ∑ h : G, a h * b (g - h)
 
-/-- `a ⋆ b` is the convolution `conv a b` (the group-algebra product of `𝔽₂[G]`). Scoped
-to `Quantum.Stabilizer.Homological.BB`: active inside that namespace, and elsewhere under
-`open scoped Quantum.Stabilizer.Homological.BB`. Multiplicative precedence (`70`), so
-`(a ⋆ b) g` needs its parentheses and `a ⋆ b + c` does not. The `simp`/`rw`/`unfold`
-lists keep the bare name `conv`. -/
+/-- `a ⋆ b` is the convolution `conv a b` (the group-algebra product of
+`𝔽₂[G]`). Scoped to `Quantum.Stabilizer.Homological.BB`: active inside that
+namespace, and elsewhere under `open scoped Quantum.Stabilizer.Homological.BB`.
+Multiplicative precedence (`70`), so `(a ⋆ b) g` needs its parentheses and
+`a ⋆ b + c` does not. The `simp`/`rw`/`unfold` lists keep the bare name `conv`.
+-/
 scoped infixl:70 " ⋆ " => conv
 
 section PolyNotation
@@ -64,21 +65,24 @@ open Lean
 
 /-! ### Polynomial literals
 
-The polynomials `A`, `B` of a bivariate bicycle code are `ZMod 2`-valued indicator
-functions on `G = ZMod ℓ × ZMod m`, the monomial `xᵃyᵇ` standing for the point `(a, b)`.
-`poly[x^3 + y + y^2]` writes such a function the way the papers do and expands to exactly
+The polynomials `A`, `B` of a bivariate bicycle code are `ZMod 2`-valued
+indicator functions on `G = ZMod ℓ × ZMod m`, the monomial `xᵃyᵇ` standing for
+the point `(a, b)`. `poly[x^3 + y + y^2]` writes such a function the way the
+papers do and expands to exactly
 
 ```lean
 fun g => if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0
 ```
 
-(the monomials in the written order, `∨` nested to the right as usual), the form the
-kernel `decide`s downstream run through. Monomials are `1`, `x`, `y`, `x^i`, `y^j`,
-`x^i*y^j` (with `x*y^j`, `x^i*y`, `x*y` for exponent `1`). Scoped like `⋆`. -/
+(the monomials in the written order, `∨` nested to the right as usual), the form
+the kernel `decide`s downstream run through. Monomials are `1`, `x`, `y`, `x^i`,
+`y^j`, `x^i*y^j` (with `x*y^j`, `x^i*y`, `x*y` for exponent `1`). Scoped like
+`⋆`. -/
 
 declare_syntax_cat bbPoly (behavior := both)
 
-/-- The constant monomial `1` (the point `(0, 0)`); other numerals are rejected. -/
+/-- The constant monomial `1` (the point `(0, 0)`); other numerals are rejected.
+-/
 scoped syntax num : bbPoly
 /-- The monomial `x` or `x^i` (the point `(i, 0)`). -/
 scoped syntax &"x" ("^" num)? : bbPoly
@@ -90,16 +94,17 @@ scoped syntax &"x" ("^" num)? "*" &"y" ("^" num)? : bbPoly
 scoped syntax:65 bbPoly:65 " + " bbPoly:66 : bbPoly
 
 /-- `poly[x^3 + y + y^2]` is the indicator function
-`fun g => if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0` of the monomials'
-exponent points, for use as a bivariate-bicycle polynomial `G → ZMod 2`. Scoped to
-`Quantum.Stabilizer.Homological.BB`.
+`fun g => if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0` of the
+monomials' exponent points, for use as a bivariate-bicycle polynomial
+`G → ZMod 2`. Scoped to `Quantum.Stabilizer.Homological.BB`.
 
-The `+` is a union of *distinct* exponent points, not addition in `𝔽₂[G]`: the literal is
-the polynomial it spells only when the written monomials are pairwise distinct modulo the
-group orders. A syntactically repeated monomial is rejected, but a coincidence modulo the
-orders cannot be seen at macro time — `poly[1 + x^6]` is `1 + x⁶` over `ZMod 12 × ZMod 6`
-but the constant `1` (not `0`) over `ZMod 6 × ZMod 6` — so check the exponents against the
-intended group. There is no literal for the zero polynomial; write `0`. -/
+The `+` is a union of *distinct* exponent points, not addition in `𝔽₂[G]`: the
+literal is the polynomial it spells only when the written monomials are pairwise
+distinct modulo the group orders. A syntactically repeated monomial is rejected,
+but a coincidence modulo the orders cannot be seen at macro time —
+`poly[1 + x^6]` is `1 + x⁶` over `ZMod 12 × ZMod 6` but the constant `1` (not
+`0`) over `ZMod 6 × ZMod 6` — so check the exponents against the intended group.
+There is no literal for the zero polynomial; write `0`. -/
 scoped syntax:max (name := polyLit) "poly[" bbPoly "]" : term
 
 /-- The exponent points `(a, b)` of a `bbPoly` sum, in the written order. -/
@@ -137,7 +142,8 @@ section PolyDelab
 
 open PrettyPrinter Delaborator SubExpr
 
-/-- A literal natural number: a raw literal or the `OfNat.ofNat` form numerals elaborate to. -/
+/-- A literal natural number: a raw literal or the `OfNat.ofNat` form numerals
+elaborate to. -/
 private def numeral? (e : Expr) : Option Nat :=
   match e with
   | .lit (.natVal k) => some k
@@ -148,8 +154,8 @@ private def numeral? (e : Expr) : Option Nat :=
       | _ => none
     else none
 
-/-- The exponent point of the disjunct `g = (a, b)` with `g` the loose bound variable `0`
-and literal `a`, `b`. -/
+/-- The exponent point of the disjunct `g = (a, b)` with `g` the loose bound
+variable `0` and literal `a`, `b`. -/
 private def exponentPoint? (e : Expr) : Option (Nat × Nat) := do
   guard (e.isAppOfArity ``Eq 3)
   guard (e.getArg! 1 == .bvar 0)
@@ -182,10 +188,11 @@ private def monomialSyntax (m : Nat × Nat) : DelabM (TSyntax `bbPoly) := do
   | (1, b) => `(bbPoly| x * y ^ $(lit b))
   | (a, b) => `(bbPoly| x ^ $(lit a) * y ^ $(lit b))
 
-/-- Delaborate `fun g => if g = (a₁, b₁) ∨ … then 1 else 0` back to `poly[…]`. Fires only on
-a lambda of exactly that shape, of type `ZMod ℓ × ZMod m → ZMod 2`, with literal exponents
-and without a `Classical` decidability instance (a `classical` indicator would print the
-same but re-elaborate to a different term); every other lambda is left to the default
+/-- Delaborate `fun g => if g = (a₁, b₁) ∨ … then 1 else 0` back to `poly[…]`.
+Fires only on a lambda of exactly that shape, of type
+`ZMod ℓ × ZMod m → ZMod 2`, with literal exponents and without a `Classical`
+decidability instance (a `classical` indicator would print the same but
+re-elaborate to a different term); every other lambda is left to the default
 printer. Scoped with the notation. -/
 @[scoped delab lam]
 def delabPolyLit : Delab :=
@@ -301,15 +308,16 @@ lemma conv_smul_right (s : ZMod 2) (a b : G → ZMod 2) :
   congr 1; funext h
   ring
 
-/-- In char 2, for any commuting `a, b`, `conv a b + conv b a = 0`.
-By commutativity of `conv`, this is just `2 (conv a b) = 0`. -/
+/-- In char 2, for any commuting `a, b`, `conv a b + conv b a = 0`. By
+commutativity of `conv`, this is just `2 (conv a b) = 0`. -/
 lemma conv_add_swap_eq_zero (a b : G → ZMod 2) :
     a ⋆ b + b ⋆ a = 0 := by
   rw [conv_comm a b]
   ext g
   simp [Pi.add_apply, CharTwo.add_self_eq_zero]
 
-/-- Convolving with a point mass on the left translates: `δ_a ⋆ b = b (· - a)`. -/
+/-- Convolving with a point mass on the left translates: `δ_a ⋆ b = b (· - a)`.
+-/
 lemma conv_single_left [DecidableEq G] (a : G) (b : G → ZMod 2) :
     Pi.single a 1 ⋆ b = fun g => b (g - a) := by
   funext g
@@ -329,7 +337,8 @@ rewriting at an applied occurrence). -/
 
 /-! ## Translation of chains -/
 
-/-- Translation of a chain by a group element: `(translate c v) g = v (g + c)`. -/
+/-- Translation of a chain by a group element: `(translate c v) g = v (g + c)`.
+-/
 def translate (c : G) (v : G → ZMod 2) : G → ZMod 2 := fun g => v (g + c)
 
 omit [Fintype G] in
@@ -353,12 +362,12 @@ Cells:
 * `C2 := G` (X-stabilizer positions = "faces")
 
 Boundary maps:
-* `∂₂(f) (h, 0) := conv A f h`,  `∂₂(f) (h, 1) := conv B f h`
-* `∂₁(c) (g)    := conv B c_L g + conv A c_R g`
-  where `c_L h = c (h, 0)`, `c_R h = c (h, 1)`.
+* `∂₂(f) (h, 0) := conv A f h`, `∂₂(f) (h, 1) := conv B f h`
+* `∂₁(c) (g) := conv B c_L g + conv A c_R g` where `c_L h = c (h, 0)`,
+  `c_R h = c (h, 1)`.
 
-Then `∂₁ ∘ ∂₂ = 0` reduces to `conv B (conv A f) + conv A (conv B f) = 0`
-via `conv_assoc` and `conv_add_swap_eq_zero` (char 2 + commutativity). -/
+Then `∂₁ ∘ ∂₂ = 0` reduces to `conv B (conv A f) + conv A (conv B f) = 0` via
+`conv_assoc` and `conv_add_swap_eq_zero` (char 2 + commutativity). -/
 
 variable (A B : G → ZMod 2)
 
@@ -484,11 +493,13 @@ lemma bbBoundary2Fn_translate (c : G) (f : G → ZMod 2) :
     rw [conv_translate]
     rfl
 
-/-- `rfl` bridge from the LinearMap `∂₂` to its computable underlying function. -/
+/-- `rfl` bridge from the LinearMap `∂₂` to its computable underlying function.
+-/
 @[simp] lemma bbBoundary2_apply (f : G → ZMod 2) :
     bbBoundary2 A B f = bbBoundary2Fn A B f := rfl
 
-/-- `rfl` bridge from the LinearMap `∂₁` to its computable underlying function. -/
+/-- `rfl` bridge from the LinearMap `∂₁` to its computable underlying function.
+-/
 @[simp] lemma bbBoundary1_apply (c : G × Fin 2 → ZMod 2) :
     bbBoundary1 A B c = bbBoundary1Fn A B c := rfl
 
@@ -535,8 +546,7 @@ lemma bbBoundaryFn_comp (f : G → ZMod 2) :
 /-! ## Packaging as a `HomologicalCode`
 
 Given `[Fintype G] [DecidableEq G] [AddCommGroup G]` and polynomials
-`A, B : G → ZMod 2`, build the chain complex
-`C0 = G,  C1 = G × Fin 2,  C2 = G`
+`A, B : G → ZMod 2`, build the chain complex `C0 = G, C1 = G × Fin 2, C2 = G`
 with `bbBoundary1`, `bbBoundary2`. -/
 
 variable [DecidableEq G]
@@ -580,7 +590,8 @@ noncomputable def bbChainComplex (A B : G → ZMod 2) : HomologicalCode where
 
 /-! ## Round-trip tests
 
-`poly[…]` expands to exactly the indicator-function normal form, and `⋆` to `conv`. -/
+`poly[…]` expands to exactly the indicator-function normal form, and `⋆` to
+`conv`. -/
 
 section RoundTrip
 
@@ -614,8 +625,9 @@ example (a b c : G → ZMod 2) : a ⋆ b ⋆ c = conv (conv a b) c := rfl
 example (a b : G → ZMod 2) (g : G) : (a ⋆ b) g = conv a b g := rfl
 
 open Lean Elab Command in
-/-- Display test: elaborate `stx` and check that its pretty-printed text is `expected`
-(`exact := false`: contains `expected`). Run through `run_cmd` so no `#`-command is needed. -/
+/-- Display test: elaborate `stx` and check that its pretty-printed text is
+`expected` (`exact := false`: contains `expected`). Run through `run_cmd` so no
+`#`-command is needed. -/
 private def checkDisplay (stx : Syntax) (expected : String) (exact : Bool := true) :
     CommandElabM Unit :=
   liftTermElabM do

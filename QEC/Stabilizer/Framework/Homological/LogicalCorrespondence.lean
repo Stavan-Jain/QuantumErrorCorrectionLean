@@ -5,10 +5,10 @@ import QEC.Stabilizer.Framework.Core.Logical.LogicalOperators
 # §C — Logical correspondence iffs
 
 For a homological CSS code, an X-type chain operator `chainXOperator c` is a
-non-trivial logical operator iff its underlying chain `c` is a cycle that is
-not a boundary.  Lifted from `ToricLogicalCorrespondenceX/Z.lean`.
+non-trivial logical operator iff its underlying chain `c` is a cycle that is not
+a boundary. Lifted from `ToricLogicalCorrespondenceX/Z.lean`.
 
-This file currently covers the X-side iffs.  The Z-side mirror via the dual
+This file currently covers the X-side iffs. The Z-side mirror via the dual
 boundary `dualBoundary = transpose ∂₂` is set up but the four mirror theorems
 are deferred (the §E toric refactor uses the X-side directly via §D).
 -/
@@ -125,7 +125,8 @@ theorem chainInnerProduct_boundary2_singleFace_eq_dualBoundary
 
 /-! ## X-side commutation criteria -/
 
-/-- `chainXOperator c` commutes with the vertex stab at `v` iff `boundary1 c v = 0`. -/
+/-- `chainXOperator c` commutes with the vertex stab at `v` iff
+`boundary1 c v = 0`. -/
 theorem chainXOperator_commutes_vertexStabOf_iff
     (c : X.C1 → ZMod 2) (v : X.C0) :
     X.chainXOperator c * X.vertexStabOf v = X.vertexStabOf v * X.chainXOperator c
@@ -400,14 +401,16 @@ theorem chainXOperator_isNontrivialLogical_iff (c : X.C1 → ZMod 2) :
 The four iffs above are mirrored on the Z-side via the dual cycles/boundaries.
 The roles of primal and dual structures swap:
 
-  primal cycles   (ker ∂₁)  ←→  dual boundaries  (im cutMap = im ∂₁ᵀ)
-  primal boundary (im ∂₂)   ←→  dual cycles      (ker ∂₂ᵀ = ker dualBoundary)
+  primal cycles (ker ∂₁) ←→ dual boundaries (im cutMap = im ∂₁ᵀ) primal boundary
+  (im ∂₂) ←→ dual cycles (ker ∂₂ᵀ = ker dualBoundary)
 
 The proofs run by the same template, replacing X-type with Z-type and using the
-transpose relation `boundary2_dualBoundary_transpose` from the head of this file.
+transpose relation `boundary2_dualBoundary_transpose` from the head of this
+file.
 -/
 
-/-- `chainZOperator (cutMap (singleVtx v)) = vertexStabOf v` (mirror of the X side). -/
+/-- `chainZOperator (cutMap (singleVtx v)) = vertexStabOf v` (mirror of the X
+side). -/
 @[simp] lemma chainZOperator_cutMap_singleVtx (v : X.C0) :
     X.chainZOperator (X.cutMap (X.singleVtx v)) = X.vertexStabOf v := rfl
 
@@ -460,7 +463,8 @@ lemma chainZOperator_mem_ZClosure_of_mem_dualBoundaries
   rcases hc with ⟨s, rfl⟩
   exact chainZOperator_cutMap_mem_ZClosure s
 
-/-- `chainZOperator c` commutes with the face stab at `f` iff `dualBoundary c f = 0`. -/
+/-- `chainZOperator c` commutes with the face stab at `f` iff
+`dualBoundary c f = 0`. -/
 theorem chainZOperator_commutes_faceStabOf_iff
     (c : X.C1 → ZMod 2) (f : X.C2) :
     X.chainZOperator c * X.faceStabOf f = X.faceStabOf f * X.chainZOperator c
@@ -532,7 +536,8 @@ lemma chainZOperator_commutes_vertexStabOf
   Quantum.StabilizerGroup.CSSCommutationLemmas.ZType_commutes
     (vertexStabOf_isZType v) (chainZOperator_isZType c)
 
-/-- Z-type elements of the stabilizer come from the Z-closure (CSS decomposition). -/
+/-- Z-type elements of the stabilizer come from the Z-closure (CSS
+decomposition). -/
 lemma zType_in_stabilizer_implies_in_ZClosure
     (g : NQubitPauliGroupElement X.numQubits)
     (hg : g ∈ X.homologicalStabilizerGroup.toSubgroup)

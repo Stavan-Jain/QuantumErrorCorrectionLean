@@ -8,18 +8,19 @@ open scoped BigOperators
 /-!
 # CSS utilities
 
-This file introduces reusable predicates and closure lemmas for working with **CSS-style**
-stabilizer generators:
+This file introduces reusable predicates and closure lemmas for working with
+**CSS-style** stabilizer generators:
 
 - Z-type single-qubit operators: `I` or `Z`
 - X-type single-qubit operators: `I` or `X`
 
-and their n-qubit liftings, plus “typed element” invariants for `NQubitPauliGroupElement n`
-that are stable under subgroup generation (`Subgroup.closure`).
+and their n-qubit liftings, plus “typed element” invariants for
+`NQubitPauliGroupElement n` that are stable under subgroup generation
+(`Subgroup.closure`).
 
-These lemmas are intended to make proofs for Shor/Steane/surface codes modular: you prove
-your generators are Z-type or X-type (and phase-0), and then closure induction gives the
-same property for the entire generated subgroup.
+These lemmas are intended to make proofs for Shor/Steane/surface codes modular:
+you prove your generators are Z-type or X-type (and phase-0), and then closure
+induction gives the same property for the entire generated subgroup.
 -/
 
 namespace PauliOperator
@@ -57,25 +58,29 @@ lemma eq_I_of_IsZType_and_IsXType {p : PauliOperator} (hz : IsZType p) (hx : IsX
 ## Closure of types under single-qubit multiplication (`mulOp`)
 -/
 
-/-- Multiplying two Z-type single-qubit Paulis contributes no phase in `mulOp`. -/
+/-- Multiplying two Z-type single-qubit Paulis contributes no phase in `mulOp`.
+-/
 lemma mulOp_phasePower_zero_of_IsZType {p q : PauliOperator}
     (hp : IsZType p) (hq : IsZType q) :
     (p.mulOp q).phasePower = 0 := by
   rcases hp with rfl | rfl <;> rcases hq with rfl | rfl <;> simp [PauliOperator.mulOp]
 
-/-- Multiplying two Z-type single-qubit Paulis stays Z-type at the operator level. -/
+/-- Multiplying two Z-type single-qubit Paulis stays Z-type at the operator
+level. -/
 lemma mulOp_operator_IsZType_of_IsZType {p q : PauliOperator}
     (hp : IsZType p) (hq : IsZType q) :
     IsZType (p.mulOp q).operator := by
   rcases hp with rfl | rfl <;> rcases hq with rfl | rfl <;> simp [IsZType, PauliOperator.mulOp]
 
-/-- Multiplying two X-type single-qubit Paulis contributes no phase in `mulOp`. -/
+/-- Multiplying two X-type single-qubit Paulis contributes no phase in `mulOp`.
+-/
 lemma mulOp_phasePower_zero_of_IsXType {p q : PauliOperator}
     (hp : IsXType p) (hq : IsXType q) :
     (p.mulOp q).phasePower = 0 := by
   rcases hp with rfl | rfl <;> rcases hq with rfl | rfl <;> simp [PauliOperator.mulOp]
 
-/-- Multiplying two X-type single-qubit Paulis stays X-type at the operator level. -/
+/-- Multiplying two X-type single-qubit Paulis stays X-type at the operator
+level. -/
 lemma mulOp_operator_IsXType_of_IsXType {p q : PauliOperator}
     (hp : IsXType p) (hq : IsXType q) :
     IsXType (p.mulOp q).operator := by
@@ -85,8 +90,8 @@ lemma mulOp_operator_IsXType_of_IsXType {p q : PauliOperator}
 ## Cross-type fact: Z-type times X-type is `I` iff both are `I`
 -/
 
-/-- If `p` is Z-type and `q` is X-type, then `(p.mulOp q)` has operator `I`
-iff `p = I` and `q = I` (i.e. no nontrivial cancellation across Z/X types). -/
+/-- If `p` is Z-type and `q` is X-type, then `(p.mulOp q)` has operator `I` iff
+`p = I` and `q = I` (i.e. no nontrivial cancellation across Z/X types). -/
 lemma mulOp_operator_eq_I_iff_of_types {p q : PauliOperator}
     (hp : IsZType p) (hq : IsXType q) :
     (p.mulOp q).operator = PauliOperator.I ↔ p = PauliOperator.I ∧ q = PauliOperator.I := by
@@ -116,8 +121,8 @@ lemma IsXType_identity {n : ℕ} : IsXType (NQubitPauliOperator.identity n) := b
 ## Cross-type fact at n qubits
 -/
 
-/-- If `p` is Z-type and `q` is X-type, then the operator part of `mulOp p q` is the
-n-qubit identity iff both `p` and `q` are the n-qubit identity operators. -/
+/-- If `p` is Z-type and `q` is X-type, then the operator part of `mulOp p q` is
+the n-qubit identity iff both `p` and `q` are the n-qubit identity operators. -/
 lemma mulOp_operators_eq_identity_iff_of_types {n : ℕ} {p q : NQubitPauliOperator n}
     (hp : IsZType p) (hq : IsXType q) :
     (NQubitPauliGroupElement.mulOp p q).operators = NQubitPauliOperator.identity n ↔
@@ -158,7 +163,8 @@ def IsXTypeElement {n : ℕ} (g : NQubitPauliGroupElement n) : Prop :=
 ## Operator-only multiplication preserves Z/X type and contributes zero phase
 -/
 
-/-- For Z-type n-qubit operators `p q`, the `mulOp p q` phase contribution is zero. -/
+/-- For Z-type n-qubit operators `p q`, the `mulOp p q` phase contribution is
+zero. -/
 lemma mulOp_phasePower_zero_of_IsZType {n : ℕ} {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsZType p) (hq : NQubitPauliOperator.IsZType q) :
     (NQubitPauliGroupElement.mulOp p q).phasePower = 0 := by
@@ -166,7 +172,8 @@ lemma mulOp_phasePower_zero_of_IsZType {n : ℕ} {p q : NQubitPauliOperator n}
   simp [NQubitPauliGroupElement.mulOp, PauliOperator.mulOp_phasePower_zero_of_IsZType (hp _) (hq _),
     Finset.sum_eq_zero]
 
-/-- For Z-type n-qubit operators `p q`, the operator part of `mulOp p q` is Z-type. -/
+/-- For Z-type n-qubit operators `p q`, the operator part of `mulOp p q` is
+Z-type. -/
 lemma mulOp_operators_IsZType_of_IsZType {n : ℕ} {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsZType p) (hq : NQubitPauliOperator.IsZType q) :
     NQubitPauliOperator.IsZType (NQubitPauliGroupElement.mulOp p q).operators := by
@@ -174,7 +181,8 @@ lemma mulOp_operators_IsZType_of_IsZType {n : ℕ} {p q : NQubitPauliOperator n}
   simp [NQubitPauliGroupElement.mulOp,
     PauliOperator.mulOp_operator_IsZType_of_IsZType (hp i) (hq i)]
 
-/-- For X-type n-qubit operators `p q`, the `mulOp p q` phase contribution is zero. -/
+/-- For X-type n-qubit operators `p q`, the `mulOp p q` phase contribution is
+zero. -/
 lemma mulOp_phasePower_zero_of_IsXType {n : ℕ} {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsXType p) (hq : NQubitPauliOperator.IsXType q) :
     (NQubitPauliGroupElement.mulOp p q).phasePower = 0 := by
@@ -182,7 +190,8 @@ lemma mulOp_phasePower_zero_of_IsXType {n : ℕ} {p q : NQubitPauliOperator n}
   simp [NQubitPauliGroupElement.mulOp, PauliOperator.mulOp_phasePower_zero_of_IsXType (hp _) (hq _),
     Finset.sum_eq_zero]
 
-/-- For X-type n-qubit operators `p q`, the operator part of `mulOp p q` is X-type. -/
+/-- For X-type n-qubit operators `p q`, the operator part of `mulOp p q` is
+X-type. -/
 lemma mulOp_operators_IsXType_of_IsXType {n : ℕ} {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsXType p) (hq : NQubitPauliOperator.IsXType q) :
     NQubitPauliOperator.IsXType (NQubitPauliGroupElement.mulOp p q).operators := by
@@ -248,7 +257,8 @@ lemma IsXTypeElement_inv {n : ℕ} {g : NQubitPauliGroupElement n}
 ## Closure induction: generators ⇒ closure
 -/
 
-/-- If every generator in `S` is Z-type, then every element of `Subgroup.closure S` is Z-type. -/
+/-- If every generator in `S` is Z-type, then every element of
+`Subgroup.closure S` is Z-type. -/
 theorem IsZTypeElement_of_mem_closure {n : ℕ} {S : Set (NQubitPauliGroupElement n)}
     (hS : ∀ g, g ∈ S → IsZTypeElement g) :
     ∀ g, g ∈ Subgroup.closure S → IsZTypeElement g := by
@@ -261,7 +271,8 @@ theorem IsZTypeElement_of_mem_closure {n : ℕ} {S : Set (NQubitPauliGroupElemen
     (fun x _ hx => IsZTypeElement_inv hx)
     hg
 
-/-- If every generator in `S` is X-type, then every element of `Subgroup.closure S` is X-type. -/
+/-- If every generator in `S` is X-type, then every element of
+`Subgroup.closure S` is X-type. -/
 theorem IsXTypeElement_of_mem_closure {n : ℕ} {S : Set (NQubitPauliGroupElement n)}
     (hS : ∀ g, g ∈ S → IsXTypeElement g) :
     ∀ g, g ∈ Subgroup.closure S → IsXTypeElement g := by
@@ -274,8 +285,9 @@ theorem IsXTypeElement_of_mem_closure {n : ℕ} {S : Set (NQubitPauliGroupElemen
     (fun x _ hx => IsXTypeElement_inv hx)
     hg
 
-/-- The only n-qubit Pauli group element that is both Z-type and X-type is the identity.
-  Used to show that an X-type logical operator is not in a Z-only stabilizer (and vice versa). -/
+/-- The only n-qubit Pauli group element that is both Z-type and X-type is the
+identity. Used to show that an X-type logical operator is not in a Z-only
+stabilizer (and vice versa). -/
 theorem eq_one_of_IsZTypeElement_and_IsXTypeElement {n : ℕ} {g : NQubitPauliGroupElement n}
     (hz : IsZTypeElement g) (hx : IsXTypeElement g) : g = 1 := by
   apply NQubitPauliGroupElement.ext g 1
@@ -286,14 +298,15 @@ theorem eq_one_of_IsZTypeElement_and_IsXTypeElement {n : ℕ} {g : NQubitPauliGr
 /-!
 ## Identity-operators criterion for a Z*X product
 
-This lemma is the algebraic core used to rule out `negIdentity` in CSS-generated stabilizer groups.
+This lemma is the algebraic core used to rule out `negIdentity` in CSS-generated
+stabilizer groups.
 -/
 
-/-- If `z` is Z-type and `x` is X-type and their product has identity operator tensor,
-then the whole product is the group identity.
+/-- If `z` is Z-type and `x` is X-type and their product has identity operator
+tensor, then the whole product is the group identity.
 
-This is the key “no `-I`” step for CSS stabilizer constructions: a Z-part times an X-part
-can only have all-`I` operator tensor in the trivial case. -/
+This is the key “no `-I`” step for CSS stabilizer constructions: a Z-part times
+an X-part can only have all-`I` operator tensor in the trivial case. -/
 lemma z_mul_x_eq_one_of_operators_eq_identity {n : ℕ}
     (z x : NQubitPauliGroupElement n)
     (hz : IsZTypeElement z) (hx : IsXTypeElement x)

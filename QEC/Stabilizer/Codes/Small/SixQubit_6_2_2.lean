@@ -28,12 +28,11 @@ namespace SixQubit_6_2_2
 /-!
 # The [[6, 2, 2]] `C_6` code (Knill 2004)
 
-A six-qubit normal self-dual CSS stabilizer code encoding **two logical
-qubits** with code distance 2. Originally introduced in
-[E. Knill, *Quantum computing with realistically noisy devices*,
-Nature 434, 39 (2005); `arxiv:quant-ph/0410199`], where it serves as the
-outer code in Knill's C_4/C_6 fault-tolerant architecture (with
-`[[4,2,2]]` at the inner level).
+A six-qubit normal self-dual CSS stabilizer code encoding **two logical qubits**
+with code distance 2. Originally introduced in [E. Knill, *Quantum computing
+with realistically noisy devices*, Nature 434, 39 (2005);
+`arxiv:quant-ph/0410199`], where it serves as the outer code in Knill's C_4/C_6
+fault-tolerant architecture (with `[[4,2,2]]` at the inner level).
 
 ## Stabilizer tableau (Knill / EC Zoo / Qiskit preset ID 126)
 
@@ -44,8 +43,8 @@ S_X1 = X X X X I I
 S_X2 = X X I I X X
 ```
 
-Uniform-weight-4 generators; n − k = 4. Each stabilizer corresponds to
-a square face of a triangular-prism ladder (3 rungs, periodic boundary).
+Uniform-weight-4 generators; n − k = 4. Each stabilizer corresponds to a square
+face of a triangular-prism ladder (3 rungs, periodic boundary).
 
 ## Logical operators (Knill 2004 via EC Zoo)
 
@@ -56,9 +55,9 @@ X̄_2 = I X I X X I   (= X_S, weight 3, support {1,3,4})
 Z̄_2 = I I I I Z Z   (= Z_S, weight 2, support {4,5})
 ```
 
-Anticommutation table: `X̄_1` anticomm `Z̄_1` (overlap {3}, odd),
-`X̄_2` anticomm `Z̄_2` (overlap {4}, odd); all other pairwise logical
-products commute (cross-pairs have even overlap, same-X / same-Z trivially).
+Anticommutation table: `X̄_1` anticomm `Z̄_1` (overlap {3}, odd), `X̄_2`
+anticomm `Z̄_2` (overlap {4}, odd); all other pairwise logical products commute
+(cross-pairs have even overlap, same-X / same-Z trivially).
 
 ## Equivalence notes
 
@@ -66,12 +65,12 @@ products commute (cross-pairs have even overlap, same-X / same-Z trivially).
   family-presentation; not formalized here).
 - The [[k+4, k, 2]] H code at k = 2 is the C_6 code.
 - The Khesin-Lu-Shor code at r = 2, m = 3 is the C_6 code.
-- The [[4, 2, 2]] code (`FourQubit_4_2_2.lean`) is C_6's structural sibling
-  in Knill's C_4/C_6 concatenation; we copy that file's k = 2 logical
-  packaging pattern.
+- The [[4, 2, 2]] code (`FourQubit_4_2_2.lean`) is C_6's structural sibling in
+  Knill's C_4/C_6 concatenation; we copy that file's k = 2 logical packaging
+  pattern.
 
-This file is a **Stage-2 skeleton**: every theorem ends in a `sorry`
-tagged `TODO(stab_6_2_2-T<n>): …`. Stage 4 closes them following the
+This file is a **Stage-2 skeleton**: every theorem ends in a `sorry` tagged
+`TODO(stab_6_2_2-T<n>): …`. Stage 4 closes them following the
 `FourQubit_4_2_2.lean` (k = 2 structure) + `CSS_4_1_2.lean` (multi-Z-stab
 structure) blended template.
 -/
@@ -80,9 +79,9 @@ open NQubitPauliGroupElement
 
 /-! ## §1 — Generators
 
-The four Knill stabilizers of C_6. All have phase 0 and uniform weight 4.
-Qubit indexing is 0-based; qubits 0,1 are the "top" pair, 2,3 the
-"middle" pair, 4,5 the "bottom" pair.
+The four Knill stabilizers of C_6. All have phase 0 and uniform weight 4. Qubit
+indexing is 0-based; qubits 0,1 are the "top" pair, 2,3 the "middle" pair, 4,5
+the "bottom" pair.
 -/
 
 /-- First Z-check stabilizer: `Z Z Z Z I I` (Z on qubits 0,1,2,3). -/
@@ -111,7 +110,8 @@ def XGenerators : Set (NQubitPauliGroupElement 6) :=
 def generators : Set (NQubitPauliGroupElement 6) :=
   ZGenerators ∪ XGenerators
 
-/-- The [[6, 2, 2]] C_6 stabilizer subgroup: closure of the four Knill generators. -/
+/-- The [[6, 2, 2]] C_6 stabilizer subgroup: closure of the four Knill
+generators. -/
 noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 6) :=
   Subgroup.closure generators
 
@@ -246,7 +246,8 @@ theorem generators_commute :
 
 /-! ## §6 — `−I` is not in the stabilizer subgroup -/
 
-/-- The [[6, 2, 2]] C_6 stabilizer subgroup does not contain `−I` (CSS argument). -/
+/-- The [[6, 2, 2]] C_6 stabilizer subgroup does not contain `−I` (CSS
+argument). -/
 theorem negIdentity_not_mem :
     negIdentity 6 ∉ subgroup := by
   have hZX : ∀ z ∈ ZGenerators, ∀ x ∈ XGenerators, z * x = x * z :=
@@ -284,7 +285,8 @@ lemma AllPhaseZero_generatorsList :
   rw [NQubitPauliGroupElement.AllPhaseZero_cons]
   exact ⟨rfl, NQubitPauliGroupElement.AllPhaseZero_nil⟩
 
-/-- The check-matrix rows of the four generators are linearly independent over GF(2). -/
+/-- The check-matrix rows of the four generators are linearly independent over
+GF(2). -/
 theorem rowsLinearIndependent_generatorsList :
     NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by decide
 
@@ -320,8 +322,8 @@ X̄_2 = IXIXXI   (= X_S, Knill "S" pair)
 Z̄_2 = IIIIZZ   (= Z_S, Knill "S" pair)
 ```
 
-Indexing: `_1` ≡ Knill's "L" (long support on Z, short on X);
-`_2` ≡ Knill's "S" (short support on Z, mid support on X).
+Indexing: `_1` ≡ Knill's "L" (long support on Z, short on X); `_2` ≡ Knill's "S"
+(short support on Z, mid support on X).
 -/
 
 /-- Logical X for logical qubit 1: `IIXXII` (X on qubits 2, 3). -/
@@ -338,7 +340,8 @@ def logicalZ_2 : NQubitPauliGroupElement 6 := σ[IIIIZZ]
 
 /-! ### Diagonal anticommutation: X̄_ℓ anticommutes Z̄_ℓ -/
 
-/-- `X̄_1 = IIXXII` and `Z̄_1 = ZIIZZI` anticommute (overlap at qubit 3 only — odd parity). -/
+/-- `X̄_1 = IIXXII` and `Z̄_1 = ZIIZZI` anticommute (overlap at qubit 3 only —
+odd parity). -/
 theorem logicalX_1_anticommutes_logicalZ_1 :
     NQubitPauliGroupElement.Anticommute logicalX_1 logicalZ_1 := by
   classical
@@ -353,7 +356,8 @@ theorem logicalX_1_anticommutes_logicalZ_1 :
         NQubitPauliOperator.set, NQubitPauliOperator.identity, PauliOperator.mulOp]
   rw [hfilter]; decide
 
-/-- `X̄_2 = IXIXXI` and `Z̄_2 = IIIIZZ` anticommute (overlap at qubit 4 only — odd parity). -/
+/-- `X̄_2 = IXIXXI` and `Z̄_2 = IIIIZZ` anticommute (overlap at qubit 4 only —
+odd parity). -/
 theorem logicalX_2_anticommutes_logicalZ_2 :
     NQubitPauliGroupElement.Anticommute logicalX_2 logicalZ_2 := by
   classical
@@ -375,13 +379,14 @@ theorem logicalX_1_commutes_logicalX_2 :
     logicalX_1 * logicalX_2 = logicalX_2 * logicalX_1 := by
   pauli_comm_componentwise [logicalX_1, logicalX_2]
 
-/-- `X̄_1 = IIXXII` and `Z̄_2 = IIIIZZ` commute (disjoint supports
-{2,3} vs {4,5} — empty overlap). -/
+/-- `X̄_1 = IIXXII` and `Z̄_2 = IIIIZZ` commute (disjoint supports {2,3} vs
+{4,5} — empty overlap). -/
 theorem logicalX_1_commutes_logicalZ_2 :
     logicalX_1 * logicalZ_2 = logicalZ_2 * logicalX_1 := by
   pauli_comm_componentwise [logicalX_1, logicalZ_2]
 
-/-- `X̄_2 = IXIXXI` and `Z̄_1 = ZIIZZI` commute (anticommute at qubits 3,4; count 2). -/
+/-- `X̄_2 = IXIXXI` and `Z̄_1 = ZIIZZI` commute (anticommute at qubits 3,4;
+count 2). -/
 theorem logicalX_2_commutes_logicalZ_1 :
     logicalX_2 * logicalZ_1 = logicalZ_1 * logicalX_2 := by
   classical
@@ -403,10 +408,10 @@ theorem logicalZ_1_commutes_logicalZ_2 :
 
 /-! ### Logical operators are in the centralizer
 
-Per-generator commutation lemmas (16 total: 4 logicals × 4 generators).
-Each is either `pauli_comm_componentwise` (when both factors are
-same-type or have disjoint supports) or `pauli_comm_even_anticommutes`
-with an explicit filter Finset. Supports of the filter Finsets:
+Per-generator commutation lemmas (16 total: 4 logicals × 4 generators). Each is
+either `pauli_comm_componentwise` (when both factors are same-type or have
+disjoint supports) or `pauli_comm_even_anticommutes` with an explicit filter
+Finset. Supports of the filter Finsets:
 
 | Logical \ Gen | `S_Z1` (q0,1,2,3) | `S_Z2` (q0,1,4,5) | `S_X1` (q0,1,2,3) | `S_X2` (q0,1,4,5) |
 |---------------|-------------------|-------------------|-------------------|-------------------|
@@ -596,7 +601,8 @@ private def logicalOps6_2_2 : Fin 2 → LogicalQubitOps 6 stabilizerGroup := fun
             logicalX_2_mem_centralizer, logicalZ_2_mem_centralizer,
             logicalX_2_anticommutes_logicalZ_2⟩
 
-/-- The [[6, 2, 2]] C_6 code as a stabilizer code on 6 physical qubits with 2 logical qubits. -/
+/-- The [[6, 2, 2]] C_6 code as a stabilizer code on 6 physical qubits with 2
+logical qubits. -/
 noncomputable def stabilizerCode : StabilizerCode 6 2 where
   hk := by decide
   generatorsList := generatorsList
@@ -620,15 +626,16 @@ noncomputable def stabilizerCode : StabilizerCode 6 2 where
 
 /-! ## §14 — Code distance = 2 -/
 
-/-- The stabilizer-code subgroup equals the closure of the (set-form) generators. -/
+/-- The stabilizer-code subgroup equals the closure of the (set-form)
+generators. -/
 private lemma stabilizerCode_toSubgroup_eq :
     stabilizerCode.toStabilizerGroup.toSubgroup = Subgroup.closure generators := by
   change (Subgroup.closure (NQubitPauliGroupElement.listToSet generatorsList) : _) =
     Subgroup.closure generators
   rw [listToSet_generatorsList]
 
-/-- Helper: a weight-1 Pauli with local Pauli `P ∈ {X, Y}` at qubit `i ∈ {0,1,2,3}`
-(the support of `S_Z1`) anticommutes with `S_Z1 = ZZZZ II`. -/
+/-- Helper: a weight-1 Pauli with local Pauli `P ∈ {X, Y}` at qubit
+`i ∈ {0,1,2,3}` (the support of `S_Z1`) anticommutes with `S_Z1 = ZZZZ II`. -/
 private lemma weightOneAt_anticomm_S_Z1 (i : Fin 6) (P : PauliOperator)
     (hi : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3)
     (hP : P = PauliOperator.X ∨ P = PauliOperator.Y) :
@@ -647,8 +654,8 @@ private lemma weightOneAt_anticomm_S_Z1 (i : Fin 6) (P : PauliOperator)
         S_Z1, NQubitPauliOperator.set, NQubitPauliOperator.identity, PauliOperator.mulOp]
   rw [hfilter]; simp +decide
 
-/-- Helper: a weight-1 Pauli with local Pauli `P ∈ {X, Y}` at qubit `i ∈ {0,1,4,5}`
-(the support of `S_Z2`) anticommutes with `S_Z2 = ZZ II ZZ`. -/
+/-- Helper: a weight-1 Pauli with local Pauli `P ∈ {X, Y}` at qubit
+`i ∈ {0,1,4,5}` (the support of `S_Z2`) anticommutes with `S_Z2 = ZZ II ZZ`. -/
 private lemma weightOneAt_anticomm_S_Z2 (i : Fin 6) (P : PauliOperator)
     (hi : i = 0 ∨ i = 1 ∨ i = 4 ∨ i = 5)
     (hP : P = PauliOperator.X ∨ P = PauliOperator.Y) :
@@ -667,8 +674,8 @@ private lemma weightOneAt_anticomm_S_Z2 (i : Fin 6) (P : PauliOperator)
         S_Z2, NQubitPauliOperator.set, NQubitPauliOperator.identity, PauliOperator.mulOp]
   rw [hfilter]; simp +decide
 
-/-- Helper: a weight-1 Pauli with local Pauli `Z` at qubit `i ∈ {0,1,2,3}`
-(the support of `S_X1`) anticommutes with `S_X1 = XXXX II`. -/
+/-- Helper: a weight-1 Pauli with local Pauli `Z` at qubit `i ∈ {0,1,2,3}` (the
+support of `S_X1`) anticommutes with `S_X1 = XXXX II`. -/
 private lemma weightOneAt_Z_anticomm_S_X1 (i : Fin 6)
     (hi : i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3) :
     NQubitPauliGroupElement.Anticommute (weightOneAt i PauliOperator.Z) S_X1 := by
@@ -686,8 +693,8 @@ private lemma weightOneAt_Z_anticomm_S_X1 (i : Fin 6)
         S_X1, NQubitPauliOperator.set, NQubitPauliOperator.identity, PauliOperator.mulOp]
   rw [hfilter]; simp +decide
 
-/-- Helper: a weight-1 Pauli with local Pauli `Z` at qubit `i ∈ {0,1,4,5}`
-(the support of `S_X2`) anticommutes with `S_X2 = XX II XX`. -/
+/-- Helper: a weight-1 Pauli with local Pauli `Z` at qubit `i ∈ {0,1,4,5}` (the
+support of `S_X2`) anticommutes with `S_X2 = XX II XX`. -/
 private lemma weightOneAt_Z_anticomm_S_X2 (i : Fin 6)
     (hi : i = 0 ∨ i = 1 ∨ i = 4 ∨ i = 5) :
     NQubitPauliGroupElement.Anticommute (weightOneAt i PauliOperator.Z) S_X2 := by
@@ -705,8 +712,8 @@ private lemma weightOneAt_Z_anticomm_S_X2 (i : Fin 6)
         S_X2, NQubitPauliOperator.set, NQubitPauliOperator.identity, PauliOperator.mulOp]
   rw [hfilter]; simp +decide
 
-/-- Anticommute witness for the C_6 code: every weight-1 Pauli anticommutes
-with at least one stabilizer generator.
+/-- Anticommute witness for the C_6 code: every weight-1 Pauli anticommutes with
+at least one stabilizer generator.
 
 Strategy: 3-way `hi_trichotomy` partition of qubits ({0,1} | {2,3} | {4,5}),
 dispatched on the local Pauli `P`:

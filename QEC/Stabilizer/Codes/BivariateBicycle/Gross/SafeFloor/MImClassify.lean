@@ -58,8 +58,9 @@ set_option maxRecDepth 4096
 
 /-! ## §0 The weight join: `chainWeight` as a sum of per-block layer weights -/
 
-/-- **Block split of the chain weight.**  A base 1-chain's weight is the sum of its
-two blocks' weights (the `h ↦ (h,0)` / `h ↦ (h,1)` images partition the support). -/
+/-- **Block split of the chain weight.** A base 1-chain's weight is the sum of
+its two blocks' weights (the `h ↦ (h,0)` / `h ↦ (h,1)` images partition the
+support). -/
 theorem chainWeight_eq_bwt_blocks (w : BaseGroup × Fin 2 → ZMod 2) :
     bb72Complex.chainWeight w = bwt (leftHalf w) + bwt (rightHalf w) := by
   rw [bb72Complex_chainWeight_eq]
@@ -91,9 +92,10 @@ theorem chainWeight_eq_bwt_blocks (w : BaseGroup × Fin 2 → ZMod 2) :
     obtain ⟨b, _, hb⟩ := hpb
     exact absurd ((Prod.mk.injEq ..).mp hb).2 (by decide)
 
-/-- **The layer-sum decomposition of the chain weight.**  Composes the block split
-with the per-block `Z₂²`-layer decomposition `weight_bridge`.  This is the form the
-A4 §10 slot frame bounds: each summand is the weight of a `Z₃²`-torus slice. -/
+/-- **The layer-sum decomposition of the chain weight.** Composes the block
+split with the per-block `Z₂²`-layer decomposition `weight_bridge`. This is the
+form the A4 §10 slot frame bounds: each summand is the weight of a `Z₃²`-torus
+slice. -/
 theorem chainWeight_eq_layer_sum (w : BaseGroup × Fin 2 → ZMod 2) :
     bb72Complex.chainWeight w
       = (∑ s : ZMod 2 × ZMod 2, weight3 (slice (leftHalf w) s))
@@ -102,12 +104,13 @@ theorem chainWeight_eq_layer_sum (w : BaseGroup × Fin 2 → ZMod 2) :
 
 /-! ## §2 The `ker ∂₂` basis, spanning, and M-VANISH (A4 §9.3–§9.4)
 
-`ker ∂₂ = {ζ : conv baseA ζ = 0 ∧ conv baseB ζ = 0}` is 6-dimensional (64 elements,
-63 nonzero in 5 translation orbits of weights 16/18/18/24/24 — matching A4 §9.3).  We
-pin a systematic basis `kb0..kb5` (with `kbᵢ` supported so that `kbᵢ(freeCellⱼ) = δᵢⱼ`),
-prove it spans `ker ∂₂` (every `ζ ∈ ker ∂₂` is reconstructed from its 6 free-cell
-coordinates, `kerBasis_spans`), and deduce A4 §9.4 Sharpening 1 — the CRT components 0
-and 2 of `seamC ζ` vanish (`off_vanish`) — by a `native_decide` over the 64 combinations. -/
+`ker ∂₂ = {ζ : conv baseA ζ = 0 ∧ conv baseB ζ = 0}` is 6-dimensional (64
+elements, 63 nonzero in 5 translation orbits of weights 16/18/18/24/24 —
+matching A4 §9.3). We pin a systematic basis `kb0..kb5` (with `kbᵢ` supported so
+that `kbᵢ(freeCellⱼ) = δᵢⱼ`), prove it spans `ker ∂₂` (every `ζ ∈ ker ∂₂` is
+reconstructed from its 6 free-cell coordinates, `kerBasis_spans`), and deduce A4
+§9.4 Sharpening 1 — the CRT components 0 and 2 of `seamC ζ` vanish
+(`off_vanish`) — by a `native_decide` over the 64 combinations. -/
 
 /-- Indicator of a finite support set. -/
 def mkZeta (supp : List BaseGroup) : BaseGroup → ZMod 2 := fun h => if h ∈ supp then 1 else 0
@@ -133,13 +136,13 @@ def kb5 : BaseGroup → ZMod 2 :=
 
 /-! ### Packed seam masks (kernel-evaluation layer)
 
-`seamC` and `∂₂` evaluate 72- and 36-term `Finset.sum`s through the bundled cover
-tower — opaque to kernel reduction.  Everything the kernel must evaluate is
+`seamC` and `∂₂` evaluate 72- and 36-term `Finset.sum`s through the bundled
+cover tower — opaque to kernel reduction. Everything the kernel must evaluate is
 routed through 72-bit packed masks instead: `chainOfMask` reads a base 1-chain
 off a `Nat` bitmask, the six `KBiMASK` literals are the `seamC` images of the
-`ker ∂₂` basis (certified below through the sparse form `seamC_eq_sparse`),
-and `seamC_kcombo_mask` gives every Smith class's seam profile as one XOR of
-mask literals.  All kernel `decide`, no `native_decide`. -/
+`ker ∂₂` basis (certified below through the sparse form `seamC_eq_sparse`), and
+`seamC_kcombo_mask` gives every Smith class's seam profile as one XOR of mask
+literals. All kernel `decide`, no `native_decide`. -/
 
 /-- Flat qubit index: `((a,b), j) ↦ a·6 + b + 36·j`. -/
 def qidx (q : BaseGroup × Fin 2) : Nat := q.1.1.val * 6 + q.1.2.val + 36 * q.2.val
@@ -164,8 +167,8 @@ theorem chainOfMask_xor (a b : Nat) :
   simp only [chainOfMask, Pi.add_apply, hbit, Nat.testBit_xor]
   rcases a.testBit (qidx q) <;> rcases b.testBit (qidx q) <;> decide
 
-/-- `seamC` images of the six `ker ∂₂` basis vectors, as packed masks
-(row order `qidx`; computed offline, certified by `seamC_kb0_mask`…). -/
+/-- `seamC` images of the six `ker ∂₂` basis vectors, as packed masks (row order
+`qidx`; computed offline, certified by `seamC_kb0_mask`…). -/
 def KB0MASK : Nat := 0x1b0000006db
 def KB1MASK : Nat := 0x2d000000b6d
 def KB2MASK : Nat := 0x14a0000053e7
@@ -201,7 +204,8 @@ theorem seamC_kb5_mask : seamC kb5 = chainOfMask KB5MASK := by
 
 /-! ### Sparse `∂₂` and the basis kernel facts -/
 
-/-- Sparse pointwise form of the base boundary: three translate terms per block. -/
+/-- Sparse pointwise form of the base boundary: three translate terms per block.
+-/
 theorem bb2_sparse (f : BaseGroup → ZMod 2) (p : BaseGroup) (j : Fin 2) :
     bbBoundary2Fn baseA baseB f (p, j)
       = if j = 0 then f (p - (3, 0)) + f (p - (0, 1)) + f (p - (0, 2))
@@ -262,7 +266,8 @@ theorem kerBasis_mem :
     kerBasis.all (fun v => decide (bbBoundary2Fn baseA baseB v = 0)) = true := by
   simp [kerBasis, bb2_kb0, bb2_kb1, bb2_kb2, bb2_kb3, bb2_kb4, bb2_kb5]
 
-/-- `recon ζ = Σᵢ ζ(freeCellᵢ) • kbᵢ` (systematic basis: `kbᵢ(freeCellⱼ) = δᵢⱼ`). -/
+/-- `recon ζ = Σᵢ ζ(freeCellᵢ) • kbᵢ` (systematic basis:
+`kbᵢ(freeCellⱼ) = δᵢⱼ`). -/
 def recon (z : BaseGroup → ZMod 2) : BaseGroup → ZMod 2 := fun h =>
   z (4,4) * kb0 h + z (4,5) * kb1 h + z (5,2) * kb2 h +
   z (5,3) * kb3 h + z (5,4) * kb4 h + z (5,5) * kb5 h
@@ -277,14 +282,16 @@ theorem bb2_zero_chain : bbBoundary2Fn baseA baseB (0 : BaseGroup → ZMod 2) = 
   simp only [bbBoundary2Fn, conv_apply, Pi.zero_apply, mul_zero, Finset.sum_const_zero]
   split <;> rfl
 
-/-- The 6-parameter combination of basis vectors (the systematic form of `recon`). -/
+/-- The 6-parameter combination of basis vectors (the systematic form of
+`recon`). -/
 def kcombo (c0 c1 c2 c3 c4 c5 : ZMod 2) : BaseGroup → ZMod 2 := fun h =>
   c0 * kb0 h + c1 * kb1 h + c2 * kb2 h + c3 * kb3 h + c4 * kb4 h + c5 * kb5 h
 
 theorem recon_eq_kcombo (z : BaseGroup → ZMod 2) :
     recon z = kcombo (z (4,4)) (z (4,5)) (z (5,2)) (z (5,3)) (z (5,4)) (z (5,5)) := rfl
 
-/-- ZMod-2 scalar action as an `if` (for the systematic-combination decomposition). -/
+/-- ZMod-2 scalar action as an `if` (for the systematic-combination
+decomposition). -/
 private theorem zmod2_mul_eq_ite (c x : ZMod 2) : c * x = if c = 1 then x else 0 := by
   revert c x; decide
 
@@ -320,9 +327,9 @@ def comboMask (c0 c1 c2 c3 c4 c5 : ZMod 2) : Nat :=
     ^^^ (if c2 = 1 then KB2MASK else 0) ^^^ (if c3 = 1 then KB3MASK else 0)
     ^^^ (if c4 = 1 then KB4MASK else 0) ^^^ (if c5 = 1 then KB5MASK else 0)
 
-/-- **Every Smith class's seam profile is a packed mask**: `seamC (kcombo c⃗) =
-chainOfMask (comboMask c⃗)`.  The kernel-evaluation gateway for all seam-offset
-read-offs and covariance certificates. -/
+/-- **Every Smith class's seam profile is a packed mask**:
+`seamC (kcombo c⃗) = chainOfMask (comboMask c⃗)`. The kernel-evaluation gateway
+for all seam-offset read-offs and covariance certificates. -/
 theorem seamC_kcombo_mask (c0 c1 c2 c3 c4 c5 : ZMod 2) :
     seamC (kcombo c0 c1 c2 c3 c4 c5) = chainOfMask (comboMask c0 c1 c2 c3 c4 c5) := by
   rw [kcombo_eq_sum, comboMask, seamC_add, seamC_add, seamC_add, seamC_add, seamC_add,
@@ -352,13 +359,13 @@ theorem bb2_kcombo (c0 c1 c2 c3 c4 c5 : ZMod 2) :
   simp
 
 
-/-- **Spanning** (A4 §9.3): every `ker ∂₂` element equals its reconstruction from its
-six free-cell coordinates.  Proved by **peeling**: `w := recon ζ + ζ` is again in
-`ker ∂₂` and vanishes on the six free cells (the basis is systematic,
-`kbᵢ(freeCellⱼ) = δᵢⱼ`), and the `∂₂`-rows then force `w` to vanish cell by cell —
-thirty steps, each reading one row whose other two cells are already known zero.
-This is Gaussian elimination on the `36`-cell system written out as its elimination
-order, so neither a matrix inverse nor an enumeration is needed. -/
+/-- **Spanning** (A4 §9.3): every `ker ∂₂` element equals its reconstruction
+from its six free-cell coordinates. Proved by **peeling**: `w := recon ζ + ζ` is
+again in `ker ∂₂` and vanishes on the six free cells (the basis is systematic,
+`kbᵢ(freeCellⱼ) = δᵢⱼ`), and the `∂₂`-rows then force `w` to vanish cell by cell
+— thirty steps, each reading one row whose other two cells are already known
+zero. This is Gaussian elimination on the `36`-cell system written out as its
+elimination order, so neither a matrix inverse nor an enumeration is needed. -/
 theorem kerBasis_spans (z : BaseGroup → ZMod 2)
     (hz : bbBoundary2Fn baseA baseB z = 0) : recon z = z := by
   have hself : ∀ a : ZMod 2, a + a = 0 := by decide
@@ -656,8 +663,9 @@ theorem offVanish_combo : ∀ c0 c1 c2 c3 c4 c5 : ZMod 2, ∀ s : ZMod 2 × ZMod
   revert c0 c1 c2 c3 c4 c5 s
   decide +kernel
 
-/-- **M-VANISH for all ζ ∈ ker ∂₂** (A4 §9.4 Sharpening 1): the CRT components 0 and 2
-of `seamC ζ` vanish on both blocks.  (Spanning reduces `ζ` to one of 64 combos.) -/
+/-- **M-VANISH for all ζ ∈ ker ∂₂** (A4 §9.4 Sharpening 1): the CRT components 0
+and 2 of `seamC ζ` vanish on both blocks. (Spanning reduces `ζ` to one of 64
+combos.) -/
 theorem off_vanish (z : BaseGroup → ZMod 2) (hz : bbBoundary2Fn baseA baseB z = 0)
     (s : ZMod 2 × ZMod 2) :
     V psi0 s (leftHalf (seamC z)) = 0 ∧ V psi0 s (rightHalf (seamC z)) = 0 ∧
@@ -667,30 +675,34 @@ theorem off_vanish (z : BaseGroup → ZMod 2) (hz : bbBoundary2Fn baseA baseB z 
 
 /-! ## §2b The coset block decomposition
 
-A Smith-coset element `seamC ζ + ∂₂ f` splits, block by block, into the seam profile
-plus the `f`-convolution: the A-block (`j = 0`) is `leftHalf (seamC ζ) + conv baseA f`,
-the B-block (`j = 1`) is `rightHalf (seamC ζ) + conv baseB f`.  Composed with the CRT
-transform `V` (additive, multiplicative through `conv baseA/baseB`), this exposes the
-coset's per-component data `off_j(ζ) ⊕ P̂_j · V_j f` that the §10 slot frame bounds. -/
+A Smith-coset element `seamC ζ + ∂₂ f` splits, block by block, into the seam
+profile plus the `f`-convolution: the A-block (`j = 0`) is
+`leftHalf (seamC ζ) + conv baseA f`, the B-block (`j = 1`) is
+`rightHalf (seamC ζ) + conv baseB f`. Composed with the CRT transform `V`
+(additive, multiplicative through `conv baseA/baseB`), this exposes the coset's
+per-component data `off_j(ζ) ⊕ P̂_j · V_j f` that the §10 slot frame bounds. -/
 
-/-- A-block of a coset element: `leftHalf (seamC ζ + ∂₂ f) = leftHalf (seamC ζ) + A⋆f`. -/
+/-- A-block of a coset element:
+`leftHalf (seamC ζ + ∂₂ f) = leftHalf (seamC ζ) + A⋆f`. -/
 theorem leftHalf_coset (ζ f : BaseGroup → ZMod 2) :
     leftHalf (seamC ζ + bbBoundary2Fn baseA baseB f)
       = leftHalf (seamC ζ) + baseA ⋆ f := rfl
 
-/-- B-block of a coset element: `rightHalf (seamC ζ + ∂₂ f) = rightHalf (seamC ζ) + B⋆f`. -/
+/-- B-block of a coset element:
+`rightHalf (seamC ζ + ∂₂ f) = rightHalf (seamC ζ) + B⋆f`. -/
 theorem rightHalf_coset (ζ f : BaseGroup → ZMod 2) :
     rightHalf (seamC ζ + bbBoundary2Fn baseA baseB f)
       = rightHalf (seamC ζ) + baseB ⋆ f := rfl
 
 /-! ## §3 The coset CRT profile: `V_j(coset) = off_j(ζ) ⊕ P̂_j · V_j f`
 
-Composing the block split (§2b) with the additivity (`V_add`) and multiplicativity
-(`mult_*`) of the CRT transform, the `j`-th component of a coset element is the seam
-offset `off_j(ζ) = V_j(seamC ζ)` plus the engine-multiplied free datum `P̂_j · V_j f`
-(`P̂ = Â` on the A-block `j=0`, `B̂` on the B-block `j=1`).  The radical multipliers are
-`Â₁=Â₃=Ahat1`, `Â₄=Ahat4`, `B̂₂=B̂₃=B̂₄=Bhat2`; the rest are `unitHat`.  These are the
-per-slot inputs the §10 slot frame minimizes over the free datum `t̂_j = V_j f`. -/
+Composing the block split (§2b) with the additivity (`V_add`) and
+multiplicativity (`mult_*`) of the CRT transform, the `j`-th component of a
+coset element is the seam offset `off_j(ζ) = V_j(seamC ζ)` plus the
+engine-multiplied free datum `P̂_j · V_j f` (`P̂ = Â` on the A-block `j=0`, `B̂`
+on the B-block `j=1`). The radical multipliers are `Â₁=Â₃=Ahat1`, `Â₄=Ahat4`,
+`B̂₂=B̂₃=B̂₄=Bhat2`; the rest are `unitHat`. These are the per-slot inputs the
+§10 slot frame minimizes over the free datum `t̂_j = V_j f`. -/
 
 variable (ζ f : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2)
 
@@ -729,11 +741,12 @@ theorem Vcoset_R4 : V psi4 s (rightHalf (seamC ζ + bbBoundary2Fn baseA baseB f)
 
 The torus-Fourier map `g ↦ (V₀,…,V₄)` is a BIJECTION on the 512 layers (Z₃² is
 coprime to char 2), so `weight3` is an EXACT function of the 5 CRT components:
-`weight3 (slice b s) = wt5OfComps (V ψⱼ s b)`.  This exact per-slot weight is what the
-confined-floor engine (`MImFloor`) minimizes over the coset's free data. -/
+`weight3 (slice b s) = wt5OfComps (V ψⱼ s b)`. This exact per-slot weight is
+what the confined-floor engine (`MImFloor`) minimizes over the coset's free
+data. -/
 
-/-- The exact weight of a torus layer as a function of its 5 CRT-Fourier components
-(`v₀ ∈ {0,1}`; index `v₀ + 2·(v₁ + 4·(v₂ + 4·(v₃ + 4·v₄)))`). -/
+/-- The exact weight of a torus layer as a function of its 5 CRT-Fourier
+components (`v₀ ∈ {0,1}`; index `v₀ + 2·(v₁ + 4·(v₂ + 4·(v₃ + 4·v₄)))`). -/
 def WT5_TABLE : Array Nat :=
   #[0,9,6,3,6,3,6,3,6,3,4,5,4,5,4,5,6,3,4,5,4,5,4,5,6,3,4,5,4,5,4,5,6,3,4,5,4,5,4,5,4,5,2,7,6,3,
     6,3,4,5,6,3,6,3,2,7,4,5,6,3,2,7,6,3,6,3,4,5,4,5,4,5,4,5,6,3,2,7,6,3,4,5,2,7,6,3,6,3,4,5,6,3,
@@ -751,9 +764,9 @@ def WT5_TABLE : Array Nat :=
 /-- `WT5_TABLE` packed into one `Nat` literal at 8 bits per entry, with the two
 `getD`-default slots `99` appended at indices `512, 513` (reachable from `Fin 4`
 arguments as `v0 + 2·255` for `v0 ∈ {2,3}`); `wt5OfComps_eq_wt5N` certifies
-agreement with the `WT5_TABLE.getD` form on the whole `Fin 4⁵` domain.  Packed so
+agreement with the `WT5_TABLE.getD` form on the whole `Fin 4⁵` domain. Packed so
 lookups are kernel-accelerated `Nat` ops, keeping the downstream `decide` walks
-cheap.  (A numeric literal cannot wrap lines, hence the long line.) -/
+cheap. (A numeric literal cannot wrap lines, hence the long line.) -/
 def WT5_N : Nat :=
   0x63630504050401080702050405040504030605040504050403060306030607020504050405040504030605040504050403060504010805040702030607020306050405040504050403060108050405040702050405040504030607020306030605040306030607020504070203060306050403060702030605040504050405040306050405040504030605040504050403060108050405040702070203060306050405040504050403060504050401080702050405040504030603060306070205040504010805040702050405040504030605040504050403060306070203060504030607020306050403060306070205040702030603060504050405040504030605040504050403060504010805040702050405040504030603060702030605040108050405040702050405040504030605040504050403060702030603060504050405040504030605040504050403060504050401080702030603060702050407020306030605040306070203060504030603060702050405040504050403060306030607020504030607020306050407020306030605040504050405040306070203060306050403060306070205040306070203060504050405040504030603060702030605040702030603060504030603060702050405040504050403060504050405040306050405040504030605040504050403060306030603060900
 
@@ -761,8 +774,9 @@ def WT5_N : Nat :=
 def wt5OfComps (v0 v1 v2 v3 v4 : Fin 4) : Nat :=
   (WT5_N >>> (8 * (v0.val + 2*(v1.val + 4*(v2.val + 4*(v3.val + 4*v4.val)))))) &&& 255
 
-/-- **The Fourier bijection**: `weight3` is the exact `wt5OfComps` of the layer's
-five torus-Fourier coefficients (kernel `decide` over the 512 layers via `mkTorus`). -/
+/-- **The Fourier bijection**: `weight3` is the exact `wt5OfComps` of the
+layer's five torus-Fourier coefficients (kernel `decide` over the 512 layers via
+`mkTorus`). -/
 theorem weight3_eq_wt5 : ∀ g : ZMod 3 × ZMod 3 → ZMod 2,
     weight3 g = wt5OfComps (fhat3 g (0,0)) (fhat3 g (0,1)) (fhat3 g (1,0)) (fhat3 g (1,1))
       (fhat3 g (1,2)) := by
@@ -787,12 +801,13 @@ theorem weight3_eq_wt5_slice (b : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
 
 /-! ## §6 The chain weight as a per-slot `wt5` sum of the ten CRT components
 
-The exact per-slot weight (§5) lifts the layer-sum decomposition (§0) to a closed
-form: `chainWeight` of any base 1-chain is the sum, over the four `Z₂²` slots, of
-`wt5OfComps` applied to the chain's ten CRT components (five per block).  This is the
-form the §10 slot frame minimizes over the coset's free data — composing it with the
-`f`-dependence (§3) expresses the coset weight as `costFromComps` of the seam offsets
-`⊕ Â/B̂·(Vⱼ f)`, the input to the confined-floor enumeration. -/
+The exact per-slot weight (§5) lifts the layer-sum decomposition (§0) to a
+closed form: `chainWeight` of any base 1-chain is the sum, over the four `Z₂²`
+slots, of `wt5OfComps` applied to the chain's ten CRT components (five per
+block). This is the form the §10 slot frame minimizes over the coset's free data
+— composing it with the `f`-dependence (§3) expresses the coset weight as
+`costFromComps` of the seam offsets `⊕ Â/B̂·(Vⱼ f)`, the input to the
+confined-floor enumeration. -/
 
 /-- The chain weight as a sum over `Z₂²` slots of the two blocks' per-slot `wt5`
 of their five CRT components. -/
@@ -801,9 +816,10 @@ def costFromComps (vL0 vL1 vL2 vL3 vL4 vR0 vR1 vR2 vR3 vR4 : ZMod 2 × ZMod 2 �
     (wt5OfComps (vL0 s) (vL1 s) (vL2 s) (vL3 s) (vL4 s)
      + wt5OfComps (vR0 s) (vR1 s) (vR2 s) (vR3 s) (vR4 s))
 
-/-- **The closed weight form** (§0 ▸ §5): `chainWeight` is `costFromComps` of the chain's
-ten CRT components (`V ψⱼ s` on each block).  Structural — `chainWeight_eq_layer_sum`
-followed by `weight3_eq_wt5_slice` on each block-slice. -/
+/-- **The closed weight form** (§0 ▸ §5): `chainWeight` is `costFromComps` of
+the chain's ten CRT components (`V ψⱼ s` on each block). Structural —
+`chainWeight_eq_layer_sum` followed by `weight3_eq_wt5_slice` on each
+block-slice. -/
 theorem chainWeight_eq_costFromComps (c : BaseGroup × Fin 2 → ZMod 2) :
     bb72Complex.chainWeight c = costFromComps
       (fun s => V psi0 s (leftHalf c)) (fun s => V psi1 s (leftHalf c))
@@ -819,21 +835,24 @@ theorem chainWeight_eq_costFromComps (c : BaseGroup × Fin 2 → ZMod 2) :
 /-! ## §7 The coset weight in component form (the `f`-dependence)
 
 Composing the closed weight form (§6) with the coset CRT profile (§3) writes the
-safe-sector coset weight `chainWeight (seamC ζ + ∂₂ f)` as `costFromComps` of the ten
-coset components `shifted (seam offset) multiplier (Vⱼ f)`: each component is the seam
-offset `Vⱼ(seamC ζ)` plus the engine-multiplied free datum `P̂ⱼ · Vⱼ f`, with
-`Â = (unitHat, Ahat1, unitHat, Ahat1, Ahat4)` on the A-block and
-`B̂ = (unitHat, unitHat, Bhat2, Bhat2, Bhat2)` on the B-block.  The helpers
-`seamOffL/R` (the per-orbit offsets) and `compF` (the free datum) are the data the
-confined-floor enumeration ranges over. -/
+safe-sector coset weight `chainWeight (seamC ζ + ∂₂ f)` as `costFromComps` of
+the ten coset components `shifted (seam offset) multiplier (Vⱼ f)`: each
+component is the seam offset `Vⱼ(seamC ζ)` plus the engine-multiplied free datum
+`P̂ⱼ · Vⱼ f`, with `Â = (unitHat, Ahat1, unitHat, Ahat1, Ahat4)` on the A-block
+and `B̂ = (unitHat, unitHat, Bhat2, Bhat2, Bhat2)` on the B-block. The helpers
+`seamOffL/R` (the per-orbit offsets) and `compF` (the free datum) are the data
+the confined-floor enumeration ranges over. -/
 
-/-- The `ζ`-seam offset of CRT component `ψ` on the A-block (`leftHalf (seamC ζ)`). -/
+/-- The `ζ`-seam offset of CRT component `ψ` on the A-block
+(`leftHalf (seamC ζ)`). -/
 def seamOffL (ζ : BaseGroup → ZMod 2) (psi : BaseGroup → Fin 4) : Ring :=
   fun s => V psi s (leftHalf (seamC ζ))
-/-- The `ζ`-seam offset of CRT component `ψ` on the B-block (`rightHalf (seamC ζ)`). -/
+/-- The `ζ`-seam offset of CRT component `ψ` on the B-block
+(`rightHalf (seamC ζ)`). -/
 def seamOffR (ζ : BaseGroup → ZMod 2) (psi : BaseGroup → Fin 4) : Ring :=
   fun s => V psi s (rightHalf (seamC ζ))
-/-! ### Seam offsets through the packed mask (the per-orbit evaluation gateway) -/
+/-! ### Seam offsets through the packed mask (the per-orbit evaluation gateway)
+-/
 
 /-- A Smith class's A-block seam offsets, evaluated through the packed mask. -/
 theorem seamOffL_mask (c0 c1 c2 c3 c4 c5 : ZMod 2) (psi : BaseGroup → Fin 4)
@@ -851,7 +870,8 @@ theorem seamOffR_mask (c0 c1 c2 c3 c4 c5 : ZMod 2) (psi : BaseGroup → Fin 4)
   change V psi s (rightHalf (seamC (kcombo c0 c1 c2 c3 c4 c5))) = _
   rw [seamC_kcombo_mask]
 
-/-- Function-level sparse form of the base boundary (for rewriting under binders). -/
+/-- Function-level sparse form of the base boundary (for rewriting under
+binders). -/
 theorem bb2_fun_sparse (f : BaseGroup → ZMod 2) :
     bbBoundary2Fn baseA baseB f
       = fun q => if q.2 = 0 then f (q.1 - (3, 0)) + f (q.1 - (0, 1)) + f (q.1 - (0, 2))
@@ -865,9 +885,10 @@ def compF (f : BaseGroup → ZMod 2) (psi : BaseGroup → Fin 4) : Ring :=
 def shifted (o mult vf : Ring) : Ring := fun s => fadd (o s) (rmul mult vf s)
 
 /-- **The coset weight in component form**: `chainWeight (seamC ζ + ∂₂ f)` is
-`costFromComps` of the ten coset components `shifted (seam offset) multiplier (Vⱼ f)`
-(§6 ▸ §3).  The substitution is the per-block `Vcoset` profile; `rfl` matches the
-`shifted` helpers definitionally. -/
+`costFromComps` of the ten coset components
+`shifted (seam offset) multiplier (Vⱼ f)` (§6 ▸ §3). The substitution is the
+per-block `Vcoset` profile; `rfl` matches the `shifted` helpers definitionally.
+-/
 theorem chainWeight_coset_eq (ζ f : BaseGroup → ZMod 2) :
     bb72Complex.chainWeight (seamC ζ + bbBoundary2Fn baseA baseB f)
       = costFromComps

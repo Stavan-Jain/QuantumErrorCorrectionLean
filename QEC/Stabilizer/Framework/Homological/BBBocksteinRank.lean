@@ -39,8 +39,8 @@ variable {F Hc Hb : Type*} [Field F]
   [AddCommGroup Hb] [Module F Hb] [FiniteDimensional F Hb]
 
 /-- `dim ker (g ∘ f) ≤ dim ker f + dim ker g`: the kernel of a composite is
-`comap f (ker g)`, which sits over `ker f` with quotient embedding into
-`ker g`. -/
+`comap f (ker g)`, which sits over `ker f` with quotient embedding into `ker g`.
+-/
 theorem finrank_ker_comp_le (f : Hc →ₗ[F] Hb) (g : Hb →ₗ[F] Hc) :
     finrank F (ker (g ∘ₗ f)) ≤ finrank F (ker f) + finrank F (ker g) := by
   set K := ker (g ∘ₗ f) with hK
@@ -67,8 +67,8 @@ theorem finrank_ker_comp_le (f : Hc →ₗ[F] Hb) (g : Hb →ₗ[F] Hc) :
   omega
 
 /-- **The transfer-inequality core.** With exactness `ker p = im τ` of the
-transfer sequence at the cover, the deck composite `ε = τ ∘ p` has image
-of dimension at least `dim Hc − dim Hb`. -/
+transfer sequence at the cover, the deck composite `ε = τ ∘ p` has image of
+dimension at least `dim Hc − dim Hb`. -/
 theorem finrank_sub_le_finrank_range_comp
     (p : Hc →ₗ[F] Hb) (τ : Hb →ₗ[F] Hc)
     (hexact : ker p = range τ) :
@@ -86,10 +86,9 @@ composite `ε = τ ∘ p` satisfies
 `dim (im ε) + dim Hb + dim (range p ⊓ ker τ) = dim Hc + dim (ker τ)`.
 
 The `range p ⊓ ker τ` term is the entire obstruction to tightness of
-`finrank_sub_le_finrank_range_comp`: it is `≤ ker τ` always, and equals
-`ker τ` exactly when `ker τ ≤ range p`.  In the homology instance this
-`range p ⊓ ker τ = ker τ` condition is the Bockstein vanishing
-`δ₁ ∘ δ₂ = 0`. -/
+`finrank_sub_le_finrank_range_comp`: it is `≤ ker τ` always, and equals `ker τ`
+exactly when `ker τ ≤ range p`. In the homology instance this
+`range p ⊓ ker τ = ker τ` condition is the Bockstein vanishing `δ₁ ∘ δ₂ = 0`. -/
 theorem finrank_range_comp_add_eq
     (p : Hc →ₗ[F] Hb) (τ : Hb →ₗ[F] Hc)
     (hexact : ker p = range τ) :
@@ -116,10 +115,9 @@ theorem finrank_range_comp_add_eq
   omega
 
 /-- **The tightness criterion (sufficient direction).**
-`finrank_sub_le_finrank_range_comp` is an equality when `ker τ ≤ range p`.
-In the homology instance `ker τ ≤ range p` is the Bockstein vanishing
-`δ₁ ∘ δ₂ = 0`, so this is the step that turns `E ≥ k̃ − k` into
-`E = k̃ − k`. -/
+`finrank_sub_le_finrank_range_comp` is an equality when `ker τ ≤ range p`. In
+the homology instance `ker τ ≤ range p` is the Bockstein vanishing
+`δ₁ ∘ δ₂ = 0`, so this is the step that turns `E ≥ k̃ − k` into `E = k̃ − k`. -/
 theorem finrank_range_comp_eq_of_ker_le
     (p : Hc →ₗ[F] Hb) (τ : Hb →ₗ[F] Hc)
     (hexact : ker p = range τ) (hle : ker τ ≤ range p) :

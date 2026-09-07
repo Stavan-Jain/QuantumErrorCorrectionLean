@@ -6,16 +6,16 @@ import QEC.Stabilizer.Codes.RotatedSurface.ChainComplex
 /-!
 # `dim H₁ = 1` for the rotated surface code
 
-The rotated surface code at `L × L` (odd `L ≥ 3`) has `dim H₁ = 1` — one
-logical qubit.  The proof rests on the *anchor-qubit* trick:
+The rotated surface code at `L × L` (odd `L ≥ 3`) has `dim H₁ = 1` — one logical
+qubit. The proof rests on the *anchor-qubit* trick:
 
-* Each X-stabiliser has a unique "anchor" qubit (its row-major minimum)
-  that no other X-stabiliser covers.  Hence the X-stab indicator family
-  is linearly independent — `ker rscBoundary2 = ⊥`.
+* Each X-stabiliser has a unique "anchor" qubit (its row-major minimum) that no
+  other X-stabiliser covers. Hence the X-stab indicator family is linearly
+  independent — `ker rscBoundary2 = ⊥`.
 * The same argument for Z-stabs gives `ker cutMap = ⊥`.
-* Combined with the cardinality identity `|X-stabs| + |Z-stabs| = L² − 1`
-  (for `L` odd) and the abstract rank-nullity from `HomologicalCode`,
-  we conclude `dim H₁ = 1`.
+* Combined with the cardinality identity `|X-stabs| + |Z-stabs| = L² − 1` (for
+  `L` odd) and the abstract rank-nullity from `HomologicalCode`, we conclude
+  `dim H₁ = 1`.
 -/
 
 namespace Quantum
@@ -144,12 +144,11 @@ lemma rsc_finrank_C2 (L : ℕ) :
 
 /-! ## Anchor-qubit framework
 
-For each X- (resp. Z-) stabilizer we assign a unique "anchor" qubit:
-its lex-minimum supported qubit.  The argument shows that distinct
-stabilisers of the same colour have distinct anchors, each anchor is in
-the corresponding support, and each anchor is the lex-min of its
-support.  This gives a row-echelon decomposition forcing linear
-independence within each colour. -/
+For each X- (resp. Z-) stabilizer we assign a unique "anchor" qubit: its
+lex-minimum supported qubit. The argument shows that distinct stabilisers of the
+same colour have distinct anchors, each anchor is in the corresponding support,
+and each anchor is the lex-min of its support. This gives a row-echelon
+decomposition forcing linear independence within each colour. -/
 
 /-- Row-major qubit index. -/
 @[reducible] def qubitIdx (v : VtxIdx L) : ℕ := v.2.val * L + v.1.val
@@ -535,8 +534,8 @@ lemma zAnchorIdx_injective : Function.Injective (zAnchorIdx : ZFaceIdx L → ℕ
 
 /-! ## ker(`rscBoundary2`) = ⊥
 
-Combining the X-anchor properties, the indicator family of X-stabs is
-linearly independent, so the boundary map `∂₂` is injective. -/
+Combining the X-anchor properties, the indicator family of X-stabs is linearly
+independent, so the boundary map `∂₂` is injective. -/
 
 theorem rscBoundary2_injective : Function.Injective (∂₂ L) := by
   rw [← LinearMap.ker_eq_bot, Submodule.eq_bot_iff]
@@ -591,9 +590,9 @@ theorem rsc_rank_boundary2 :
 
 /-! ## The Z-side cut map and its kernel
 
-The map `rscZCutMap`: `s : ZFaceIdx → ZMod 2` ↦ `(v : VtxIdx) ↦ ∑_{zf ∋ v} s zf`.
-This is the indicator-combination map for Z-stabilisers, dual to `rscBoundary1`
-in the transpose sense. -/
+The map `rscZCutMap`: `s : ZFaceIdx → ZMod 2` ↦
+`(v : VtxIdx) ↦ ∑_{zf ∋ v} s zf`. This is the indicator-combination map for
+Z-stabilisers, dual to `rscBoundary1` in the transpose sense. -/
 
 /-- The Z-stab indicator combination map. -/
 def rscZCutMap (L : ℕ) :
@@ -606,8 +605,9 @@ def rscZCutMap (L : ℕ) :
     funext v
     simp only [RingHom.id_apply, Pi.smul_apply, smul_eq_mul, Finset.mul_sum, mul_assoc]
 
-/-- `δ⁰` is the rotated-surface Z-side cut map `rscZCutMap L` (the transpose of `∂₁`,
-i.e. the coboundary `C⁰ → C¹`). Scoped: `open scoped RotatedSurfaceChain`. -/
+/-- `δ⁰` is the rotated-surface Z-side cut map `rscZCutMap L` (the transpose of
+`∂₁`, i.e. the coboundary `C⁰ → C¹`). Scoped: `open scoped RotatedSurfaceChain`.
+-/
 scoped[RotatedSurfaceChain] notation "δ⁰" =>
   Quantum.Stabilizer.Lattice.RotatedSurface.rscZCutMap
 
@@ -665,8 +665,8 @@ theorem rsc_rank_zCutMap :
 
 /-! ## Transpose pairing of `rscBoundary1` and `rscZCutMap`
 
-The standard pairing `⟨∂₁ c, s⟩ = ⟨c, rscZCutMap s⟩` identifies the two
-maps as mutual transposes, so they share the same rank. -/
+The standard pairing `⟨∂₁ c, s⟩ = ⟨c, rscZCutMap s⟩` identifies the two maps as
+mutual transposes, so they share the same rank. -/
 
 theorem rscBoundary1_rscZCutMap_transpose
     (c : VtxIdx L → ZMod 2) (s : ZFaceIdx L → ZMod 2) :
@@ -698,11 +698,12 @@ theorem rscBoundary1_rscZCutMap_transpose
 
 /-! ## Rank equality via the Z-stab incidence matrix
 
-`rscBoundary1` and `rscZCutMap` are mutual transposes (the indicator
-matrix of Z-stabs).  Using `Matrix.rank_transpose` we get the rank
-equality `rank ∂₁ = rank rscZCutMap`. -/
+`rscBoundary1` and `rscZCutMap` are mutual transposes (the indicator matrix of
+Z-stabs). Using `Matrix.rank_transpose` we get the rank equality
+`rank ∂₁ = rank rscZCutMap`. -/
 
-/-- The Z-stab incidence matrix: entry `(zf, v)` is `1` iff `v ∈ zSupport zf`. -/
+/-- The Z-stab incidence matrix: entry `(zf, v)` is `1` iff `v ∈ zSupport zf`.
+-/
 def stabZMatrix (L : ℕ) : Matrix (ZFaceIdx L) (VtxIdx L) (ZMod 2) :=
   fun zf v => if v ∈ zSupport zf then 1 else 0
 

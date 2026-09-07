@@ -28,9 +28,10 @@ Formalizes the parametric toric code for an L×L lattice:
 - Horizontal edges `H(x,y)` and vertical edges `V(x,y)` with periodic boundaries
 - Face stabilizers (X-type) and vertex stabilizers (Z-type)
 
-Convention note: this file uses face=X and vertex=Z checks, matching the convention
-in `distance_proof.md`. Some expositions use the swapped convention (face=Z, vertex=X);
-both are equivalent via global Hadamard (X ↔ Z on every qubit).
+Convention note: this file uses face=X and vertex=Z checks, matching the
+convention in `distance_proof.md`. Some expositions use the swapped convention
+(face=Z, vertex=X); both are equivalent via global Hadamard (X ↔ Z on every
+qubit).
 -/
 
 namespace Quantum
@@ -365,7 +366,8 @@ lemma mem_support_vertexStab_iff (L : ℕ) [Fact (0 < L)] (xv yv : Fin L) (i : F
     · subst h4
       simp [NQubitPauliOperator.support, vertexStab, NQubitPauliOperator.set]
 
-/-- At each qubit, face/vertex anticommute exactly when both supports contain that qubit. -/
+/-- At each qubit, face/vertex anticommute exactly when both supports contain
+that qubit. -/
 lemma anticommutesAt_face_vertex_iff_mem_support_both
     (L : ℕ) [Fact (0 < L)] (xf yf xv yv : Fin L) (i : Fin (numQubits L)) :
     NQubitPauliGroupElement.anticommutesAt
@@ -606,16 +608,18 @@ lemma stabilizerGroup_toSubgroup_eq (L : ℕ) [Fact (2 ≤ L)] :
 ## 6. Chain complex and homology aliases
 
 (The full `StabilizerCode (numQubits L) 2` packaging is built in
-`ToricCodeNStabilizerCode.lean`, which uses a *trimmed* generator list
-of length `numQubits L - 2`. The full `generatorsList L` here has length
-`2L²`, so it cannot directly populate `StabilizerCode.generators_length`.)
+`ToricCodeNStabilizerCode.lean`, which uses a *trimmed* generator list of length
+`numQubits L - 2`. The full `generatorsList L` here has length `2L²`, so it
+cannot directly populate `StabilizerCode.generators_length`.)
 -/
 
-/-- Alias for the toric `∂2` boundary map from the lattice chain-complex layer. -/
+/-- Alias for the toric `∂2` boundary map from the lattice chain-complex layer.
+-/
 abbrev toricBoundary2 (L : ℕ) [Fact (0 < L)] :=
   ∂₂ (L := L)
 
-/-- Alias for the toric `∂1` boundary map from the lattice chain-complex layer. -/
+/-- Alias for the toric `∂1` boundary map from the lattice chain-complex layer.
+-/
 abbrev toricBoundary1 (L : ℕ) [Fact (0 < L)] :=
   ∂₁ (L := L)
 

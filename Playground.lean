@@ -3,8 +3,8 @@ import QECLight
 /-!
 # Playground
 
-A scratch file for trying things against QECLean. Edit freely — nothing here
-is part of the library, and no `lean_lib` builds it.
+A scratch file for trying things against QECLean. Edit freely — nothing here is
+part of the library, and no `lean_lib` builds it.
 
 It imports `QECLight`, which is the library minus the bivariate-bicycle code
 family (too memory-hungry for a container or a shared session; see

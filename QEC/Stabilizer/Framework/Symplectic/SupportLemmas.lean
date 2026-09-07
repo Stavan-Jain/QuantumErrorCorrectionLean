@@ -75,7 +75,8 @@ namespace NQubitPauliGroupElement
 
 variable {n : ℕ}
 
-/-- For Z/X-typed operator tensors, `anticommutesAt` is equivalent to support overlap. -/
+/-- For Z/X-typed operator tensors, `anticommutesAt` is equivalent to support
+overlap. -/
 lemma anticommutesAt_iff_mem_support_both_of_ZXType
     {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsZType p)
@@ -92,7 +93,8 @@ lemma anticommutesAt_iff_mem_support_both_of_ZXType
     · simp [anticommutesAt, NQubitPauliOperator.support, hpZ, hqI]
     · simp [anticommutesAt, NQubitPauliOperator.support, hpZ, hqX]
 
-/-- For X/Z-typed operator tensors, `anticommutesAt` is equivalent to support overlap. -/
+/-- For X/Z-typed operator tensors, `anticommutesAt` is equivalent to support
+overlap. -/
 lemma anticommutesAt_iff_mem_support_both_of_XZType
     {p q : NQubitPauliOperator n}
     (hp : NQubitPauliOperator.IsXType p)

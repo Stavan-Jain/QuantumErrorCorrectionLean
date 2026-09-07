@@ -6,15 +6,15 @@ import QEC.Stabilizer.Framework.Symplectic.SupportLemmas
 # §B.2 — Stabilizer generators of a homological CSS code
 
 For a `HomologicalCode X`, the X-stabilizer generators are face stabilizers
-`chainXOperator (∂₂ (singleFace f))`, and the Z-stabilizer generators are
-vertex stabilizers `chainZOperator (cutMap (singleVtx v))`.
+`chainXOperator (∂₂ (singleFace f))`, and the Z-stabilizer generators are vertex
+stabilizers `chainZOperator (cutMap (singleVtx v))`.
 
 We prove pairwise commutation:
 
 * X-X commute (both X-type).
 * Z-Z commute (both Z-type).
 * X-Z commute iff their `Σ e, c e * c' e` vanishes (the bilinear pairing on
-  chains).  For face/vertex generators this is `0` by the chain-complex law
+  chains). For face/vertex generators this is `0` by the chain-complex law
   `∂₁ ∘ ∂₂ = 0` together with `boundary1_cutMap_transpose` from §A.
 -/
 
@@ -186,7 +186,8 @@ theorem chainXOperator_commutes_chainZOperator_iff (c c' : X.C1 → ZMod 2) :
       chainInnerProduct_eq_card_filter c c']
   exact (nat_cast_zmod2_eq_zero_iff_even _).symm
 
-/-- The face X-stabilizer commutes with the vertex Z-stabilizer (chain-complex law). -/
+/-- The face X-stabilizer commutes with the vertex Z-stabilizer (chain-complex
+law). -/
 theorem faceStabOf_commutes_vertexStabOf (f : X.C2) (v : X.C0) :
     X.faceStabOf f * X.vertexStabOf v = X.vertexStabOf v * X.faceStabOf f := by
   unfold faceStabOf vertexStabOf

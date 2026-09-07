@@ -48,22 +48,24 @@ namespace LightStab
 
 /-! ## §1 The layer dictionary `d₃` over `Z₃²`
 
-For nonzero `f : Z₃² → F₂` whose `F₄`-valued torus-Fourier support is contained in
-an orbit set `W`, the Hamming weight is at least `d₃(W)`.  This is the clean finite
-core of the one-block lemma (A4 §6.3): there, every layer of a one-block stabilizer
-has Fourier support `⊆ {orbit ψ₁, orbit ψ₃}` (the parity, `ψ₂`, `ψ₄` components are
-dead), and the dictionary converts that confinement into a per-layer weight floor.
+For nonzero `f : Z₃² → F₂` whose `F₄`-valued torus-Fourier support is contained
+in an orbit set `W`, the Hamming weight is at least `d₃(W)`. This is the clean
+finite core of the one-block lemma (A4 §6.3): there, every layer of a one-block
+stabilizer has Fourier support `⊆ {orbit ψ₁, orbit ψ₃}` (the parity, `ψ₂`, `ψ₄`
+components are dead), and the dictionary converts that confinement into a
+per-layer weight floor.
 
-Support confinement is checked at ONE representative per dead orbit (Frobenius makes
-this equivalent to checking the whole orbit, for `F₂`-valued `f`); the representatives
-are exactly the `CRTFrame` characters `ψ₀..ψ₄`, so `§2`'s Fourier bridge turns each
-check into a condition on `V ψⱼ s b`. -/
+Support confinement is checked at ONE representative per dead orbit (Frobenius
+makes this equivalent to checking the whole orbit, for `F₂`-valued `f`); the
+representatives are exactly the `CRTFrame` characters `ψ₀..ψ₄`, so `§2`'s
+Fourier bridge turns each check into a condition on `V ψⱼ s b`. -/
 
 /-- The 9 torus cells of `Z₃²`. -/
 def cells3 : List (ZMod 3 × ZMod 3) :=
   (List.range 3).flatMap (fun a => (List.range 3).map (fun b => ((a : ZMod 3), (b : ZMod 3))))
 
-/-- The torus character value `ω^{a·t_x + b·t_y}` of direction `c = (a,b)` at cell `t`. -/
+/-- The torus character value `ω^{a·t_x + b·t_y}` of direction `c = (a,b)` at
+cell `t`. -/
 def tchar (c t : ZMod 3 × ZMod 3) : Fin 4 := omegaPow (c.1 * t.1 + c.2 * t.2)
 
 /-- The `F₄`-valued torus-Fourier coefficient of `f` at character direction
@@ -93,11 +95,11 @@ def dead13 : List (ZMod 3 × ZMod 3) := [(0, 0), (1, 0), (1, 2)]
 
 /-! ### The kernel-friendly chain constructor.
 
-The dictionary bounds sweep all 512 chains `f : Z₃² → F₂`.  Enumerating that
+The dictionary bounds sweep all 512 chains `f : Z₃² → F₂`. Enumerating that
 pi-type directly makes the kernel whnf the pi-`Fintype` instance (the
 noncomputable-whnf hazard's finite cousin), so the sweeps are instead stated
-over nine `ZMod 2` cell values via `mkTorus`, with `eq_mkTorus` transporting
-the result to an arbitrary `f`. -/
+over nine `ZMod 2` cell values via `mkTorus`, with `eq_mkTorus` transporting the
+result to an arbitrary `f`. -/
 
 /-- Explicit torus chain from its nine cell values (row-major
 `(0,0),(0,1),(0,2),(1,0),(1,1),(1,2),(2,0),(2,1),(2,2)`). -/
@@ -117,10 +119,11 @@ theorem eq_mkTorus (f : ZMod 3 × ZMod 3 → ZMod 2) :
   rcases h3 t1 with rfl | rfl | rfl <;> rcases h3 t2 with rfl | rfl | rfl <;> rfl
 
 /-! ### The three dictionary lower bounds (512-chain kernel sweeps via
-`mkTorus`).  These are the exact `d₃`-costs the one-block lemma (A4 §6.3)
+`mkTorus`). These are the exact `d₃`-costs the one-block lemma (A4 §6.3)
 consumes. -/
 
-/-- `d₃({1}) = 6`: a nonzero `f` with Fourier support `⊆ orbit(ψ₁)` has weight `≥ 6`. -/
+/-- `d₃({1}) = 6`: a nonzero `f` with Fourier support `⊆ orbit(ψ₁)` has weight
+`≥ 6`. -/
 theorem d3_psi1_ge6 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
     f ≠ 0 → suppOutsideZero f dead1 = true → 6 ≤ weight3 f := by
   have key : ∀ v00 v01 v02 v10 v11 v12 v20 v21 v22 : ZMod 2,
@@ -131,7 +134,8 @@ theorem d3_psi1_ge6 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
   rw [eq_mkTorus f] at hne hsupp ⊢
   exact key _ _ _ _ _ _ _ _ _ hne hsupp
 
-/-- `d₃({3}) = 6`: a nonzero `f` with Fourier support `⊆ orbit(ψ₃)` has weight `≥ 6`. -/
+/-- `d₃({3}) = 6`: a nonzero `f` with Fourier support `⊆ orbit(ψ₃)` has weight
+`≥ 6`. -/
 theorem d3_psi3_ge6 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
     f ≠ 0 → suppOutsideZero f dead3 = true → 6 ≤ weight3 f := by
   have key : ∀ v00 v01 v02 v10 v11 v12 v20 v21 v22 : ZMod 2,
@@ -142,8 +146,8 @@ theorem d3_psi3_ge6 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
   rw [eq_mkTorus f] at hne hsupp ⊢
   exact key _ _ _ _ _ _ _ _ _ hne hsupp
 
-/-- `d₃({1,3}) = 4`: a nonzero `f` with Fourier support `⊆ orbit(ψ₁) ∪ orbit(ψ₃)`
-has weight `≥ 4`. -/
+/-- `d₃({1,3}) = 4`: a nonzero `f` with Fourier support
+`⊆ orbit(ψ₁) ∪ orbit(ψ₃)` has weight `≥ 4`. -/
 theorem d3_psi1or3_ge4 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
     f ≠ 0 → suppOutsideZero f dead13 = true → 4 ≤ weight3 f := by
   have key : ∀ v00 v01 v02 v10 v11 v12 v20 v21 v22 : ZMod 2,
@@ -155,7 +159,7 @@ theorem d3_psi1or3_ge4 : ∀ f : ZMod 3 × ZMod 3 → ZMod 2,
   exact key _ _ _ _ _ _ _ _ _ hne hsupp
 
 /-! ### Tightness: each bound is attained (guards against a vacuously-true,
-over-constrained support predicate).  Witnesses: `d₃({1})` — the two rows
+over-constrained support predicate). Witnesses: `d₃({1})` — the two rows
 `t_y ∈ {0,1}`; `d₃({3})` — the two diagonals `t_x+t_y ∈ {0,1}`; `d₃({1,3})` —
 their symmetric difference (weight 4). -/
 
@@ -174,10 +178,11 @@ theorem d3_psi1or3_tight : ∃ f : ZMod 3 × ZMod 3 → ZMod 2,
 /-! ## §2 The base ↔ torus reindex bridge
 
 `BaseGroup = Z₆² ≅ Z₂² × Z₃²` via `g ↦ (layer g, torus g)`; `combineCell` is the
-inverse (CRT: `3·s + 4·t (mod 6)` per coordinate).  The layer-`s` torus slice of a
-base chain `b` is `slice b s := fun t => b (combineCell s t)`. -/
+inverse (CRT: `3·s + 4·t (mod 6)` per coordinate). The layer-`s` torus slice of
+a base chain `b` is `slice b s := fun t => b (combineCell s t)`. -/
 
-/-- CRT inverse on one `Z₆` coordinate: the element `≡ s (mod 2)`, `≡ t (mod 3)`. -/
+/-- CRT inverse on one `Z₆` coordinate: the element `≡ s (mod 2)`,
+`≡ t (mod 3)`. -/
 def combine1 (s : ZMod 2) (t : ZMod 3) : ZMod 6 := ((3 * s.val + 4 * t.val : ℕ) : ZMod 6)
 
 /-- CRT inverse `Z₂² × Z₃² → Z₆² = BaseGroup`. -/
@@ -198,7 +203,8 @@ theorem combineCell_layer_torus : ∀ g : BaseGroup,
     combineCell (layer g) (torus g) = g := by decide
 theorem cells3_complete : ∀ t : ZMod 3 × ZMod 3, t ∈ cells3 := by decide
 
-/-! ### `fhat3` is `F₂`-linear (the bridge needs additivity to lift the basis case). -/
+/-! ### `fhat3` is `F₂`-linear (the bridge needs additivity to lift the basis
+case). -/
 
 /-- `fhat3` is `F₂`-additive in the chain. -/
 theorem fhat3_add (f g : ZMod 3 × ZMod 3 → ZMod 2) (c : ZMod 3 × ZMod 3) :
@@ -244,8 +250,8 @@ Both sides are `F₂`-additive in `b` and agree on every `δ_g` (kernel `decide`
 over the 36 `g` × 4 `s` — both sides are explicit `List.foldl`s, so the direct
 statement is already kernel-checkable), hence agree for all `b`. -/
 
-/-- Two `F₂`-additive maps `(BaseGroup → ZMod 2) → Fin 4` that agree on every `δ_g`
-agree everywhere. -/
+/-- Two `F₂`-additive maps `(BaseGroup → ZMod 2) → Fin 4` that agree on every
+`δ_g` agree everywhere. -/
 theorem fourier_bridge_gen (M N : (BaseGroup → ZMod 2) → Fin 4)
     (hM0 : M 0 = 0) (hN0 : N 0 = 0)
     (hMadd : ∀ a b, M (a + b) = fadd (M a) (M b))
@@ -333,8 +339,8 @@ def baseEquiv : BaseGroup ≃ (ZMod 2 × ZMod 2) × (ZMod 3 × ZMod 3) where
 /-- The base weight of a block `b`, as a `Finset.card`. -/
 def bwt (b : BaseGroup → ZMod 2) : Nat := (Finset.univ.filter (fun h => b h = 1)).card
 
-/-- **The weight bridge**: a block's weight is the sum over layers of its torus slice
-weights. -/
+/-- **The weight bridge**: a block's weight is the sum over layers of its torus
+slice weights. -/
 theorem weight_bridge (b : BaseGroup → ZMod 2) :
     bwt b = ∑ s : ZMod 2 × ZMod 2, weight3 (slice b s) := by
   unfold bwt
@@ -346,15 +352,18 @@ theorem weight_bridge (b : BaseGroup → ZMod 2) :
 /-! ## §3 The sharp one-block lemma (L4c)
 
 `w ∈ Ann(A) ∖ ker ∂₂` (`A·w = 0`, `B·w ≠ 0`) ⟹ `|B·w| ≥ 16` (A4 §6.3, one-block
-lemma, sharp form).  This is the completeness-free route: a forward implication
-from `A·w = 0` via multiplicativity + the engine (the Fourier profile of `B·w`) and
-the `§1`/`§2` dictionary + bridge (the per-layer weight floor).  The sharp `16` (not
-the old `≥ 12`) is what closes the d=12 gap at exactly 12 in the endgame transfers.
+lemma, sharp form). This is the completeness-free route: a forward implication
+from `A·w = 0` via multiplicativity + the engine (the Fourier profile of `B·w`)
+and the `§1`/`§2` dictionary + bridge (the per-layer weight floor). The sharp
+`16` (not the old `≥ 12`) is what closes the d=12 gap at exactly 12 in the
+endgame transfers.
 
 `CRTFrame` supplies the radical-multiplier multiplicativity (`mult_A1/A3/A4`,
-`mult_B2/B3/B4`); the unit components (`Â₀=Â₂=B̂₀=B̂₁=1+u+v`) are completed here. -/
+`mult_B2/B3/B4`); the unit components (`Â₀=Â₂=B̂₀=B̂₁=1+u+v`) are completed
+here. -/
 
-/-- The unit multiplier value vector `Â₀ = Â₂ = B̂₀ = B̂₁ = 1+u+v = (1,1,1,0)`. -/
+/-- The unit multiplier value vector `Â₀ = Â₂ = B̂₀ = B̂₁ = 1+u+v = (1,1,1,0)`.
+-/
 def unitHat : Ring := fun s =>
   if s = (0, 0) then 1 else if s = (1, 0) then 1 else if s = (0, 1) then 1 else 0
 
@@ -389,7 +398,8 @@ theorem unitHat_zero_to_Bhat2 : ∀ r : Ring,
   rw [ring_eq_mkRing r]
   exact key _ _ _ _
 
-/-- `V₄`: an `Â₄`-annihilated component is killed by `B̂₂` (since `B̂₄ = ω·Â₄`). -/
+/-- `V₄`: an `Â₄`-annihilated component is killed by `B̂₂` (since `B̂₄ = ω·Â₄`).
+-/
 theorem Ahat4_zero_to_Bhat2 : ∀ r : Ring,
     rmul Ahat4 r = (fun _ => 0) → rmul Bhat2 r = (fun _ => 0) := by
   have key : ∀ a b c d : Fin 4,
@@ -412,7 +422,8 @@ theorem Ahat1_zero_Bhat2_const : ∀ r : Ring,
   rw [ring_eq_mkRing r]
   exact key _ _ _ _
 
-/-- `V₁`: `rmul unitHat r` stays in `Ann(Â₁)` when `r` does (`B̂₁` is a unit). -/
+/-- `V₁`: `rmul unitHat r` stays in `Ann(Â₁)` when `r` does (`B̂₁` is a unit).
+-/
 theorem Ahat1_unitHat_ann : ∀ r : Ring,
     rmul Ahat1 r = (fun _ => 0) → rmul Ahat1 (rmul unitHat r) = (fun _ => 0) := by
   have key : ∀ a b c d : Fin 4,
@@ -436,7 +447,8 @@ theorem annAhat1_zero_or_ge3 : ∀ r : Ring,
 
 theorem allS_complete : ∀ s : ZMod 2 × ZMod 2, s ∈ allS := by decide
 
-/-- `nLayers` (a `List` length) equals the `Finset.card` of the nonzero layers. -/
+/-- `nLayers` (a `List` length) equals the `Finset.card` of the nonzero layers.
+-/
 theorem nLayers_eq_card (p : Ring) :
     nLayers p = (Finset.univ.filter (fun s => p s ≠ 0)).card := by
   have hnd : allS.Nodup := by decide
@@ -448,9 +460,9 @@ theorem nLayers_eq_card (p : Ring) :
     Finset.mem_univ, true_and, and_iff_right_iff_imp]
   intro _; exact allS_complete s
 
-/-- Torus-Fourier injectivity at the 5 orbit reps (contrapositive form): a nonzero
-function has a nonzero `fhat3` at some representative (kernel `decide` over the
-512 chains, via `mkTorus`). -/
+/-- Torus-Fourier injectivity at the 5 orbit reps (contrapositive form): a
+nonzero function has a nonzero `fhat3` at some representative (kernel `decide`
+over the 512 chains, via `mkTorus`). -/
 theorem fhat3_nonzero_reps : ∀ f : ZMod 3 × ZMod 3 → ZMod 2, f ≠ 0 →
     fhat3 f (0, 0) ≠ 0 ∨ fhat3 f (0, 1) ≠ 0 ∨ fhat3 f (1, 0) ≠ 0 ∨
     fhat3 f (1, 1) ≠ 0 ∨ fhat3 f (1, 2) ≠ 0 := by
@@ -471,8 +483,8 @@ theorem b_zero_of_slices (b : BaseGroup → ZMod 2) (h : ∀ s, slice b s = 0) :
   have := congrFun (h (layer g)) (torus g)
   rwa [slice, combineCell_layer_torus] at this
 
-/-- Core: a block `b` with the Fourier profile of `B·w` (`w ∈ Ann(A)`) — `V₀=V₂=V₄=0`,
-`V₃` constant, `V₁ ∈ Ann(Â₁)` — has weight `≥ 16`. -/
+/-- Core: a block `b` with the Fourier profile of `B·w` (`w ∈ Ann(A)`) —
+`V₀=V₂=V₄=0`, `V₃` constant, `V₁ ∈ Ann(Â₁)` — has weight `≥ 16`. -/
 theorem oneBlock_core (b : BaseGroup → ZMod 2)
     (hV0 : ∀ s, V psi0 s b = 0) (hV2 : ∀ s, V psi2 s b = 0) (hV4 : ∀ s, V psi4 s b = 0)
     (hV3 : (∀ s, V psi3 s b = 0) ∨ (∀ s, V psi3 s b ≠ 0))
@@ -549,8 +561,8 @@ theorem oneBlock_core (b : BaseGroup → ZMod 2)
     calc (16 : ℕ) = ∑ _s : ZMod 2 × ZMod 2, 4 := h4.symm
       _ ≤ ∑ s : ZMod 2 × ZMod 2, weight3 (slice b s) := Finset.sum_le_sum (fun s _ => hfloor4 s)
 
-/-- **The sharp one-block lemma (L4c)**: `w ∈ Ann(A) ∖ ker ∂₂` (`A·w = 0`, `B·w ≠ 0`)
-forces `|B·w| ≥ 16`. -/
+/-- **The sharp one-block lemma (L4c)**: `w ∈ Ann(A) ∖ ker ∂₂` (`A·w = 0`,
+`B·w ≠ 0`) forces `|B·w| ≥ 16`. -/
 theorem oneBlock_ge16 (w : BaseGroup → ZMod 2) (hA : baseA ⋆ w = 0)
     (hB : baseB ⋆ w ≠ 0) : 16 ≤ bwt (baseB ⋆ w) := by
   apply oneBlock_core (baseB ⋆ w)
@@ -580,9 +592,10 @@ theorem oneBlock_ge16 (w : BaseGroup → ZMod 2) (hA : baseA ⋆ w = 0)
 
 /-! ## §4 Endgame transfer (block → boundary)
 
-L4c, contrapositive, lifts a block-level match to the full boundary: if the A-block
-of `∂₂f` equals a hexagon/D-pair A-block, the residual `w = f − witness ∈ Ann(A)`
-has `|B·w| < 16`, so (L4c) `B·w = 0` and `∂₂f = ∂₂(witness)`. -/
+L4c, contrapositive, lifts a block-level match to the full boundary: if the
+A-block of `∂₂f` equals a hexagon/D-pair A-block, the residual
+`w = f − witness ∈ Ann(A)` has `|B·w| < 16`, so (L4c) `B·w = 0` and
+`∂₂f = ∂₂(witness)`. -/
 
 /-- L4c contrapositive: `w ∈ Ann(A)` with `|B·w| < 16` forces `B·w = 0`. -/
 theorem oneBlock_contra (w : BaseGroup → ZMod 2) (hA : baseA ⋆ w = 0)
@@ -621,7 +634,8 @@ theorem bb2_zero (z : BaseGroup → ZMod 2) (h : BaseGroup) :
 theorem bb2_one (z : BaseGroup → ZMod 2) (h : BaseGroup) :
     bbBoundary2Fn baseA baseB z (h, 1) = (baseB ⋆ z) h := rfl
 
-/-- The B-block weight is at most the full boundary weight (`h ↦ (h,1)` injection). -/
+/-- The B-block weight is at most the full boundary weight (`h ↦ (h,1)`
+injection). -/
 theorem bwt_baseB_le_boundary (f : BaseGroup → ZMod 2) :
     bwt (baseB ⋆ f) ≤ (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0)).card := by
@@ -633,8 +647,8 @@ theorem bwt_baseB_le_boundary (f : BaseGroup → ZMod 2) :
     rw [bb2_one, hh]; exact one_ne_zero
   · intro a _ b _ hab; exact congrArg Prod.fst hab
 
-/-- **Endgame transfer (hexagon)**: if the A-block of `∂₂f` is `A·δ_g` and `|∂₂f| ≤ 10`,
-then `∂₂f = ∂₂δ_g`. -/
+/-- **Endgame transfer (hexagon)**: if the A-block of `∂₂f` is `A·δ_g` and
+`|∂₂f| ≤ 10`, then `∂₂f = ∂₂δ_g`. -/
 theorem transfer_hexagon (f : BaseGroup → ZMod 2) (g : BaseGroup)
     (hA : baseA ⋆ f = baseA ⋆ Pi.single g 1)
     (hwt : (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
@@ -667,8 +681,9 @@ theorem transfer_hexagon (f : BaseGroup → ZMod 2) (g : BaseGroup)
   · rw [if_pos hj, if_pos hj]; exact congrFun hA h
   · rw [if_neg hj, if_neg hj]; exact congrFun hBeq h
 
-/-- Block-weight decomposition (≤): the two blocks' weights sum to at most `|∂₂f|`
-(disjoint `h↦(h,0)` / `h↦(h,1)` injections into the boundary support). -/
+/-- Block-weight decomposition (≤): the two blocks' weights sum to at most
+`|∂₂f|` (disjoint `h↦(h,0)` / `h↦(h,1)` injections into the boundary support).
+-/
 theorem bwt_blocks_le_boundary (f : BaseGroup → ZMod 2) :
     bwt (baseA ⋆ f) + bwt (baseB ⋆ f) ≤
     (Finset.univ.filter (fun j : BaseGroup × Fin 2 => bbBoundary2Fn baseA baseB f j ≠ 0)).card := by
@@ -720,9 +735,9 @@ theorem bwt_baseB_dpair_le6 : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
     _ ≤ 6 := by norm_num
 
 /-- **Endgame transfer (D-pair)**: if the A-block of `∂₂f` is `A·(δ_g+δ_{g+d})`,
-`d ∈ pairDirections`, and `|∂₂f| ≤ 10`, then `∂₂f = ∂₂(δ_g+δ_{g+d})`.  The crude
-`10+6` bound only gives `≤16`; the block decomposition tightens `|B·f| ≤ 10−w_A ≤ 9`
-(`w_A = bwt(A·witness) ≥ 1`), so `|B·w| ≤ 15 < 16`. -/
+`d ∈ pairDirections`, and `|∂₂f| ≤ 10`, then `∂₂f = ∂₂(δ_g+δ_{g+d})`. The crude
+`10+6` bound only gives `≤16`; the block decomposition tightens
+`|B·f| ≤ 10−w_A ≤ 9` (`w_A = bwt(A·witness) ≥ 1`), so `|B·w| ≤ 15 < 16`. -/
 theorem transfer_dpair (f : BaseGroup → ZMod 2) (g d : BaseGroup) (hd : d ∈ pairDirections)
     (hA : baseA ⋆ f = baseA ⋆ (Pi.single g 1 + Pi.single (g + d) 1))
     (hwt : (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>

@@ -17,7 +17,8 @@ namespace Shor9
 /-!
 # Shor’s 9-qubit code (stabilizer generators)
 
-This file defines a clean, reusable formalization of Shor’s 9-qubit stabilizer subgroup:
+This file defines a clean, reusable formalization of Shor’s 9-qubit stabilizer
+subgroup:
 
 - Z-type generators `M1`–`M6` (pairwise Z checks within blocks)
 - X-type generators `M7`,`M8` (blockwise X checks)
@@ -36,8 +37,8 @@ open NQubitPauliGroupElement
 
 Qubits are indexed `0..8` in three blocks `{0,1,2}`, `{3,4,5}`, `{6,7,8}`.
 `M1`–`M6` are **intra-block** Z⊗Z on adjacent pairs within each block of three.
-`M7` is X on all qubits `0..5`; `M8` is X on all qubits `3..8` (standard Shor CSS
-presentation; overlapping supports).
+`M7` is X on all qubits `0..5`; `M8` is X on all qubits `3..8` (standard Shor
+CSS presentation; overlapping supports).
 -/
 
 /-- Z⊗Z on qubits 0 and 1 (first block, adjacent pair). -/
@@ -58,10 +59,12 @@ def M5 : NQubitPauliGroupElement 9 := σ[IIIIIIZZI]
 /-- Z⊗Z on qubits 7 and 8 (third block). -/
 def M6 : NQubitPauliGroupElement 9 := σ[IIIIIIIZZ]
 
-/-- X on each of qubits 0–5 (six-qubit X stabilizer, overlapping first two blocks). -/
+/-- X on each of qubits 0–5 (six-qubit X stabilizer, overlapping first two
+blocks). -/
 def M7 : NQubitPauliGroupElement 9 := σ[XXXXXXIII]
 
-/-- X on each of qubits 3–8 (six-qubit X stabilizer, overlapping last two blocks). -/
+/-- X on each of qubits 3–8 (six-qubit X stabilizer, overlapping last two
+blocks). -/
 def M8 : NQubitPauliGroupElement 9 := σ[IIIXXXXXX]
 
 /-- The six Z-type generators `M1`–`M6`. -/
@@ -108,8 +111,9 @@ lemma XGenerators_are_XType :
 /-!
 ## Commutation: Z generators commute with X generators
 
-We use the parity characterization from `PauliGroup/Commutation.lean` and discharge the
-finite parity goals by explicitly identifying the anticommute positions (n = 9).
+We use the parity characterization from `PauliGroup/Commutation.lean` and
+discharge the finite parity goals by explicitly identifying the anticommute
+positions (n = 9).
 -/
 
 private lemma M1_comm_M7 : M1 * M7 = M7 * M1 := by

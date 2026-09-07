@@ -7,21 +7,23 @@ import QEC.Stabilizer.Foundations.PauliGroup.NQubitOperator
 
 Two tactics to shorten repetitive commutation proofs in stabilizer code files:
 
-- **`pauli_comm_componentwise [lemmas]`**: for goals `p * q = q * p` when `p` and `q` commute
-  qubit-wise (e.g. both Z-type or both X-type). Applies `commutes_of_componentwise_commutes`
-  and proves the componentwise equality by `fin_cases` + `simp`. Pass code-specific
-  definitions in the optional `[lemmas]` list (e.g. `[Z1Z2, Z2Z3, logicalZ]`).
+- **`pauli_comm_componentwise [lemmas]`**: for goals `p * q = q * p` when `p`
+  and `q` commute qubit-wise (e.g. both Z-type or both X-type). Applies
+  `commutes_of_componentwise_commutes` and proves the componentwise equality by
+  `fin_cases` + `simp`. Pass code-specific definitions in the optional
+  `[lemmas]` list (e.g. `[Z1Z2, Z2Z3, logicalZ]`).
 
-- **`pauli_comm_even_anticommutes`**: for goals `z * x = x * z` when commutation follows
-  from "even number of qubits anticommute". Reduces the goal to
-  `Even ((Finset.univ.filter (anticommutesAt ...)).card)`. Then prove by showing the
-  filter equals a concrete finset (e.g. `have hfilter : (Finset.univ.filter ...) = {0,1} := by
-  ext i; fin_cases i; simp [Finset.mem_filter, anticommutesAt, *, logicalX, Z1Z2, ...]`) then
-  `simp [hfilter]` or `rw [hfilter]; decide`.
+- **`pauli_comm_even_anticommutes`**: for goals `z * x = x * z` when commutation
+  follows from "even number of qubits anticommute". Reduces the goal to
+  `Even ((Finset.univ.filter (anticommutesAt ...)).card)`. Then prove by showing
+  the filter equals a concrete finset (e.g.
+  `have hfilter : (Finset.univ.filter ...) = {0,1} := by ext i; fin_cases i; simp [Finset.mem_filter, anticommutesAt, *, logicalX, Z1Z2, ...]`)
+  then `simp [hfilter]` or `rw [hfilter]; decide`.
 
-- **`pauli_anticomm_odd_anticommutes`**: for goals `Anticommute p q` (i.e. `p * q = (-1)*(q * p)`).
-  Reduces the goal to `Odd ((filter ...).card)`. Then show the filter equals a concrete
-  finset of odd size and `simp [hfilter]` or `rw [hfilter]; decide`.
+- **`pauli_anticomm_odd_anticommutes`**: for goals `Anticommute p q` (i.e.
+  `p * q = (-1)*(q * p)`). Reduces the goal to `Odd ((filter ...).card)`. Then
+  show the filter equals a concrete finset of odd size and `simp [hfilter]` or
+  `rw [hfilter]; decide`.
 -/
 
 namespace Quantum.NQubitPauliGroupElement

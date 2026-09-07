@@ -66,8 +66,8 @@ lemma sum_conv (a b : G → ZMod 2) :
   exact Equiv.sum_comp (Equiv.subRight h) b
 
 omit [AddCommGroup G] in
-/-- Over `ZMod 2`, the sum of a chain is its support parity: the cast of
-the support count equals `∑ v`. -/
+/-- Over `ZMod 2`, the sum of a chain is its support parity: the cast of the
+support count equals `∑ v`. -/
 lemma natCast_card_support (v : G → ZMod 2) :
     (((Finset.univ.filter fun g => v g ≠ 0).card : ℕ) : ZMod 2)
       = ∑ g : G, v g := by
@@ -89,10 +89,9 @@ section Parity
 
 variable {G : Type} [Fintype G] [AddCommGroup G]
 
-/-- **Parity (L1).** If both polynomials have odd weight
-(`∑ A = ∑ B = 1` in `ZMod 2`), every 1-cycle of the BB complex has even
-support: the augmentation applied to `B⋆v_L + A⋆v_R = 0` gives
-`∑ v_L = ∑ v_R`, so `∑ v = 0`. -/
+/-- **Parity (L1).** If both polynomials have odd weight (`∑ A = ∑ B = 1` in
+`ZMod 2`), every 1-cycle of the BB complex has even support: the augmentation
+applied to `B⋆v_L + A⋆v_R = 0` gives `∑ v_L = ∑ v_R`, so `∑ v = 0`. -/
 theorem cycle_support_even (A B : G → ZMod 2)
     (hA : ∑ g : G, A g = 1) (hB : ∑ g : G, B g = 1)
     {v : G × Fin 2 → ZMod 2} (hv : bbBoundary1Fn A B v = 0) :
@@ -130,8 +129,8 @@ variable {G H : Type}
 
 /-! ## Parity instantiated on the cover bundle -/
 
-/-- The cover polynomials have the same augmentation as their descents
-(fiber summation preserves totals). -/
+/-- The cover polynomials have the same augmentation as their descents (fiber
+summation preserves totals). -/
 lemma sum_cover_eq_sum_base (v : G → ZMod 2) :
     ∑ g : G, v g = ∑ h : H, fiberSumFn (⇑D.proj) v h := by
   classical
@@ -169,9 +168,9 @@ theorem cover_cycle_weight_even
 
 /-! ## The seam transfer identity (L0, reverse direction) -/
 
-/-- **`τ(seamC ζ) = liftStab ζ`** for a base 2-cycle `ζ`: the pullback of
-the seam-crossing chain is the lifted stabilizer.  (Same chase as
-`seamC_mem_cycles`, keeping the pullback identity.) -/
+/-- **`τ(seamC ζ) = liftStab ζ`** for a base 2-cycle `ζ`: the pullback of the
+seam-crossing chain is the lifted stabilizer. (Same chase as `seamC_mem_cycles`,
+keeping the pullback identity.) -/
 theorem pull1_seamC {ζ : H → ZMod 2}
     (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
     D.pull1 (D.seamC ζ) = D.liftStab ζ := by
@@ -237,12 +236,11 @@ lemma sheetC2_0_add_sheetC2_1 (z : G → ZMod 2) (h : H) :
   rw [D.proj_sec h] at hp
   exact hp.symm
 
-/-- **The seam transfer kernel, forward chase**: a base 1-chain whose
-pullback is a cover boundary lies in a seam coset.  Descend the boundary
-witness `c` through the sheet decomposition `liftC2_decomp`: with
-`ξ₀, ξ₁` its sheets and `ζ = ξ₀ + ξ₁`, taking `sheet1` of
-`τ w = ∂₂ᶜ c = liftStab ξ₀ + σ(liftStab ξ₁)` gives
-`w = seamC ξ₀ + seamN ξ₁ = seamC ζ + ∂₂ᵇ ξ₁` (char 2). -/
+/-- **The seam transfer kernel, forward chase**: a base 1-chain whose pullback
+is a cover boundary lies in a seam coset. Descend the boundary witness `c`
+through the sheet decomposition `liftC2_decomp`: with `ξ₀, ξ₁` its sheets and
+`ζ = ξ₀ + ξ₁`, taking `sheet1` of `τ w = ∂₂ᶜ c = liftStab ξ₀ + σ(liftStab ξ₁)`
+gives `w = seamC ξ₀ + seamN ξ₁ = seamC ζ + ∂₂ᵇ ξ₁` (char 2). -/
 theorem exists_seamCoset_of_pull1_mem_boundaries {w : H × Fin 2 → ZMod 2}
     (hbd : D.pull1 w ∈ D.coverComplex.boundaries) :
     ∃ ζ : H → ZMod 2, bbBoundary2Fn D.Ab D.Bb ζ = 0 ∧
@@ -291,11 +289,10 @@ theorem exists_seamCoset_of_pull1_mem_boundaries {w : H × Fin 2 → ZMod 2}
     rw [hs1', hseamN, D.seamC_add]
     abel
 
-/-- **The seam transfer kernel (L0, chain form)**: a base 1-chain pulls
-back to a cover boundary **iff** it lies in a seam coset.  This is the
-connecting-map slot `im δ₂ = ker τ₁` of the transfer LES at chain level
-(the H₁-quotient packaging of the reverse slot is
-`BBTransferH1.ker_pushH1_eq_range_pullH1`). -/
+/-- **The seam transfer kernel (L0, chain form)**: a base 1-chain pulls back to
+a cover boundary **iff** it lies in a seam coset. This is the connecting-map
+slot `im δ₂ = ker τ₁` of the transfer LES at chain level (the H₁-quotient
+packaging of the reverse slot is `BBTransferH1.ker_pushH1_eq_range_pullH1`). -/
 theorem pull1_mem_boundaries_iff_seamCoset (w : H × Fin 2 → ZMod 2) :
     D.pull1 w ∈ D.coverComplex.boundaries
       ↔ ∃ ζ : H → ZMod 2, bbBoundary2Fn D.Ab D.Bb ζ = 0 ∧
@@ -307,9 +304,9 @@ theorem pull1_mem_boundaries_iff_seamCoset (w : H × Fin 2 → ZMod 2) :
 
 /-! ## The pushforward bound (T2) -/
 
-/-- **T2, membership form**: under the deck homotopy (R), the pushforward
-of every cover 1-cycle lies in a seam coset — `τ(p v) = v + σv` is a
-cover boundary, so L0 applies. -/
+/-- **T2, membership form**: under the deck homotopy (R), the pushforward of
+every cover 1-cycle lies in a seam coset — `τ(p v) = v + σv` is a cover
+boundary, so L0 applies. -/
 theorem push1_mem_seamCoset_of_deckTrivial (hR : D.DeckTrivialOnH1)
     {v : G × Fin 2 → ZMod 2} (hv : v ∈ D.coverComplex.cycles) :
     ∃ ζ : H → ZMod 2, bbBoundary2Fn D.Ab D.Bb ζ = 0 ∧
@@ -319,11 +316,10 @@ theorem push1_mem_seamCoset_of_deckTrivial (hR : D.DeckTrivialOnH1)
   rw [D.pull1_push1 v]
   exact hR v hv
 
-/-- **T2, weight form (the wall inheritance)**: a cover 1-cycle of weight
-`< m` whose pushforward is not a base boundary refutes
-`SeamCosetFloor m` — the safe floor inherits the cover's safe-sector
-failure at no weight cost (`d_safe ≤ d̃_safe`).  Converse direction to
-`safeFloor_of_seamCosetFloor`. -/
+/-- **T2, weight form (the wall inheritance)**: a cover 1-cycle of weight `< m`
+whose pushforward is not a base boundary refutes `SeamCosetFloor m` — the safe
+floor inherits the cover's safe-sector failure at no weight cost
+(`d_safe ≤ d̃_safe`). Converse direction to `safeFloor_of_seamCosetFloor`. -/
 theorem not_seamCosetFloor_of_light_cover_cycle (hR : D.DeckTrivialOnH1)
     {v : G × Fin 2 → ZMod 2} (hv : v ∈ D.coverComplex.cycles)
     (hpush : D.push1 v ∉ D.baseComplex.boundaries)
@@ -345,12 +341,11 @@ lemma seamCoset_mem_cycles {ζ : H → ZMod 2}
   Submodule.add_mem _ (D.seamC_mem_cycles hζ)
     (D.baseComplex.boundaries_le_cycles ⟨f, rfl⟩)
 
-/-- **The deficit wall (seam-coset form).** Under the parity hypothesis,
-the seam-coset floor at `m − 1` upgrades to `m` for even `m`: every
-coset element is a cycle, hence of even weight, so weight `≥ m − 1`
-forces weight `≥ m`.  Contrapositive: an SF-failing cell at even target
-`m` already fails at `m − 1`, i.e. **the maximal failing value is
-`m − 2`.** -/
+/-- **The deficit wall (seam-coset form).** Under the parity hypothesis, the
+seam-coset floor at `m − 1` upgrades to `m` for even `m`: every coset element is
+a cycle, hence of even weight, so weight `≥ m − 1` forces weight `≥ m`.
+Contrapositive: an SF-failing cell at even target `m` already fails at `m − 1`,
+i.e. **the maximal failing value is `m − 2`.** -/
 theorem seamCosetFloor_of_even_of_pred
     (hA : ∑ h : H, D.Ab h = 1) (hB : ∑ h : H, D.Bb h = 1)
     {m : ℕ} (hm : Even m)
@@ -364,8 +359,8 @@ theorem seamCosetFloor_of_even_of_pred
   obtain ⟨t, ht⟩ := heven
   omega
 
-/-- **The deficit wall (safe-floor form).** Same upgrade for the
-cover-side `SafeFloor`: safe-sector cover cycles have even weight. -/
+/-- **The deficit wall (safe-floor form).** Same upgrade for the cover-side
+`SafeFloor`: safe-sector cover cycles have even weight. -/
 theorem safeFloor_of_even_of_pred
     (hA : ∑ h : H, D.Ab h = 1) (hB : ∑ h : H, D.Bb h = 1)
     {m : ℕ} (hm : Even m)

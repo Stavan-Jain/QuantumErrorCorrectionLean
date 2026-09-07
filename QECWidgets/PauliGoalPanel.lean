@@ -16,8 +16,8 @@ widget's own parity computation says the goal holds — offers a link that
 replaces the `pauli_strip?` call with `decide`.
 
 The panel is a server-rendered component (`mk_rpc_widget%`): the RPC method
-receives the goals plus the range to replace, so the edit is built against
-the live document (`MakeEditLinkProps.ofReplaceRange` needs the current
+receives the goals plus the range to replace, so the edit is built against the
+live document (`MakeEditLinkProps.ofReplaceRange` needs the current
 `DocumentMeta`, which only exists server-side).
 -/
 
@@ -27,8 +27,8 @@ open Lean Server Meta ProofWidgets Quantum
 
 /-- Whether a recognized concrete Pauli proposition holds, by the same
 computation the verdicts use (anticommutation parity / pointwise comparison):
-`some true` exactly when `decide` should close it, `none` when the
-proposition is not recognized or did not fully reduce. -/
+`some true` exactly when `decide` should close it, `none` when the proposition
+is not recognized or did not fully reduce. -/
 def pauliGoalHolds? (e : Expr) : MetaM (Option Bool) := do
   let count (marks : Array Bool) : Nat :=
     marks.foldl (fun acc b => if b then acc + 1 else acc) 0
@@ -53,9 +53,9 @@ def pauliGoalHolds? (e : Expr) : MetaM (Option Bool) := do
       | _, _ => return none
   | _ => return none
 
-/-- Props for `PauliSuggestionPanel`: the panel props the infoview injects,
-plus the source range the suggestion link replaces (the `pauli_strip?` call
-itself, recorded when the tactic runs). -/
+/-- Props for `PauliSuggestionPanel`: the panel props the infoview injects, plus
+the source range the suggestion link replaces (the `pauli_strip?` call itself,
+recorded when the tactic runs). -/
 structure PauliSuggestionProps where
   /-- Cursor position in the file. -/
   pos : Lsp.Position
@@ -65,8 +65,8 @@ structure PauliSuggestionProps where
   replaceRange : Lsp.Range
   deriving RpcEncodable
 
-/-- Render the main goal as a Pauli card; when it holds, append the
-`decide` suggestion link. -/
+/-- Render the main goal as a Pauli card; when it holds, append the `decide`
+suggestion link. -/
 private def suggestionBody (docMeta : DocumentMeta) (range : Lsp.Range)
     (goals : Array Widget.InteractiveGoal) : RequestM Html := do
   let some g := goals[0]?
@@ -102,10 +102,10 @@ verdict says the goal holds, a link that inserts `decide`. -/
 def PauliSuggestionPanel : Component PauliSuggestionProps :=
   mk_rpc_widget% PauliSuggestionPanel.rpc
 
-/-- `pauli_strip?` renders the current goal's Pauli strip view in the
-infoview (put the cursor on the tactic). When the widget's parity
-computation says the goal holds, the panel offers a link that replaces this
-tactic call with `decide`. The goal is left untouched until then. -/
+/-- `pauli_strip?` renders the current goal's Pauli strip view in the infoview
+(put the cursor on the tactic). When the widget's parity computation says the
+goal holds, the panel offers a link that replaces this tactic call with
+`decide`. The goal is left untouched until then. -/
 syntax (name := pauliStripTac) "pauli_strip?" : tactic
 
 open Elab Tactic in

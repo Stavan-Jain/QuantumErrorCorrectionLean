@@ -15,11 +15,11 @@ open scoped ToricChain
 /-!
 # Z-type logical correspondence for the toric code
 
-Mirror of `ToricLogicalCorrespondenceX` for Z-type operators.  The roles of
+Mirror of `ToricLogicalCorrespondenceX` for Z-type operators. The roles of
 primal and dual structures are swapped:
 
-  primal cycles   (ker ∂₁)  ←→  dual boundaries  (im cutMap = im ∂₁ᵀ)
-  primal boundary (im ∂₂)   ←→  dual cycles      (ker ∂₂ᵀ)
+  primal cycles (ker ∂₁) ←→ dual boundaries (im cutMap = im ∂₁ᵀ) primal boundary
+  (im ∂₂) ←→ dual cycles (ker ∂₂ᵀ)
 
 The dual boundary map `toricDualBoundary : C1 → C2` checks commutation with
 every face stabilizer:
@@ -27,8 +27,9 @@ every face stabilizer:
   (toricDualBoundary c) (x, y)
     = c(H x y) + c(H x (next y)) + c(V x y) + c(V (next x) y)
 
-Dual cycles  = ker(toricDualBoundary)  = Z-chains commuting with all face stabs.
-Dual boundaries = range(toricVertexCutMap) = Z-chains that are products of vertex stabs.
+Dual cycles = ker(toricDualBoundary) = Z-chains commuting with all face stabs.
+Dual boundaries = range(toricVertexCutMap) = Z-chains that are products of
+vertex stabs.
 -/
 
 -- ---------------------------------------------------------------------------
@@ -36,7 +37,8 @@ Dual boundaries = range(toricVertexCutMap) = Z-chains that are products of verte
 --     `ToricChainOps.lean` so the bridges in `ToricChainComplex.lean` can use it).
 -- ---------------------------------------------------------------------------
 
-/-- `toricDualBoundary`: the transpose of ∂₂, checking commutation with face stabs.
+/-- `toricDualBoundary`: the transpose of ∂₂, checking commutation with face
+stabs.
     A chain `c` is a dual cycle iff this map vanishes identically. -/
 def toricDualBoundary (L : ℕ) [Fact (0 < L)] : C1 L →ₗ[ZMod 2] C2 L where
   toFun c := fun ⟨x, y⟩ =>
@@ -53,12 +55,12 @@ def toricDualCycles (L : ℕ) [Fact (0 < L)] : Submodule (ZMod 2) (C1 L) :=
 noncomputable def toricDualBoundaries (L : ℕ) [Fact (0 < L)] : Submodule (ZMod 2) (C1 L) :=
   LinearMap.range (δ⁰ (L := L))
 
-/-- `Z¹ L` is the toric dual 1-cycle submodule `toricDualCycles L` (kernel of the dual
-boundary). Scoped: `open scoped ToricChain`. -/
+/-- `Z¹ L` is the toric dual 1-cycle submodule `toricDualCycles L` (kernel of
+the dual boundary). Scoped: `open scoped ToricChain`. -/
 scoped[ToricChain] notation "Z¹" => Quantum.Stabilizer.Lattice.toricDualCycles
 
-/-- `B¹ L` is the toric dual 1-boundary submodule `toricDualBoundaries L` (range of the
-vertex cut map). Scoped: `open scoped ToricChain`. -/
+/-- `B¹ L` is the toric dual 1-boundary submodule `toricDualBoundaries L` (range
+of the vertex cut map). Scoped: `open scoped ToricChain`. -/
 scoped[ToricChain] notation "B¹" => Quantum.Stabilizer.Lattice.toricDualBoundaries
 
 
@@ -77,16 +79,16 @@ theorem toricDualBoundaries_le_toricDualCycles (L : ℕ) [Fact (0 < L)] :
 /-! ## §E bridges: lattice ↔ abstract dual structures
 
 These bridges allow Z-side iff theorems to be delegated to the generic
-`Homological.LogicalCorrespondence` theorems.  The bridges live here (rather
-than in `ToricChainComplex.lean`) because `toricDualBoundary`,
-`toricDualCycles`, `toricDualBoundaries` are defined in this file. -/
+`Homological.LogicalCorrespondence` theorems. The bridges live here (rather than
+in `ToricChainComplex.lean`) because `toricDualBoundary`, `toricDualCycles`,
+`toricDualBoundaries` are defined in this file. -/
 
 section DualBridges
 
 variable (L : ℕ) [Fact (0 < L)]
 
 /-- Bridge: the abstract `dualBoundaries` (range of `cutMap`) equals the lattice
-`toricDualBoundaries` (range of `toricVertexCutMap`).  Follows directly from
+`toricDualBoundaries` (range of `toricVertexCutMap`). Follows directly from
 `toricHomologicalCode_cutMap_eq`. -/
 theorem toricHomologicalCode_dualBoundaries_eq :
     (toricHomologicalCode L).dualBoundaries = B¹ L := by
@@ -97,9 +99,9 @@ theorem toricHomologicalCode_dualBoundaries_eq :
 /-- Bridge: the abstract `dualBoundary` linear map equals the lattice
 `toricDualBoundary`.
 
-Both are the `𝔽₂`-transpose of `toricBoundary2`.  The abstract one is defined
-as `c ↦ λ p, ∑ e, c e * ∂₂(δ_p)(e)`; the toric one is the explicit 4-term sum
-`c (h x y) + c (h x (next y)) + c (v x y) + c (v (next x) y)`.  We prove the
+Both are the `𝔽₂`-transpose of `toricBoundary2`. The abstract one is defined as
+`c ↦ λ p, ∑ e, c e * ∂₂(δ_p)(e)`; the toric one is the explicit 4-term sum
+`c (h x y) + c (h x (next y)) + c (v x y) + c (v (next x) y)`. We prove the
 equality pointwise by splitting `EdgeIdx` into h-edges and v-edges and
 identifying the four nonzero `∂₂(Pi.single (x, y) 1)` contributions. -/
 theorem toricHomologicalCode_dualBoundary_eq :
@@ -412,7 +414,8 @@ theorem faceCheckCommutes_iff_dualBoundaryAt
 -- 5.  Global commutation and cycle membership
 -- ---------------------------------------------------------------------------
 
-/-- Commutation with all face-X checks is equivalent to dual-cycle membership. -/
+/-- Commutation with all face-X checks is equivalent to dual-cycle membership.
+-/
 theorem zCommutesWithXChecks_iff_dualBoundary_pointwise_zero
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     zCommutesWithXChecks L c ↔
@@ -443,8 +446,9 @@ theorem dualBoundary_pointwise_zero_iff_mem_toricDualCycles
 
 /-- Z-chain commutes with all face checks iff it is a dual cycle.
 
-Delegates to the generic `chainZOperator_commutes_XGenerators_iff_mem_dualCycles`
-via the X-generator and dual-cycle bridges. -/
+Delegates to the generic
+`chainZOperator_commutes_XGenerators_iff_mem_dualCycles` via the X-generator and
+dual-cycle bridges. -/
 theorem zCommutesWithXChecks_iff_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     zCommutesWithXChecks L c ↔ c ∈ Z¹ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
@@ -535,7 +539,8 @@ lemma toricZOperatorOfChain_mem_centralizer_iff_dualCycle
 -- 8.  Stabilizer membership helpers
 -- ---------------------------------------------------------------------------
 
-/-- Any element with Z/I-only operators in the stabilizer has phase 0 (is Z-type). -/
+/-- Any element with Z/I-only operators in the stabilizer has phase 0 (is
+Z-type). -/
 private lemma zTypeOps_in_stabilizer_has_phase_zero
     (L : ℕ) [Fact (2 ≤ L)]
     (s : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L))
@@ -661,7 +666,8 @@ lemma stabilizer_same_ops_implies_dualBoundary
 -- 9.  Nontrivial logical ↔ dual cycle but not dual boundary
 -- ---------------------------------------------------------------------------
 
-/-- Z nontrivial logical iff corresponding chain is a dual-cycle-not-dual-boundary.
+/-- Z nontrivial logical iff corresponding chain is a
+dual-cycle-not-dual-boundary.
 
 Delegates to the generic `chainZOperator_isNontrivialLogical_iff` via the
 stabilizer-subgroup bridge and the dual cycle/boundary bridges. -/

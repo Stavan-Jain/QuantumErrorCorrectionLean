@@ -37,7 +37,8 @@ For parameter `r ≥ 3`:
 - Total generators: 2r, encoding `2^r − 1 − 2r` logical qubits
 
 The Hamming parity-check matrix has columns indexed by `Fin (2^r − 1)`, where
-column `k` represents the binary expansion of `k + 1` (all nonzero r-bit vectors).
+column `k` represents the binary expansion of `k + 1` (all nonzero r-bit
+vectors).
 
 Cross-commutation holds because any two rows of the Hamming parity-check matrix
 overlap in an even number of positions: specifically `2^(r−2)` for distinct rows
@@ -59,11 +60,13 @@ expansion of `k + 1`.
 -/
 
 /-- Entry `(a, k)` of the Hamming parity-check matrix: bit `a` of `k + 1`.
-    Row `a` has a 1 at column `k` iff the `(k+1)`-th nonzero vector has its `a`-th bit set. -/
+    Row `a` has a 1 at column `k` iff the `(k+1)`-th nonzero vector has its `a`-th bit set.
+-/
 def hammingEntry (a : Fin r) (k : Fin (2 ^ r - 1)) : ZMod 2 :=
   if (k.val + 1).testBit a.val then 1 else 0
 
-/-- The number of columns where rows `a` and `b` both have a 1. Over ZMod 2, this is the
+/-- The number of columns where rows `a` and `b` both have a 1. Over ZMod 2,
+this is the
     dot product of rows `a` and `b` of the parity-check matrix. -/
 def hammingRowDot (a b : Fin r) : ZMod 2 :=
   ∑ k : Fin (2 ^ r - 1), hammingEntry r a k * hammingEntry r b k
@@ -127,7 +130,8 @@ private lemma xor_pow_lt_pow {m c r : ℕ} (hm : m < 2 ^ r) (hc : c < r) :
     _ ≤ 2 ^ i := Nat.pow_le_pow_right (by omega) hi)
   simp [show ¬ (c = i) from by omega, hmi]
 
-/-- For `k : Fin (2^r - 1)` with bit `a` set (where `a ≠ c`), `(k+1) ⊕ 2^c - 1` is
+/-- For `k : Fin (2^r - 1)` with bit `a` set (where `a ≠ c`), `(k+1) ⊕ 2^c - 1`
+is
     a valid element of `Fin (2^r - 1)`. -/
 private lemma xor_flip_val_lt {r c : ℕ} (hc : c < r) {k : Fin (2 ^ r - 1)}
     {a : ℕ} (hac : a ≠ c) (ha : (k.val + 1).testBit a = true) :
@@ -145,7 +149,8 @@ private lemma xor_flip_val_lt {r c : ℕ} (hc : c < r) {k : Fin (2 ^ r - 1)}
     exact absurd hbad (by simp)
   omega
 
-/-- The XOR-flip function on `Fin (2^r - 1)`, defined for elements where bit `a` is set. -/
+/-- The XOR-flip function on `Fin (2^r - 1)`, defined for elements where bit `a`
+is set. -/
 private def xorFlip (r c : ℕ) (hc : c < r) (a : ℕ) (hac : a ≠ c)
     (k : Fin (2 ^ r - 1)) (ha : (k.val + 1).testBit a = true) : Fin (2 ^ r - 1) :=
   ⟨(k.val + 1 ^^^ 2 ^ c) - 1, xor_flip_val_lt hc hac ha⟩
@@ -161,12 +166,14 @@ private lemma xor_pos_of_testBit {m c a : ℕ} (hac : a ≠ c)
   rw [ha] at this
   exact Bool.false_ne_true this
 
-/-- The dot product of any two rows of the Hamming parity-check matrix is 0 (mod 2)
+/-- The dot product of any two rows of the Hamming parity-check matrix is 0 (mod
+2)
     for `r ≥ 3`.
 
     **Proof sketch:** We find a bit position `c` distinct from `a` and `b` (possible
     since `r ≥ 3`), then define an involution on the overlap set by XORing with `2^c`.
-    This involution is fixed-point-free, so the overlap set has even cardinality. -/
+    This involution is fixed-point-free, so the overlap set has even cardinality.
+-/
 theorem hammingRowDot_eq_zero (hr : 3 ≤ r) (a b : Fin r) :
     hammingRowDot r a b = 0 := by
   -- Step 1: Rewrite as card of a filter set
@@ -240,8 +247,8 @@ theorem hammingRowDot_eq_zero (hr : 3 ≤ r) (a b : Fin r) :
 /-!
 ## Generators
 
-For each row `a : Fin r`, we have a Z-generator and an X-generator.
-The support of generator `a` is the set of qubits `k` where row `a` has a 1.
+For each row `a : Fin r`, we have a Z-generator and an X-generator. The support
+of generator `a` is the set of qubits `k` where row `a` has a 1.
 -/
 
 /-- Z-generator for row `a`: Z on qubits where bit `a` of `(k+1)` is set. -/
@@ -271,8 +278,9 @@ noncomputable def subgroup : Subgroup (NQubitPauliGroupElement (2 ^ r - 1)) :=
 /-!
 ## Generator list
 
-We combine the Z-generators and X-generators into a single function on `Fin (2 * r)`,
-mapping the first `r` indices to Z-generators and the last `r` to X-generators.
+We combine the Z-generators and X-generators into a single function on
+`Fin (2 * r)`, mapping the first `r` indices to Z-generators and the last `r` to
+X-generators.
 -/
 
 /-- Combined generator function: indices `[0, r)` map to Z-generators,
@@ -341,11 +349,13 @@ lemma XGenerators_are_XType :
 /-!
 ## Cross-commutation: Z-generators commute with X-generators
 
-The symplectic inner product between `ZGen a` and `XGen b` reduces to the dot product
-of rows `a` and `b` of the Hamming parity-check matrix (over ZMod 2), which is 0.
+The symplectic inner product between `ZGen a` and `XGen b` reduces to the dot
+product of rows `a` and `b` of the Hamming parity-check matrix (over ZMod 2),
+which is 0.
 -/
 
-/-- The symplectic inner product of `ZGen a` and `XGen b` equals the Hamming row dot
+/-- The symplectic inner product of `ZGen a` and `XGen b` equals the Hamming row
+dot
     product of rows `a` and `b`. -/
 lemma ZGen_XGen_symplectic_eq_hammingRowDot (a b : Fin r) :
     NQubitPauliOperator.symplecticInner (ZGen r a).operators (XGen r b).operators =
@@ -485,7 +495,8 @@ private lemma hammingRows_linearIndependent :
   rw [hrest, add_zero, _root_.mul_one] at hpivot
   exact hpivot
 
-/-- The check matrix entry for a ZGen generator at a Z-component column equals hammingEntry.
+/-- The check matrix entry for a ZGen generator at a Z-component column equals
+hammingEntry.
     For ZGen a, the Z-component (column n + k) is hammingEntry r a k. -/
 private lemma checkMatrix_ZGen_Z_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
     NQubitPauliOperator.toSymplectic (ZGen r a).operators (Fin.natAdd (2 ^ r - 1) k) =
@@ -496,7 +507,8 @@ private lemma checkMatrix_ZGen_Z_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
   · simp [PauliOperator.toSymplecticSingle]
   · simp [PauliOperator.toSymplecticSingle]
 
-/-- The check matrix entry for a ZGen generator at an X-component column is 0. -/
+/-- The check matrix entry for a ZGen generator at an X-component column is 0.
+-/
 private lemma checkMatrix_ZGen_X_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
     NQubitPauliOperator.toSymplectic (ZGen r a).operators (Fin.castAdd (2 ^ r - 1) k) = 0 := by
   rw [NQubitPauliOperator.toSymplectic_X_part]
@@ -505,7 +517,8 @@ private lemma checkMatrix_ZGen_X_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
   · simp [PauliOperator.toSymplecticSingle]
   · simp [PauliOperator.toSymplecticSingle]
 
-/-- The check matrix entry for an XGen generator at an X-component column equals hammingEntry. -/
+/-- The check matrix entry for an XGen generator at an X-component column equals
+hammingEntry. -/
 private lemma checkMatrix_XGen_X_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
     NQubitPauliOperator.toSymplectic (XGen r a).operators (Fin.castAdd (2 ^ r - 1) k) =
       hammingEntry r a k := by
@@ -515,7 +528,8 @@ private lemma checkMatrix_XGen_X_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
   · simp [PauliOperator.toSymplecticSingle]
   · simp [PauliOperator.toSymplecticSingle]
 
-/-- The check matrix entry for an XGen generator at a Z-component column is 0. -/
+/-- The check matrix entry for an XGen generator at a Z-component column is 0.
+-/
 private lemma checkMatrix_XGen_Z_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
     NQubitPauliOperator.toSymplectic (XGen r a).operators (Fin.natAdd (2 ^ r - 1) k) = 0 := by
   rw [NQubitPauliOperator.toSymplectic_Z_part]
@@ -525,7 +539,8 @@ private lemma checkMatrix_XGen_Z_part (a : Fin r) (k : Fin (2 ^ r - 1)) :
   · simp [PauliOperator.toSymplecticSingle]
 
 
-/-- The check matrix entry for the Z-component column of a generatorsList entry. -/
+/-- The check matrix entry for the Z-component column of a generatorsList entry.
+-/
 private lemma checkMatrix_generatorsList_Z
     (idx : Fin (generatorsList r).length) (k : Fin (2 ^ r - 1)) :
     NQubitPauliGroupElement.checkMatrix (generatorsList r) idx
@@ -543,7 +558,8 @@ private lemma checkMatrix_generatorsList_Z
       simp [show ¬(idx.val < r) from hlt]
     rw [this, dif_neg hlt, checkMatrix_XGen_Z_part]
 
-/-- The check matrix entry for the X-component column of a generatorsList entry. -/
+/-- The check matrix entry for the X-component column of a generatorsList entry.
+-/
 private lemma checkMatrix_generatorsList_X
     (idx : Fin (generatorsList r).length) (k : Fin (2 ^ r - 1)) :
     NQubitPauliGroupElement.checkMatrix (generatorsList r) idx
@@ -563,7 +579,8 @@ private lemma checkMatrix_generatorsList_X
       simp [show ¬(idx.val < r) from hlt]
     rw [this, dif_neg hlt, checkMatrix_XGen_X_part]
 
-/-- The sum ∑_{idx} f(idx) * checkMatrix(idx, Z-col k) = ∑_{a:Fin r} f(a) * hammingEntry(a,k). -/
+/-- The sum ∑_{idx} f(idx) * checkMatrix(idx, Z-col k) = ∑_{a:Fin r} f(a) *
+hammingEntry(a,k). -/
 private lemma sum_checkMatrix_Z_eq
     (f : Fin (generatorsList r).length → ZMod 2)
     (k : Fin (2 ^ r - 1)) :
@@ -597,7 +614,8 @@ private lemma sum_checkMatrix_Z_eq
   · exact fun b => ⟨⟨b, by rw [generatorsList_length]; linarith [Fin.is_lt b]⟩,
       by simp +decide⟩
 
-/-- The sum ∑_{idx} f(idx) * checkMatrix(idx, X-col k) = ∑_{a:Fin r} f(r+a) * hammingEntry(a,k). -/
+/-- The sum ∑_{idx} f(idx) * checkMatrix(idx, X-col k) = ∑_{a:Fin r} f(r+a) *
+hammingEntry(a,k). -/
 private lemma sum_checkMatrix_X_eq
     (f : Fin (generatorsList r).length → ZMod 2)
     (k : Fin (2 ^ r - 1)) :
@@ -640,7 +658,8 @@ private lemma sum_checkMatrix_X_eq
   · exact fun a ha =>
       Or.inl <| congr_arg f <| Fin.ext <| by simp +decide [Nat.add_sub_of_le ha]
 
-/-- The check-matrix rows of the quantum Hamming generators are linearly independent. -/
+/-- The check-matrix rows of the quantum Hamming generators are linearly
+independent. -/
 theorem rowsLinearIndependent_generatorsList :
     NQubitPauliGroupElement.rowsLinearIndependent (generatorsList r) := by
   rw [NQubitPauliGroupElement.rowsLinearIndependent_iff_forall]
@@ -706,7 +725,8 @@ theorem logicalX_anticommutes_logicalZ (hr1 : 1 ≤ r) :
     NQubitPauliGroupElement.Anticommute (logicalX r) (logicalZ r) :=
   NQubitPauliOperator.allX_allZ_anticommute (2 ^ r - 1) (two_pow_sub_one_odd r hr1)
 
-/-- Logical X commutes with every Z-generator (each Z-row has `2^(r−1)` ones, which is even).
+/-- Logical X commutes with every Z-generator (each Z-row has `2^(r−1)` ones,
+which is even).
     Since X commutes with X trivially, logical X is in the centralizer. -/
 private lemma logicalX_commutes_ZGen (hr : 3 ≤ r) (a : Fin r) :
     logicalX r * ZGen r a = ZGen r a * logicalX r := by

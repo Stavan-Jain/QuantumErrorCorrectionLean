@@ -75,8 +75,8 @@ lemma reflect_conv [Fintype G] (a b : G → ZMod 2) :
 
 /-! ## The block-swap-and-negate equivalence Φ -/
 
-/-- The duality equivalence on BB qubits: negate the group coordinate and
-swap the L/R block. -/
+/-- The duality equivalence on BB qubits: negate the group coordinate and swap
+the L/R block. -/
 def blockSwapNeg : (G × Fin 2) ≃ (G × Fin 2) :=
   (Equiv.neg G).prodCongr (Equiv.swap 0 1)
 
@@ -135,8 +135,8 @@ end Reflect
 variable {G : Type} [Fintype G] [AddCommGroup G] [DecidableEq G]
 variable (A B : G → ZMod 2)
 
-/-- `∂₂` of a point mass: `∂₂(δ_f)(h, j) = A(h-f)` on the left block,
-`B(h-f)` on the right. -/
+/-- `∂₂` of a point mass: `∂₂(δ_f)(h, j) = A(h-f)` on the left block, `B(h-f)`
+on the right. -/
 lemma bbBoundary2Fn_single (f : G) (h : G) (j : Fin 2) :
     bbBoundary2Fn A B (Pi.single f 1) (h, j)
       = if j = 0 then A (h - f) else B (h - f) := by
@@ -266,8 +266,8 @@ theorem dualBoundary_bbDualFn (c : G × Fin 2 → ZMod 2) :
   simp only [reflect_apply, bbBoundary1Fn]
   ring
 
-/-- `Φ ∘ ∂₂ = cutMap ∘ reflect`: Φ carries primal boundaries to dual
-boundaries. -/
+/-- `Φ ∘ ∂₂ = cutMap ∘ reflect`: Φ carries primal boundaries to dual boundaries.
+-/
 theorem bbDualFn_bbBoundary2Fn (f2 : G → ZMod 2) :
     bbDualFn (bbBoundary2Fn A B f2)
       = (bbChainComplex A B).cutMap (reflect (G := G) f2) := by
@@ -354,8 +354,8 @@ theorem bbDual_chainWeight (c : G × Fin 2 → ZMod 2) :
 /-! ## Chain-level `d_X = d_Z` -/
 
 /-- A chain-weight lower bound on nontrivial primal cycles holds iff the same
-bound holds on nontrivial dual cycles: the chain-level `d_X = d_Z` for BB
-codes. -/
+bound holds on nontrivial dual cycles: the chain-level `d_X = d_Z` for BB codes.
+-/
 theorem bb_cycle_bound_iff_dual_bound (K : ℕ) :
     (∀ c ∈ (bbChainComplex A B).cycles,
         c ∉ (bbChainComplex A B).boundaries →

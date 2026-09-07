@@ -23,7 +23,8 @@ deriving DecidableEq
 
 /-- An element of the single-qubit Pauli group.
 
-Represented as `i^k * P` where `k : Fin 4` is the phase power and `P : PauliOperator`.
+Represented as `i^k * P` where `k : Fin 4` is the phase power and
+`P : PauliOperator`.
 -/
 structure PauliGroupElement where
   phasePower : Fin 4

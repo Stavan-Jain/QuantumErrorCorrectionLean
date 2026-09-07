@@ -24,11 +24,11 @@ namespace RepetitionCodeN
 /-!
 # Parametric repetition code (Z-only CSS) on `n+2` qubits
 
-This is a parametric version of `RepetitionCode3`, defined on **`n+2` qubits** to make the
-adjacent-pair indexing clean.
+This is a parametric version of `RepetitionCode3`, defined on **`n+2` qubits**
+to make the adjacent-pair indexing clean.
 
-Generators (Z-checks):
-`Z_i Z_{i+1}` for `i : Fin (n+1)`, acting on qubits `i` and `i+1`.
+Generators (Z-checks): `Z_i Z_{i+1}` for `i : Fin (n+1)`, acting on qubits `i`
+and `i+1`.
 
 We show the generated subgroup is a `StabilizerGroup (n+2)`:
 - **abelian**: all generators are Z-type
@@ -42,7 +42,8 @@ open scoped Pauli
 ## Generators
 -/
 
-/-- The adjacent Z-check `Z_i Z_{i+1}` on `n+2` qubits, indexed by `i : Fin (n+1)`. -/
+/-- The adjacent Z-check `Z_i Z_{i+1}` on `n+2` qubits, indexed by
+`i : Fin (n+1)`. -/
 def ZPair (n : ℕ) (i : Fin (n + 1)) : NQubitPauliGroupElement (n + 2) :=
   σ[n + 2 | Fin.castSucc i ↦ Z, Fin.succ i ↦ Z]
 
@@ -87,7 +88,8 @@ lemma ZPair_operators_at (n : ℕ) (i : Fin (n + 1)) (k : Fin (n + 2)) :
   simp only [ZPair, NQubitPauliOperator.set, NQubitPauliOperator.identity]
   by_cases hk1 : k = Fin.succ i <;> by_cases hk2 : k = Fin.castSucc i <;> simp [hk1, hk2]
 
-/-- Z-column of the check matrix: row `i` has 1 at Z-qubit `k` iff `k` is one of the two qubits. -/
+/-- Z-column of the check matrix: row `i` has 1 at Z-qubit `k` iff `k` is one of
+the two qubits. -/
 lemma checkMatrix_ZColumn (n : ℕ) (i : Fin (generatorsList n).length) (k : Fin (n + 2)) :
     checkMatrix (generatorsList n) i (Fin.natAdd (n + 2) k) =
       if k = Fin.castSucc (Fin.cast (generatorsList_length n) i)
@@ -97,7 +99,8 @@ lemma checkMatrix_ZColumn (n : ℕ) (i : Fin (generatorsList n).length) (k : Fin
     ZPair_operators_at]
   split_ifs <;> simp only [PauliOperator.toSymplecticSingle_Z, PauliOperator.toSymplecticSingle_I]
 
-/-- Row index for generator `j`: `(generatorsList n).get (rowIdx n j) = ZPair n j`. -/
+/-- Row index for generator `j`:
+`(generatorsList n).get (rowIdx n j) = ZPair n j`. -/
 def rowIdx (n : ℕ) (j : Fin (n + 1)) : Fin (generatorsList n).length :=
   Fin.cast (generatorsList_length n).symm j
 
@@ -214,7 +217,8 @@ lemma sum_ZColumn_mid (n : ℕ) (f : Fin (generatorsList n).length → ZMod 2) (
     omega;
   · tauto
 
-/-- The check-matrix rows of the parametric repetition-code generators are linearly independent. -/
+/-- The check-matrix rows of the parametric repetition-code generators are
+linearly independent. -/
 theorem rowsLinearIndependent_generatorsList (n : ℕ) :
     NQubitPauliGroupElement.rowsLinearIndependent (generatorsList n) := by
   unfold Quantum.NQubitPauliGroupElement.rowsLinearIndependent;
@@ -238,7 +242,8 @@ theorem rowsLinearIndependent_generatorsList (n : ℕ) :
   specialize h_check_matrix_rows_lin_indep g
   simp_all +decide [funext_iff, Finset.sum_apply]
 
-/-- The parametric repetition-code generator list is an independent generating set. -/
+/-- The parametric repetition-code generator list is an independent generating
+set. -/
 theorem GeneratorsIndependent_generatorsList (n : ℕ) :
     GeneratorsIndependent (n + 2) (generatorsList n) :=
   GeneratorsIndependent_of_rowsLinearIndependent (n + 2) (generatorsList n)
@@ -315,9 +320,9 @@ lemma listToSet_generators_eq (n : ℕ) :
 /-!
 ## Logical operators (one logical qubit when `n+2` is odd)
 
-Logical X = X on all `n+2` qubits, logical Z = Z on all `n+2` qubits. They commute with
-every stabilizer (each ZPair has exactly two qubits where X and Z meet, so even
-anticommutes) and anticommute with each other when `n+2` is odd.
+Logical X = X on all `n+2` qubits, logical Z = Z on all `n+2` qubits. They
+commute with every stabilizer (each ZPair has exactly two qubits where X and Z
+meet, so even anticommutes) and anticommute with each other when `n+2` is odd.
 -/
 
 /-- Logical X: X on all `n+2` qubits. -/
@@ -328,7 +333,8 @@ def logicalX (n : ℕ) : NQubitPauliGroupElement (n + 2) :=
 def logicalZ (n : ℕ) : NQubitPauliGroupElement (n + 2) :=
   ⟨0, NQubitPauliOperator.Z (n + 2)⟩
 
-/-- Logical X and logical Z anticommute when the number of physical qubits `n+2` is odd. -/
+/-- Logical X and logical Z anticommute when the number of physical qubits `n+2`
+is odd. -/
 theorem logicalX_anticommutes_logicalZ (n : ℕ) (hn : Odd (n + 2)) :
     NQubitPauliGroupElement.Anticommute (logicalX n) (logicalZ n) :=
   NQubitPauliOperator.allX_allZ_anticommute (n + 2) hn
@@ -383,7 +389,8 @@ private lemma logicalZ_commutes_ZPair (n : ℕ) (i : Fin (n + 1)) :
 ## Bundled `StabilizerGroup (n+2)`
 -/
 
-/-- The repetition code as a stabilizer group (canonical: from generator list). -/
+/-- The repetition code as a stabilizer group (canonical: from generator list).
+-/
 noncomputable def stabilizerGroup (n : ℕ) : StabilizerGroup (n + 2) :=
   mkStabilizerFromGenerators (n + 2) (generatorsList n)
     (by rw [listToSet_generators_eq]; exact generators_commute n)
@@ -418,9 +425,9 @@ theorem logicalZ_mem_centralizer (n : ℕ) :
 /-!
 ## StabilizerCode [[n+2, 1]] for odd n
 
-The repetition code encodes one logical qubit. Logical X̄ = X on all qubits and Z̄ = Z on all
-qubits; they anticommute only when the number of physical qubits `n+2` is odd, so the code
-is defined only for odd `n` (i.e. `Odd (n + 2)`).
+The repetition code encodes one logical qubit. Logical X̄ = X on all qubits and
+Z̄ = Z on all qubits; they anticommute only when the number of physical qubits
+`n+2` is odd, so the code is defined only for odd `n` (i.e. `Odd (n + 2)`).
 -/
 
 private def logicalOpsRepN (n : ℕ) (hn : Odd (n + 2)) :
@@ -428,7 +435,8 @@ private def logicalOpsRepN (n : ℕ) (hn : Odd (n + 2)) :
   fun _ => ⟨logicalX n, logicalZ n, logicalX_mem_centralizer n, logicalZ_mem_centralizer n,
     logicalX_anticommutes_logicalZ n hn⟩
 
-/-- The parametric repetition code as a stabilizer code [[n+2, 1]] when `n+2` is odd. -/
+/-- The parametric repetition code as a stabilizer code [[n+2, 1]] when `n+2` is
+odd. -/
 noncomputable def stabilizerCode (n : ℕ) (hn : Odd (n + 2)) :
     StabilizerCode (n + 2) 1 where
   hk := Nat.succ_le_succ (Nat.zero_le (n + 1))

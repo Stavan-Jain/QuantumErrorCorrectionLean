@@ -20,9 +20,10 @@ anticommuting-position count, and the underlying outer generators commute.
   being in `Cin`'s centralizer.
 - `concat_closure_no_neg_identity` — regroup the generator set as `Z ∪ X` (via
   `inner_split`/`outer_split`) and apply `negIdentity_not_mem_closure_union`.
-- the concat logicals' centralizer membership, anticommutation, and cross-commutation.
-Generator independence is an explicit hypothesis of `concatenate` (see its doc-comment
-for why it is assumed rather than derived).
+- the concat logicals' centralizer membership, anticommutation, and
+  cross-commutation.
+Generator independence is an explicit hypothesis of `concatenate` (see its
+doc-comment for why it is assumed rather than derived).
 -/
 
 namespace Quantum.Concatenation
@@ -37,7 +38,8 @@ variable (D : ConcatCSSData n₁ n₂ k₂)
 
 /-! ## R6 foundations: the inner logicals as zero-phase operators -/
 
-/-- `ofOperator Xbar` is the inner logical `X` (they agree because `X̄` has phase 0). -/
+/-- `ofOperator Xbar` is the inner logical `X` (they agree because `X̄` has
+phase 0). -/
 lemma ofOperator_Xbar : ofOperator D.Xbar = D.Cin.logicalX 0 := by
   apply NQubitPauliGroupElement.ext
   · rw [ofOperator_phasePower, D.innerLogX_phaseZero]
@@ -49,7 +51,8 @@ lemma ofOperator_Zbar : ofOperator D.Zbar = D.Cin.logicalZ 0 := by
   · rw [ofOperator_phasePower, D.innerLogZ_phaseZero]
   · rfl
 
-/-- The promotion targets `X̄`, `Z̄` anticommute (they are the inner logical pair). -/
+/-- The promotion targets `X̄`, `Z̄` anticommute (they are the inner logical
+pair). -/
 lemma Xbar_Zbar_anticommute : Anticommute (ofOperator D.Xbar) (ofOperator D.Zbar) := by
   rw [D.ofOperator_Xbar, D.ofOperator_Zbar]; exact (D.Cin.logicalOps 0).anticommute
 
@@ -62,9 +65,9 @@ lemma not_anticommutesAt_self {m : ℕ} (A : NQubitPauliOperator m) (i : Fin m) 
   simp only [Fin.val_add] at hv
   omega
 
-/-- Per-position reduction: two promoted operators anticommute at physical qubit `q`
-exactly when the single-qubit promotions of `h₁`,`h₂` at block `blockOf q` anticommute
-at the in-block position `posOf q`. -/
+/-- Per-position reduction: two promoted operators anticommute at physical qubit
+`q` exactly when the single-qubit promotions of `h₁`,`h₂` at block `blockOf q`
+anticommute at the in-block position `posOf q`. -/
 lemma anticommutesAt_promoteE (h₁ h₂ : NQubitPauliGroupElement n₂) (q : Fin (n₁ * n₂)) :
     anticommutesAt (promoteE D.Xbar D.Zbar h₁).operators (promoteE D.Xbar D.Zbar h₂).operators q
       = anticommutesAt (promoteSingle D.Xbar D.Zbar (h₁.operators (blockOf q)))
@@ -74,8 +77,8 @@ lemma anticommutesAt_promoteE (h₁ h₂ : NQubitPauliGroupElement n₂) (q : Fi
 /-! ## Commutation obligation (R6 parity core) -/
 
 open Classical in
-/-- Block-decomposition: the promoted anticommuting-position count is the sum over
-blocks of the per-block single-qubit promoted counts. -/
+/-- Block-decomposition: the promoted anticommuting-position count is the sum
+over blocks of the per-block single-qubit promoted counts. -/
 lemma promote_count_eq_sum (h₁ h₂ : NQubitPauliGroupElement n₂) :
     (Finset.univ.filter (anticommutesAt (promoteE D.Xbar D.Zbar h₁).operators
         (promoteE D.Xbar D.Zbar h₂).operators)).card
@@ -129,13 +132,14 @@ lemma not_anticommute_one_right {n : ℕ} (g : NQubitPauliGroupElement n) : ¬ A
     ofOperator (NQubitPauliOperator.identity n) = 1 := rfl
 
 open Classical in
-/-- Per-block parity: the single-qubit promoted count at block `b` is odd iff the
-underlying outer operators anticommute at `b` (requires no-`Y` at `b`).
+/-- Per-block parity: the single-qubit promoted count at block `b` is odd iff
+the underlying outer operators anticommute at `b` (requires no-`Y` at `b`).
 
-Proved filter-free: convert `Odd (filter …).card` to `Anticommute (ofOperator …)` via
-`anticommutes_iff_odd_anticommutes`, then a `{I,X,Z}²` case analysis using the group-level
-`Anticommute` facts (self / `1` / `X̄·Z̄`). This sidesteps the `DecidablePred` instance
-mismatch that blocks any `card = 0` rewrite on the goal's filter. -/
+Proved filter-free: convert `Odd (filter …).card` to
+`Anticommute (ofOperator …)` via `anticommutes_iff_odd_anticommutes`, then a
+`{I,X,Z}²` case analysis using the group-level `Anticommute` facts (self / `1` /
+`X̄·Z̄`). This sidesteps the `DecidablePred` instance mismatch that blocks any
+`card = 0` rewrite on the goal's filter. -/
 lemma cnt_odd_iff (h₁ h₂ : NQubitPauliGroupElement n₂) (b : Fin n₂)
     (hY₁ : h₁.operators b ≠ PauliOperator.Y) (hY₂ : h₂.operators b ≠ PauliOperator.Y) :
     Odd (Finset.univ.filter (anticommutesAt (promoteSingle D.Xbar D.Zbar (h₁.operators b))
@@ -166,16 +170,17 @@ lemma cnt_odd_iff (h₁ h₂ : NQubitPauliGroupElement n₂) (b : Fin n₂)
 
 open Classical in
 /-- **(R6)** Promotion preserves the parity of the anticommuting-position count:
-the count of physical qubits where two promoted outer operators anticommute has the
-same parity as the count of outer qubits where the underlying operators anticommute.
-This is exactly why promoted outer generators commute on the nose.
+the count of physical qubits where two promoted outer operators anticommute has
+the same parity as the count of outer qubits where the underlying operators
+anticommute. This is exactly why promoted outer generators commute on the nose.
 
-The `no-Y` hypotheses are essential: `promoteSingle` sends `Y ↦ I`, which would break
-the per-block parity at any `Y`. CSS outer generators (Z-type or X-type) satisfy them.
+The `no-Y` hypotheses are essential: `promoteSingle` sends `Y ↦ I`, which would
+break the per-block parity at any `Y`. CSS outer generators (Z-type or X-type)
+satisfy them.
 
-Proof: block-decompose the promoted count (`promote_count_eq_sum`), reduce mod 2 to a
-sum of per-block parities (`cnt_odd_iff`), and match against the outer count written as
-`∑ indicators` (`Finset.card_filter`). -/
+Proof: block-decompose the promoted count (`promote_count_eq_sum`), reduce mod 2
+to a sum of per-block parities (`cnt_odd_iff`), and match against the outer
+count written as `∑ indicators` (`Finset.card_filter`). -/
 lemma promote_anticommute_parity (h₁ h₂ : NQubitPauliGroupElement n₂)
     (hY₁ : ∀ b, h₁.operators b ≠ PauliOperator.Y)
     (hY₂ : ∀ b, h₂.operators b ≠ PauliOperator.Y) :
@@ -196,8 +201,8 @@ lemma promote_anticommute_parity (h₁ h₂ : NQubitPauliGroupElement n₂)
         (fun ho => hb ((D.cnt_odd_iff h₁ h₂ b (hY₁ b) (hY₂ b)).mp ho)))
   rw [Nat.even_iff, Nat.even_iff, key]
 
-/-- An inner generator commutes with the inner logical `X` (it lies in `Cin`'s stabilizer,
-which the logical centralizes). -/
+/-- An inner generator commutes with the inner logical `X` (it lies in `Cin`'s
+stabilizer, which the logical centralizes). -/
 lemma inner_gen_comm_logicalX (g : NQubitPauliGroupElement n₁)
     (hg : g ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList) :
     g * D.Cin.logicalX 0 = D.Cin.logicalX 0 * g :=
@@ -211,8 +216,9 @@ lemma inner_gen_comm_logicalZ (g : NQubitPauliGroupElement n₁)
   (mem_centralizer_iff _ _).mp (D.Cin.logicalOps 0).z_mem_centralizer g
     (Subgroup.subset_closure hg)
 
-/-- An inner generator commutes with the zero-phase embedding of any single-qubit promotion
-`I ↦ 1`, `X ↦ X̄`, `Z ↦ Z̄` (the `Y` branch is excluded). -/
+/-- An inner generator commutes with the zero-phase embedding of any
+single-qubit promotion `I ↦ 1`, `X ↦ X̄`, `Z ↦ Z̄` (the `Y` branch is excluded).
+-/
 lemma inner_gen_comm_promoteSingle (g : NQubitPauliGroupElement n₁)
     (hg : g ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList)
     (P : PauliOperator) (hPY : P ≠ PauliOperator.Y) :
@@ -227,9 +233,9 @@ lemma inner_gen_comm_promoteSingle (g : NQubitPauliGroupElement n₁)
   · rw [show promoteSingle D.Xbar D.Zbar PauliOperator.Z = D.Zbar from rfl, D.ofOperator_Zbar]
     exact D.inner_gen_comm_logicalZ g hg
 
-/-- An embedded inner generator commutes with any promoted (`Y`-free) outer operator:
-they agree where the inner operator is non-`I` (block `b`), reducing to the inner generator
-commuting with the inner logical there. -/
+/-- An embedded inner generator commutes with any promoted (`Y`-free) outer
+operator: they agree where the inner operator is non-`I` (block `b`), reducing
+to the inner generator commuting with the inner logical there. -/
 lemma embedBlock_promoteE_commute (b : Fin n₂) (g : NQubitPauliGroupElement n₁)
     (hg : g ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList)
     (h : NQubitPauliGroupElement n₂) (hhY : ∀ b', h.operators b' ≠ PauliOperator.Y) :
@@ -264,8 +270,8 @@ lemma outer_gen_noY (y : NQubitPauliGroupElement n₂) (hy : y ∈ D.outerZ ++ D
   · exact noY_of_isZType (D.outerZ_isZ y hz).2 b'
   · exact noY_of_isXType (D.outerX_isX y hx).2 b'
 
-/-- Membership in the concatenated generator list: every element is an embedded inner
-generator or a promoted (typed) outer generator. -/
+/-- Membership in the concatenated generator list: every element is an embedded
+inner generator or a promoted (typed) outer generator. -/
 lemma mem_concatGeneratorsList (x : NQubitPauliGroupElement (n₁ * n₂))
     (hx : x ∈ NQubitPauliGroupElement.listToSet D.concatGeneratorsList) :
     (∃ b z, z ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList ∧ embedBlock b z = x) ∨
@@ -301,11 +307,12 @@ lemma concat_generators_commute :
 
 /-- The closure of the concatenated generators omits `-I`.
 
-Regroup `listToSet concatGeneratorsList` as `Z ∪ X`: the embedded inner Z/X generators
-(across all blocks, split via `inner_split`) together with the promoted outer Z/X
-generators (split via `outer_split`). Each side is provably Z-type / X-type
-(`embedBlock_isZ`/`promoteE_isZ`, resp. the X analogues), and the cross-commutation
-hypothesis is exactly `concat_generators_commute`. Then `negIdentity_not_mem_closure_union`. -/
+Regroup `listToSet concatGeneratorsList` as `Z ∪ X`: the embedded inner Z/X
+generators (across all blocks, split via `inner_split`) together with the
+promoted outer Z/X generators (split via `outer_split`). Each side is provably
+Z-type / X-type (`embedBlock_isZ`/`promoteE_isZ`, resp. the X analogues), and
+the cross-commutation hypothesis is exactly `concat_generators_commute`. Then
+`negIdentity_not_mem_closure_union`. -/
 lemma concat_closure_no_neg_identity :
     negIdentity (n₁ * n₂) ∉ Subgroup.closure (listToSet D.concatGeneratorsList) := by
   classical
@@ -340,18 +347,20 @@ noncomputable def concatStabGroup : StabilizerGroup (n₁ * n₂) :=
   mkStabilizerFromGenerators (n₁ * n₂) D.concatGeneratorsList
     (concat_generators_commute D) (concat_closure_no_neg_identity D)
 
-/-- Concatenated logical `X` for logical qubit `ℓ`: the promoted outer logical `X`. -/
+/-- Concatenated logical `X` for logical qubit `ℓ`: the promoted outer logical
+`X`. -/
 def concatLogicalX (ℓ : Fin k₂) : NQubitPauliGroupElement (n₁ * n₂) :=
   promoteE D.Xbar D.Zbar (D.Cout.logicalX ℓ)
 
-/-- Concatenated logical `Z` for logical qubit `ℓ`: the promoted outer logical `Z`. -/
+/-- Concatenated logical `Z` for logical qubit `ℓ`: the promoted outer logical
+`Z`. -/
 def concatLogicalZ (ℓ : Fin k₂) : NQubitPauliGroupElement (n₁ * n₂) :=
   promoteE D.Xbar D.Zbar (D.Cout.logicalZ ℓ)
 
-/-- The promoted outer logical `X` centralizes the concatenated stabilizer. Against an
-embedded inner generator it is `embedBlock_promoteE_commute`; against a promoted outer
-generator it is `promote_anticommute_parity` plus `Cout.logicalX ℓ` centralizing
-`Cout`'s stabilizer. -/
+/-- The promoted outer logical `X` centralizes the concatenated stabilizer.
+Against an embedded inner generator it is `embedBlock_promoteE_commute`; against
+a promoted outer generator it is `promote_anticommute_parity` plus
+`Cout.logicalX ℓ` centralizing `Cout`'s stabilizer. -/
 lemma concatLogicalX_mem_centralizer (ℓ : Fin k₂) :
     concatLogicalX D ℓ ∈ centralizer (concatStabGroup D) := by
   classical
@@ -371,8 +380,8 @@ lemma concatLogicalX_mem_centralizer (ℓ : Fin k₂) :
     exact (mem_centralizer_iff _ _).mp (D.Cout.logicalOps ℓ).x_mem_centralizer y
       (Subgroup.subset_closure hy_mem)
 
-/-- The promoted outer logical `Z` centralizes the concatenated stabilizer (symmetric to
-`concatLogicalX_mem_centralizer`). -/
+/-- The promoted outer logical `Z` centralizes the concatenated stabilizer
+(symmetric to `concatLogicalX_mem_centralizer`). -/
 lemma concatLogicalZ_mem_centralizer (ℓ : Fin k₂) :
     concatLogicalZ D ℓ ∈ centralizer (concatStabGroup D) := by
   classical
@@ -393,7 +402,8 @@ lemma concatLogicalZ_mem_centralizer (ℓ : Fin k₂) :
       (Subgroup.subset_closure hy_mem)
 
 /-- The concatenated logicals `X̄_ℓ`, `Z̄_ℓ` anticommute: the outer logical pair
-anticommutes (odd outer count), and `promote_anticommute_parity` preserves the parity. -/
+anticommutes (odd outer count), and `promote_anticommute_parity` preserves the
+parity. -/
 lemma concatLogical_anticommute (ℓ : Fin k₂) :
     Anticommute (concatLogicalX D ℓ) (concatLogicalZ D ℓ) := by
   classical
@@ -446,12 +456,14 @@ lemma concat_logical_commute_cross (ℓ ℓ' : Fin k₂) (hne : ℓ ≠ ℓ') :
 /-- Concatenate a `k₁ = 1` CSS inner code with a CSS outer code into a
 `StabilizerCode (n₁ * n₂) k₂`. The headline of M3.
 
-Generator independence is an explicit hypothesis rather than a derived fact: the only
-available route to `GeneratorsIndependent` is `rowsLinearIndependent` (check-matrix row
-independence over `ZMod 2`), which is strictly stronger than the subgroup-independence
-`Cin`/`Cout` carry and is *not* recoverable from it (the reverse implication is false in
-general). For a concrete instance it is discharged by `native_decide` via
-`GeneratorsIndependent_of_rowsLinearIndependent`, exactly as the small CSS codes do. -/
+Generator independence is an explicit hypothesis rather than a derived fact: the
+only available route to `GeneratorsIndependent` is `rowsLinearIndependent`
+(check-matrix row independence over `ZMod 2`), which is strictly stronger than
+the subgroup-independence `Cin`/`Cout` carry and is *not* recoverable from it
+(the reverse implication is false in general). For a concrete instance it is
+discharged by `native_decide` via
+`GeneratorsIndependent_of_rowsLinearIndependent`, exactly as the small CSS codes
+do. -/
 noncomputable def concatenate (D : ConcatCSSData n₁ n₂ k₂)
     (hindep : GeneratorsIndependent (n₁ * n₂) D.concatGeneratorsList) :
     StabilizerCode (n₁ * n₂) k₂ where

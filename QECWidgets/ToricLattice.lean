@@ -9,19 +9,19 @@ import QECWidgets.PauliStrip
 /-!
 # Toric lattice view
 
-Draws a concrete toric 1-chain on the `L × L` torus: qubits are edges,
-edges carried by the chain are highlighted, and edges that wrap around the
-torus are drawn as dotted stubs on both sides. Recognized shapes:
+Draws a concrete toric 1-chain on the `L × L` torus: qubits are edges, edges
+carried by the chain are highlighted, and edges that wrap around the torus are
+drawn as dotted stubs on both sides. Recognized shapes:
 
 - a term of type `C1 L` (or literally `EdgeIdx L → ZMod 2`) — neutral purple;
 - `toricXOperatorOfChain L c` — the chain `c` in X coral;
 - `toricZOperatorOfChain L c` — the chain `c` in Z blue.
 
 Use the `#toric_chain e` command, or the `Toric lattice` expression presenter
-(via `ProofWidgets.SelectionPanel`) during a proof. Drawing convention
-matches `toricBoundary1`: edge `h x y` joins vertex `(x, y)` to
-`(next x, y)` (rightward), `v x y` joins `(x, y)` to `(x, next y)`
-(downward, matching row-major index order).
+(via `ProofWidgets.SelectionPanel`) during a proof. Drawing convention matches
+`toricBoundary1`: edge `h x y` joins vertex `(x, y)` to `(next x, y)`
+(rightward), `v x y` joins `(x, y)` to `(x, next y)` (downward, matching
+row-major index order).
 
 Chain strokes are drawn over a background-colored halo (map-style casing) so
 loops read cleanly where they cross the grid.
@@ -31,9 +31,9 @@ namespace QECWidgets
 
 open Lean Server Meta ProofWidgets Quantum Quantum.Stabilizer.Lattice
 
-/-- An evaluated toric 1-chain: one presence bit per horizontal / vertical
-edge (`none` where reduction got stuck). Both arrays are row-major:
-edge `(x, y)` sits at index `y * L + x`. -/
+/-- An evaluated toric 1-chain: one presence bit per horizontal / vertical edge
+(`none` where reduction got stuck). Both arrays are row-major: edge `(x, y)`
+sits at index `y * L + x`. -/
 structure ChainView where
   /-- Lattice side length. -/
   L : Nat
@@ -96,14 +96,14 @@ def ChainFlavor.letter : ChainFlavor → Option String
   | .xOp => some "X"
   | .zOp => some "Z"
 
-/-- Lattices larger than this are refused (each edge costs a reduction, and
-the drawing stops being readable). -/
+/-- Lattices larger than this are refused (each edge costs a reduction, and the
+drawing stops being readable). -/
 def maxToricL : Nat := 16
 
-/-- Recognize a toric-chain-shaped expression: an
-`toricXOperatorOfChain L c` / `toricZOperatorOfChain L c` application, or a
-term whose type is `C1 L` (or unfolded `EdgeIdx L → ZMod 2`), with `L`
-literal. Returns the flavor, `L`, and the chain expression. -/
+/-- Recognize a toric-chain-shaped expression: an `toricXOperatorOfChain L c` /
+`toricZOperatorOfChain L c` application, or a term whose type is `C1 L` (or
+unfolded `EdgeIdx L → ZMod 2`), with `L` literal. Returns the flavor, `L`, and
+the chain expression. -/
 def toricShape? (e : Expr) : MetaM (Option (ChainFlavor × Nat × Expr)) := do
   if e.isAppOfArity ``toricXOperatorOfChain 2 then
     if let some L ← natOfExpr? (e.getArg! 0) then
@@ -147,8 +147,8 @@ private def chainSeg (x1 y1 x2 y2 : Nat) (color : String) (dashed : Bool := fals
       #[]]
 
 /-- Draw the lattice: base grid (with dashed wrap stubs), the chain's edges in
-the flavor color over halos, stuck edges in the warning color, vertex dots,
-and coordinate labels on small lattices. -/
+the flavor color over halos, stuck edges in the warning color, vertex dots, and
+coordinate labels on small lattices. -/
 def latticeSvg (v : ChainView) (flavor : ChainFlavor) : Html := Id.run do
   let L := v.L
   let s : Nat := if L ≤ 6 then 44 else if L ≤ 10 then 30 else 22
@@ -254,10 +254,10 @@ def toricLatticePresenter : ExprPresenter where
   layoutKind := .block
   present := toricPresent
 
-/-- `#toric_chain e` draws a concrete toric 1-chain on the `L × L` torus in
-the infoview. `e` may be a term of type `C1 L`, or an application
-`toricXOperatorOfChain L c` / `toricZOperatorOfChain L c` (colored X coral /
-Z blue). Wrap-around edges are drawn as dotted stubs on both sides. -/
+/-- `#toric_chain e` draws a concrete toric 1-chain on the `L × L` torus in the
+infoview. `e` may be a term of type `C1 L`, or an application
+`toricXOperatorOfChain L c` / `toricZOperatorOfChain L c` (colored X coral / Z
+blue). Wrap-around edges are drawn as dotted stubs on both sides. -/
 syntax (name := toricChainCmd) "#toric_chain " term : command
 
 open Elab Command in

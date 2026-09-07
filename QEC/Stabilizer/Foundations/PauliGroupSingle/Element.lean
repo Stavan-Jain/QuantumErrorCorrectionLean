@@ -10,7 +10,8 @@ namespace PauliGroupElement
 /-!
 # The Single-Qubit Pauli Group (Abstract Structure)
 
-This file defines the group structure on `PauliGroupElement` (one, mul, inv, group laws).
+This file defines the group structure on `PauliGroupElement` (one, mul, inv,
+group laws).
 -/
 
 /-- The identity element of the Pauli group: I with phase 1. -/

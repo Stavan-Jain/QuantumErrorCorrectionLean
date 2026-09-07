@@ -15,13 +15,13 @@ open scoped ToricChain
 
 Mirror of `ToricWrappingInvariants` for the dual chain complex.
 
-Dual invariants on `toricDualCycles`:
-  `hRowAt y₀ c = ∑ x, c (H x y₀)`  — row parity of H-edges; independent of y₀ on dual cycles.
-  `vColAt x₀ c = ∑ y, c (V x₀ y)`  — column parity of V-edges; independent of x₀ on dual cycles.
+Dual invariants on `toricDualCycles`: `hRowAt y₀ c = ∑ x, c (H x y₀)` — row
+parity of H-edges; independent of y₀ on dual cycles.
+`vColAt x₀ c = ∑ y, c (V x₀ y)` — column parity of V-edges; independent of x₀ on
+dual cycles.
 
-Both invariants vanish on `toricDualBoundaries`, inducing an isomorphism
-  H¹_dual ≅ (ZMod 2)²
-via `(hRowAt, vColAt)`.
+Both invariants vanish on `toricDualBoundaries`, inducing an isomorphism H¹_dual
+≅ (ZMod 2)² via `(hRowAt, vColAt)`.
 -/
 
 variable (L : ℕ)
@@ -197,7 +197,8 @@ theorem vColAt_dualBoundary_zero (b : B¹ L) :
 -- 4.  The quotient map φ_Z : H¹_dual → (ZMod 2)²
 -- ---------------------------------------------------------------------------
 
-/-- Dual homology quotient: toricDualCycles / toricDualBoundaries (as submodule in cycles). -/
+/-- Dual homology quotient: toricDualCycles / toricDualBoundaries (as submodule
+in cycles). -/
 noncomputable abbrev toricDualBoundarySubmoduleInCycles :
     Submodule (ZMod 2) (Z¹ L) :=
   Submodule.comap (Z¹ L).subtype (B¹ L)
@@ -206,7 +207,8 @@ noncomputable abbrev toricDualBoundarySubmoduleInCycles :
 abbrev toricDualH1 : Type :=
   Z¹ L ⧸ toricDualBoundarySubmoduleInCycles (L := L)
 
-/-- Quotient-level map `(hRowAt, vColAt)` on dual cycles, well-defined modulo dual boundaries. -/
+/-- Quotient-level map `(hRowAt, vColAt)` on dual cycles, well-defined modulo
+dual boundaries. -/
 noncomputable def phiDual : toricDualH1 (L := L) → ZMod 2 × ZMod 2 :=
   let N : Submodule (ZMod 2) (Z¹ L) :=
     Submodule.comap (Z¹ L).subtype (B¹ L)
@@ -326,7 +328,8 @@ theorem toric_finrank_dualBoundaries :
     exact?;
   · simp +decide [ C0, Module.finrank ]
 
-/-- `phiDual` as an explicit linear map (for injectivity via dimension count). -/
+/-- `phiDual` as an explicit linear map (for injectivity via dimension count).
+-/
 noncomputable def phiDualLinearMap :
     (Z¹ L ⧸
       Submodule.comap (Z¹ L).subtype (B¹ L)) →ₗ[ZMod 2]

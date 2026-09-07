@@ -29,9 +29,8 @@ namespace CSS_4_1_2
 # The [[4, 1, 2]] LNCY code
 
 The Leung-Nielsen-Chuang-Yamamoto [[4, 1, 2]] code is a four-qubit CSS
-stabilizer code encoding one logical qubit, with code distance 2. It
-detects (but does not correct) a single arbitrary Pauli error. Originally
-introduced in
+stabilizer code encoding one logical qubit, with code distance 2. It detects
+(but does not correct) a single arbitrary Pauli error. Originally introduced in
 [Leung-Nielsen-Chuang-Yamamoto 1997, `arxiv:quant-ph/9704002`, §II Eqs. 5–6].
 
 ## Codewords (LNCY convention, paper Eqs. 5–6)
@@ -48,9 +47,9 @@ Three generators, n − k = 3:
 - `S_Z2 = I I Z Z` (Z-type)
 - `S_X1 = X X X X` (X-type)
 
-Note: the EC Zoo entry quotes a *dual* tableau `(XXII, IIXX, ZZZZ)` from
-the Qiskit preset; that one stabilizes a different 2-d subspace. We use
-the LNCY codeword convention as the ground truth.
+Note: the EC Zoo entry quotes a *dual* tableau `(XXII, IIXX, ZZZZ)` from the
+Qiskit preset; that one stabilizes a different 2-d subspace. We use the LNCY
+codeword convention as the ground truth.
 
 ## Logical operators
 
@@ -59,10 +58,10 @@ the LNCY codeword convention as the ground truth.
 
 The two anticommute at qubit 0 only (X·Z vs no I overlap with I·I).
 
-All theorems closed via the `FourQubit_4_2_2.lean` template, adjusted for
-the k = 1, 2-Z-stab CSS structure (logical operators are weight-2
-strings, and the weight-1 anti-witness function dispatches on `i ∈ {0, 1}`
-vs `i ∈ {2, 3}` to pick the appropriate Z-generator).
+All theorems closed via the `FourQubit_4_2_2.lean` template, adjusted for the k
+= 1, 2-Z-stab CSS structure (logical operators are weight-2 strings, and the
+weight-1 anti-witness function dispatches on `i ∈ {0, 1}` vs `i ∈ {2, 3}` to
+pick the appropriate Z-generator).
 -/
 
 open NQubitPauliGroupElement
@@ -126,9 +125,9 @@ lemma XGenerators_are_XType :
 
 /-! ## §4 — Cross-commutation (Z-generators commute with X-generators)
 
-`S_Z1 = ZZII` overlaps `S_X1 = XXXX` (anticommutes pairwise) at qubits 0
-and 1: count 2 (even) ⇒ they commute. `S_Z2 = IIZZ` overlaps `S_X1` at
-qubits 2 and 3: count 2 (even) ⇒ they commute. -/
+`S_Z1 = ZZII` overlaps `S_X1 = XXXX` (anticommutes pairwise) at qubits 0 and 1:
+count 2 (even) ⇒ they commute. `S_Z2 = IIZZ` overlaps `S_X1` at qubits 2 and 3:
+count 2 (even) ⇒ they commute. -/
 
 private lemma S_Z1_comm_S_X1 : S_Z1 * S_X1 = S_X1 * S_Z1 := by
   classical
@@ -230,7 +229,8 @@ lemma AllPhaseZero_generatorsList :
   rw [NQubitPauliGroupElement.AllPhaseZero_cons]
   exact ⟨rfl, NQubitPauliGroupElement.AllPhaseZero_nil⟩
 
-/-- The check-matrix rows of the three generators are linearly independent over GF(2). -/
+/-- The check-matrix rows of the three generators are linearly independent over
+GF(2). -/
 theorem rowsLinearIndependent_generatorsList :
     NQubitPauliGroupElement.rowsLinearIndependent generatorsList := by decide
 
@@ -264,9 +264,9 @@ codewords:
 |0_L⟩ = (|0000⟩ + |1111⟩)/√2,   |1_L⟩ = (|0011⟩ + |1100⟩)/√2
 ```
 
-`X̄ = XXII` maps `|0_L⟩ ↔ |1_L⟩`. `Z̄ = ZIZI` has eigenvalue +1 on
-`|0_L⟩` and −1 on `|1_L⟩` (the parity `(-1)^(q₀ + q₂)` of the codeword
-basis kets is constant on each codeword).
+`X̄ = XXII` maps `|0_L⟩ ↔ |1_L⟩`. `Z̄ = ZIZI` has eigenvalue +1 on `|0_L⟩` and
+−1 on `|1_L⟩` (the parity `(-1)^(q₀ + q₂)` of the codeword basis kets is
+constant on each codeword).
 -/
 
 /-- Logical X: `X X I I` (overlaps `S_Z1` at qubits 0, 1; even ⇒ commutes). -/
@@ -277,7 +277,8 @@ def logicalZ : NQubitPauliGroupElement 4 := σ[ZIZI]
 
 /-! ### §11 — Logical anticommutation -/
 
-/-- `X̄ = XXII` and `Z̄ = ZIZI` anticommute (overlap at qubit 0 only — odd parity). -/
+/-- `X̄ = XXII` and `Z̄ = ZIZI` anticommute (overlap at qubit 0 only — odd
+parity). -/
 theorem logicalX_anticommutes_logicalZ :
     NQubitPauliGroupElement.Anticommute logicalX logicalZ := by
   classical
@@ -367,7 +368,8 @@ private noncomputable def logicalOpsCSS_4_1_2 : Fin 1 → LogicalQubitOps 4 stab
   fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
             logicalX_anticommutes_logicalZ⟩
 
-/-- The [[4, 1, 2]] LNCY code as a stabilizer code on 4 physical qubits with 1 logical qubit. -/
+/-- The [[4, 1, 2]] LNCY code as a stabilizer code on 4 physical qubits with 1
+logical qubit. -/
 noncomputable def stabilizerCode : StabilizerCode 4 1 where
   hk := by decide
   generatorsList := generatorsList
@@ -381,7 +383,8 @@ noncomputable def stabilizerCode : StabilizerCode 4 1 where
 
 /-! ## §14 — Code distance = 2 -/
 
-/-- The stabilizer-code subgroup equals the closure of the (set-form) generators. -/
+/-- The stabilizer-code subgroup equals the closure of the (set-form)
+generators. -/
 private lemma stabilizerCode_toSubgroup_eq :
     stabilizerCode.toStabilizerGroup.toSubgroup = Subgroup.closure generators := by
   change (Subgroup.closure (NQubitPauliGroupElement.listToSet generatorsList) : _) =
@@ -390,8 +393,9 @@ private lemma stabilizerCode_toSubgroup_eq :
 
 /-- Helper: a weight-1 Pauli with local Pauli `P ∈ {X, Y}` at qubit `i ∈ {0, 1}`
 anticommutes with `S_Z1 = ZZII`. The proof shape mirrors
-`FourQubit_4_2_2.weightOneAt_anticomm_Z1` but with the extra constraint `i ∈ {0, 1}`
-(qubit indices where `S_Z1` has a Z), which we case-split on by `rcases`. -/
+`FourQubit_4_2_2.weightOneAt_anticomm_Z1` but with the extra constraint
+`i ∈ {0, 1}` (qubit indices where `S_Z1` has a Z), which we case-split on by
+`rcases`. -/
 private lemma weightOneAt_anticomm_S_Z1 (i : Fin 4) (P : PauliOperator)
     (hi : i = 0 ∨ i = 1)
     (hP : P = PauliOperator.X ∨ P = PauliOperator.Y) :
