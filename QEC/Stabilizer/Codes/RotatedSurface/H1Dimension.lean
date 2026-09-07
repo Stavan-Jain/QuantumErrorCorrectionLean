@@ -24,6 +24,7 @@ namespace Lattice
 namespace RotatedSurface
 
 open scoped BigOperators
+open scoped Homology
 open scoped RotatedSurfaceChain
 
 /-! ## Basic ambient facts -/
@@ -129,16 +130,16 @@ end Cardinality
 /-! ## Finrank of chain spaces -/
 
 lemma rsc_finrank_C1 (L : ℕ) :
-    Module.finrank (ZMod 2) (VtxIdx L → ZMod 2) = L * L := by
+    dim₂ (VtxIdx L → ZMod 2) = L * L := by
   rw [Module.finrank_fintype_fun_eq_card]
   simp [VtxIdx, Fintype.card_prod, Fintype.card_fin]
 
 lemma rsc_finrank_C0 (L : ℕ) :
-    Module.finrank (ZMod 2) (ZFaceIdx L → ZMod 2) = Fintype.card (ZFaceIdx L) := by
+    dim₂ (ZFaceIdx L → ZMod 2) = Fintype.card (ZFaceIdx L) := by
   rw [Module.finrank_fintype_fun_eq_card]
 
 lemma rsc_finrank_C2 (L : ℕ) :
-    Module.finrank (ZMod 2) (XFaceIdx L → ZMod 2) = Fintype.card (XFaceIdx L) := by
+    dim₂ (XFaceIdx L → ZMod 2) = Fintype.card (XFaceIdx L) := by
   rw [Module.finrank_fintype_fun_eq_card]
 
 /-! ## Anchor-qubit framework
@@ -579,10 +580,10 @@ theorem rscBoundary2_ker_eq_bot :
 
 /-- `rank(∂₂) = |XFaceIdx L|`. -/
 theorem rsc_rank_boundary2 :
-    Module.finrank (ZMod 2) (LinearMap.range (∂₂ L)) =
+    dim₂ (LinearMap.range (∂₂ L)) =
       Fintype.card (XFaceIdx L) := by
   have hrn := LinearMap.finrank_range_add_finrank_ker (∂₂ L)
-  rw [show Module.finrank (ZMod 2) (LinearMap.ker (∂₂ L)) = 0 from ?_] at hrn
+  rw [show dim₂ (LinearMap.ker (∂₂ L)) = 0 from ?_] at hrn
   · rw [rsc_finrank_C2] at hrn
     omega
   · rw [rscBoundary2_ker_eq_bot]
@@ -653,10 +654,10 @@ theorem rscZCutMap_ker_eq_bot : LinearMap.ker (δ⁰ L) = ⊥ := by
 
 /-- `rank(rscZCutMap) = |ZFaceIdx L|`. -/
 theorem rsc_rank_zCutMap :
-    Module.finrank (ZMod 2) (LinearMap.range (δ⁰ L)) =
+    dim₂ (LinearMap.range (δ⁰ L)) =
       Fintype.card (ZFaceIdx L) := by
   have hrn := LinearMap.finrank_range_add_finrank_ker (δ⁰ L)
-  rw [show Module.finrank (ZMod 2) (LinearMap.ker (δ⁰ L)) = 0 from ?_] at hrn
+  rw [show dim₂ (LinearMap.ker (δ⁰ L)) = 0 from ?_] at hrn
   · rw [rsc_finrank_C0] at hrn
     omega
   · rw [rscZCutMap_ker_eq_bot]
@@ -733,15 +734,15 @@ lemma rscZCutMap_eq_transpose_mulVecLin :
 
 /-- `rank(∂₁) = rank(rscZCutMap)` via matrix transpose-rank. -/
 theorem rsc_rank_boundary1_eq_rank_zCutMap :
-    Module.finrank (ZMod 2) (LinearMap.range (∂₁ L)) =
-      Module.finrank (ZMod 2) (LinearMap.range (δ⁰ L)) := by
+    dim₂ (LinearMap.range (∂₁ L)) =
+      dim₂ (LinearMap.range (δ⁰ L)) := by
   rw [rscBoundary1_eq_mulVecLin, rscZCutMap_eq_transpose_mulVecLin]
   show Matrix.rank (stabZMatrix L) = Matrix.rank (stabZMatrix L).transpose
   rw [Matrix.rank_transpose]
 
 /-- `rank(∂₁) = |ZFaceIdx L|`. -/
 theorem rsc_rank_boundary1 :
-    Module.finrank (ZMod 2) (LinearMap.range (∂₁ L)) =
+    dim₂ (LinearMap.range (∂₁ L)) =
       Fintype.card (ZFaceIdx L) := by
   rw [rsc_rank_boundary1_eq_rank_zCutMap, rsc_rank_zCutMap]
 
@@ -749,7 +750,7 @@ theorem rsc_rank_boundary1 :
 
 /-- `dim(cycles) = L * L − |ZFaceIdx L|`. -/
 theorem rsc_finrank_cycles :
-    Module.finrank (ZMod 2) (rscCycles L) =
+    dim₂ (Z₁ L) =
       L * L - Fintype.card (ZFaceIdx L) := by
   have hrn := LinearMap.finrank_range_add_finrank_ker (∂₁ L)
   rw [rsc_finrank_C1, rsc_rank_boundary1] at hrn
@@ -763,32 +764,32 @@ theorem rsc_finrank_cycles :
     have hLL : 1 ≤ L * L := by nlinarith
     omega
   -- rscCycles = ker rscBoundary1
-  show Module.finrank (ZMod 2) (LinearMap.ker (∂₁ L)) = _
+  show dim₂ (LinearMap.ker (∂₁ L)) = _
   omega
 
 /-- `dim(boundaries) = |XFaceIdx L|`. -/
 theorem rsc_finrank_boundaries :
-    Module.finrank (ZMod 2) (rscBoundaries L) = Fintype.card (XFaceIdx L) := by
-  show Module.finrank (ZMod 2) (LinearMap.range (∂₂ L)) = _
+    dim₂ (B₁ L) = Fintype.card (XFaceIdx L) := by
+  show dim₂ (LinearMap.range (∂₂ L)) = _
   exact rsc_rank_boundary2
 
 /-- `dim(H₁) = 1` for the rotated surface code. -/
 theorem rsc_finrank_H1_eq_one :
-    Module.finrank (ZMod 2) (rscH1 L) = 1 := by
+    dim₂ (H₁ L) = 1 := by
   -- The generic quotient-dimension formula on the HomologicalCode side.
   have hquot := (rotatedSurfaceHomologicalCode L).finrank_H1_eq_cycles_sub_boundaries
   -- Convert from generic cycles/boundaries to lattice-specific via the rfl-bridges.
-  have hC : Module.finrank (ZMod 2) ((rotatedSurfaceHomologicalCode L).cycles) =
+  have hC : dim₂ ((rotatedSurfaceHomologicalCode L).cycles) =
       L * L - Fintype.card (ZFaceIdx L) := by
-    show Module.finrank (ZMod 2) (rscCycles L) = _
+    show dim₂ (Z₁ L) = _
     exact rsc_finrank_cycles
-  have hB : Module.finrank (ZMod 2) ((rotatedSurfaceHomologicalCode L).boundaries) =
+  have hB : dim₂ ((rotatedSurfaceHomologicalCode L).boundaries) =
       Fintype.card (XFaceIdx L) := by
-    show Module.finrank (ZMod 2) (rscBoundaries L) = _
+    show dim₂ (B₁ L) = _
     exact rsc_finrank_boundaries
   rw [hC, hB] at hquot
   -- The two finrank forms (lattice vs generic) agree by defeq.
-  have h_targ : Module.finrank (ZMod 2) (rscH1 L) =
+  have h_targ : dim₂ (H₁ L) =
       @Module.finrank (ZMod 2) (rotatedSurfaceHomologicalCode L).H1 _
         (Submodule.Quotient.addCommGroup
           (rotatedSurfaceHomologicalCode L).boundarySubmoduleInCycles).toAddCommMonoid

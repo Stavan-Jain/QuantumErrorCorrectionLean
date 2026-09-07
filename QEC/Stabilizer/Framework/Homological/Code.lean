@@ -21,11 +21,34 @@ This file sets up the abstract structure and the homology API:
 The CSS construction itself is in `QEC/Stabilizer/Homological/CSS.lean`.
 -/
 
+/-- `dim₂ V` is `Module.finrank (ZMod 2) V`, the `𝔽₂`-dimension of a chain space, cycle
+space, or homology group (mathlib precedent: `local notation "dim" => Module.finrank ℝ`).
+`dim₂ V` elaborates to exactly `Module.finrank (ZMod 2) V`, and the unexpander the
+`notation` command generates prints it back while the scope is open. Scoped: enable with
+`open scoped Homology`. -/
+scoped[Homology] notation "dim₂" => Module.finrank (ZMod 2)
+
 namespace Quantum
 namespace Stabilizer
 namespace Homological
 
 open scoped BigOperators
+open scoped Homology
+
+open Lean Elab Command in
+/-- Display test: elaborate `stx` and check that its pretty-printed text is `expected`
+(`exact := false`: contains `expected`). Run through `run_cmd` so no `#`-command is needed. -/
+private def checkDisplay (stx : Syntax) (expected : String) (exact : Bool := true) :
+    CommandElabM Unit :=
+  liftTermElabM do
+    let e ← Term.elabTerm stx none
+    Term.synthesizeSyntheticMVarsNoPostponing
+    let s := toString (← Meta.ppExpr (← instantiateMVars e))
+    unless (if exact then s == expected else (s.splitOn expected).length > 1) do
+      throwError "display test failed:{indentD s}\nexpected{indentD expected}"
+
+run_cmd do
+  checkDisplay (← `(Module.finrank (ZMod 2) (Fin 3 → ZMod 2))) "dim₂ (Fin 3 → ZMod 2)"
 
 /-- A length-3 chain complex over `ZMod 2` with finite, decidable cells.
 
@@ -115,32 +138,32 @@ abbrev H1 : Type :=
 
 /-- The `C₀` chain space has `Fintype.card C₀` dimensions. -/
 theorem finrank_C0 :
-    Module.finrank (ZMod 2) (X.C0 → ZMod 2) = Fintype.card X.C0 :=
+    dim₂ (X.C0 → ZMod 2) = Fintype.card X.C0 :=
   Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := X.C0)
 
 /-- The `C₁` chain space has `Fintype.card C₁` dimensions. -/
 theorem finrank_C1 :
-    Module.finrank (ZMod 2) (X.C1 → ZMod 2) = Fintype.card X.C1 :=
+    dim₂ (X.C1 → ZMod 2) = Fintype.card X.C1 :=
   Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := X.C1)
 
 /-- The `C₂` chain space has `Fintype.card C₂` dimensions. -/
 theorem finrank_C2 :
-    Module.finrank (ZMod 2) (X.C2 → ZMod 2) = Fintype.card X.C2 :=
+    dim₂ (X.C2 → ZMod 2) = Fintype.card X.C2 :=
   Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := X.C2)
 
 /-- Rank-nullity for `∂₁`: `dim C₁ = dim Z₁ + rank ∂₁`. -/
 theorem rank_nullity_boundary1 :
-    Module.finrank (ZMod 2) (X.C1 → ZMod 2) =
-      Module.finrank (ZMod 2) X.cycles +
-        Module.finrank (ZMod 2) (LinearMap.range X.boundary1) := by
+    dim₂ (X.C1 → ZMod 2) =
+      dim₂ X.cycles +
+        dim₂ (LinearMap.range X.boundary1) := by
   simpa [cycles, add_comm] using
     (LinearMap.finrank_range_add_finrank_ker X.boundary1).symm
 
 /-- Rank-nullity for `∂₂`: `dim C₂ = dim (ker ∂₂) + dim B₁`. -/
 theorem rank_nullity_boundary2 :
-    Module.finrank (ZMod 2) (X.C2 → ZMod 2) =
-      Module.finrank (ZMod 2) (LinearMap.ker X.boundary2) +
-        Module.finrank (ZMod 2) X.boundaries := by
+    dim₂ (X.C2 → ZMod 2) =
+      dim₂ (LinearMap.ker X.boundary2) +
+        dim₂ X.boundaries := by
   simpa [boundaries, add_comm] using
     (LinearMap.finrank_range_add_finrank_ker X.boundary2).symm
 
@@ -150,21 +173,21 @@ theorem finrank_H1_eq_cycles_sub_boundaries :
       (Submodule.Quotient.addCommGroup
         (X.boundarySubmoduleInCycles)).toAddCommMonoid
       (Submodule.Quotient.module X.boundarySubmoduleInCycles) =
-      Module.finrank (ZMod 2) X.cycles -
-        Module.finrank (ZMod 2) X.boundaries := by
+      dim₂ X.cycles -
+        dim₂ X.boundaries := by
   have hquot :
       @Module.finrank (ZMod 2) X.H1 _
           (Submodule.Quotient.addCommGroup
             X.boundarySubmoduleInCycles).toAddCommMonoid
           (Submodule.Quotient.module X.boundarySubmoduleInCycles) +
-          Module.finrank (ZMod 2) X.boundarySubmoduleInCycles =
-        Module.finrank (ZMod 2) X.cycles := by
+          dim₂ X.boundarySubmoduleInCycles =
+        dim₂ X.cycles := by
     simpa [H1, boundarySubmoduleInCycles] using
       (Submodule.finrank_quotient_add_finrank (R := ZMod 2)
         X.boundarySubmoduleInCycles)
   have hcomap :
-      Module.finrank (ZMod 2) X.boundarySubmoduleInCycles =
-        Module.finrank (ZMod 2) X.boundaries := by
+      dim₂ X.boundarySubmoduleInCycles =
+        dim₂ X.boundaries := by
     simpa [boundarySubmoduleInCycles] using
       (Submodule.comapSubtypeEquivOfLe X.boundaries_le_cycles).finrank_eq
   rw [hcomap] at hquot

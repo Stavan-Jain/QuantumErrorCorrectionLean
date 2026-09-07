@@ -33,11 +33,9 @@ open scoped BigOperators
 /-! ## The base cycle `u*` -/
 
 /-- `z* = 1 + y + y² + y⁵ + x³ + x³y⁴` over the base group `Z₆ × Z₆`. -/
-def zStar : BaseGroup → ZMod 2 := fun g =>
-  if g = (0, 0) ∨ g = (0, 1) ∨ g = (0, 2) ∨ g = (0, 5) ∨
-     g = (3, 0) ∨ g = (3, 4) then 1 else 0
+def zStar : BaseGroup → ZMod 2 := poly[1 + y + y^2 + y^5 + x^3 + x^3*y^4]
 
-theorem conv_baseA_zStar : conv baseA zStar = 0 := by
+theorem conv_baseA_zStar : baseA ⋆ zStar = 0 := by
   decide +kernel
 
 /-- The base 1-chain `u*`: `z*` in the right block, zero in the left. -/
@@ -83,8 +81,8 @@ def fluxWitness : GrossGroup × Fin 2 → ZMod 2 := fun p =>
 /-- Raw (computable) form of `dualBoundary fluxWitness = 0`, via the
 transpose formula `bb_dualBoundary_eq`. -/
 theorem fluxWitness_dual_raw :
-    (fun f => conv (reflect grossA) (leftHalf fluxWitness) f
-      + conv (reflect grossB) (rightHalf fluxWitness) f)
+    (fun f => (reflect grossA ⋆ leftHalf fluxWitness) f
+      + (reflect grossB ⋆ rightHalf fluxWitness) f)
       = (0 : GrossGroup → ZMod 2) := by
   decide +kernel
 

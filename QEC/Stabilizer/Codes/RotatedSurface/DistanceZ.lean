@@ -32,6 +32,7 @@ namespace StabilizerGroup
 namespace RotatedSurfaceCodeN
 
 open scoped BigOperators
+open scoped Homology
 open scoped RotatedSurfaceChain
 open NQubitPauliGroupElement
 open Stabilizer.Lattice
@@ -318,13 +319,13 @@ lemma dualBoundary_eq_mulVecLin :
 
 /-- `rank(dualBoundary) = card (XFaceIdx L)`. -/
 theorem rsc_rank_dualBoundary :
-    Module.finrank (ZMod 2)
+    dim₂
         (LinearMap.range (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundary) =
       Fintype.card (RotatedSurface.XFaceIdx L) := by
   have h_eq_rank :
-      Module.finrank (ZMod 2)
+      dim₂
           (LinearMap.range (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundary) =
-        Module.finrank (ZMod 2) (LinearMap.range (∂₂ L)) := by
+        dim₂ (LinearMap.range (∂₂ L)) := by
     rw [dualBoundary_eq_mulVecLin, rscBoundary2_eq_transpose_mulVecLin]
     change Matrix.rank (stabXMatrix L) = Matrix.rank (stabXMatrix L).transpose
     rw [Matrix.rank_transpose]
@@ -333,20 +334,20 @@ theorem rsc_rank_dualBoundary :
 
 /-- `dim dualCycles = L*L − card XFaceIdx`. -/
 theorem rsc_finrank_dualCycles :
-    Module.finrank (ZMod 2)
+    dim₂
         (RotatedSurface.rotatedSurfaceHomologicalCode L).dualCycles =
       L * L - Fintype.card (RotatedSurface.XFaceIdx L) := by
   have hrn := LinearMap.finrank_range_add_finrank_ker
     (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundary
   rw [rsc_rank_dualBoundary] at hrn
   -- dim C₁ = L*L (via Fintype card of VtxIdx).
-  have h_C1 : Module.finrank (ZMod 2)
+  have h_C1 : dim₂
       ((RotatedSurface.rotatedSurfaceHomologicalCode L).C1 → ZMod 2) = L * L := by
     rw [Module.finrank_fintype_fun_eq_card]
     change Fintype.card (RotatedSurface.VtxIdx L) = L * L
     simp [Fintype.card_prod, Fintype.card_fin]
   rw [h_C1] at hrn
-  change Module.finrank (ZMod 2)
+  change dim₂
     (LinearMap.ker (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundary) = _
   omega
 
@@ -387,10 +388,10 @@ lemma cutMap_eq_rscZCutMap :
 
 /-- `dim dualBoundaries = card ZFaceIdx`. -/
 theorem rsc_finrank_dualBoundaries :
-    Module.finrank (ZMod 2)
+    dim₂
         (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundaries =
       Fintype.card (RotatedSurface.ZFaceIdx L) := by
-  change Module.finrank (ZMod 2)
+  change dim₂
     (LinearMap.range (RotatedSurface.rotatedSurfaceHomologicalCode L).cutMap) = _
   rw [cutMap_eq_rscZCutMap]
   exact RotatedSurface.rsc_rank_zCutMap (L := L)
@@ -448,7 +449,7 @@ theorem dualBoundaries_le_dualCycles :
 
 /-- `dim (dualCycles / dualBoundaries) = 1` for the rotated surface code. -/
 theorem rsc_finrank_dualH1_eq_one :
-    Module.finrank (ZMod 2)
+    dim₂
       ((RotatedSurface.rotatedSurfaceHomologicalCode L).dualCycles ⧸
         Submodule.comap
           (RotatedSurface.rotatedSurfaceHomologicalCode L).dualCycles.subtype
@@ -457,10 +458,10 @@ theorem rsc_finrank_dualH1_eq_one :
   have h_quot := Submodule.finrank_quotient_add_finrank (R := ZMod 2)
     (Submodule.comap (RotatedSurface.rotatedSurfaceHomologicalCode L).dualCycles.subtype
       (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundaries)
-  have h_comap : Module.finrank (ZMod 2)
+  have h_comap : dim₂
       (Submodule.comap (RotatedSurface.rotatedSurfaceHomologicalCode L).dualCycles.subtype
         (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundaries) =
-      Module.finrank (ZMod 2)
+      dim₂
         (RotatedSurface.rotatedSurfaceHomologicalCode L).dualBoundaries :=
     (Submodule.comapSubtypeEquivOfLe h_le).finrank_eq
   rw [h_comap, rsc_finrank_dualBoundaries, rsc_finrank_dualCycles] at h_quot

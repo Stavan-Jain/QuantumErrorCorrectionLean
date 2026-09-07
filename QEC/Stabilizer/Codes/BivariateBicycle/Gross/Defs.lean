@@ -39,36 +39,31 @@ abbrev BaseGroup : Type := ZMod 6 × ZMod 6
 /-! ## Polynomials
 
 Group-algebra elements are `ZMod 2`-valued indicator functions of their
-supports.  Monomial `xᵃyᵇ` ↦ the point `(a, b)`. -/
+supports.  Monomial `xᵃyᵇ` ↦ the point `(a, b)`; `poly[x^3 + y + y^2]`
+(`BBChainComplex.lean`) expands to exactly the
+`fun g => if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0` indicator. -/
 
 /-- Gross-code `A = x³ + y + y²`. -/
-def grossA : GrossGroup → ZMod 2 := fun g =>
-  if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0
+def grossA : GrossGroup → ZMod 2 := poly[x^3 + y + y^2]
 
 /-- Gross-code `B = y³ + x + x²`. -/
-def grossB : GrossGroup → ZMod 2 := fun g =>
-  if g = (0, 3) ∨ g = (1, 0) ∨ g = (2, 0) then 1 else 0
+def grossB : GrossGroup → ZMod 2 := poly[y^3 + x + x^2]
 
 /-- Base-code `A = x³ + y + y²` (over `Z₆ × Z₆`). -/
-def baseA : BaseGroup → ZMod 2 := fun g =>
-  if g = (3, 0) ∨ g = (0, 1) ∨ g = (0, 2) then 1 else 0
+def baseA : BaseGroup → ZMod 2 := poly[x^3 + y + y^2]
 
 /-- Base-code `B = y³ + x + x²` (over `Z₆ × Z₆`). -/
-def baseB : BaseGroup → ZMod 2 := fun g =>
-  if g = (0, 3) ∨ g = (1, 0) ∨ g = (2, 0) then 1 else 0
+def baseB : BaseGroup → ZMod 2 := poly[y^3 + x + x^2]
 
 /-- The polynomial `1 + x²` (homotopy-chain prefactor). -/
-def onePlusX2 : GrossGroup → ZMod 2 := fun g =>
-  if g = (0, 0) ∨ g = (2, 0) then 1 else 0
+def onePlusX2 : GrossGroup → ZMod 2 := poly[1 + x^2]
 
 /-- `B ⋆ B = 1 + x² + x⁴` over the gross group (squares kill cross terms in
 char 2, and `y⁶ = 1`). -/
-def bSquaredPoly : GrossGroup → ZMod 2 := fun g =>
-  if g = (0, 0) ∨ g = (2, 0) ∨ g = (4, 0) then 1 else 0
+def bSquaredPoly : GrossGroup → ZMod 2 := poly[1 + x^2 + x^4]
 
 /-- The polynomial `1 + x⁶ = 1 + deck`. -/
-def onePlusX6 : GrossGroup → ZMod 2 := fun g =>
-  if g = (0, 0) ∨ g = (6, 0) then 1 else 0
+def onePlusX6 : GrossGroup → ZMod 2 := poly[1 + x^6]
 
 /-! ## Chain complexes -/
 

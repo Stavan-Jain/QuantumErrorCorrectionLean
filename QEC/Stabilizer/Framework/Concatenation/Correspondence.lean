@@ -46,11 +46,11 @@ the inner logicals: `I` if it commutes with both, `X`/`Z` for a single anticommu
 noncomputable def inducedOuterOp (D : ConcatCSSData n₁ n₂ k₂)
     (g : NQubitPauliGroupElement (n₁ * n₂)) : NQubitPauliOperator n₂ :=
   fun b =>
-    if Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).zOp then
-      (if Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).xOp
+    if Anticommute (restrictBlock b g) (D.Cin.logicalZ 0) then
+      (if Anticommute (restrictBlock b g) (D.Cin.logicalX 0)
         then PauliOperator.Y else PauliOperator.X)
     else
-      (if Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).xOp
+      (if Anticommute (restrictBlock b g) (D.Cin.logicalX 0)
         then PauliOperator.Z else PauliOperator.I)
 
 /-- The induced outer operator as a phase-0 group element. -/
@@ -70,8 +70,8 @@ variable (D : ConcatCSSData n₁ n₂ k₂)
 logicals. -/
 lemma inducedOuterOp_eq_I_iff (g : NQubitPauliGroupElement (n₁ * n₂)) (b : Fin n₂) :
     inducedOuterOp D g b = PauliOperator.I
-      ↔ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).zOp
-        ∧ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).xOp := by
+      ↔ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalZ 0)
+        ∧ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalX 0) := by
   unfold inducedOuterOp
   split_ifs with h1 h2 h3
   · exact iff_of_false (by decide) (fun hc => hc.1 h1)
@@ -96,7 +96,7 @@ lemma induced_block_anticommute_iff (g : NQubitPauliGroupElement (n₁ * n₂))
     exact not_anticommute_one_right _
   · -- X: both sides ↔ anticommuting with X̄₁ (the Z-component bit)
     rw [show ofOperator (promoteSingle D.Xbar D.Zbar PauliOperator.X)
-        = (D.Cin.logicalOps 0).xOp from by simp only [promoteSingle]; exact D.ofOperator_Xbar]
+        = (D.Cin.logicalX 0) from by simp only [promoteSingle]; exact D.ofOperator_Xbar]
     simp only [NQubitPauliGroupElement.anticommutesAt, inducedOuterOp, hPb]
     split_ifs with h1 h2 h3 <;>
       first
@@ -105,7 +105,7 @@ lemma induced_block_anticommute_iff (g : NQubitPauliGroupElement (n₁ * n₂))
   · exact absurd hPb hP
   · -- Z: both sides ↔ anticommuting with Z̄₁ (the X-component bit)
     rw [show ofOperator (promoteSingle D.Xbar D.Zbar PauliOperator.Z)
-        = (D.Cin.logicalOps 0).zOp from by simp only [promoteSingle]; exact D.ofOperator_Zbar]
+        = (D.Cin.logicalZ 0) from by simp only [promoteSingle]; exact D.ofOperator_Zbar]
     simp only [NQubitPauliGroupElement.anticommutesAt, inducedOuterOp, hPb]
     split_ifs with h1 h2 h3 <;>
       first
@@ -231,26 +231,26 @@ logicals centralise the stabilizer). -/
 lemma restrict_commutes_both_iff_stab (g : NQubitPauliGroupElement (n₁ * n₂))
     (hg : g ∈ centralizer D.concatStabGroup)
     (hindep : rowsLinearIndependent D.Cin.generatorsList) (b : Fin n₂) :
-    (¬ Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).zOp
-      ∧ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalOps 0).xOp)
+    (¬ Anticommute (restrictBlock b g) (D.Cin.logicalZ 0)
+      ∧ ¬ Anticommute (restrictBlock b g) (D.Cin.logicalX 0))
     ↔ ∃ s ∈ D.Cin.toStabilizerGroup.toSubgroup, s.operators = (restrictBlock b g).operators := by
   constructor
   · rintro ⟨hZ, hX⟩
-    have hcomm_x : restrictBlock b g * (D.Cin.logicalOps 0).xOp
-        = (D.Cin.logicalOps 0).xOp * restrictBlock b g :=
+    have hcomm_x : restrictBlock b g * D.Cin.logicalX 0
+        = D.Cin.logicalX 0 * restrictBlock b g :=
       (commute_or_anticommute _ _).resolve_right hX
-    have hcomm_z : restrictBlock b g * (D.Cin.logicalOps 0).zOp
-        = (D.Cin.logicalOps 0).zOp * restrictBlock b g :=
+    have hcomm_z : restrictBlock b g * D.Cin.logicalZ 0
+        = D.Cin.logicalZ 0 * restrictBlock b g :=
       (commute_or_anticommute _ _).resolve_right hZ
     exact operators_eq_stab_of_commutes_both_logicals D.Cin hindep (restrictBlock b g)
       (D.restrictBlock_mem_centralizer g hg b) hcomm_x hcomm_z
   · rintro ⟨s, hs, hsop⟩
     refine ⟨commute_not_anticommute ?_, commute_not_anticommute ?_⟩
     · rw [commutes_iff_even_anticommutes, ← hsop, ← commutes_iff_even_anticommutes]
-      exact (mem_centralizer_iff (D.Cin.logicalOps 0).zOp D.Cin.toStabilizerGroup).mp
+      exact (mem_centralizer_iff (D.Cin.logicalZ 0) D.Cin.toStabilizerGroup).mp
         (D.Cin.logicalOps 0).z_mem_centralizer s hs
     · rw [commutes_iff_even_anticommutes, ← hsop, ← commutes_iff_even_anticommutes]
-      exact (mem_centralizer_iff (D.Cin.logicalOps 0).xOp D.Cin.toStabilizerGroup).mp
+      exact (mem_centralizer_iff (D.Cin.logicalX 0) D.Cin.toStabilizerGroup).mp
         (D.Cin.logicalOps 0).x_mem_centralizer s hs
 
 /-- **(M5.)** Block `b` is in the support of the induced outer operator exactly when the
@@ -292,8 +292,8 @@ open NQubitPauliOperator in
 /-- `symplecticInner` is additive in the left argument under the group product (it depends only
 on the operator part, whose symplectic vector adds, and the form is bilinear). -/
 lemma symplecticInner_group_mul_left {m : ℕ} (p q L : NQubitPauliGroupElement m) :
-    symplecticInner (p * q).operators L.operators
-      = symplecticInner p.operators L.operators + symplecticInner q.operators L.operators := by
+    ⟪(p * q), L⟫ₛ
+      = ⟪p, L⟫ₛ + ⟪q, L⟫ₛ := by
   rw [← symplecticBilinear_toSymplectic, ← symplecticBilinear_toSymplectic,
     ← symplecticBilinear_toSymplectic,
     show toSymplectic (p * q).operators
@@ -304,7 +304,7 @@ lemma symplecticInner_group_mul_left {m : ℕ} (p q L : NQubitPauliGroupElement 
 open NQubitPauliOperator in
 /-- The identity commutes with everything, so its symplectic inner product is zero. -/
 lemma symplecticInner_one_left {m : ℕ} (L : NQubitPauliGroupElement m) :
-    symplecticInner (1 : NQubitPauliGroupElement m).operators L.operators = 0 :=
+    ⟪(1 : NQubitPauliGroupElement m), L⟫ₛ = 0 :=
   (commutes_iff_symplectic_inner_zero 1 L).mp (by rw [one_mul, mul_one])
 
 open NQubitPauliOperator in
@@ -319,9 +319,9 @@ open NQubitPauliOperator in
 multiplies block-wise, so its symplectic inner product against `L` is additive. -/
 lemma symplecticInner_restrictBlock_mul (b : Fin n₂) (x y : NQubitPauliGroupElement (n₁ * n₂))
     (L : NQubitPauliGroupElement n₁) :
-    symplecticInner (restrictBlock b (x * y)).operators L.operators
-      = symplecticInner (restrictBlock b x).operators L.operators
-        + symplecticInner (restrictBlock b y).operators L.operators := by
+    ⟪restrictBlock b (x * y), L⟫ₛ
+      = ⟪restrictBlock b x, L⟫ₛ
+        + ⟪restrictBlock b y, L⟫ₛ := by
   rw [show (restrictBlock b (x * y)).operators
       = (restrictBlock b x * restrictBlock b y).operators from by funext i; rfl]
   exact symplecticInner_group_mul_left (restrictBlock b x) (restrictBlock b y) L
@@ -332,17 +332,17 @@ symplectic inner products of the restriction with `Z̄₁` and `X̄₁`. -/
 lemma inducedOuterOp_toSymplecticSingle (D : ConcatCSSData n₁ n₂ k₂)
     (x : NQubitPauliGroupElement (n₁ * n₂)) (b : Fin n₂) :
     (inducedOuterOp D x b).toSymplecticSingle
-      = (symplecticInner (restrictBlock b x).operators (D.Cin.logicalOps 0).zOp.operators,
-         symplecticInner (restrictBlock b x).operators (D.Cin.logicalOps 0).xOp.operators) := by
+      = (⟪restrictBlock b x, (D.Cin.logicalZ 0)⟫ₛ,
+         ⟪restrictBlock b x, (D.Cin.logicalX 0)⟫ₛ) := by
   classical
-  have hz : symplecticInner (restrictBlock b x).operators (D.Cin.logicalOps 0).zOp.operators
-      = if Anticommute (restrictBlock b x) (D.Cin.logicalOps 0).zOp then (1 : ZMod 2) else 0 := by
+  have hz : ⟪restrictBlock b x, (D.Cin.logicalZ 0)⟫ₛ
+      = if Anticommute (restrictBlock b x) (D.Cin.logicalZ 0) then (1 : ZMod 2) else 0 := by
     split_ifs with h
     · exact (anticommutes_iff_symplectic_inner_one _ _).mp h
     · exact (commutes_iff_symplectic_inner_zero _ _).mp
         ((commute_or_anticommute _ _).resolve_right h)
-  have hx : symplecticInner (restrictBlock b x).operators (D.Cin.logicalOps 0).xOp.operators
-      = if Anticommute (restrictBlock b x) (D.Cin.logicalOps 0).xOp then (1 : ZMod 2) else 0 := by
+  have hx : ⟪restrictBlock b x, (D.Cin.logicalX 0)⟫ₛ
+      = if Anticommute (restrictBlock b x) (D.Cin.logicalX 0) then (1 : ZMod 2) else 0 := by
     split_ifs with h
     · exact (anticommutes_iff_symplectic_inner_one _ _).mp h
     · exact (commutes_iff_symplectic_inner_zero _ _).mp
@@ -370,31 +370,31 @@ lemma exists_concatStab_matching_induced (g : NQubitPauliGroupElement (n₁ * n�
     (t : NQubitPauliGroupElement n₂) (ht : t ∈ D.Cout.toStabilizerGroup.toSubgroup)
     (htop : t.operators = (inducedOuter D g).operators) :
     ∃ u ∈ D.concatStabGroup.toSubgroup, ∀ b : Fin n₂,
-      restrictBlock b (g * u) * (D.Cin.logicalOps 0).xOp
-          = (D.Cin.logicalOps 0).xOp * restrictBlock b (g * u)
-        ∧ restrictBlock b (g * u) * (D.Cin.logicalOps 0).zOp
-          = (D.Cin.logicalOps 0).zOp * restrictBlock b (g * u) := by
+      restrictBlock b (g * u) * D.Cin.logicalX 0
+          = D.Cin.logicalX 0 * restrictBlock b (g * u)
+        ∧ restrictBlock b (g * u) * D.Cin.logicalZ 0
+          = D.Cin.logicalZ 0 * restrictBlock b (g * u) := by
   classical
   -- Symplectic-inner values of the inner logical pair.
-  have hXZ : symplecticInner (D.Cin.logicalOps 0).xOp.operators (D.Cin.logicalOps 0).zOp.operators
+  have hXZ : ⟪(D.Cin.logicalX 0), (D.Cin.logicalZ 0)⟫ₛ
       = 1 := (anticommutes_iff_symplectic_inner_one _ _).mp (D.Cin.logicalOps 0).anticommute
-  have hZX : symplecticInner (D.Cin.logicalOps 0).zOp.operators (D.Cin.logicalOps 0).xOp.operators
+  have hZX : ⟪(D.Cin.logicalZ 0), (D.Cin.logicalX 0)⟫ₛ
       = 1 := (anticommutes_iff_symplectic_inner_one _ _).mp
         (NQubitPauliGroupElement.anticommute_symm _ _ (D.Cin.logicalOps 0).anticommute)
-  have hXX : symplecticInner (D.Cin.logicalOps 0).xOp.operators (D.Cin.logicalOps 0).xOp.operators
+  have hXX : ⟪(D.Cin.logicalX 0), (D.Cin.logicalX 0)⟫ₛ
       = 0 := (commutes_iff_symplectic_inner_zero _ _).mp rfl
-  have hZZ : symplecticInner (D.Cin.logicalOps 0).zOp.operators (D.Cin.logicalOps 0).zOp.operators
+  have hZZ : ⟪(D.Cin.logicalZ 0), (D.Cin.logicalZ 0)⟫ₛ
       = 0 := (commutes_iff_symplectic_inner_zero _ _).mp rfl
   -- Step 1: build a class-matching concatenated stabilizer `u` with `inducedOuterOp u = t`.
   have ht' : t ∈ Subgroup.closure (NQubitPauliGroupElement.listToSet D.Cout.generatorsList) := ht
   obtain ⟨u, hu_mem, hu_sig⟩ : ∃ u ∈ D.concatStabGroup.toSubgroup, ∀ b : Fin n₂,
-      ((symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).zOp.operators,
-        symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).xOp.operators)
+      ((⟪restrictBlock b u, (D.Cin.logicalZ 0)⟫ₛ,
+        ⟪restrictBlock b u, (D.Cin.logicalX 0)⟫ₛ)
         : ZMod 2 × ZMod 2) = (t.operators b).toSymplecticSingle := by
     refine Subgroup.closure_induction
       (p := fun t _ => ∃ u ∈ D.concatStabGroup.toSubgroup, ∀ b : Fin n₂,
-        ((symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).zOp.operators,
-          symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).xOp.operators)
+        ((⟪restrictBlock b u, (D.Cin.logicalZ 0)⟫ₛ,
+          ⟪restrictBlock b u, (D.Cin.logicalX 0)⟫ₛ)
           : ZMod 2 × ZMod 2) = (t.operators b).toSymplecticSingle)
       ?_ ?_ ?_ ?_ ht'
     · -- mem: a `Y`-free outer generator `y` promotes to a matching concat generator.
@@ -433,13 +433,13 @@ lemma exists_concatStab_matching_induced (g : NQubitPauliGroupElement (n₁ * n�
       obtain ⟨u₁, hu₁, hsig₁⟩ := iha
       obtain ⟨u₂, hu₂, hsig₂⟩ := iha'
       refine ⟨u₁ * u₂, Subgroup.mul_mem _ hu₁ hu₂, fun b => ?_⟩
-      have e1 : symplecticInner (restrictBlock b u₁).operators (D.Cin.logicalOps 0).zOp.operators
+      have e1 : ⟪restrictBlock b u₁, (D.Cin.logicalZ 0)⟫ₛ
           = ((a.operators b).toSymplecticSingle).1 := congrArg Prod.fst (hsig₁ b)
-      have e2 : symplecticInner (restrictBlock b u₁).operators (D.Cin.logicalOps 0).xOp.operators
+      have e2 : ⟪restrictBlock b u₁, (D.Cin.logicalX 0)⟫ₛ
           = ((a.operators b).toSymplecticSingle).2 := congrArg Prod.snd (hsig₁ b)
-      have e3 : symplecticInner (restrictBlock b u₂).operators (D.Cin.logicalOps 0).zOp.operators
+      have e3 : ⟪restrictBlock b u₂, (D.Cin.logicalZ 0)⟫ₛ
           = ((a'.operators b).toSymplecticSingle).1 := congrArg Prod.fst (hsig₂ b)
-      have e4 : symplecticInner (restrictBlock b u₂).operators (D.Cin.logicalOps 0).xOp.operators
+      have e4 : ⟪restrictBlock b u₂, (D.Cin.logicalX 0)⟫ₛ
           = ((a'.operators b).toSymplecticSingle).2 := congrArg Prod.snd (hsig₂ b)
       rw [symplecticInner_restrictBlock_mul, symplecticInner_restrictBlock_mul,
         show (a * a').operators b
@@ -456,16 +456,16 @@ lemma exists_concatStab_matching_induced (g : NQubitPauliGroupElement (n₁ * n�
   -- Step 2: `inducedOuterOp u = inducedOuterOp g`, so `g * u` restricts to commuting elements.
   refine ⟨u, hu_mem, fun b => ?_⟩
   have hsig_g : (t.operators b).toSymplecticSingle
-      = (symplecticInner (restrictBlock b g).operators (D.Cin.logicalOps 0).zOp.operators,
-         symplecticInner (restrictBlock b g).operators (D.Cin.logicalOps 0).xOp.operators) := by
+      = (⟪restrictBlock b g, (D.Cin.logicalZ 0)⟫ₛ,
+         ⟪restrictBlock b g, (D.Cin.logicalX 0)⟫ₛ) := by
     rw [htop, inducedOuter_operators]
     exact D.inducedOuterOp_toSymplecticSingle g b
   have hpair := (hu_sig b).trans hsig_g
-  have hzg : symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).zOp.operators
-      = symplecticInner (restrictBlock b g).operators (D.Cin.logicalOps 0).zOp.operators :=
+  have hzg : ⟪restrictBlock b u, (D.Cin.logicalZ 0)⟫ₛ
+      = ⟪restrictBlock b g, (D.Cin.logicalZ 0)⟫ₛ :=
     congrArg Prod.fst hpair
-  have hxg : symplecticInner (restrictBlock b u).operators (D.Cin.logicalOps 0).xOp.operators
-      = symplecticInner (restrictBlock b g).operators (D.Cin.logicalOps 0).xOp.operators :=
+  have hxg : ⟪restrictBlock b u, (D.Cin.logicalX 0)⟫ₛ
+      = ⟪restrictBlock b g, (D.Cin.logicalX 0)⟫ₛ :=
     congrArg Prod.snd hpair
   refine ⟨?_, ?_⟩
   · refine (commutes_iff_symplectic_inner_zero _ _).mpr ?_

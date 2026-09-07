@@ -322,7 +322,7 @@ theorem xCommutesWithZChecks_iff_boundary1_pointwise_zero
 i.e. cycle membership. -/
 theorem boundary1_pointwise_zero_iff_mem_toricCycles
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
-    (∀ v : VtxIdx L, ∂₁ (L := L) c v = 0) ↔ c ∈ toricCycles (L := L) := by
+    (∀ v : VtxIdx L, ∂₁ (L := L) c v = 0) ↔ c ∈ Z₁ L := by
   constructor
   · intro h
     change ∂₁ (L := L) c = 0
@@ -336,7 +336,7 @@ theorem boundary1_pointwise_zero_iff_mem_toricCycles
 This delegates to the generic `chainXOperator_commutes_ZGenerators_iff_mem_cycles`
 via the toric `HomologicalCode` instance and the lattice/abstract generator-set bridge. -/
 theorem xCommutesWithZChecks_iff_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
-    xCommutesWithZChecks L c ↔ c ∈ toricCycles (L := L) := by
+    xCommutesWithZChecks L c ↔ c ∈ Z₁ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold xCommutesWithZChecks
   rw [← toricHomologicalCode_ZGenerators_eq]
@@ -358,7 +358,7 @@ lemma c2_eq_sum_singleFace (L : ℕ) (f : C2 L) :
 Delegates to `chainXOperator_mem_XClosure_iff_mem_boundaries` on the toric
 `HomologicalCode` instance via the X-generator bridge. -/
 theorem xIsPlaquetteProduct_iff_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
-    xIsPlaquetteProduct L c ↔ c ∈ toricBoundaries (L := L) := by
+    xIsPlaquetteProduct L c ↔ c ∈ B₁ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold xIsPlaquetteProduct
   rw [← toricHomologicalCode_XGenerators_eq]
@@ -394,7 +394,7 @@ lemma toricXOperatorOfChain_mem_centralizer_iff_cycle
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     toricXOperatorOfChain L c ∈
     StabilizerGroup.centralizer (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
-        c ∈ toricCycles (L := L) := by
+        c ∈ Z₁ L := by
   constructor;
   · intro h;
     apply (xCommutesWithZChecks_iff_mem_toricCycles L c).mp;
@@ -535,7 +535,7 @@ lemma stabilizer_same_ops_implies_boundary
     (s : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L))
     (hs : s ∈ (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup)
     (heq : s.operators = (toricXOperatorOfChain L c).operators) :
-    c ∈ toricBoundaries (L := L) := by
+    c ∈ B₁ L := by
   have hops : ∀ i, s.operators i = PauliOperator.X ∨ s.operators i = PauliOperator.I := by
     intro i; rw [heq]; simp only [toricXOperatorOfChain]
     by_cases h : ∃ e : EdgeIdx L, edgeToQubitIdx L e = i ∧ c e = 1
@@ -558,7 +558,7 @@ shared underlying subgroup of the toric and abstract stabilizer groups. -/
 theorem xNontrivialLogical_iff_cycle_not_boundary (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     StabilizerGroup.IsNontrivialLogicalOperator
         (toricXOperatorOfChain L c) (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
-      c ∈ toricCycles (L := L) ∧ c ∉ toricBoundaries (L := L) := by
+      c ∈ Z₁ L ∧ c ∉ B₁ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   -- The toric and abstract stabilizer groups have the same underlying subgroup
   -- once we translate the lattice generator sets via the §E bridges.

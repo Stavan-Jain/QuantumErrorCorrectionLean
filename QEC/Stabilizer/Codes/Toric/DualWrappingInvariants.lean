@@ -7,6 +7,7 @@ namespace Stabilizer
 namespace Lattice
 
 open scoped BigOperators
+open scoped Homology
 open scoped ToricChain
 
 /-!
@@ -70,7 +71,7 @@ theorem vColAt_linear (x0 : Fin L) :
 /-
 `hRowAt` is independent of the chosen row on dual cycles.
 -/
-theorem hRowAt_independent_on_dualCycles (c : toricDualCycles (L := L)) (y0 y1 : Fin L) :
+theorem hRowAt_independent_on_dualCycles (c : Z¹ L) (y0 y1 : Fin L) :
     hRowAt (L := L) y0 c.1 = hRowAt (L := L) y1 c.1 := by
   -- By definition of `toricDualCycles`, we know that `toricDualBoundary L c = 0`.
   have h_dual_boundary_zero : toricDualBoundary L c.1 = 0 := by
@@ -111,7 +112,7 @@ theorem hRowAt_independent_on_dualCycles (c : toricDualCycles (L := L)) (y0 y1 :
 /-
 `vColAt` is independent of the chosen column on dual cycles.
 -/
-theorem vColAt_independent_on_dualCycles (c : toricDualCycles (L := L)) (x0 x1 : Fin L) :
+theorem vColAt_independent_on_dualCycles (c : Z¹ L) (x0 x1 : Fin L) :
     vColAt (L := L) x0 c.1 = vColAt (L := L) x1 c.1 := by
   have hvColAt_linear : ∀ x : Fin L,
       vColAt (L := L) x c.1 + vColAt (L := L) (next L x) c.1 = 0 := by
@@ -161,7 +162,7 @@ theorem vColAt_independent_on_dualCycles (c : toricDualCycles (L := L)) (x0 x1 :
 
 Dual boundaries have trivial `hRowAt` invariant.
 -/
-theorem hRowAt_dualBoundary_zero (b : toricDualBoundaries (L := L)) :
+theorem hRowAt_dualBoundary_zero (b : B¹ L) :
     hRowAt (L := L) (zeroCoord L) b.1 = 0 := by
   rcases b with ⟨ b, ⟨ s, rfl ⟩ ⟩;
   unfold hRowAt toricVertexCutMap;
@@ -175,7 +176,7 @@ theorem hRowAt_dualBoundary_zero (b : toricDualBoundaries (L := L)) :
 /-
 Dual boundaries have trivial `vColAt` invariant.
 -/
-theorem vColAt_dualBoundary_zero (b : toricDualBoundaries (L := L)) :
+theorem vColAt_dualBoundary_zero (b : B¹ L) :
     vColAt (L := L) (zeroCoord L) b.1 = 0 := by
   rcases b with ⟨ b, hb ⟩;
   obtain ⟨ s, rfl ⟩ := hb;
@@ -198,18 +199,18 @@ theorem vColAt_dualBoundary_zero (b : toricDualBoundaries (L := L)) :
 
 /-- Dual homology quotient: toricDualCycles / toricDualBoundaries (as submodule in cycles). -/
 noncomputable abbrev toricDualBoundarySubmoduleInCycles :
-    Submodule (ZMod 2) (toricDualCycles (L := L)) :=
-  Submodule.comap (toricDualCycles (L := L)).subtype (toricDualBoundaries (L := L))
+    Submodule (ZMod 2) (Z¹ L) :=
+  Submodule.comap (Z¹ L).subtype (B¹ L)
 
 /-- The dual H¹ quotient type. -/
 abbrev toricDualH1 : Type :=
-  toricDualCycles (L := L) ⧸ toricDualBoundarySubmoduleInCycles (L := L)
+  Z¹ L ⧸ toricDualBoundarySubmoduleInCycles (L := L)
 
 /-- Quotient-level map `(hRowAt, vColAt)` on dual cycles, well-defined modulo dual boundaries. -/
 noncomputable def phiDual : toricDualH1 (L := L) → ZMod 2 × ZMod 2 :=
-  let N : Submodule (ZMod 2) (toricDualCycles (L := L)) :=
-    Submodule.comap (toricDualCycles (L := L)).subtype (toricDualBoundaries (L := L))
-  let phiDualLin : toricDualCycles (L := L) →ₗ[ZMod 2] ZMod 2 × ZMod 2 :=
+  let N : Submodule (ZMod 2) (Z¹ L) :=
+    Submodule.comap (Z¹ L).subtype (B¹ L)
+  let phiDualLin : Z¹ L →ₗ[ZMod 2] ZMod 2 × ZMod 2 :=
     { toFun := fun c => (hRowAt (L := L) (zeroCoord L) c.1, vColAt (L := L) (zeroCoord L) c.1)
       map_add' := fun a b => by
         simp only [Submodule.coe_add]
@@ -227,7 +228,7 @@ noncomputable def phiDual : toricDualH1 (L := L) → ZMod 2 × ZMod 2 :=
     exact Prod.ext hh hv)
 
 /-- `phiDual` agrees with the underlying linear lift on equivalence classes. -/
-theorem phiDual_liftQ_eq (c : toricDualCycles (L := L)) :
+theorem phiDual_liftQ_eq (c : Z¹ L) :
     phiDual (L := L) (Submodule.Quotient.mk c) =
       (hRowAt (L := L) (zeroCoord L) c.1, vColAt (L := L) (zeroCoord L) c.1) := by
   simp only [phiDual, Submodule.liftQ_apply, LinearMap.coe_mk, AddHom.coe_mk]
@@ -244,7 +245,7 @@ theorem phiDual_surjective :
   intro p
   obtain ⟨a, b⟩ := p
   generalize_proofs at *;
-  obtain ⟨c, hc⟩ : ∃ c : toricDualCycles (L := L),
+  obtain ⟨c, hc⟩ : ∃ c : Z¹ L,
       hRowAt (L := L) (zeroCoord L) c.1 = a ∧
         vColAt (L := L) (zeroCoord L) c.1 = b := by
     -- Define the chain $c$ such that it has $a$ horizontal edges and $b$ vertical edges.
@@ -278,12 +279,12 @@ theorem phiDual_surjective :
 Dimension of the dual cycle space.
 -/
 theorem toric_finrank_dualCycles :
-    Module.finrank (ZMod 2) (toricDualCycles (L := L)) = L * L + 1 := by
+    dim₂ (Z¹ L) = L * L + 1 := by
   have := LinearMap.finrank_range_add_finrank_ker ( toricDualBoundary L ) ;
   simp_all +decide ;
   have h_dual_boundary_range :
-      Module.finrank (ZMod 2) (LinearMap.range (toricDualBoundary L)) =
-        Module.finrank (ZMod 2) (LinearMap.range (∂₂ (L := L))) := by
+      dim₂ (LinearMap.range (toricDualBoundary L)) =
+        dim₂ (LinearMap.range (∂₂ (L := L))) := by
     have h_dual_boundary :
         LinearMap.rank (toricDualBoundary L) =
           LinearMap.rank (∂₂ (L := L)) := by
@@ -312,10 +313,10 @@ theorem toric_finrank_dualCycles :
 Dimension of the dual boundary space.
 -/
 theorem toric_finrank_dualBoundaries :
-    Module.finrank (ZMod 2) (toricDualBoundaries (L := L)) = L * L - 1 := by
+    dim₂ (B¹ L) = L * L - 1 := by
   -- By definition of `toricDualBoundaries`, we know that it is the range of the vertex cut map.
   have h_dualBoundaries_range :
-      toricDualBoundaries L = LinearMap.range (δ⁰ (L := L)) := by
+      B¹ L = LinearMap.range (δ⁰ (L := L)) := by
     exact rfl;
   rw [ h_dualBoundaries_range ];
   have := LinearMap.finrank_range_add_finrank_ker ( δ⁰ ( L := L ) );
@@ -327,8 +328,8 @@ theorem toric_finrank_dualBoundaries :
 
 /-- `phiDual` as an explicit linear map (for injectivity via dimension count). -/
 noncomputable def phiDualLinearMap :
-    (toricDualCycles (L := L) ⧸
-      Submodule.comap (toricDualCycles (L := L)).subtype (toricDualBoundaries (L := L))) →ₗ[ZMod 2]
+    (Z¹ L ⧸
+      Submodule.comap (Z¹ L).subtype (B¹ L)) →ₗ[ZMod 2]
     ZMod 2 × ZMod 2 :=
   Submodule.liftQ _ {
     toFun := fun c => (hRowAt (L := L) (zeroCoord L) c.1, vColAt (L := L) (zeroCoord L) c.1)
@@ -342,7 +343,7 @@ noncomputable def phiDualLinearMap :
   } (by
     intro c hc
     simp only [LinearMap.mem_ker]
-    have hc' : c.1 ∈ toricDualBoundaries (L := L) := by
+    have hc' : c.1 ∈ B¹ L := by
       rwa [Submodule.mem_comap] at hc
     have hh := hRowAt_dualBoundary_zero (L := L) ⟨c.1, hc'⟩
     have hv := vColAt_dualBoundary_zero (L := L) ⟨c.1, hc'⟩
@@ -358,10 +359,10 @@ theorem phiDual_eq_phiDualLinearMap (x : toricDualH1 (L := L)) :
 -/
 theorem phiDual_injective :
     Function.Injective (phiDual (L := L)) := by
-  have h_finrank : Module.finrank (ZMod 2) (toricDualH1 (L := L)) = 2 := by
+  have h_finrank : dim₂ (toricDualH1 (L := L)) = 2 := by
     have h_finrank :
-        Module.finrank (ZMod 2) (toricDualCycles (L := L)) -
-          Module.finrank (ZMod 2) (toricDualBoundaries (L := L)) = 2 := by
+        dim₂ (Z¹ L) -
+          dim₂ (B¹ L) = 2 := by
       rw [ toric_finrank_dualCycles, toric_finrank_dualBoundaries ];
       exact Nat.sub_eq_of_eq_add <| by
         linarith [ Nat.sub_add_cancel <|
@@ -378,7 +379,7 @@ theorem phiDual_injective :
     · exact le_of_lt ( Nat.lt_of_sub_eq_succ h_finrank );
   have := @phiDual_surjective L ‹_›;
   have h_finrank :
-      Module.finrank (ZMod 2) (↥(LinearMap.range (phiDualLinearMap (L := L)))) = 2 := by
+      dim₂ (↥(LinearMap.range (phiDualLinearMap (L := L)))) = 2 := by
     rw [ LinearMap.range_eq_top.mpr ] <;> norm_num [ this ];
     convert this using 1;
   have := LinearMap.finrank_range_add_finrank_ker ( phiDualLinearMap ( L := L ) ) ;

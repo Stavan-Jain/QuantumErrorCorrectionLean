@@ -64,7 +64,7 @@ lemma reflect_eq_zero_iff (a : G → ZMod 2) : reflect a = 0 ↔ a = 0 := by
     simp
 
 lemma reflect_conv [Fintype G] (a b : G → ZMod 2) :
-    reflect (conv a b) = conv (reflect a) (reflect b) := by
+    reflect (a ⋆ b) = reflect a ⋆ reflect b := by
   funext g
   simp only [reflect_apply, conv_apply]
   rw [← Equiv.sum_comp (Equiv.neg G) (fun h => a h * b (-g - h))]
@@ -142,11 +142,11 @@ lemma bbBoundary2Fn_single (f : G) (h : G) (j : Fin 2) :
       = if j = 0 then A (h - f) else B (h - f) := by
   by_cases hj : j = 0
   · rw [if_pos hj]
-    change (if j = 0 then conv A (Pi.single f 1) h else conv B (Pi.single f 1) h)
+    change (if j = 0 then (A ⋆ Pi.single f 1) h else (B ⋆ Pi.single f 1) h)
       = A (h - f)
     rw [if_pos hj, conv_comm A, conv_single_left_apply]
   · rw [if_neg hj]
-    change (if j = 0 then conv A (Pi.single f 1) h else conv B (Pi.single f 1) h)
+    change (if j = 0 then (A ⋆ Pi.single f 1) h else (B ⋆ Pi.single f 1) h)
       = B (h - f)
     rw [if_neg hj, conv_comm B, conv_single_left_apply]
 
@@ -154,12 +154,12 @@ lemma bbBoundary2Fn_single (f : G) (h : G) (j : Fin 2) :
 `dualBoundary c = (reflect A) ⋆ c_L + (reflect B) ⋆ c_R`. -/
 theorem bb_dualBoundary_eq (c : G × Fin 2 → ZMod 2) :
     (bbChainComplex A B).dualBoundary c
-      = fun f => conv (reflect A) (leftHalf c) f
-          + conv (reflect B) (rightHalf c) f := by
+      = fun f => (reflect A ⋆ leftHalf c) f
+          + (reflect B ⋆ rightHalf c) f := by
   change (fun f : G =>
       ∑ p : G × Fin 2, c p * bbBoundary2Fn A B (Pi.single f 1) p) = _
   funext f
-  have hL : conv (reflect A) (leftHalf c) f
+  have hL : (reflect A ⋆ leftHalf c) f
       = ∑ h : G, c (h, 0) * A (h - f) := by
     rw [conv_apply,
       ← Equiv.sum_comp (Equiv.subLeft f)
@@ -168,7 +168,7 @@ theorem bb_dualBoundary_eq (c : G × Fin 2 → ZMod 2) :
     simp only [Equiv.subLeft_apply, reflect_apply, neg_sub, sub_sub_cancel]
     rw [mul_comm]
     rfl
-  have hR : conv (reflect B) (rightHalf c) f
+  have hR : (reflect B ⋆ rightHalf c) f
       = ∑ h : G, c (h, 1) * B (h - f) := by
     rw [conv_apply,
       ← Equiv.sum_comp (Equiv.subLeft f)
@@ -196,7 +196,7 @@ lemma bbBoundary1Fn_single_left (g v : G) :
     funext h
     rw [rightHalf, Pi.single_apply]
     simp [Prod.ext_iff]
-  have hzero : conv A (0 : G → ZMod 2) v = 0 := by
+  have hzero : (A ⋆ (0 : G → ZMod 2)) v = 0 := by
     simp [conv_apply]
   rw [bbBoundary1Fn, hLhalf, hRhalf, conv_comm B, conv_single_left_apply,
     hzero, add_zero]
@@ -215,7 +215,7 @@ lemma bbBoundary1Fn_single_right (g v : G) :
     by_cases hh : h = g
     · simp [hh]
     · simp [hh, Prod.ext_iff]
-  have hzero : conv B (0 : G → ZMod 2) v = 0 := by
+  have hzero : (B ⋆ (0 : G → ZMod 2)) v = 0 := by
     simp [conv_apply]
   rw [bbBoundary1Fn, hLhalf, hRhalf, conv_comm A, conv_single_left_apply,
     hzero, zero_add]
@@ -225,13 +225,13 @@ lemma bbBoundary1Fn_single_right (g v : G) :
 theorem bb_cutMap_eq (s : G → ZMod 2) :
     (bbChainComplex A B).cutMap s
       = fun p : G × Fin 2 =>
-          if p.2 = 0 then conv (reflect B) s p.1 else conv (reflect A) s p.1 := by
+          if p.2 = 0 then (reflect B ⋆ s) p.1 else (reflect A ⋆ s) p.1 := by
   change (fun e : G × Fin 2 =>
       ∑ v : G, s v * bbBoundary1Fn A B (Pi.single e 1) v) = _
   funext p
   obtain ⟨g, j⟩ := p
   have key : ∀ q : G → ZMod 2,
-      conv (reflect q) s g = ∑ v : G, s v * q (v - g) := by
+      (reflect q ⋆ s) g = ∑ v : G, s v * q (v - g) := by
     intro q
     rw [conv_apply,
       ← Equiv.sum_comp (Equiv.subLeft g) (fun h => reflect q h * s (g - h))]
@@ -241,14 +241,14 @@ theorem bb_cutMap_eq (s : G → ZMod 2) :
   by_cases hj : j = 0
   · subst hj
     change ∑ v : G, s v * bbBoundary1Fn A B (Pi.single ((g, 0) : G × Fin 2) 1) v
-      = conv (reflect B) s g
+      = (reflect B ⋆ s) g
     rw [key B]
     refine Finset.sum_congr rfl fun v _ => ?_
     rw [bbBoundary1Fn_single_left]
   · have hj1 : j = 1 := by omega
     subst hj1
     change ∑ v : G, s v * bbBoundary1Fn A B (Pi.single ((g, 1) : G × Fin 2) 1) v
-      = conv (reflect A) s g
+      = (reflect A ⋆ s) g
     rw [key A]
     refine Finset.sum_congr rfl fun v _ => ?_
     rw [bbBoundary1Fn_single_right]
@@ -275,7 +275,7 @@ theorem bbDualFn_bbBoundary2Fn (f2 : G → ZMod 2) :
   funext p
   obtain ⟨g, j⟩ := p
   have hconv : ∀ q : G → ZMod 2,
-      conv q f2 (-g) = conv (reflect q) (reflect f2) g := by
+      (q ⋆ f2) (-g) = (reflect q ⋆ reflect f2) g := by
     intro q
     have hq := congrFun (reflect_conv q f2) g
     rw [reflect_apply] at hq
@@ -283,16 +283,16 @@ theorem bbDualFn_bbBoundary2Fn (f2 : G → ZMod 2) :
   by_cases hj : j = 0
   · subst hj
     change bbBoundary2Fn A B f2 (blockSwapNeg (g, 0))
-      = conv (reflect B) (reflect f2) g
+      = (reflect B ⋆ reflect f2) g
     rw [blockSwapNeg_apply_zero]
-    change conv B f2 (-g) = conv (reflect B) (reflect f2) g
+    change (B ⋆ f2) (-g) = (reflect B ⋆ reflect f2) g
     exact hconv B
   · have hj1 : j = 1 := by omega
     subst hj1
     change bbBoundary2Fn A B f2 (blockSwapNeg (g, 1))
-      = conv (reflect A) (reflect f2) g
+      = (reflect A ⋆ reflect f2) g
     rw [blockSwapNeg_apply_one]
-    change conv A f2 (-g) = conv (reflect A) (reflect f2) g
+    change (A ⋆ f2) (-g) = (reflect A ⋆ reflect f2) g
     exact hconv A
 
 /-- Φ carries cycles to dual cycles (and conversely, by involutivity). -/

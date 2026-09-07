@@ -110,12 +110,14 @@ namespace StabilizerCode
 noncomputable def toStabilizerGroup (C : StabilizerCode n k) : StabilizerGroup n :=
   mkStabilizerFromGenerators n C.generatorsList C.generators_commute C.closure_no_neg_identity
 
-/-- Logical X for logical qubit ℓ. -/
-def logicalX (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
+/-- Logical X for logical qubit ℓ, i.e. `(C.logicalOps ℓ).xOp`. A reducible abbreviation,
+so `simp` sees through it and lemmas may be stated in either spelling; there is deliberately
+no display rewriting between the two — a goal prints whichever spelling its term carries. -/
+abbrev logicalX (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
   (C.logicalOps ℓ).xOp
 
-/-- Logical Z for logical qubit ℓ. -/
-def logicalZ (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
+/-- Logical Z for logical qubit ℓ, i.e. `(C.logicalOps ℓ).zOp` (see `logicalX`). -/
+abbrev logicalZ (C : StabilizerCode n k) (ℓ : Fin k) : NQubitPauliGroupElement n :=
   (C.logicalOps ℓ).zOp
 
 /-- Logical X for qubit ℓ is not in the stabilizer subgroup. -/

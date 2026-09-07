@@ -285,7 +285,7 @@ def deckPoly : G → ZMod 2 :=
 
 /-- Convolution with `deckPoly` is `1 + σ` on `G`-chains. -/
 lemma conv_deckPoly_eq (w : G → ZMod 2) :
-    conv D.deckPoly w = w + D.deckShift0 w := by
+    D.deckPoly ⋆ w = w + D.deckShift0 w := by
   funext g
   simp only [deckPoly, conv_add_left, Pi.add_apply,
     conv_single_left_apply, deckShift0_apply]
@@ -293,11 +293,11 @@ lemma conv_deckPoly_eq (w : G → ZMod 2) :
 
 /-- The Bezout homotopy 2-chain map `C v = P⋆v_L + Q⋆v_R`. -/
 def bezoutC (P Q : G → ZMod 2) (v : G × Fin 2 → ZMod 2) : G → ZMod 2 :=
-  conv P (leftHalf v) + conv Q (rightHalf v)
+  P ⋆ leftHalf v + Q ⋆ rightHalf v
 
 /-- The Bezout `∂₁`-correction `E h = (Q⋆h | P⋆h)`. -/
 def bezoutE (P Q : G → ZMod 2) (h : G → ZMod 2) : G × Fin 2 → ZMod 2 :=
-  fun q => if q.2 = 0 then conv Q h q.1 else conv P h q.1
+  fun q => if q.2 = 0 then (Q ⋆ h) q.1 else (P ⋆ h) q.1
 
 omit [DecidableEq G] in
 lemma bezoutC_zero (P Q : G → ZMod 2) : bezoutC P Q 0 = 0 := by
@@ -335,13 +335,13 @@ lemma bezoutE_add (P Q : G → ZMod 2) (a b : G → ZMod 2) :
 /-- Left-block computation for the Bezout homotopy:
 `(1+σ)v_L + Q⋆(∂₁v) = A⋆(C v)` at the left block. -/
 lemma bezout_blockL (P Q : G → ZMod 2)
-    (hPQ : conv P D.Ac + conv Q D.Bc = D.deckPoly)
+    (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly)
     (wL wR : G → ZMod 2) :
     wL + D.deckShift0 wL
-        + conv Q (conv D.Bc wL + conv D.Ac wR)
-      = conv D.Ac (conv P wL + conv Q wR) := by
+        + Q ⋆ (D.Bc ⋆ wL + D.Ac ⋆ wR)
+      = D.Ac ⋆ (P ⋆ wL + Q ⋆ wR) := by
   have heps : wL + D.deckShift0 wL
-      = conv (conv P D.Ac) wL + conv (conv Q D.Bc) wL := by
+      = (P ⋆ D.Ac) ⋆ wL + (Q ⋆ D.Bc) ⋆ wL := by
     rw [← conv_add_left, hPQ, D.conv_deckPoly_eq]
   rw [conv_add_right, conv_add_right, heps,
     ← conv_assoc Q D.Bc wL,
@@ -350,18 +350,18 @@ lemma bezout_blockL (P Q : G → ZMod 2)
   funext g
   simp only [Pi.add_apply]
   linear_combination
-    (CharTwo.add_self_eq_zero (conv (conv Q D.Bc) wL g))
+    (CharTwo.add_self_eq_zero (((Q ⋆ D.Bc) ⋆ wL) g))
 
 /-- Right-block computation for the Bezout homotopy:
 `(1+σ)v_R + P⋆(∂₁v) = B⋆(C v)` at the right block. -/
 lemma bezout_blockR (P Q : G → ZMod 2)
-    (hPQ : conv P D.Ac + conv Q D.Bc = D.deckPoly)
+    (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly)
     (wL wR : G → ZMod 2) :
     wR + D.deckShift0 wR
-        + conv P (conv D.Bc wL + conv D.Ac wR)
-      = conv D.Bc (conv P wL + conv Q wR) := by
+        + P ⋆ (D.Bc ⋆ wL + D.Ac ⋆ wR)
+      = D.Bc ⋆ (P ⋆ wL + Q ⋆ wR) := by
   have heps : wR + D.deckShift0 wR
-      = conv (conv P D.Ac) wR + conv (conv Q D.Bc) wR := by
+      = (P ⋆ D.Ac) ⋆ wR + (Q ⋆ D.Bc) ⋆ wR := by
     rw [← conv_add_left, hPQ, D.conv_deckPoly_eq]
   rw [conv_add_right, conv_add_right, heps,
     ← conv_assoc P D.Bc wL, conv_comm P D.Bc, conv_assoc D.Bc P wL,
@@ -370,17 +370,17 @@ lemma bezout_blockR (P Q : G → ZMod 2)
   funext g
   simp only [Pi.add_apply]
   linear_combination
-    (CharTwo.add_self_eq_zero (conv (conv P D.Ac) wR g))
+    (CharTwo.add_self_eq_zero (((P ⋆ D.Ac) ⋆ wR) g))
 
 /-- The full chain-level Bezout homotopy identity
 `(1 + σ) + E∘∂₁ = ∂₂∘C` on every 1-chain. -/
 lemma bezout_chain_identity (P Q : G → ZMod 2)
-    (hPQ : conv P D.Ac + conv Q D.Bc = D.deckPoly)
+    (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly)
     (v : G × Fin 2 → ZMod 2) :
     v + D.deckShift1 v + bezoutE P Q (bbBoundary1Fn D.Ac D.Bc v)
       = bbBoundary2Fn D.Ac D.Bc (bezoutC P Q v) := by
   have hb1 : bbBoundary1Fn D.Ac D.Bc v
-      = conv D.Bc (leftHalf v) + conv D.Ac (rightHalf v) := rfl
+      = D.Bc ⋆ leftHalf v + D.Ac ⋆ rightHalf v := rfl
   funext q
   obtain ⟨g, j⟩ := q
   fin_cases j
@@ -401,7 +401,7 @@ lemma bezout_chain_identity (P Q : G → ZMod 2)
 `P⋆A + Q⋆B = 1 + x^{deckS}` certifies that the deck acts trivially on
 `H₁(cover)`.  By A12 such a witness exists iff `k(cover) = k(base)`. -/
 theorem deckTrivial_of_bezout (P Q : G → ZMod 2)
-    (hPQ : conv P D.Ac + conv Q D.Bc = D.deckPoly) :
+    (hPQ : P ⋆ D.Ac + Q ⋆ D.Bc = D.deckPoly) :
     D.DeckTrivialOnH1 :=
   D.deckTrivial_of_homotopy_certificate (bezoutC P Q) (bezoutE P Q)
     (bezoutC_zero P Q) (bezoutC_add P Q) (bezoutE_zero P Q)

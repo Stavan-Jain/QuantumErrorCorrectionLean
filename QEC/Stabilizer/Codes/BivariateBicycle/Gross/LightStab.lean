@@ -360,19 +360,19 @@ def unitHat : Ring := fun s =>
 
 /-- `V₀(A⋆z) = Â₀·V₀(z)`, `Â₀ = unitHat`. -/
 theorem mult_A0 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi0 s (conv baseA z) = rmul unitHat (fun s' => V psi0 s' z) s :=
+    V psi0 s (baseA ⋆ z) = rmul unitHat (fun s' => V psi0 s' z) s :=
   mult_of_basis psi0 baseA unitHat (basis_of_translate (by decide +kernel)) z s
 /-- `V₂(A⋆z) = Â₂·V₂(z)`, `Â₂ = unitHat`. -/
 theorem mult_A2 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi2 s (conv baseA z) = rmul unitHat (fun s' => V psi2 s' z) s :=
+    V psi2 s (baseA ⋆ z) = rmul unitHat (fun s' => V psi2 s' z) s :=
   mult_of_basis psi2 baseA unitHat (basis_of_translate (by decide +kernel)) z s
 /-- `V₀(B⋆z) = B̂₀·V₀(z)`, `B̂₀ = unitHat`. -/
 theorem mult_B0 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi0 s (conv baseB z) = rmul unitHat (fun s' => V psi0 s' z) s :=
+    V psi0 s (baseB ⋆ z) = rmul unitHat (fun s' => V psi0 s' z) s :=
   mult_of_basis psi0 baseB unitHat (basis_of_translate (by decide +kernel)) z s
 /-- `V₁(B⋆z) = B̂₁·V₁(z)`, `B̂₁ = unitHat`. -/
 theorem mult_B1 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi1 s (conv baseB z) = rmul unitHat (fun s' => V psi1 s' z) s :=
+    V psi1 s (baseB ⋆ z) = rmul unitHat (fun s' => V psi1 s' z) s :=
   mult_of_basis psi1 baseB unitHat (basis_of_translate (by decide +kernel)) z s
 
 /-! ### Ring facts for the Fourier profile of `B·w` (kernel `decide` over the
@@ -551,9 +551,9 @@ theorem oneBlock_core (b : BaseGroup → ZMod 2)
 
 /-- **The sharp one-block lemma (L4c)**: `w ∈ Ann(A) ∖ ker ∂₂` (`A·w = 0`, `B·w ≠ 0`)
 forces `|B·w| ≥ 16`. -/
-theorem oneBlock_ge16 (w : BaseGroup → ZMod 2) (hA : conv baseA w = 0)
-    (hB : conv baseB w ≠ 0) : 16 ≤ bwt (conv baseB w) := by
-  apply oneBlock_core (conv baseB w)
+theorem oneBlock_ge16 (w : BaseGroup → ZMod 2) (hA : baseA ⋆ w = 0)
+    (hB : baseB ⋆ w ≠ 0) : 16 ≤ bwt (baseB ⋆ w) := by
+  apply oneBlock_core (baseB ⋆ w)
   · intro s
     have hkey : rmul unitHat (fun s' => V psi0 s' w) = (fun _ => 0) := by
       funext s'; rw [← mult_A0 w s', hA]; exact V_zero psi0 s'
@@ -573,7 +573,7 @@ theorem oneBlock_ge16 (w : BaseGroup → ZMod 2) (hA : conv baseA w = 0)
     · right; intro s; rw [mult_B3 w s]; exact h s
   · have hkey1 : rmul Ahat1 (fun s' => V psi1 s' w) = (fun _ => 0) := by
       funext s'; rw [← mult_A1 w s', hA]; exact V_zero psi1 s'
-    have hb1 : (fun s => V psi1 s (conv baseB w)) = rmul unitHat (fun s' => V psi1 s' w) := by
+    have hb1 : (fun s => V psi1 s (baseB ⋆ w)) = rmul unitHat (fun s' => V psi1 s' w) := by
       funext s; exact mult_B1 w s
     rw [hb1]; exact Ahat1_unitHat_ann _ hkey1
   · exact hB
@@ -585,8 +585,8 @@ of `∂₂f` equals a hexagon/D-pair A-block, the residual `w = f − witness �
 has `|B·w| < 16`, so (L4c) `B·w = 0` and `∂₂f = ∂₂(witness)`. -/
 
 /-- L4c contrapositive: `w ∈ Ann(A)` with `|B·w| < 16` forces `B·w = 0`. -/
-theorem oneBlock_contra (w : BaseGroup → ZMod 2) (hA : conv baseA w = 0)
-    (hlt : bwt (conv baseB w) < 16) : conv baseB w = 0 := by
+theorem oneBlock_contra (w : BaseGroup → ZMod 2) (hA : baseA ⋆ w = 0)
+    (hlt : bwt (baseB ⋆ w) < 16) : baseB ⋆ w = 0 := by
   by_contra hne
   exact absurd (oneBlock_ge16 w hA hne) (Nat.not_le.mpr hlt)
 
@@ -603,13 +603,13 @@ theorem bwt_add_le (a b : BaseGroup → ZMod 2) : bwt (a + b) ≤ bwt a + bwt b 
   exact le_trans (Finset.card_le_card hsub) (Finset.card_union_le _ _)
 
 /-- A single hexagon A-block has weight exactly 3. -/
-theorem bwt_baseA_single : ∀ g : BaseGroup, bwt (conv baseA (Pi.single g 1)) = 3 := by
+theorem bwt_baseA_single : ∀ g : BaseGroup, bwt (baseA ⋆ Pi.single g 1) = 3 := by
   have key : ∀ g : BaseGroup, bwt (fun h => baseA (h - g)) = 3 := by decide +kernel
   intro g
   rw [conv_single_right]
   exact key g
 /-- A single hexagon B-block has weight exactly 3. -/
-theorem bwt_baseB_single : ∀ g : BaseGroup, bwt (conv baseB (Pi.single g 1)) = 3 := by
+theorem bwt_baseB_single : ∀ g : BaseGroup, bwt (baseB ⋆ Pi.single g 1) = 3 := by
   have key : ∀ g : BaseGroup, bwt (fun h => baseB (h - g)) = 3 := by decide +kernel
   intro g
   rw [conv_single_right]
@@ -617,13 +617,13 @@ theorem bwt_baseB_single : ∀ g : BaseGroup, bwt (conv baseB (Pi.single g 1)) =
 
 /-- `∂₂` block values (definitional). -/
 theorem bb2_zero (z : BaseGroup → ZMod 2) (h : BaseGroup) :
-    bbBoundary2Fn baseA baseB z (h, 0) = conv baseA z h := rfl
+    bbBoundary2Fn baseA baseB z (h, 0) = (baseA ⋆ z) h := rfl
 theorem bb2_one (z : BaseGroup → ZMod 2) (h : BaseGroup) :
-    bbBoundary2Fn baseA baseB z (h, 1) = conv baseB z h := rfl
+    bbBoundary2Fn baseA baseB z (h, 1) = (baseB ⋆ z) h := rfl
 
 /-- The B-block weight is at most the full boundary weight (`h ↦ (h,1)` injection). -/
 theorem bwt_baseB_le_boundary (f : BaseGroup → ZMod 2) :
-    bwt (conv baseB f) ≤ (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
+    bwt (baseB ⋆ f) ≤ (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0)).card := by
   unfold bwt
   apply Finset.card_le_card_of_injOn (fun h => (h, (1 : Fin 2)))
@@ -636,33 +636,33 @@ theorem bwt_baseB_le_boundary (f : BaseGroup → ZMod 2) :
 /-- **Endgame transfer (hexagon)**: if the A-block of `∂₂f` is `A·δ_g` and `|∂₂f| ≤ 10`,
 then `∂₂f = ∂₂δ_g`. -/
 theorem transfer_hexagon (f : BaseGroup → ZMod 2) (g : BaseGroup)
-    (hA : conv baseA f = conv baseA (Pi.single g 1))
+    (hA : baseA ⋆ f = baseA ⋆ Pi.single g 1)
     (hwt : (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0)).card ≤ 10) :
     bbBoundary2Fn baseA baseB f = bbBoundary2Fn baseA baseB (Pi.single g 1) := by
   set δ : BaseGroup → ZMod 2 := Pi.single g 1 with hδ
   have hself : ∀ x : ZMod 2, x + x = 0 := by decide
-  have hAw : conv baseA (f + δ) = 0 := by
+  have hAw : baseA ⋆ (f + δ) = 0 := by
     rw [conv_add_right, hA]; funext h; rw [Pi.add_apply]; exact hself _
-  have hbound : bwt (conv baseB (f + δ)) < 16 := by
+  have hbound : bwt (baseB ⋆ (f + δ)) < 16 := by
     rw [conv_add_right]
-    calc bwt (conv baseB f + conv baseB δ)
-          ≤ bwt (conv baseB f) + bwt (conv baseB δ) := bwt_add_le _ _
+    calc bwt (baseB ⋆ f + baseB ⋆ δ)
+          ≤ bwt (baseB ⋆ f) + bwt (baseB ⋆ δ) := bwt_add_le _ _
       _ ≤ 10 + 3 := by
           gcongr
           · exact le_trans (bwt_baseB_le_boundary f) hwt
           · rw [hδ, bwt_baseB_single g]
       _ < 16 := by norm_num
-  have hBw : conv baseB (f + δ) = 0 := oneBlock_contra _ hAw hbound
-  have hBeq : conv baseB f = conv baseB δ := by
+  have hBw : baseB ⋆ (f + δ) = 0 := oneBlock_contra _ hAw hbound
+  have hBeq : baseB ⋆ f = baseB ⋆ δ := by
     funext h
-    have hpt : conv baseB f h + conv baseB δ h = 0 := by
+    have hpt : (baseB ⋆ f) h + (baseB ⋆ δ) h = 0 := by
       have := congrFun hBw h; rwa [conv_add_right, Pi.add_apply] at this
     have key : ∀ x y : ZMod 2, x + y = 0 → x = y := by decide
     exact key _ _ hpt
   funext ⟨h, j⟩
-  show (if j = 0 then conv baseA f h else conv baseB f h)
-      = (if j = 0 then conv baseA δ h else conv baseB δ h)
+  show (if j = 0 then (baseA ⋆ f) h else (baseB ⋆ f) h)
+      = (if j = 0 then (baseA ⋆ δ) h else (baseB ⋆ δ) h)
   by_cases hj : j = 0
   · rw [if_pos hj, if_pos hj]; exact congrFun hA h
   · rw [if_neg hj, if_neg hj]; exact congrFun hBeq h
@@ -670,7 +670,7 @@ theorem transfer_hexagon (f : BaseGroup → ZMod 2) (g : BaseGroup)
 /-- Block-weight decomposition (≤): the two blocks' weights sum to at most `|∂₂f|`
 (disjoint `h↦(h,0)` / `h↦(h,1)` injections into the boundary support). -/
 theorem bwt_blocks_le_boundary (f : BaseGroup → ZMod 2) :
-    bwt (conv baseA f) + bwt (conv baseB f) ≤
+    bwt (baseA ⋆ f) + bwt (baseB ⋆ f) ≤
     (Finset.univ.filter (fun j : BaseGroup × Fin 2 => bbBoundary2Fn baseA baseB f j ≠ 0)).card := by
   unfold bwt
   have injA : Function.Injective (fun h : BaseGroup => (h, (0 : Fin 2))) :=
@@ -698,7 +698,7 @@ theorem bwt_blocks_le_boundary (f : BaseGroup → ZMod 2) :
 `g + (0,1)` for the two directions `(3,4)`, `(3,5)`, whose second hexagon covers
 `g + (3,0)` — carries value 1 (kernel `decide`, 12 × 36 single-cell checks). -/
 theorem bwt_baseA_dpair_ge1 : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
-    1 ≤ bwt (conv baseA (Pi.single g 1 + Pi.single (g + d) 1)) := by
+    1 ≤ bwt (baseA ⋆ (Pi.single g 1 + Pi.single (g + d) 1)) := by
   have key : ∀ d ∈ pairDirections, ∀ g : BaseGroup,
       ((fun h => baseA (h - g)) + fun h => baseA (h - (g + d)))
         (g + (if d = (3, 4) ∨ d = (3, 5) then (0, 1) else (3, 0))) = 1 := by
@@ -710,11 +710,11 @@ theorem bwt_baseA_dpair_ge1 : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
     ⟨_, Finset.mem_filter.mpr ⟨Finset.mem_univ _, key d hd g⟩⟩
 /-- D-pair B-block has weight ≤ 6 (subadditivity + two weight-3 hexagons). -/
 theorem bwt_baseB_dpair_le6 : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
-    bwt (conv baseB (Pi.single g 1 + Pi.single (g + d) 1)) ≤ 6 := by
+    bwt (baseB ⋆ (Pi.single g 1 + Pi.single (g + d) 1)) ≤ 6 := by
   intro g d _
   rw [conv_add_right]
-  calc bwt (conv baseB (Pi.single g 1) + conv baseB (Pi.single (g + d) 1))
-      ≤ bwt (conv baseB (Pi.single g 1)) + bwt (conv baseB (Pi.single (g + d) 1)) :=
+  calc bwt (baseB ⋆ Pi.single g 1 + baseB ⋆ Pi.single (g + d) 1)
+      ≤ bwt (baseB ⋆ Pi.single g 1) + bwt (baseB ⋆ Pi.single (g + d) 1) :=
         bwt_add_le _ _
     _ = 3 + 3 := by rw [bwt_baseB_single g, bwt_baseB_single (g + d)]
     _ ≤ 6 := by norm_num
@@ -724,36 +724,36 @@ theorem bwt_baseB_dpair_le6 : ∀ g : BaseGroup, ∀ d ∈ pairDirections,
 `10+6` bound only gives `≤16`; the block decomposition tightens `|B·f| ≤ 10−w_A ≤ 9`
 (`w_A = bwt(A·witness) ≥ 1`), so `|B·w| ≤ 15 < 16`. -/
 theorem transfer_dpair (f : BaseGroup → ZMod 2) (g d : BaseGroup) (hd : d ∈ pairDirections)
-    (hA : conv baseA f = conv baseA (Pi.single g 1 + Pi.single (g + d) 1))
+    (hA : baseA ⋆ f = baseA ⋆ (Pi.single g 1 + Pi.single (g + d) 1))
     (hwt : (Finset.univ.filter (fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0)).card ≤ 10) :
     bbBoundary2Fn baseA baseB f
       = bbBoundary2Fn baseA baseB (Pi.single g 1 + Pi.single (g + d) 1) := by
   set wit : BaseGroup → ZMod 2 := Pi.single g 1 + Pi.single (g + d) 1 with hwit
   have hself : ∀ x : ZMod 2, x + x = 0 := by decide
-  have hAw : conv baseA (f + wit) = 0 := by
+  have hAw : baseA ⋆ (f + wit) = 0 := by
     rw [conv_add_right, hA]; funext h; rw [Pi.add_apply]; exact hself _
-  have hbound : bwt (conv baseB (f + wit)) < 16 := by
+  have hbound : bwt (baseB ⋆ (f + wit)) < 16 := by
     rw [conv_add_right]
-    have hBf : bwt (conv baseB f) ≤ 9 := by
+    have hBf : bwt (baseB ⋆ f) ≤ 9 := by
       have hdec := bwt_blocks_le_boundary f
-      have hA1 : 1 ≤ bwt (conv baseA f) := by rw [hA]; exact bwt_baseA_dpair_ge1 g d hd
+      have hA1 : 1 ≤ bwt (baseA ⋆ f) := by rw [hA]; exact bwt_baseA_dpair_ge1 g d hd
       omega
-    have hBwit : bwt (conv baseB wit) ≤ 6 := bwt_baseB_dpair_le6 g d hd
-    calc bwt (conv baseB f + conv baseB wit)
-          ≤ bwt (conv baseB f) + bwt (conv baseB wit) := bwt_add_le _ _
+    have hBwit : bwt (baseB ⋆ wit) ≤ 6 := bwt_baseB_dpair_le6 g d hd
+    calc bwt (baseB ⋆ f + baseB ⋆ wit)
+          ≤ bwt (baseB ⋆ f) + bwt (baseB ⋆ wit) := bwt_add_le _ _
       _ ≤ 9 + 6 := add_le_add hBf hBwit
       _ < 16 := by norm_num
-  have hBw : conv baseB (f + wit) = 0 := oneBlock_contra _ hAw hbound
-  have hBeq : conv baseB f = conv baseB wit := by
+  have hBw : baseB ⋆ (f + wit) = 0 := oneBlock_contra _ hAw hbound
+  have hBeq : baseB ⋆ f = baseB ⋆ wit := by
     funext h
-    have hpt : conv baseB f h + conv baseB wit h = 0 := by
+    have hpt : (baseB ⋆ f) h + (baseB ⋆ wit) h = 0 := by
       have := congrFun hBw h; rwa [conv_add_right, Pi.add_apply] at this
     have key : ∀ x y : ZMod 2, x + y = 0 → x = y := by decide
     exact key _ _ hpt
   funext ⟨h, j⟩
-  show (if j = 0 then conv baseA f h else conv baseB f h)
-      = (if j = 0 then conv baseA wit h else conv baseB wit h)
+  show (if j = 0 then (baseA ⋆ f) h else (baseB ⋆ f) h)
+      = (if j = 0 then (baseA ⋆ wit) h else (baseB ⋆ wit) h)
   by_cases hj : j = 0
   · rw [if_pos hj, if_pos hj]; exact congrFun hA h
   · rw [if_neg hj, if_neg hj]; exact congrFun hBeq h

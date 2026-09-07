@@ -284,9 +284,31 @@ These are local to this codebase — search here before assuming mathlib has the
   phase-less Pauli string is `P[…]` (`P[XZZXI] : NQubitPauliOperator 5`), which
   elaborates to exactly the bare `.set` chain and displays back as `P[…]` (an
   element with a non-literal phase shows as `⟨k, P[…]⟩`). Concrete
-  literal codes (`Codes/Small/`, `Repetition/Three.lean`) use it; parametric
-  families with symbolic indices (`Repetition/N.lean`, `Iceberg/N.lean`, toric)
-  cannot.
+  literal codes (`Codes/Small/`, `Repetition/Three.lean`) use it. Parametric
+  families with symbolic qubit counts / indices (`Repetition/N.lean`,
+  `Iceberg/N.lean`, `Toric/CodeN.lean`) use the **symbolic form**
+  `σ[n | i ↦ Z, j ↦ Z]` (same leading tokens: `iσ[n | …]`, `-σ[n | …]`,
+  `-iσ[n | …]`, `P[n | …]`; letters `X`/`Y`/`Z`), which elaborates to exactly
+  `⟨0, ((NQubitPauliOperator.identity n).set i Z).set j Z⟩` with the `.set`s in
+  the written order, and displays back the same way.
+- **Other scoped notations** (each is a pure macro onto the pre-existing term, with a
+  delaborator/unexpander that is scoped with it, so a goal only ever shows syntax the
+  current file can parse; bare names stay in `simp`/`rw`/`unfold` lists):
+  `⟪p, q⟫ₛ` (scope `Quantum.NQubitPauliGroupElement`, `BinarySymplectic/SymplecticInner.lean`)
+  = `NQubitPauliOperator.symplecticInner p.operators q.operators`;
+  `U ⊳ M` (scope `Quantum`, `Foundations/Gates.lean`) = `conjBy U M` — `conjBy_def` is a
+  `simp` lemma, so state conjugation lemmas in the matrix-product form — and
+  `G₁ ⊗ᵍ G₂` = `tensorGate G₁ G₂` (`Foundations/Tensor.lean`);
+  `a ⋆ b` = `conv a b` and `poly[x^3 + y + y^2]` for the indicator-function polynomials
+  (scope `Quantum.Stabilizer.Homological.BB`, `Homological/BBChainComplex.lean`; the `+`
+  is a union of distinct exponent points, so check them against the group's orders);
+  `dim₂ V` = `Module.finrank (ZMod 2) V` (scope `Homology`, `Homological/Code.lean`);
+  `Z₁ L`/`B₁ L`/`H₁ L` = `toricCycles L`/`toricBoundaries L`/`toricH1 L` and
+  `Z¹ L`/`B¹ L` for the dual cycles/boundaries (scope `ToricChain`), and the same
+  `Z₁`/`B₁`/`H₁` for `rscCycles`/`rscBoundaries`/`rscH1` (scope `RotatedSurfaceChain` —
+  the two scopes bind the same tokens, so open one per file).
+- `C.logicalX ℓ`/`C.logicalZ ℓ` are reducible abbreviations of `(C.logicalOps ℓ).xOp`/`.zOp`
+  (`Core/Stabilizer/StabilizerCode.lean`); goals print whichever spelling a term carries.
 - `NQubitPauliGroupElement.toMatrix`, `.mulOp`, `.phasePower`, `.operators`
 - `NQubitPauliGroupElement.Anticommute`, `.anticommutesAt`
 - `NQubitPauliGroupElement.commutes_iff_even_anticommutes` — main parity-based

@@ -103,10 +103,10 @@ variable (π : G →+ H)
 /-- Pushforward intertwines convolution: `π_* (a ⋆ b) = (π_* a) ⋆ (π_* b)`.
 No injectivity or surjectivity of `π` is needed. -/
 lemma fiberSum_conv (a b : G → ZMod 2) :
-    fiberSumFn ⇑π (conv a b) = conv (fiberSumFn ⇑π a) (fiberSumFn ⇑π b) := by
+    fiberSumFn ⇑π (a ⋆ b) = fiberSumFn ⇑π a ⋆ fiberSumFn ⇑π b := by
   funext j
   -- Both sides equal `∑ h, a h * (π_* b) (j - π h)`.
-  have lhs_eq : fiberSumFn ⇑π (conv a b) j
+  have lhs_eq : fiberSumFn ⇑π (a ⋆ b) j
       = ∑ h : G, a h * fiberSumFn ⇑π b (j - π h) := by
     have key : ∀ h : G,
         (∑ g : G, if π g = j then a h * b (g - h) else 0)
@@ -122,7 +122,7 @@ lemma fiberSum_conv (a b : G → ZMod 2) :
       by_cases hm : π m = j - π h
       · rw [if_pos (hcond.mpr hm), if_pos hm]
       · rw [if_neg (fun hc => hm (hcond.mp hc)), if_neg hm, mul_zero]
-    calc fiberSumFn ⇑π (conv a b) j
+    calc fiberSumFn ⇑π (a ⋆ b) j
         = ∑ g : G, if π g = j then (∑ h : G, a h * b (g - h)) else 0 := rfl
       _ = ∑ g : G, ∑ h : G, (if π g = j then a h * b (g - h) else 0) := by
           refine Finset.sum_congr rfl fun g _ => ?_
@@ -131,7 +131,7 @@ lemma fiberSum_conv (a b : G → ZMod 2) :
           Finset.sum_comm
       _ = ∑ h : G, a h * fiberSumFn ⇑π b (j - π h) :=
           Finset.sum_congr rfl fun h _ => key h
-  have rhs_eq : conv (fiberSumFn ⇑π a) (fiberSumFn ⇑π b) j
+  have rhs_eq : (fiberSumFn ⇑π a ⋆ fiberSumFn ⇑π b) j
       = ∑ h : G, a h * fiberSumFn ⇑π b (j - π h) := by
     rw [conv_apply]
     have expand : ∀ k : H, fiberSumFn ⇑π a k * fiberSumFn ⇑π b (j - k)
@@ -150,7 +150,7 @@ lemma fiberSum_conv (a b : G → ZMod 2) :
 `a ⋆ (u ∘ π) = ((π_* a) ⋆ u) ∘ π`.  No injectivity hypothesis is needed —
 the fiber regrouping works unconditionally. -/
 lemma conv_pullback (a : G → ZMod 2) (u : H → ZMod 2) :
-    conv a (u ∘ ⇑π) = (conv (fiberSumFn ⇑π a) u) ∘ ⇑π := by
+    a ⋆ (u ∘ ⇑π) = (fiberSumFn ⇑π a ⋆ u) ∘ ⇑π := by
   funext g
   simp only [Function.comp_apply, conv_apply]
   have lhs_eq : ∀ h : G, a h * u (π (g - h)) = a h * u (π g - π h) := by
@@ -510,7 +510,7 @@ lemma fiberSum_bbBoundary1Fn
     fiberSumFn ⇑π (bbBoundary1Fn Ac Bc c)
       = bbBoundary1Fn Ab Bb (fiberSumFn (Prod.map ⇑π id) c) := by
   have hsum : bbBoundary1Fn Ac Bc c
-      = conv Bc (leftHalf c) + conv Ac (rightHalf c) := rfl
+      = Bc ⋆ leftHalf c + Ac ⋆ rightHalf c := rfl
   rw [hsum, fiberSumFn_add, fiberSum_conv π Bc (leftHalf c),
     fiberSum_conv π Ac (rightHalf c), hA, hB]
   funext j
@@ -529,7 +529,7 @@ lemma fiberSum_bbBoundary2Fn
   by_cases hb : b = 0
   · subst hb
     have hslice : (fun h => bbBoundary2Fn Ac Bc f2 (h, (0 : Fin 2)))
-        = conv Ac f2 := by
+        = Ac ⋆ f2 := by
       funext h
       simp [bbBoundary2Fn]
     rw [hslice, fiberSum_conv π Ac f2, hA]
@@ -537,7 +537,7 @@ lemma fiberSum_bbBoundary2Fn
   · have hb1 : b = 1 := by omega
     subst hb1
     have hslice : (fun h => bbBoundary2Fn Ac Bc f2 (h, (1 : Fin 2)))
-        = conv Bc f2 := by
+        = Bc ⋆ f2 := by
       funext h
       simp [bbBoundary2Fn]
     rw [hslice, fiberSum_conv π Bc f2, hB]
@@ -549,9 +549,9 @@ lemma pullback_bbBoundary1Fn
     (u : H × Fin 2 → ZMod 2) :
     bbBoundary1Fn Ac Bc (u ∘ Prod.map ⇑π id)
       = (bbBoundary1Fn Ab Bb u) ∘ ⇑π := by
-  have hL : conv Bc ((leftHalf u) ∘ ⇑π) = (conv Bb (leftHalf u)) ∘ ⇑π := by
+  have hL : Bc ⋆ ((leftHalf u) ∘ ⇑π) = (Bb ⋆ leftHalf u) ∘ ⇑π := by
     rw [conv_pullback π Bc (leftHalf u), hB]
-  have hR : conv Ac ((rightHalf u) ∘ ⇑π) = (conv Ab (rightHalf u)) ∘ ⇑π := by
+  have hR : Ac ⋆ ((rightHalf u) ∘ ⇑π) = (Ab ⋆ rightHalf u) ∘ ⇑π := by
     rw [conv_pullback π Ac (rightHalf u), hA]
   funext g
   rw [bbBoundary1Fn, leftHalf_pullback_prodMap, rightHalf_pullback_prodMap,
@@ -564,17 +564,17 @@ lemma pullback_bbBoundary2Fn
     (f2 : H → ZMod 2) :
     bbBoundary2Fn Ac Bc (f2 ∘ ⇑π)
       = (bbBoundary2Fn Ab Bb f2) ∘ Prod.map ⇑π id := by
-  have hA' : conv Ac (f2 ∘ ⇑π) = (conv Ab f2) ∘ ⇑π := by
+  have hA' : Ac ⋆ (f2 ∘ ⇑π) = (Ab ⋆ f2) ∘ ⇑π := by
     rw [conv_pullback π Ac f2, hA]
-  have hB' : conv Bc (f2 ∘ ⇑π) = (conv Bb f2) ∘ ⇑π := by
+  have hB' : Bc ⋆ (f2 ∘ ⇑π) = (Bb ⋆ f2) ∘ ⇑π := by
     rw [conv_pullback π Bc f2, hB]
   funext p
   obtain ⟨g, b⟩ := p
   fin_cases b
-  · change conv Ac (f2 ∘ ⇑π) g = bbBoundary2Fn Ab Bb f2 (π g, 0)
+  · change (Ac ⋆ (f2 ∘ ⇑π)) g = bbBoundary2Fn Ab Bb f2 (π g, 0)
     rw [hA']
     rfl
-  · change conv Bc (f2 ∘ ⇑π) g = bbBoundary2Fn Ab Bb f2 (π g, 1)
+  · change (Bc ⋆ (f2 ∘ ⇑π)) g = bbBoundary2Fn Ab Bb f2 (π g, 1)
     rw [hB']
     rfl
 

@@ -38,13 +38,13 @@ variable (D : ConcatCSSData n₁ n₂ k₂)
 /-! ## R6 foundations: the inner logicals as zero-phase operators -/
 
 /-- `ofOperator Xbar` is the inner logical `X` (they agree because `X̄` has phase 0). -/
-lemma ofOperator_Xbar : ofOperator D.Xbar = (D.Cin.logicalOps 0).xOp := by
+lemma ofOperator_Xbar : ofOperator D.Xbar = D.Cin.logicalX 0 := by
   apply NQubitPauliGroupElement.ext
   · rw [ofOperator_phasePower, D.innerLogX_phaseZero]
   · rfl
 
 /-- `ofOperator Zbar` is the inner logical `Z`. -/
-lemma ofOperator_Zbar : ofOperator D.Zbar = (D.Cin.logicalOps 0).zOp := by
+lemma ofOperator_Zbar : ofOperator D.Zbar = D.Cin.logicalZ 0 := by
   apply NQubitPauliGroupElement.ext
   · rw [ofOperator_phasePower, D.innerLogZ_phaseZero]
   · rfl
@@ -200,14 +200,14 @@ lemma promote_anticommute_parity (h₁ h₂ : NQubitPauliGroupElement n₂)
 which the logical centralizes). -/
 lemma inner_gen_comm_logicalX (g : NQubitPauliGroupElement n₁)
     (hg : g ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList) :
-    g * (D.Cin.logicalOps 0).xOp = (D.Cin.logicalOps 0).xOp * g :=
+    g * D.Cin.logicalX 0 = D.Cin.logicalX 0 * g :=
   (mem_centralizer_iff _ _).mp (D.Cin.logicalOps 0).x_mem_centralizer g
     (Subgroup.subset_closure hg)
 
 /-- An inner generator commutes with the inner logical `Z`. -/
 lemma inner_gen_comm_logicalZ (g : NQubitPauliGroupElement n₁)
     (hg : g ∈ NQubitPauliGroupElement.listToSet D.Cin.generatorsList) :
-    g * (D.Cin.logicalOps 0).zOp = (D.Cin.logicalOps 0).zOp * g :=
+    g * D.Cin.logicalZ 0 = D.Cin.logicalZ 0 * g :=
   (mem_centralizer_iff _ _).mp (D.Cin.logicalOps 0).z_mem_centralizer g
     (Subgroup.subset_closure hg)
 
@@ -342,15 +342,15 @@ noncomputable def concatStabGroup : StabilizerGroup (n₁ * n₂) :=
 
 /-- Concatenated logical `X` for logical qubit `ℓ`: the promoted outer logical `X`. -/
 def concatLogicalX (ℓ : Fin k₂) : NQubitPauliGroupElement (n₁ * n₂) :=
-  promoteE D.Xbar D.Zbar (D.Cout.logicalOps ℓ).xOp
+  promoteE D.Xbar D.Zbar (D.Cout.logicalX ℓ)
 
 /-- Concatenated logical `Z` for logical qubit `ℓ`: the promoted outer logical `Z`. -/
 def concatLogicalZ (ℓ : Fin k₂) : NQubitPauliGroupElement (n₁ * n₂) :=
-  promoteE D.Xbar D.Zbar (D.Cout.logicalOps ℓ).zOp
+  promoteE D.Xbar D.Zbar (D.Cout.logicalZ ℓ)
 
 /-- The promoted outer logical `X` centralizes the concatenated stabilizer. Against an
 embedded inner generator it is `embedBlock_promoteE_commute`; against a promoted outer
-generator it is `promote_anticommute_parity` plus `(Cout.logicalOps ℓ).xOp` centralizing
+generator it is `promote_anticommute_parity` plus `Cout.logicalX ℓ` centralizing
 `Cout`'s stabilizer. -/
 lemma concatLogicalX_mem_centralizer (ℓ : Fin k₂) :
     concatLogicalX D ℓ ∈ centralizer (concatStabGroup D) := by
@@ -360,10 +360,10 @@ lemma concatLogicalX_mem_centralizer (ℓ : Fin k₂) :
     D.concatGeneratorsList rfl
   intro s hs
   rcases D.mem_concatGeneratorsList s hs with ⟨b, z, hz, rfl⟩ | ⟨y, hy, rfl⟩
-  · exact D.embedBlock_promoteE_commute b z hz (D.Cout.logicalOps ℓ).xOp
+  · exact D.embedBlock_promoteE_commute b z hz (D.Cout.logicalX ℓ)
       (noY_of_isXType (D.outerLogX_isX ℓ))
   · rw [commutes_iff_even_anticommutes,
-      D.promote_anticommute_parity y (D.Cout.logicalOps ℓ).xOp
+      D.promote_anticommute_parity y (D.Cout.logicalX ℓ)
         (D.outer_gen_noY y hy) (noY_of_isXType (D.outerLogX_isX ℓ)),
       ← commutes_iff_even_anticommutes]
     have hy_mem : y ∈ NQubitPauliGroupElement.listToSet D.Cout.generatorsList :=
@@ -381,10 +381,10 @@ lemma concatLogicalZ_mem_centralizer (ℓ : Fin k₂) :
     D.concatGeneratorsList rfl
   intro s hs
   rcases D.mem_concatGeneratorsList s hs with ⟨b, z, hz, rfl⟩ | ⟨y, hy, rfl⟩
-  · exact D.embedBlock_promoteE_commute b z hz (D.Cout.logicalOps ℓ).zOp
+  · exact D.embedBlock_promoteE_commute b z hz (D.Cout.logicalZ ℓ)
       (noY_of_isZType (D.outerLogZ_isZ ℓ))
   · rw [commutes_iff_even_anticommutes,
-      D.promote_anticommute_parity y (D.Cout.logicalOps ℓ).zOp
+      D.promote_anticommute_parity y (D.Cout.logicalZ ℓ)
         (D.outer_gen_noY y hy) (noY_of_isZType (D.outerLogZ_isZ ℓ)),
       ← commutes_iff_even_anticommutes]
     have hy_mem : y ∈ NQubitPauliGroupElement.listToSet D.Cout.generatorsList :=
@@ -399,7 +399,7 @@ lemma concatLogical_anticommute (ℓ : Fin k₂) :
   classical
   simp only [concatLogicalX, concatLogicalZ]
   rw [anticommutes_iff_odd_anticommutes, ← Nat.not_even_iff_odd,
-    D.promote_anticommute_parity (D.Cout.logicalOps ℓ).xOp (D.Cout.logicalOps ℓ).zOp
+    D.promote_anticommute_parity (D.Cout.logicalX ℓ) (D.Cout.logicalZ ℓ)
       (noY_of_isXType (D.outerLogX_isX ℓ)) (noY_of_isZType (D.outerLogZ_isZ ℓ)),
     Nat.not_even_iff_odd]
   exact (anticommutes_iff_odd_anticommutes _ _).mp (D.Cout.logicalOps ℓ).anticommute

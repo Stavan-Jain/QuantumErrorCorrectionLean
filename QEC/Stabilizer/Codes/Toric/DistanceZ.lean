@@ -60,7 +60,7 @@ def verticalVRowZOperator (L : ℕ) [Fact (0 < L)] :
 
 /-- The vertical V-row chain is a dual cycle (commutes with all face stabs). -/
 theorem verticalVRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
-    verticalVRowChain L ∈ Stabilizer.Lattice.toricDualCycles (L := L) := by
+    verticalVRowChain L ∈ Stabilizer.Lattice.toricDualCycles L := by
   have hL0 : 0 < L := Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)
   haveI : Fact (0 < L) := ⟨hL0⟩
   unfold Stabilizer.Lattice.toricDualCycles
@@ -76,14 +76,14 @@ theorem verticalVRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
 
 /-- The vertical V-row chain is not a dual boundary. -/
 theorem verticalVRowChain_not_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    verticalVRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries (L := L) := by
+    verticalVRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries L := by
   have hL0 : 0 < L := Nat.lt_of_lt_of_le (by decide : 0 < 2) (Fact.out : 2 ≤ L)
   haveI : Fact (0 < L) := ⟨hL0⟩
   intro h
   have h_vColAt : Stabilizer.Lattice.vColAt (L := L) (Stabilizer.Lattice.zeroCoord L)
       (verticalVRowChain L) = 0 :=
     Stabilizer.Lattice.vColAt_dualBoundary_zero L
-      (⟨verticalVRowChain L, h⟩ : Stabilizer.Lattice.toricDualBoundaries (L := L))
+      (⟨verticalVRowChain L, h⟩ : Stabilizer.Lattice.toricDualBoundaries L)
   have h_compute : Stabilizer.Lattice.vColAt (L := L) (Stabilizer.Lattice.zeroCoord L)
       (verticalVRowChain L) = 1 := by
     unfold Stabilizer.Lattice.vColAt verticalVRowChain
@@ -270,8 +270,8 @@ theorem nontrivial_z_logical_weight_ge_L (L : ℕ) [Fact (2 ≤ L)]
         all_goals (try cases hgZ.2 q <;> aesop)
     exact this g hgZ
   have h_dualCycle :
-      c ∈ Stabilizer.Lattice.toricDualCycles (L := L) ∧
-        c ∉ Stabilizer.Lattice.toricDualBoundaries (L := L) := by
+      c ∈ Stabilizer.Lattice.toricDualCycles L ∧
+        c ∉ Stabilizer.Lattice.toricDualBoundaries L := by
     rw [hc] at hgLogical
     exact (Stabilizer.Lattice.zNontrivialLogical_iff_dualCycle_not_dualBoundary L c).mp hgLogical
   have h_weight : Stabilizer.Lattice.edgeWeight c ≥ L := by
@@ -432,7 +432,7 @@ def horizontalHRowZOperator (L : ℕ) [Fact (0 < L)] :
 
 /-- The horizontal Z-row chain is a dual cycle. -/
 theorem horizontalHRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalHRowChain L ∈ Stabilizer.Lattice.toricDualCycles (L := L) := by
+    horizontalHRowChain L ∈ Stabilizer.Lattice.toricDualCycles L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold Stabilizer.Lattice.toricDualCycles
   rw [LinearMap.mem_ker]
@@ -447,7 +447,7 @@ theorem horizontalHRowChain_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] :
 
 /-- The horizontal Z-row chain is not a dual boundary (its `hRowAt` invariant is 1). -/
 theorem horizontalHRowChain_not_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalHRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries (L := L) := by
+    horizontalHRowChain L ∉ Stabilizer.Lattice.toricDualBoundaries L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   intro h
   have h_hRowAt : Stabilizer.Lattice.hRowAt (L := L) (Stabilizer.Lattice.zeroCoord L)

@@ -107,8 +107,8 @@ lemma noY_of_isZType {n : ℕ} {op : NQubitPauliOperator n}
 
 /-- Input data for concatenating a `k₁ = 1` CSS inner code with a CSS outer code.
 Carries the typed (Z/X) splits of both generator lists and the CSS-typed,
-phase-0 inner logical representatives `X̄₁ = (Cin.logicalOps 0).xOp`,
-`Z̄₁ = (Cin.logicalOps 0).zOp`. -/
+phase-0 inner logical representatives `X̄₁ = (Cin.logicalX 0)`,
+`Z̄₁ = (Cin.logicalZ 0)`. -/
 structure ConcatCSSData (n₁ n₂ k₂ : ℕ) [NeZero n₁] where
   Cin : StabilizerCode n₁ 1
   Cout : StabilizerCode n₂ k₂
@@ -122,26 +122,26 @@ structure ConcatCSSData (n₁ n₂ k₂ : ℕ) [NeZero n₁] where
   outer_split : List.Perm Cout.generatorsList (outerZ ++ outerX)
   outerZ_isZ : ∀ g ∈ outerZ, IsZTypeElement g
   outerX_isX : ∀ g ∈ outerX, IsXTypeElement g
-  innerLogX_isX : NQubitPauliOperator.IsXType (Cin.logicalOps 0).xOp.operators
-  innerLogX_phaseZero : (Cin.logicalOps 0).xOp.phasePower = 0
-  innerLogZ_isZ : NQubitPauliOperator.IsZType (Cin.logicalOps 0).zOp.operators
-  innerLogZ_phaseZero : (Cin.logicalOps 0).zOp.phasePower = 0
+  innerLogX_isX : NQubitPauliOperator.IsXType (Cin.logicalX 0).operators
+  innerLogX_phaseZero : (Cin.logicalX 0).phasePower = 0
+  innerLogZ_isZ : NQubitPauliOperator.IsZType (Cin.logicalZ 0).operators
+  innerLogZ_phaseZero : (Cin.logicalZ 0).phasePower = 0
   /-- The outer logical `X` representatives are X-type (hence `Y`-free): required so that
   `promote_anticommute_parity` applies to the promoted logicals. A CSS outer code admits
   such representatives. -/
-  outerLogX_isX : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsXType (Cout.logicalOps ℓ).xOp.operators
+  outerLogX_isX : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsXType (Cout.logicalX ℓ).operators
   /-- The outer logical `Z` representatives are Z-type (hence `Y`-free). -/
-  outerLogZ_isZ : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsZType (Cout.logicalOps ℓ).zOp.operators
+  outerLogZ_isZ : ∀ ℓ : Fin k₂, NQubitPauliOperator.IsZType (Cout.logicalZ ℓ).operators
 
 namespace ConcatCSSData
 
 variable (D : ConcatCSSData n₁ n₂ k₂)
 
 /-- The inner logical-`X` operator used as the `X ↦ X̄₁` promotion target. -/
-def Xbar : NQubitPauliOperator n₁ := (D.Cin.logicalOps 0).xOp.operators
+def Xbar : NQubitPauliOperator n₁ := (D.Cin.logicalX 0).operators
 
 /-- The inner logical-`Z` operator used as the `Z ↦ Z̄₁` promotion target. -/
-def Zbar : NQubitPauliOperator n₁ := (D.Cin.logicalOps 0).zOp.operators
+def Zbar : NQubitPauliOperator n₁ := (D.Cin.logicalZ 0).operators
 
 /-! ## The concatenated generator list -/
 

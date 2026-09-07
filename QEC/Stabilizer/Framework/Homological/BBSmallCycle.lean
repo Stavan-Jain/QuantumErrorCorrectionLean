@@ -93,7 +93,7 @@ lemma card_support_translate1 (c : G) (u : G × Fin 2 → ZMod 2) :
 
 /-- The augmentation is multiplicative on convolutions. -/
 lemma sum_conv (a b : G → ZMod 2) :
-    ∑ g : G, conv a b g = (∑ h : G, a h) * (∑ g : G, b g) := by
+    ∑ g : G, (a ⋆ b) g = (∑ h : G, a h) * (∑ g : G, b g) := by
   simp only [conv_apply]
   rw [Finset.sum_comm]
   rw [Finset.sum_mul]
@@ -206,7 +206,7 @@ lemma cycle_total_parity (u : G × Fin 2 → ZMod 2)
       = (∑ h : G, D.B h) * (∑ g : G, leftHalf u g)
         + (∑ h : G, D.A h) * (∑ g : G, rightHalf u g) := by
     rw [show (fun g => bbBoundary1Fn D.A D.B u g)
-        = fun g => conv D.B (leftHalf u) g + conv D.A (rightHalf u) g
+        = fun g => (D.B ⋆ leftHalf u) g + (D.A ⋆ rightHalf u) g
       from rfl]
     rw [Finset.sum_add_distrib, SmallCycle.sum_conv, SmallCycle.sum_conv]
   rw [hexp, D.epsA, D.epsB, one_mul, one_mul] at h0

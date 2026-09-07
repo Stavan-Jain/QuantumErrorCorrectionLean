@@ -42,7 +42,10 @@ straightforwardly to:
   `logical_commute_cross` — for `k = 1` the `Subsingleton.elim` shortcut
   suffices; for `k ≥ 2` you need explicit case-splits on `Fin k × Fin k`.
 - **Parametric families** (toric, rotated surface, …) — generators are
-  defined as functions of `L`, the subgroup is parametric, and the
+  defined as functions of `L` (the toric, repetition and iceberg families
+  write theirs with the symbolic `σ[n | i ↦ Z, …]` form, see §1; the rotated
+  surface code builds them through the homological-code layer instead),
+  the subgroup is parametric, and the
   `StabilizerCode` packaging often requires a *trimmed* generator list (see
   `ToricCodeNStabilizerCode.lean` for the pattern). The distance proof
   typically lives in a *separate file* (`<Code>Distance.lean`).
@@ -127,6 +130,24 @@ Conventions:
 
 **Non-CSS variant.** Mixed-Pauli generators use the same notation (e.g., the
 5-qubit perfect code's `σ[XZZXI]`); there is no Z/X partition.
+
+**Parametric variant.** When the qubit count and the positions are terms
+rather than numerals, use the symbolic form with the same leading tokens:
+
+```lean
+/-- The adjacent Z-check `Z_i Z_{i+1}` on `n + 2` qubits. -/
+def ZPair (n : ℕ) (i : Fin (n + 1)) : NQubitPauliGroupElement (n + 2) :=
+  σ[n + 2 | Fin.castSucc i ↦ Z, Fin.succ i ↦ Z]
+```
+
+`σ[n | i ↦ Z, j ↦ Z]` elaborates to exactly
+`⟨0, ((NQubitPauliOperator.identity n).set i PauliOperator.Z).set j PauliOperator.Z⟩`,
+the `.set`s in the written order, so the usual
+`simp [NQubitPauliOperator.set, NQubitPauliOperator.identity]` unfolding is
+unchanged; `P[n | …]` is the phase-less string, and the phase prefixes work the
+same way. Letters are `X`, `Y`, `Z` only — leave identity qubits out. See
+`Repetition/N.lean`, `Iceberg/N.lean`, and `Toric/CodeN.lean` (`vertexStab`,
+`faceStab`) for uses.
 -/
 
 /-!

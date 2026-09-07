@@ -349,28 +349,28 @@ chain `z` — by F₂-linearity of `conv baseP ·`, `V`, and `rmul`. -/
 theorem mult_of_basis (psi : BaseGroup → Fin 4) (P : BaseGroup → ZMod 2)
     (Phat : ZMod 2 × ZMod 2 → Fin 4)
     (hbasis : ∀ (p : BaseGroup) (s : ZMod 2 × ZMod 2),
-      V psi s (conv P (Pi.single p 1)) = rmul Phat (fun s' => V psi s' (Pi.single p 1)) s)
+      V psi s (P ⋆ Pi.single p 1) = rmul Phat (fun s' => V psi s' (Pi.single p 1)) s)
     (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi s (conv P z) = rmul Phat (fun s' => V psi s' z) s := by
+    V psi s (P ⋆ z) = rmul Phat (fun s' => V psi s' z) s := by
   have goal_add : ∀ (a b : BaseGroup → ZMod 2),
-      (∀ s, V psi s (conv P a) = rmul Phat (fun s' => V psi s' a) s) →
-      (∀ s, V psi s (conv P b) = rmul Phat (fun s' => V psi s' b) s) →
-      (∀ s, V psi s (conv P (a + b)) = rmul Phat (fun s' => V psi s' (a + b)) s) := by
+      (∀ s, V psi s (P ⋆ a) = rmul Phat (fun s' => V psi s' a) s) →
+      (∀ s, V psi s (P ⋆ b) = rmul Phat (fun s' => V psi s' b) s) →
+      (∀ s, V psi s (P ⋆ (a + b)) = rmul Phat (fun s' => V psi s' (a + b)) s) := by
     intro a b ha hb s
     rw [conv_add_right, V_add]
     rw [show (fun s' => V psi s' (a + b))
         = (fun s' => fadd (V psi s' a) (V psi s' b)) from by funext s'; rw [V_add]]
     rw [rmul_add_right, ha s, hb s]
-  have goal_zero : ∀ s, V psi s (conv P (0 : BaseGroup → ZMod 2))
+  have goal_zero : ∀ s, V psi s (P ⋆ (0 : BaseGroup → ZMod 2))
       = rmul Phat (fun s' => V psi s' (0 : BaseGroup → ZMod 2)) s := by
     intro s
-    have hc0 : conv P (0 : BaseGroup → ZMod 2) = 0 := by funext g; simp [conv_apply]
+    have hc0 : P ⋆ (0 : BaseGroup → ZMod 2) = 0 := by funext g; simp [conv_apply]
     rw [hc0, V_zero,
       show (fun s' => V psi s' (0 : BaseGroup → ZMod 2)) = (fun _ => 0) from by
         funext s'; exact V_zero psi s',
       rmul_zero_right]
   have key : ∀ (S : Finset BaseGroup) (s),
-      V psi s (conv P (ind S)) = rmul Phat (fun s' => V psi s' (ind S)) s := by
+      V psi s (P ⋆ ind S) = rmul Phat (fun s' => V psi s' (ind S)) s := by
     intro S
     induction S using Finset.induction with
     | empty => rw [ind_empty]; exact goal_zero
@@ -386,7 +386,7 @@ For each, a kernel `decide` discharges the 36-`δ_p` basis case (in the sparse
 /-- Sparse form of right-convolution with a point mass:
 `conv P δ_p = P (· - p)` (from `conv_comm` + `conv_single_left`). -/
 theorem conv_single_right (P : BaseGroup → ZMod 2) (p : BaseGroup) :
-    conv P (Pi.single p 1) = fun g => P (g - p) := by
+    P ⋆ Pi.single p 1 = fun g => P (g - p) := by
   rw [conv_comm, conv_single_left]
 
 /-- Reduce the `hbasis` obligation of `mult_of_basis` to its translate form
@@ -398,38 +398,38 @@ theorem basis_of_translate {psi : BaseGroup → Fin 4} {P : BaseGroup → ZMod 2
     (h : ∀ (p : BaseGroup) (s : ZMod 2 × ZMod 2),
       V psi s (fun g => P (g - p)) = rmul Phat (fun s' => V psi s' (Pi.single p 1)) s)
     (p : BaseGroup) (s : ZMod 2 × ZMod 2) :
-    V psi s (conv P (Pi.single p 1)) = rmul Phat (fun s' => V psi s' (Pi.single p 1)) s := by
+    V psi s (P ⋆ Pi.single p 1) = rmul Phat (fun s' => V psi s' (Pi.single p 1)) s := by
   rw [conv_single_right]
   exact h p s
 
 /-- `Â₁`: `V₁(A⋆z) = Â₁·V₁(z)`. -/
 theorem mult_A1 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi1 s (conv baseA z) = rmul Ahat1 (fun s' => V psi1 s' z) s :=
+    V psi1 s (baseA ⋆ z) = rmul Ahat1 (fun s' => V psi1 s' z) s :=
   mult_of_basis psi1 baseA Ahat1 (basis_of_translate (by decide +kernel)) z s
 
 /-- `Â₃ = Â₁`: `V₃(A⋆z) = Â₁·V₃(z)`. -/
 theorem mult_A3 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi3 s (conv baseA z) = rmul Ahat1 (fun s' => V psi3 s' z) s :=
+    V psi3 s (baseA ⋆ z) = rmul Ahat1 (fun s' => V psi3 s' z) s :=
   mult_of_basis psi3 baseA Ahat1 (basis_of_translate (by decide +kernel)) z s
 
 /-- `Â₄`: `V₄(A⋆z) = Â₄·V₄(z)`. -/
 theorem mult_A4 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi4 s (conv baseA z) = rmul Ahat4 (fun s' => V psi4 s' z) s :=
+    V psi4 s (baseA ⋆ z) = rmul Ahat4 (fun s' => V psi4 s' z) s :=
   mult_of_basis psi4 baseA Ahat4 (basis_of_translate (by decide +kernel)) z s
 
 /-- `B̂₂`: `V₂(B⋆z) = B̂₂·V₂(z)`. -/
 theorem mult_B2 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi2 s (conv baseB z) = rmul Bhat2 (fun s' => V psi2 s' z) s :=
+    V psi2 s (baseB ⋆ z) = rmul Bhat2 (fun s' => V psi2 s' z) s :=
   mult_of_basis psi2 baseB Bhat2 (basis_of_translate (by decide +kernel)) z s
 
 /-- `B̂₃ = B̂₂`: `V₃(B⋆z) = B̂₂·V₃(z)`. -/
 theorem mult_B3 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi3 s (conv baseB z) = rmul Bhat2 (fun s' => V psi3 s' z) s :=
+    V psi3 s (baseB ⋆ z) = rmul Bhat2 (fun s' => V psi3 s' z) s :=
   mult_of_basis psi3 baseB Bhat2 (basis_of_translate (by decide +kernel)) z s
 
 /-- `B̂₄ = B̂₂`: `V₄(B⋆z) = B̂₂·V₄(z)`. -/
 theorem mult_B4 (z : BaseGroup → ZMod 2) (s : ZMod 2 × ZMod 2) :
-    V psi4 s (conv baseB z) = rmul Bhat2 (fun s' => V psi4 s' z) s :=
+    V psi4 s (baseB ⋆ z) = rmul Bhat2 (fun s' => V psi4 s' z) s :=
   mult_of_basis psi4 baseB Bhat2 (basis_of_translate (by decide +kernel)) z s
 
 end CRTFrame

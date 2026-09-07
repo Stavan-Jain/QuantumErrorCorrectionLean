@@ -36,6 +36,7 @@ We show the generated subgroup is a `StabilizerGroup (n+2)`:
 -/
 
 open NQubitPauliGroupElement
+open scoped Pauli
 
 /-!
 ## Generators
@@ -43,9 +44,7 @@ open NQubitPauliGroupElement
 
 /-- The adjacent Z-check `Z_i Z_{i+1}` on `n+2` qubits, indexed by `i : Fin (n+1)`. -/
 def ZPair (n : ℕ) (i : Fin (n + 1)) : NQubitPauliGroupElement (n + 2) :=
-  ⟨0,
-    ((NQubitPauliOperator.identity (n + 2)).set (Fin.castSucc i) PauliOperator.Z)
-      |>.set (Fin.succ i) PauliOperator.Z⟩
+  σ[n + 2 | Fin.castSucc i ↦ Z, Fin.succ i ↦ Z]
 
 def ZGenerators (n : ℕ) : Set (NQubitPauliGroupElement (n + 2)) :=
   Set.range (ZPair n)

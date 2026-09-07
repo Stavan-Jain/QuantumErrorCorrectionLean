@@ -206,12 +206,12 @@ theorem bb2_sparse (f : BaseGroup → ZMod 2) (p : BaseGroup) (j : Fin 2) :
     bbBoundary2Fn baseA baseB f (p, j)
       = if j = 0 then f (p - (3, 0)) + f (p - (0, 1)) + f (p - (0, 2))
         else f (p - (0, 3)) + f (p - (1, 0)) + f (p - (2, 0)) := by
-  change (if j = 0 then conv baseA f p else conv baseB f p) = _
-  have hA : conv baseA f p
+  change (if j = 0 then (baseA ⋆ f) p else (baseB ⋆ f) p) = _
+  have hA : (baseA ⋆ f) p
       = f (p - (3, 0)) + f (p - (0, 1)) + f (p - (0, 2)) :=
     conv_indicator3 ((3, 0) : BaseGroup) (0, 1) (0, 2)
       (by decide) (by decide) (by decide) f p
-  have hB : conv baseB f p
+  have hB : (baseB ⋆ f) p
       = f (p - (0, 3)) + f (p - (1, 0)) + f (p - (2, 0)) :=
     conv_indicator3 ((0, 3) : BaseGroup) (1, 0) (2, 0)
       (by decide) (by decide) (by decide) f p
@@ -676,12 +676,12 @@ coset's per-component data `off_j(ζ) ⊕ P̂_j · V_j f` that the §10 slot fra
 /-- A-block of a coset element: `leftHalf (seamC ζ + ∂₂ f) = leftHalf (seamC ζ) + A⋆f`. -/
 theorem leftHalf_coset (ζ f : BaseGroup → ZMod 2) :
     leftHalf (seamC ζ + bbBoundary2Fn baseA baseB f)
-      = leftHalf (seamC ζ) + conv baseA f := rfl
+      = leftHalf (seamC ζ) + baseA ⋆ f := rfl
 
 /-- B-block of a coset element: `rightHalf (seamC ζ + ∂₂ f) = rightHalf (seamC ζ) + B⋆f`. -/
 theorem rightHalf_coset (ζ f : BaseGroup → ZMod 2) :
     rightHalf (seamC ζ + bbBoundary2Fn baseA baseB f)
-      = rightHalf (seamC ζ) + conv baseB f := rfl
+      = rightHalf (seamC ζ) + baseB ⋆ f := rfl
 
 /-! ## §3 The coset CRT profile: `V_j(coset) = off_j(ζ) ⊕ P̂_j · V_j f`
 

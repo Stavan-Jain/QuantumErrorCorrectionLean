@@ -305,11 +305,11 @@ packed row-syndrome sweep instead of a per-tuple `gateM` evaluation. -/
 /-- Convolving with a point mass on the right translates:
 `P ⋆ δ_c = P (· - c)` (right-handed sibling of `conv_single_left`). -/
 private theorem conv_single_right (P : BaseGroup → ZMod 2) (c : BaseGroup) :
-    conv P (Pi.single c 1) = fun g => P (g - c) := by
+    P ⋆ Pi.single c 1 = fun g => P (g - c) := by
   rw [conv_comm, conv_single_left]
 
 theorem hexA_correct : ∀ g : Fin 36,
-    hexA.getD g.val 0 = bitmaskOf (conv baseA (Pi.single (cellOf g.val) 1)) := by
+    hexA.getD g.val 0 = bitmaskOf (baseA ⋆ Pi.single (cellOf g.val) 1) := by
   have tab : ∀ g : Fin 36,
       hexA.getD g.val 0 = bitmaskOf (fun x => baseA (x - cellOf g.val)) := by decide
   intro g
@@ -319,7 +319,7 @@ theorem hexA_correct : ∀ g : Fin 36,
 theorem gate_hexA : ∀ g : Fin 36, gateM (hexA.getD g.val 0) = true := by decide
 
 theorem hexB_correct : ∀ g : Fin 36,
-    hexB.getD g.val 0 = bitmaskOf (conv baseB (Pi.single (cellOf g.val) 1)) := by
+    hexB.getD g.val 0 = bitmaskOf (baseB ⋆ Pi.single (cellOf g.val) 1) := by
   have tab : ∀ g : Fin 36,
       hexB.getD g.val 0 = bitmaskOf (fun x => baseB (x - cellOf g.val)) := by decide
   intro g
@@ -343,17 +343,17 @@ theorem xorLift (M : (BaseGroup → ZMod 2) → Nat) (P : Nat → Prop)
   rw [self_eq_ind_filter b]; exact key _
 
 theorem gateM_conv_baseA (z : BaseGroup → ZMod 2) :
-    gateM (bitmaskOf (conv baseA z)) = true := by
-  apply xorLift (fun w => bitmaskOf (conv baseA w)) (fun m => gateM m = true)
-  · show bitmaskOf (conv baseA 0) = 0
-    rw [show conv baseA (0 : BaseGroup → ZMod 2) = 0 from by funext g; simp [conv_apply],
+    gateM (bitmaskOf (baseA ⋆ z)) = true := by
+  apply xorLift (fun w => bitmaskOf (baseA ⋆ w)) (fun m => gateM m = true)
+  · show bitmaskOf (baseA ⋆ 0) = 0
+    rw [show (baseA ⋆ (0 : BaseGroup → ZMod 2)) = 0 from by funext g; simp [conv_apply],
       bitmaskOf_zero]
-  · intro a b; show bitmaskOf (conv baseA (a + b)) = _
+  · intro a b; show bitmaskOf (baseA ⋆ (a + b)) = _
     rw [conv_add_right, bitmaskOf_add]
   · exact gateM_zero
   · intro m n hm hn; exact gateM_xor hm hn
   · intro g
-    show gateM (bitmaskOf (conv baseA (Pi.single g 1))) = true
+    show gateM (bitmaskOf (baseA ⋆ Pi.single g 1)) = true
     have hk : cellOf (idxOf g) = g := cellOf_idxOf g
     have hc := hexA_correct ⟨idxOf g, idxOf_lt g⟩
     rw [hk] at hc
@@ -435,12 +435,12 @@ theorem inBspan_xor {x y : Nat} (hx : inBspan x) (hy : inBspan y) : inBspan (x ^
 
 /-- The coset-defect map: `Φ f = MBA·(Â-block) ⊕ (B̂-block)`, lands in `Bspan`. -/
 def Phi (f : BaseGroup → ZMod 2) : Nat :=
-  applyCols MBAcols (bitmaskOf (conv baseA f)) ^^^ bitmaskOf (conv baseB f)
+  applyCols MBAcols (bitmaskOf (baseA ⋆ f)) ^^^ bitmaskOf (baseB ⋆ f)
 
 theorem Phi_zero : Phi 0 = 0 := by
   unfold Phi
-  rw [show conv baseA (0 : BaseGroup → ZMod 2) = 0 from by funext g; simp [conv_apply],
-      show conv baseB (0 : BaseGroup → ZMod 2) = 0 from by funext g; simp [conv_apply],
+  rw [show (baseA ⋆ (0 : BaseGroup → ZMod 2)) = 0 from by funext g; simp [conv_apply],
+      show (baseB ⋆ (0 : BaseGroup → ZMod 2)) = 0 from by funext g; simp [conv_apply],
       bitmaskOf_zero, applyCols_zero, Nat.xor_zero]
 
 theorem Phi_add (a b : BaseGroup → ZMod 2) : Phi (a + b) = Phi a ^^^ Phi b := by
@@ -487,18 +487,18 @@ theorem foldl_min_le (f : Nat → Nat) :
     · exact ih _ c hct
 
 theorem minBcoset_le_bwt (f : BaseGroup → ZMod 2) :
-    minBcoset (bitmaskOf (conv baseA f)) ≤ bwt (conv baseB f) := by
+    minBcoset (bitmaskOf (baseA ⋆ f)) ≤ bwt (baseB ⋆ f) := by
   obtain ⟨c, hc⟩ := coset_mem f
   simp only [Phi] at hc
-  have hrw : bitmaskOf (conv baseB f)
-      = applyCols MBAcols (bitmaskOf (conv baseA f)) ^^^ bOffset c.val := by
+  have hrw : bitmaskOf (baseB ⋆ f)
+      = applyCols MBAcols (bitmaskOf (baseA ⋆ f)) ^^^ bOffset c.val := by
     rw [hc, ← Nat.xor_assoc, Nat.xor_self, Nat.zero_xor]
-  calc minBcoset (bitmaskOf (conv baseA f))
-      ≤ wtM (applyCols MBAcols (bitmaskOf (conv baseA f)) ^^^ bOffset c.val) := by
+  calc minBcoset (bitmaskOf (baseA ⋆ f))
+      ≤ wtM (applyCols MBAcols (bitmaskOf (baseA ⋆ f)) ^^^ bOffset c.val) := by
         unfold minBcoset
         exact foldl_min_le _ (List.range 64) 99 c.val (List.mem_range.mpr c.isLt)
-    _ = wtM (bitmaskOf (conv baseB f)) := by rw [← hrw]
-    _ = bwt (conv baseB f) := wtM_eq_bwt _
+    _ = wtM (bitmaskOf (baseB ⋆ f)) := by rw [← hrw]
+    _ = bwt (baseB ⋆ f) := wtM_eq_bwt _
 
 
 
@@ -522,10 +522,10 @@ theorem dpairDirList_mem : ∀ k : Fin 12, dpairDirList.getD k.val 0 ∈ pairDir
 /-- A gated A-block recognised as hexagon/D-pair lifts to a function-level witness:
 its `conv baseA` equals that of a single hexagon, or of a D-pair `δ_g + δ_{g+d}`. -/
 theorem isHexDpairA_witness (f : BaseGroup → ZMod 2)
-    (h : isHexDpairA (bitmaskOf (conv baseA f)) = true) :
-    (∃ g : BaseGroup, conv baseA f = conv baseA (Pi.single g 1)) ∨
+    (h : isHexDpairA (bitmaskOf (baseA ⋆ f)) = true) :
+    (∃ g : BaseGroup, baseA ⋆ f = baseA ⋆ Pi.single g 1) ∨
     (∃ g : BaseGroup, ∃ d ∈ pairDirections,
-        conv baseA f = conv baseA (Pi.single g 1 + Pi.single (g + d) 1)) := by
+        baseA ⋆ f = baseA ⋆ (Pi.single g 1 + Pi.single (g + d) 1)) := by
   unfold isHexDpairA at h
   rw [Bool.or_eq_true] at h
   rcases h with hHex | hDp
@@ -1032,27 +1032,27 @@ theorem classifyCoreEven : ∀ q₁ q₂ q₃ : Fin 36,
 weight ≤ 5 whose boundary is light (`bwt A + bwt B ≤ 10`) is a hexagon or D-pair
 A-block. -/
 theorem classify_master (f : BaseGroup → ZMod 2)
-    (horig : conv baseA f (0, 0) = 1)
-    (hwt5 : bwt (conv baseA f) ≤ 5)
-    (hbnd : bwt (conv baseA f) + bwt (conv baseB f) ≤ 10) :
-    (∃ g : BaseGroup, conv baseA f = conv baseA (Pi.single g 1)) ∨
+    (horig : (baseA ⋆ f) (0, 0) = 1)
+    (hwt5 : bwt (baseA ⋆ f) ≤ 5)
+    (hbnd : bwt (baseA ⋆ f) + bwt (baseB ⋆ f) ≤ 10) :
+    (∃ g : BaseGroup, baseA ⋆ f = baseA ⋆ Pi.single g 1) ∨
     (∃ g : BaseGroup, ∃ d ∈ pairDirections,
-        conv baseA f = conv baseA (Pi.single g 1 + Pi.single (g + d) 1)) := by
-  have hgate : gateM (bitmaskOf (conv baseA f)) = true := gateM_conv_baseA f
-  have hge1 : 1 ≤ bwt (conv baseA f) := by
+        baseA ⋆ f = baseA ⋆ (Pi.single g 1 + Pi.single (g + d) 1)) := by
+  have hgate : gateM (bitmaskOf (baseA ⋆ f)) = true := gateM_conv_baseA f
+  have hge1 : 1 ≤ bwt (baseA ⋆ f) := by
     unfold bwt
     exact Finset.card_pos.mpr ⟨(0, 0), Finset.mem_filter.mpr ⟨Finset.mem_univ _, horig⟩⟩
-  have hge3 : 3 ≤ bwt (conv baseA f) := gated_bwt_ge3 (conv baseA f) hgate hge1
-  have hmb : minBcoset (bitmaskOf (conv baseA f)) ≤ bwt (conv baseB f) := minBcoset_le_bwt f
-  have hclass : isHexDpairA (bitmaskOf (conv baseA f)) = true := by
-    rcases Nat.even_or_odd (bwt (conv baseA f)) with heven | hodd
-    · obtain ⟨q1, q2, q3, hq⟩ := exists_supMask4 (conv baseA f) horig hwt5 (by omega) heven
+  have hge3 : 3 ≤ bwt (baseA ⋆ f) := gated_bwt_ge3 (baseA ⋆ f) hgate hge1
+  have hmb : minBcoset (bitmaskOf (baseA ⋆ f)) ≤ bwt (baseB ⋆ f) := minBcoset_le_bwt f
+  have hclass : isHexDpairA (bitmaskOf (baseA ⋆ f)) = true := by
+    rcases Nat.even_or_odd (bwt (baseA ⋆ f)) with heven | hodd
+    · obtain ⟨q1, q2, q3, hq⟩ := exists_supMask4 (baseA ⋆ f) horig hwt5 (by omega) heven
       have hgate' : gateM (supMask [0, q1, q2, q3]) = true := by rw [hq]; exact hgate
       have h3 : 3 ≤ wtM (supMask [0, q1, q2, q3]) := by rw [hq, wtM_eq_bwt]; exact hge3
       rcases classifyCoreEven q1 q2 q3 hgate' h3 with hhd | hbig
       · rw [hq] at hhd; exact hhd
       · exfalso; rw [hq, wtM_eq_bwt] at hbig; omega
-    · obtain ⟨q1, q2, q3, q4, hq⟩ := exists_supMask5 (conv baseA f) horig hwt5 hodd
+    · obtain ⟨q1, q2, q3, q4, hq⟩ := exists_supMask5 (baseA ⋆ f) horig hwt5 hodd
       have hgate' : gateM (supMask [0, q1, q2, q3, q4]) = true := by rw [hq]; exact hgate
       rcases classifyCore q1 q2 q3 q4 hgate' with hhd | hbig
       · rw [hq] at hhd; exact hhd
@@ -1110,48 +1110,48 @@ theorem bwt_translate (c : BaseGroup) (v : BaseGroup → ZMod 2) :
 /-- The A-lighter classification: if the (necessarily nonzero) A-block of a light
 boundary has weight ≤ 5, the boundary is a hexagon or D-pair. -/
 theorem classify_Alighter (f : BaseGroup → ZMod 2)
-    (hAne : conv baseA f ≠ 0)
+    (hAne : baseA ⋆ f ≠ 0)
     (hle10 : (Finset.univ.filter fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0).card ≤ 10)
-    (hAlight : bwt (conv baseA f) ≤ 5) :
+    (hAlight : bwt (baseA ⋆ f) ≤ 5) :
     (∃ g : BaseGroup, bbBoundary2Fn baseA baseB f
         = bbBoundary2Fn baseA baseB (Pi.single g 1)) ∨
     (∃ g : BaseGroup, ∃ d ∈ pairDirections, bbBoundary2Fn baseA baseB f
         = bbBoundary2Fn baseA baseB (Pi.single g 1 + Pi.single (g + d) 1)) := by
-  obtain ⟨c, hc⟩ : ∃ c, conv baseA f c = 1 := by
+  obtain ⟨c, hc⟩ : ∃ c, (baseA ⋆ f) c = 1 := by
     by_contra hcon
     push Not at hcon
     apply hAne
     funext x
     have h := hcon x
-    change conv baseA f x = (0 : ZMod 2)
-    revert h; generalize conv baseA f x = u; revert u; decide
-  have hAf' : conv baseA (translate c f) = translate c (conv baseA f) := conv_translate baseA f c
-  have hBf' : conv baseB (translate c f) = translate c (conv baseB f) := conv_translate baseB f c
-  have horig : conv baseA (translate c f) (0, 0) = 1 := by
+    change (baseA ⋆ f) x = (0 : ZMod 2)
+    revert h; generalize (baseA ⋆ f) x = u; revert u; decide
+  have hAf' : baseA ⋆ translate c f = translate c (baseA ⋆ f) := conv_translate baseA f c
+  have hBf' : baseB ⋆ translate c f = translate c (baseB ⋆ f) := conv_translate baseB f c
+  have horig : (baseA ⋆ translate c f) (0, 0) = 1 := by
     rw [hAf']
-    change conv baseA f ((0 : BaseGroup) + c) = 1
+    change (baseA ⋆ f) ((0 : BaseGroup) + c) = 1
     rw [zero_add]
     exact hc
-  have hAwt' : bwt (conv baseA (translate c f)) ≤ 5 := by rw [hAf', bwt_translate]; exact hAlight
-  have hbnd : bwt (conv baseA (translate c f)) + bwt (conv baseB (translate c f)) ≤ 10 := by
+  have hAwt' : bwt (baseA ⋆ translate c f) ≤ 5 := by rw [hAf', bwt_translate]; exact hAlight
+  have hbnd : bwt (baseA ⋆ translate c f) + bwt (baseB ⋆ translate c f) ≤ 10 := by
     rw [hAf', hBf', bwt_translate, bwt_translate]
     exact le_trans (bwt_blocks_le_boundary f) hle10
   rcases classify_master (translate c f) horig hAwt' hbnd with ⟨g', hg'⟩ | ⟨g', d, hd, hg'⟩
   · left
     refine ⟨g' + c, ?_⟩
     apply transfer_hexagon f (g' + c) ?_ hle10
-    have hh : translate c (conv baseA f) = conv baseA (Pi.single g' 1) := by rw [← hAf']; exact hg'
-    have h2 : conv baseA f = translate (-c) (conv baseA (Pi.single g' 1)) := by
+    have hh : translate c (baseA ⋆ f) = baseA ⋆ Pi.single g' 1 := by rw [← hAf']; exact hg'
+    have h2 : baseA ⋆ f = translate (-c) (baseA ⋆ Pi.single g' 1) := by
       rw [← hh, translate_neg_translate]
     rw [h2, ← conv_translate, translate_single]
   · right
     refine ⟨g' + c, d, hd, ?_⟩
     apply transfer_dpair f (g' + c) d hd ?_ hle10
-    have hh : translate c (conv baseA f)
-        = conv baseA (Pi.single g' 1 + Pi.single (g' + d) 1) := by rw [← hAf']; exact hg'
-    have h2 : conv baseA f
-        = translate (-c) (conv baseA (Pi.single g' 1 + Pi.single (g' + d) 1)) := by
+    have hh : translate c (baseA ⋆ f)
+        = baseA ⋆ (Pi.single g' 1 + Pi.single (g' + d) 1) := by rw [← hAf']; exact hg'
+    have h2 : baseA ⋆ f
+        = translate (-c) (baseA ⋆ (Pi.single g' 1 + Pi.single (g' + d) 1)) := by
       rw [← hh, translate_neg_translate]
     rw [h2, ← conv_translate, translate_add, translate_single, translate_single,
       show (g' + d) + c = (g' + c) + d from by abel]
@@ -1197,45 +1197,45 @@ theorem funLift (M N : (BaseGroup → ZMod 2) → (BaseGroup → ZMod 2))
     | @insert p S hp ih => rw [ind_insert hp, hMadd, hNadd, hbasis p, ih]
   rw [self_eq_ind_filter f]; exact key _
 
-theorem conv_zero_right (P : BaseGroup → ZMod 2) : conv P 0 = 0 := by
+theorem conv_zero_right (P : BaseGroup → ZMod 2) : P ⋆ 0 = 0 := by
   funext g; simp [conv_apply]
 
 theorem swap_basisA : ∀ g x : BaseGroup,
-    conv baseA (swapFn (Pi.single g 1)) x = swapFn (conv baseB (Pi.single g 1)) x := by
+    (baseA ⋆ swapFn (Pi.single g 1)) x = swapFn (baseB ⋆ Pi.single g 1) x := by
   have key : ∀ g x : BaseGroup, baseA (x - swap g) = baseB (swap x - g) := by decide
   intro g x
   rw [swapFn_single, swapFn_apply, conv_single_right, conv_single_right]
   exact key g x
 theorem swap_basisB : ∀ g x : BaseGroup,
-    conv baseB (swapFn (Pi.single g 1)) x = swapFn (conv baseA (Pi.single g 1)) x := by
+    (baseB ⋆ swapFn (Pi.single g 1)) x = swapFn (baseA ⋆ Pi.single g 1) x := by
   have key : ∀ g x : BaseGroup, baseB (x - swap g) = baseA (swap x - g) := by decide
   intro g x
   rw [swapFn_single, swapFn_apply, conv_single_right, conv_single_right]
   exact key g x
 
 theorem swap_convA (f : BaseGroup → ZMod 2) :
-    conv baseA (swapFn f) = swapFn (conv baseB f) := by
-  apply funLift (fun f => conv baseA (swapFn f)) (fun f => swapFn (conv baseB f))
-  · show conv baseA (swapFn 0) = 0
+    baseA ⋆ swapFn f = swapFn (baseB ⋆ f) := by
+  apply funLift (fun f => (baseA ⋆ swapFn f)) (fun f => swapFn (baseB ⋆ f))
+  · show (baseA ⋆ swapFn 0) = 0
     rw [swapFn_zero, conv_zero_right]
-  · show swapFn (conv baseB 0) = 0
+  · show swapFn (baseB ⋆ 0) = 0
     rw [conv_zero_right, swapFn_zero]
-  · intro a b; show conv baseA (swapFn (a + b)) = _
+  · intro a b; show (baseA ⋆ swapFn (a + b)) = _
     rw [swapFn_add, conv_add_right]
-  · intro a b; show swapFn (conv baseB (a + b)) = _
+  · intro a b; show swapFn (baseB ⋆ (a + b)) = _
     rw [conv_add_right, swapFn_add]
   · intro g; funext x; exact swap_basisA g x
 
 theorem swap_convB (f : BaseGroup → ZMod 2) :
-    conv baseB (swapFn f) = swapFn (conv baseA f) := by
-  apply funLift (fun f => conv baseB (swapFn f)) (fun f => swapFn (conv baseA f))
-  · show conv baseB (swapFn 0) = 0
+    baseB ⋆ swapFn f = swapFn (baseA ⋆ f) := by
+  apply funLift (fun f => (baseB ⋆ swapFn f)) (fun f => swapFn (baseA ⋆ f))
+  · show (baseB ⋆ swapFn 0) = 0
     rw [swapFn_zero, conv_zero_right]
-  · show swapFn (conv baseA 0) = 0
+  · show swapFn (baseA ⋆ 0) = 0
     rw [conv_zero_right, swapFn_zero]
-  · intro a b; show conv baseB (swapFn (a + b)) = _
+  · intro a b; show (baseB ⋆ swapFn (a + b)) = _
     rw [swapFn_add, conv_add_right]
-  · intro a b; show swapFn (conv baseA (a + b)) = _
+  · intro a b; show swapFn (baseA ⋆ (a + b)) = _
     rw [conv_add_right, swapFn_add]
   · intro g; funext x; exact swap_basisB g x
 
@@ -1253,10 +1253,10 @@ theorem bwt_swapFn (v : BaseGroup → ZMod 2) : bwt (swapFn v) = bwt v := by
 
 /-- B-side one-block lemma (via the swap): `conv baseB w = 0`, `conv baseA w ≠ 0`
 forces `|conv baseA w| ≥ 16`. -/
-theorem oneBlock_ge16_B (w : BaseGroup → ZMod 2) (hB : conv baseB w = 0)
-    (hA : conv baseA w ≠ 0) : 16 ≤ bwt (conv baseA w) := by
-  have hA' : conv baseA (swapFn w) = 0 := by rw [swap_convA, hB, swapFn_zero]
-  have hB' : conv baseB (swapFn w) ≠ 0 := by
+theorem oneBlock_ge16_B (w : BaseGroup → ZMod 2) (hB : baseB ⋆ w = 0)
+    (hA : baseA ⋆ w ≠ 0) : 16 ≤ bwt (baseA ⋆ w) := by
+  have hA' : baseA ⋆ swapFn w = 0 := by rw [swap_convA, hB, swapFn_zero]
+  have hB' : baseB ⋆ swapFn w ≠ 0 := by
     rw [swap_convB]; intro h; exact hA (swapFn_injective (h.trans swapFn_zero.symm))
   have h16 := oneBlock_ge16 (swapFn w) hA' hB'
   rwa [swap_convB, bwt_swapFn] at h16
@@ -1270,16 +1270,16 @@ theorem boundary_swapFn (f : BaseGroup → ZMod 2) :
     bbBoundary2Fn baseA baseB (swapFn f) = bnSwap (bbBoundary2Fn baseA baseB f) := by
   funext p
   obtain ⟨h, j⟩ := p
-  change (if j = 0 then conv baseA (swapFn f) h else conv baseB (swapFn f) h)
+  change (if j = 0 then (baseA ⋆ swapFn f) h else (baseB ⋆ swapFn f) h)
     = bbBoundary2Fn baseA baseB f (swap h, swapF2 j)
-  have hA : conv baseA (swapFn f) h = conv baseB f (swap h) := by rw [swap_convA, swapFn_apply]
-  have hB : conv baseB (swapFn f) h = conv baseA f (swap h) := by rw [swap_convB, swapFn_apply]
+  have hA : (baseA ⋆ swapFn f) h = (baseB ⋆ f) (swap h) := by rw [swap_convA, swapFn_apply]
+  have hB : (baseB ⋆ swapFn f) h = (baseA ⋆ f) (swap h) := by rw [swap_convB, swapFn_apply]
   rw [hA, hB]
   fin_cases j
-  · change (if (0 : Fin 2) = 0 then conv baseB f (swap h) else conv baseA f (swap h))
+  · change (if (0 : Fin 2) = 0 then (baseB ⋆ f) (swap h) else (baseA ⋆ f) (swap h))
       = bbBoundary2Fn baseA baseB f (swap h, swapF2 0)
     rw [if_pos rfl]; rfl
-  · change (if (1 : Fin 2) = 0 then conv baseB f (swap h) else conv baseA f (swap h))
+  · change (if (1 : Fin 2) = 0 then (baseB ⋆ f) (swap h) else (baseA ⋆ f) (swap h))
       = bbBoundary2Fn baseA baseB f (swap h, swapF2 1)
     rw [if_neg (by decide)]; rfl
 
@@ -1306,17 +1306,17 @@ theorem pairDirections_swap : ∀ d ∈ pairDirections, swap d ∈ pairDirection
 
 /-- The B-lighter classification (transported from the A-side via the swap). -/
 theorem classify_Blighter (f : BaseGroup → ZMod 2)
-    (hBne : conv baseB f ≠ 0)
+    (hBne : baseB ⋆ f ≠ 0)
     (hle10 : (Finset.univ.filter fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB f j ≠ 0).card ≤ 10)
-    (hBlight : bwt (conv baseB f) ≤ 5) :
+    (hBlight : bwt (baseB ⋆ f) ≤ 5) :
     (∃ g : BaseGroup, bbBoundary2Fn baseA baseB f
         = bbBoundary2Fn baseA baseB (Pi.single g 1)) ∨
     (∃ g : BaseGroup, ∃ d ∈ pairDirections, bbBoundary2Fn baseA baseB f
         = bbBoundary2Fn baseA baseB (Pi.single g 1 + Pi.single (g + d) 1)) := by
-  have hAne' : conv baseA (swapFn f) ≠ 0 := by
+  have hAne' : baseA ⋆ swapFn f ≠ 0 := by
     rw [swap_convA]; intro h; exact hBne (swapFn_injective (h.trans swapFn_zero.symm))
-  have hAlight' : bwt (conv baseA (swapFn f)) ≤ 5 := by rw [swap_convA, bwt_swapFn]; exact hBlight
+  have hAlight' : bwt (baseA ⋆ swapFn f) ≤ 5 := by rw [swap_convA, bwt_swapFn]; exact hBlight
   have hle10' : (Finset.univ.filter fun j : BaseGroup × Fin 2 =>
       bbBoundary2Fn baseA baseB (swapFn f) j ≠ 0).card ≤ 10 := by
     rw [boundary_swapFn, bnSwap_card]; exact hle10
@@ -1348,28 +1348,28 @@ every nonzero base boundary of weight ≤ 11 is a hexagon or a D-pair. -/
 theorem lightStabilizerClassification_holds : LightStabilizerClassification := by
   intro f hne hle11
   have hle10 := boundary_weight_le_ten f hle11
-  have hsum : bwt (conv baseA f) + bwt (conv baseB f) ≤ 10 :=
+  have hsum : bwt (baseA ⋆ f) + bwt (baseB ⋆ f) ≤ 10 :=
     le_trans (bwt_blocks_le_boundary f) hle10
-  have hAne : conv baseA f ≠ 0 := by
+  have hAne : baseA ⋆ f ≠ 0 := by
     intro hA0
-    have hBne0 : conv baseB f ≠ 0 := by
+    have hBne0 : baseB ⋆ f ≠ 0 := by
       intro hB0; apply hne; funext p; obtain ⟨h, j⟩ := p
-      change (if j = 0 then conv baseA f h else conv baseB f h)
+      change (if j = 0 then (baseA ⋆ f) h else (baseB ⋆ f) h)
         = (0 : BaseGroup × Fin 2 → ZMod 2) (h, j)
       by_cases hj : j = 0
       · rw [if_pos hj, hA0]; rfl
       · rw [if_neg hj, hB0]; rfl
     have h16 := oneBlock_ge16 f hA0 hBne0
-    have hble : bwt (conv baseB f) ≤ 10 := le_trans (bwt_baseB_le_boundary f) hle10
+    have hble : bwt (baseB ⋆ f) ≤ 10 := le_trans (bwt_baseB_le_boundary f) hle10
     omega
-  have hBne : conv baseB f ≠ 0 := by
+  have hBne : baseB ⋆ f ≠ 0 := by
     intro hB0
-    have hAne0 : conv baseA f ≠ 0 := hAne
+    have hAne0 : baseA ⋆ f ≠ 0 := hAne
     have h16 := oneBlock_ge16_B f hB0 hAne0
-    have hale : bwt (conv baseA f) ≤ 10 := by
+    have hale : bwt (baseA ⋆ f) ≤ 10 := by
       have := bwt_blocks_le_boundary f; omega
     omega
-  rcases le_total (bwt (conv baseA f)) (bwt (conv baseB f)) with hAB | hBA
+  rcases le_total (bwt (baseA ⋆ f)) (bwt (baseB ⋆ f)) with hAB | hBA
   · exact classify_Alighter f hAne hle10 (by omega)
   · exact classify_Blighter f hBne hle10 (by omega)
 

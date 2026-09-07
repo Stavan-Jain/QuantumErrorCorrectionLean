@@ -97,6 +97,7 @@ generalized for k = 2m − 2 logical qubits.
 -/
 
 open NQubitPauliGroupElement
+open scoped Pauli
 
 /-! ## Local convenience -/
 
@@ -380,16 +381,12 @@ For each `i : Fin (2m − 2)`:
 /-- Logical X for logical qubit `i`: X on qubits `i` and `2m − 1`. -/
 def logicalX (m : ℕ) [Fact (2 ≤ m)] (i : Fin (2 * m - 2)) :
     NQubitPauliGroupElement (2 * m) :=
-  ⟨0,
-    ((NQubitPauliOperator.identity (2 * m)).set (logIdx i) PauliOperator.X).set
-      (xAnchor m) PauliOperator.X⟩
+  σ[2 * m | logIdx i ↦ X, xAnchor m ↦ X]
 
 /-- Logical Z for logical qubit `i`: Z on qubits `i` and `2m − 2`. -/
 def logicalZ (m : ℕ) [Fact (2 ≤ m)] (i : Fin (2 * m - 2)) :
     NQubitPauliGroupElement (2 * m) :=
-  ⟨0,
-    ((NQubitPauliOperator.identity (2 * m)).set (logIdx i) PauliOperator.Z).set
-      (zAnchor m) PauliOperator.Z⟩
+  σ[2 * m | logIdx i ↦ Z, zAnchor m ↦ Z]
 
 /-! ## §11 — Logical (anti)commutation -/
 

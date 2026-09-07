@@ -208,14 +208,14 @@ only the weaker subgroup `GeneratorsIndependent`. For a concrete code it is `nat
 theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCode n 1)
     (hindep : rowsLinearIndependent C.generatorsList)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup)
-    (hX : g * (C.logicalOps 0).xOp = (C.logicalOps 0).xOp * g)
-    (hZ : g * (C.logicalOps 0).zOp = (C.logicalOps 0).zOp * g) :
+    (hX : g * C.logicalX 0 = C.logicalX 0 * g)
+    (hZ : g * C.logicalZ 0 = C.logicalZ 0 * g) :
     ∃ s ∈ C.toStabilizerGroup.toSubgroup, s.operators = g.operators := by
   classical
   apply exists_mem_closure_of_symp_in_span C.generatorsList g.operators
   have hn1 : 1 ≤ n := C.hk
-  set xv := toSymplectic (C.logicalOps 0).xOp.operators with hxv
-  set zv := toSymplectic (C.logicalOps 0).zOp.operators with hzv
+  set xv := toSymplectic (C.logicalX 0).operators with hxv
+  set zv := toSymplectic (C.logicalZ 0).operators with hzv
   set U : Submodule (ZMod 2) (Fin (n + n) → ZMod 2) := Submodule.span (ZMod 2) {xv, zv} with hU
   -- Pairing values of the symplectic form on the logicals.
   have hXZ : sympBilinForm n xv zv = 1 := by

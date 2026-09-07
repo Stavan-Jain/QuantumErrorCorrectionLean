@@ -388,7 +388,7 @@ lemma boundary2_apply_eq_sum_d2term (f : GrossGroup → ZMod 2) (h : GrossGroup)
   rw [hgr]
   by_cases hj : j = 0
   · subst hj
-    change conv grossA f h = ∑ p : GrossGroup, f p * d2term p h 0
+    change (grossA ⋆ f) h = ∑ p : GrossGroup, f p * d2term p h 0
     rw [conv_apply]
     refine (Equiv.sum_comp (Equiv.subLeft h) (fun x => grossA x * f (h - x))).symm.trans ?_
     refine Finset.sum_congr rfl fun p _ => ?_
@@ -396,7 +396,7 @@ lemma boundary2_apply_eq_sum_d2term (f : GrossGroup → ZMod 2) (h : GrossGroup)
     simp [d2term, Equiv.subLeft_apply, hp, mul_comm]
   · have hj1 : j = 1 := by omega
     subst hj1
-    change conv grossB f h = ∑ p : GrossGroup, f p * d2term p h 1
+    change (grossB ⋆ f) h = ∑ p : GrossGroup, f p * d2term p h 1
     rw [conv_apply]
     refine (Equiv.sum_comp (Equiv.subLeft h) (fun x => grossB x * f (h - x))).symm.trans ?_
     refine Finset.sum_congr rfl fun p _ => ?_
@@ -1296,14 +1296,14 @@ private lemma grossB_eq_singles :
       + Pi.single ((2 : ZMod 12), (0 : ZMod 6)) 1 := by decide
 
 private lemma conv_grossB_apply (w : GrossGroup → ZMod 2) (g : GrossGroup) :
-    conv grossB w g
+    (grossB ⋆ w) g
       = w (g - ((0 : ZMod 12), (3 : ZMod 6))) + w (g - ((1 : ZMod 12), (0 : ZMod 6)))
         + w (g - ((2 : ZMod 12), (0 : ZMod 6))) := by
   rw [grossB_eq_singles, conv_add_left, conv_add_left]
   simp only [Pi.add_apply, conv_single_left_apply]
 
 private lemma conv_grossA_apply (w : GrossGroup → ZMod 2) (g : GrossGroup) :
-    conv grossA w g
+    (grossA ⋆ w) g
       = w (g - ((3 : ZMod 12), (0 : ZMod 6))) + w (g - ((0 : ZMod 12), (1 : ZMod 6)))
         + w (g - ((0 : ZMod 12), (2 : ZMod 6))) := by
   rw [grossA_eq_singles, conv_add_left, conv_add_left]

@@ -40,14 +40,14 @@ def HasToricXDistance (L d : ℕ) [Fact (2 ≤ L)] : Prop :=
 
 /-- Section-8 witness: the canonical horizontal loop is a toric 1-cycle. -/
 theorem horizontalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalLoopChain L ∈ Stabilizer.Lattice.toricCycles (L := L) := by
+    horizontalLoopChain L ∈ Stabilizer.Lattice.toricCycles L := by
   unfold Stabilizer.Lattice.toricCycles;
   unfold Stabilizer.Lattice.toricBoundary1 horizontalLoopChain; simp +decide ;
   ext ⟨ x, y ⟩ ; aesop
 
 /-- Section-8 witness: the canonical horizontal loop is not a toric 1-boundary. -/
 theorem horizontalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    horizontalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries (L := L) := by
+    horizontalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries L := by
   have h_hAt_zero :
       Stabilizer.Lattice.hAt (L := L) (Stabilizer.Lattice.zeroCoord L)
         (horizontalLoopChain L) = 1 := by
@@ -220,8 +220,8 @@ theorem nontrivial_x_logical_weight_ge_L (L : ℕ) [Fact (2 ≤ L)]
         · cases hgX.2 q <;> aesop
     exact this g hgX;
   have h_cycle :
-      c ∈ Stabilizer.Lattice.toricCycles (L := L) ∧
-        c ∉ Stabilizer.Lattice.toricBoundaries (L := L) := by
+      c ∈ Stabilizer.Lattice.toricCycles L ∧
+        c ∉ Stabilizer.Lattice.toricBoundaries L := by
     rw [hc] at hgLogical;
     exact (Stabilizer.Lattice.xNontrivialLogical_iff_cycle_not_boundary L c).mp hgLogical;
   have h_weight : Stabilizer.Lattice.edgeWeight c ≥ L := by
@@ -374,7 +374,7 @@ def verticalLoopXOperator (L : ℕ) [Fact (0 < L)] :
 
 /-- The vertical X-loop chain is a primal cycle. -/
 theorem verticalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
-    verticalLoopChain L ∈ Stabilizer.Lattice.toricCycles (L := L) := by
+    verticalLoopChain L ∈ Stabilizer.Lattice.toricCycles L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold Stabilizer.Lattice.toricCycles
   rw [LinearMap.mem_ker]
@@ -389,7 +389,7 @@ theorem verticalLoopChain_mem_toricCycles (L : ℕ) [Fact (2 ≤ L)] :
 
 /-- The vertical X-loop chain is not a primal boundary (its `vAt` invariant is 1). -/
 theorem verticalLoopChain_not_mem_toricBoundaries (L : ℕ) [Fact (2 ≤ L)] :
-    verticalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries (L := L) := by
+    verticalLoopChain L ∉ Stabilizer.Lattice.toricBoundaries L := by
   haveI : Fact (0 < L) := ⟨lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   intro h
   have h_vAt : Stabilizer.Lattice.vAt (L := L) (Stabilizer.Lattice.zeroCoord L)

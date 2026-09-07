@@ -115,31 +115,31 @@ scoped notation ψ:60 " ⊗ₛ " φ:60 => tensorState ψ φ
 
 /-- X on the first of two qubits (X ⊗ I). -/
 noncomputable def X_q1_2 : TwoQubitGate :=
-  tensorGate X 1
+  X ⊗ᵍ 1
 
 /-- X on the second of two qubits (I ⊗ X). -/
 noncomputable def X_q2_2 : TwoQubitGate :=
-  tensorGate 1 X
+  1 ⊗ᵍ X
 
 /-- Z on the first of two qubits (Z ⊗ I). -/
 noncomputable def Z_q1_2 : TwoQubitGate :=
-  tensorGate Z 1
+  Z ⊗ᵍ 1
 
 /-- Z on the second of two qubits (I ⊗ Z). -/
 noncomputable def Z_q2_2 : TwoQubitGate :=
-  tensorGate 1 Z
+  1 ⊗ᵍ Z
 
 /-- X on the first qubit and Z on the second (X ⊗ Z). -/
 noncomputable def X_q1Z_q2_2 : TwoQubitGate :=
-  tensorGate X Z
+  X ⊗ᵍ Z
 
 /-- X on both qubits (X ⊗ X). -/
 noncomputable def XX_2 : TwoQubitGate :=
-  tensorGate X X
+  X ⊗ᵍ X
 
 /-- Z on both qubits (Z ⊗ Z). -/
 noncomputable def ZZ_2 : TwoQubitGate :=
-  tensorGate Z Z
+  Z ⊗ᵍ Z
 
 /-- X ⊗ I: |00⟩ ↦ |10⟩. -/
 @[simp] lemma X_q1_2_on_ket00 : X_q1_2 • |00⟩ = |10⟩ := by
@@ -175,19 +175,19 @@ noncomputable def ZZ_2 : TwoQubitGate :=
 
 /-- X on the first of three qubits (X ⊗ I ⊗ I). -/
 noncomputable def X_q1_3 : ThreeQubitGate :=
-  tensorGate X 1
+  X ⊗ᵍ 1
 
 /-- X on the second of three qubits (I ⊗ X ⊗ I). -/
 noncomputable def X_q2_3 : ThreeQubitGate :=
-  tensorGate 1 (tensorGate X 1)
+  1 ⊗ᵍ X ⊗ᵍ 1
 
 /-- X on the third of three qubits (I ⊗ I ⊗ X). -/
 noncomputable def X_q3_3 : ThreeQubitGate :=
-  tensorGate 1 (tensorGate 1 X)
+  1 ⊗ᵍ 1 ⊗ᵍ X
 
 /-- X on all three qubits (X ⊗ X ⊗ X). -/
 noncomputable def X_q1q2q3_3 : ThreeQubitGate :=
-  tensorGate X (tensorGate X X)
+  X ⊗ᵍ X ⊗ᵍ X
 
 /-- X ⊗ I ⊗ I: |000⟩ ↦ |100⟩. -/
 @[simp] lemma X_q1_3_on_ket000 : X_q1_3 • |000⟩ = |100⟩ := by
@@ -319,7 +319,7 @@ noncomputable def CNOT_q1_q3_3 : ThreeQubitGate :=
 This is the identity on q1 tensored with CNOT on `(q2, q3)`.
 -/
 noncomputable def CNOT_q2_q3_3 : ThreeQubitGate :=
-  tensorGate (1 : OneQubitGate) CNOT
+  (1 : OneQubitGate) ⊗ᵍ CNOT
 
 /-- CNOT with control q2 and target q3: |000⟩ ↦ |000⟩. -/
 @[simp] lemma CNOT_q2_q3_3_on_ket000 : CNOT_q2_q3_3 • |000⟩ = |000⟩ := by

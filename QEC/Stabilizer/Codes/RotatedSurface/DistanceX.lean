@@ -36,6 +36,7 @@ namespace StabilizerGroup
 namespace RotatedSurfaceCodeN
 
 open scoped BigOperators
+open scoped Homology
 open scoped RotatedSurfaceChain
 open NQubitPauliGroupElement
 open Stabilizer.Lattice
@@ -256,7 +257,7 @@ theorem rowParity_rscBoundary2
 /-- `rowParity` vanishes on the boundary submodule. -/
 theorem rowParity_eq_zero_of_mem_boundaries
     {c : RotatedSurface.VtxIdx L → ZMod 2}
-    (hc : c ∈ RotatedSurface.rscBoundaries L) (y : Fin L) :
+    (hc : c ∈ B₁ L) (y : Fin L) :
     rowParity L c y = 0 := by
   rcases hc with ⟨f, rfl⟩
   exact rowParity_rscBoundary2 L f y
@@ -271,7 +272,7 @@ the boundary submodule.
 
 /-- `middleColChain` is not a boundary. -/
 theorem middleColChain_not_mem_boundaries :
-    middleColChain L ∉ RotatedSurface.rscBoundaries L := by
+    middleColChain L ∉ B₁ L := by
   intro h
   -- rowParity middleColChain 0 = 1 (§B) ≠ 0 (= rowParity of boundary, §C)
   have h1 : rowParity L (middleColChain L) ⟨0, by have h3 : 3 ≤ L := Fact.out; omega⟩ = 1 :=
@@ -281,12 +282,12 @@ theorem middleColChain_not_mem_boundaries :
   rw [h1] at h0
   exact (by decide : (1 : ZMod 2) ≠ 0) h0
 
-/-- The class of `middleColChain` in `rscH1 L` is non-zero. -/
+/-- The class of `middleColChain` in `H₁ L` is non-zero. -/
 private lemma middleColChain_class_ne_zero :
     (Submodule.Quotient.mk
       (⟨middleColChain L, middleColChain_mem_cycles L⟩ :
-        RotatedSurface.rscCycles L) :
-      RotatedSurface.rscH1 L) ≠ 0 := by
+        Z₁ L) :
+      H₁ L) ≠ 0 := by
   intro h
   -- Submodule.Quotient.mk x = 0 ↔ x ∈ S.  Here S is the comap into cycles.
   rw [Submodule.Quotient.mk_eq_zero] at h
@@ -297,20 +298,20 @@ private lemma middleColChain_class_ne_zero :
 /-- Every cycle is `0` or `middleColChain` modulo boundaries (since `dim H₁ = 1`). -/
 theorem cycle_sub_middleColChain_mem_boundaries
     {c : RotatedSurface.VtxIdx L → ZMod 2}
-    (hc_cycle : c ∈ RotatedSurface.rscCycles L)
-    (hc_nontrivial : c ∉ RotatedSurface.rscBoundaries L) :
-    c - middleColChain L ∈ RotatedSurface.rscBoundaries L := by
-  have h_dim : Module.finrank (ZMod 2) (RotatedSurface.rscH1 L) = 1 :=
+    (hc_cycle : c ∈ Z₁ L)
+    (hc_nontrivial : c ∉ B₁ L) :
+    c - middleColChain L ∈ B₁ L := by
+  have h_dim : dim₂ (H₁ L) = 1 :=
     RotatedSurface.rsc_finrank_H1_eq_one (L := L)
   -- By dim = 1: every element is a scalar multiple of [middleColChain].
   have h_spans :
-      ∀ w : RotatedSurface.rscH1 L,
+      ∀ w : H₁ L,
         ∃ a : ZMod 2, a • (Submodule.Quotient.mk
           (⟨middleColChain L, middleColChain_mem_cycles L⟩ :
-            RotatedSurface.rscCycles L)) = w :=
+            Z₁ L)) = w :=
     (finrank_eq_one_iff_of_nonzero' _ (middleColChain_class_ne_zero L)).mp h_dim
   -- Apply to [c].
-  let cCycle : RotatedSurface.rscCycles L := ⟨c, hc_cycle⟩
+  let cCycle : Z₁ L := ⟨c, hc_cycle⟩
   obtain ⟨a, ha⟩ := h_spans (Submodule.Quotient.mk cCycle)
   -- a is 0 or 1 in ZMod 2.
   have ha_dichot : a = 0 ∨ a = 1 := by
@@ -326,10 +327,10 @@ theorem cycle_sub_middleColChain_mem_boundaries
     exact hc_nontrivial ha
   · -- a = 1: [middleColChain] = [c], so c - middleColChain ∈ boundaries.
     rw [ha1, one_smul] at ha
-    have h_eq : (Submodule.Quotient.mk cCycle : RotatedSurface.rscH1 L) =
+    have h_eq : (Submodule.Quotient.mk cCycle : H₁ L) =
         Submodule.Quotient.mk
           (⟨middleColChain L, middleColChain_mem_cycles L⟩ :
-            RotatedSurface.rscCycles L) := ha.symm
+            Z₁ L) := ha.symm
     rw [Submodule.Quotient.eq] at h_eq
     -- h_eq : cCycle - ⟨middleColChain, _⟩ ∈ Submodule.comap _ boundaries
     -- which unfolds to: c - middleColChain ∈ boundaries
@@ -338,8 +339,8 @@ theorem cycle_sub_middleColChain_mem_boundaries
 /-- For any non-trivial cycle `c`, `rowParity c y = 1` for every row `y`. -/
 theorem rowParity_eq_one_of_nontrivial
     {c : RotatedSurface.VtxIdx L → ZMod 2}
-    (hc_cycle : c ∈ RotatedSurface.rscCycles L)
-    (hc_nontrivial : c ∉ RotatedSurface.rscBoundaries L) (y : Fin L) :
+    (hc_cycle : c ∈ Z₁ L)
+    (hc_nontrivial : c ∉ B₁ L) (y : Fin L) :
     rowParity L c y = 1 := by
   -- c = middleColChain + (c - middleColChain); the second is a boundary.
   have h_diff_boundary :=
@@ -402,8 +403,8 @@ private lemma chainSupport_card_eq_sum_row_card
 /-- For any non-trivial X-cycle `c`, the abstract `chainWeight` is ≥ L. -/
 theorem chainWeight_ge_L_of_nontrivial
     {c : RotatedSurface.VtxIdx L → ZMod 2}
-    (hc_cycle : c ∈ RotatedSurface.rscCycles L)
-    (hc_nontrivial : c ∉ RotatedSurface.rscBoundaries L) :
+    (hc_cycle : c ∈ Z₁ L)
+    (hc_nontrivial : c ∉ B₁ L) :
     L ≤ (RotatedSurface.rotatedSurfaceHomologicalCode L).chainWeight c := by
   -- chainWeight c = (chainSupport c).card; the row decomposition + per-row ≥ 1.
   change L ≤ ((RotatedSurface.rotatedSurfaceHomologicalCode L).chainSupport c).card

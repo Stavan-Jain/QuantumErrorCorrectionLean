@@ -53,9 +53,18 @@ def toricDualCycles (L : ℕ) [Fact (0 < L)] : Submodule (ZMod 2) (C1 L) :=
 noncomputable def toricDualBoundaries (L : ℕ) [Fact (0 < L)] : Submodule (ZMod 2) (C1 L) :=
   LinearMap.range (δ⁰ (L := L))
 
+/-- `Z¹ L` is the toric dual 1-cycle submodule `toricDualCycles L` (kernel of the dual
+boundary). Scoped: `open scoped ToricChain`. -/
+scoped[ToricChain] notation "Z¹" => Quantum.Stabilizer.Lattice.toricDualCycles
+
+/-- `B¹ L` is the toric dual 1-boundary submodule `toricDualBoundaries L` (range of the
+vertex cut map). Scoped: `open scoped ToricChain`. -/
+scoped[ToricChain] notation "B¹" => Quantum.Stabilizer.Lattice.toricDualBoundaries
+
+
 /-- Every dual boundary is a dual cycle (∂₂ᵀ ∘ ∂₁ᵀ = 0). -/
 theorem toricDualBoundaries_le_toricDualCycles (L : ℕ) [Fact (0 < L)] :
-    toricDualBoundaries (L := L) ≤ toricDualCycles (L := L) := by
+    B¹ L ≤ Z¹ L := by
   intro c hc
   simp only [toricDualBoundaries, LinearMap.mem_range] at hc
   obtain ⟨s, rfl⟩ := hc
@@ -80,7 +89,7 @@ variable (L : ℕ) [Fact (0 < L)]
 `toricDualBoundaries` (range of `toricVertexCutMap`).  Follows directly from
 `toricHomologicalCode_cutMap_eq`. -/
 theorem toricHomologicalCode_dualBoundaries_eq :
-    (toricHomologicalCode L).dualBoundaries = toricDualBoundaries (L := L) := by
+    (toricHomologicalCode L).dualBoundaries = B¹ L := by
   unfold Homological.HomologicalCode.dualBoundaries toricDualBoundaries
   rw [toricHomologicalCode_cutMap_eq]
   rfl
@@ -234,7 +243,7 @@ theorem toricHomologicalCode_dualBoundary_eq :
 /-- Bridge: the abstract `dualCycles` (kernel of abstract `dualBoundary`) equals
 the lattice `toricDualCycles` (kernel of `toricDualBoundary`). -/
 theorem toricHomologicalCode_dualCycles_eq :
-    (toricHomologicalCode L).dualCycles = toricDualCycles (L := L) := by
+    (toricHomologicalCode L).dualCycles = Z¹ L := by
   unfold Homological.HomologicalCode.dualCycles toricDualCycles
   rw [toricHomologicalCode_dualBoundary_eq]
   rfl
@@ -424,7 +433,7 @@ theorem zCommutesWithXChecks_iff_dualBoundary_pointwise_zero
 theorem dualBoundary_pointwise_zero_iff_mem_toricDualCycles
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     (∀ p : FaceIdx L, toricDualBoundary L c p = 0) ↔
-      c ∈ toricDualCycles (L := L) := by
+      c ∈ Z¹ L := by
   constructor
   · intro h
     change toricDualBoundary L c = 0
@@ -437,7 +446,7 @@ theorem dualBoundary_pointwise_zero_iff_mem_toricDualCycles
 Delegates to the generic `chainZOperator_commutes_XGenerators_iff_mem_dualCycles`
 via the X-generator and dual-cycle bridges. -/
 theorem zCommutesWithXChecks_iff_mem_toricDualCycles (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
-    zCommutesWithXChecks L c ↔ c ∈ toricDualCycles (L := L) := by
+    zCommutesWithXChecks L c ↔ c ∈ Z¹ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold zCommutesWithXChecks
   rw [← toricHomologicalCode_XGenerators_eq, ← toricHomologicalCode_dualCycles_eq]
@@ -461,7 +470,7 @@ private lemma c0_eq_sum_singleVtx (L : ℕ) (s : C0 L) :
 Delegates to the generic `chainZOperator_mem_ZClosure_iff_mem_dualBoundaries`
 via the Z-generator and dual-boundary bridges. -/
 theorem zIsStarProduct_iff_mem_toricDualBoundaries (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
-    zIsStarProduct L c ↔ c ∈ toricDualBoundaries (L := L) := by
+    zIsStarProduct L c ↔ c ∈ B¹ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   unfold zIsStarProduct
   rw [← toricHomologicalCode_ZGenerators_eq, ← toricHomologicalCode_dualBoundaries_eq]
@@ -492,7 +501,7 @@ lemma toricZOperatorOfChain_mem_centralizer_iff_dualCycle
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     toricZOperatorOfChain L c ∈
       StabilizerGroup.centralizer (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
-        c ∈ toricDualCycles (L := L) := by
+        c ∈ Z¹ L := by
   constructor
   · intro h
     apply (zCommutesWithXChecks_iff_mem_toricDualCycles L c).mp
@@ -632,7 +641,7 @@ lemma stabilizer_same_ops_implies_dualBoundary
     (s : NQubitPauliGroupElement (StabilizerGroup.ToricCodeN.numQubits L))
     (hs : s ∈ (StabilizerGroup.ToricCodeN.stabilizerGroup L).toSubgroup)
     (heq : s.operators = (toricZOperatorOfChain L c).operators) :
-    c ∈ toricDualBoundaries (L := L) := by
+    c ∈ B¹ L := by
   have hops : ∀ i, s.operators i = PauliOperator.Z ∨ s.operators i = PauliOperator.I := by
     intro i; rw [heq]; simp only [toricZOperatorOfChain]
     by_cases h : ∃ e : EdgeIdx L, edgeToQubitIdx L e = i ∧ c e = 1
@@ -660,7 +669,7 @@ theorem zNontrivialLogical_iff_dualCycle_not_dualBoundary
     (L : ℕ) [Fact (2 ≤ L)] (c : C1 L) :
     StabilizerGroup.IsNontrivialLogicalOperator
         (toricZOperatorOfChain L c) (StabilizerGroup.ToricCodeN.stabilizerGroup L) ↔
-      c ∈ toricDualCycles (L := L) ∧ c ∉ toricDualBoundaries (L := L) := by
+      c ∈ Z¹ L ∧ c ∉ B¹ L := by
   haveI : Fact (0 < L) := ⟨Nat.lt_of_lt_of_le (by decide : 0 < 2) Fact.out⟩
   -- Translate the lattice `IsNontrivialLogicalOperator` to the abstract one
   -- via the subgroup bridge.

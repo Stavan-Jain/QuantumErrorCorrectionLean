@@ -30,6 +30,8 @@ namespace Stabilizer
 namespace Homological
 namespace BB
 
+open scoped Homology
+
 -- Defeq checks through `coverComplex`/`baseComplex` projections unfold deep
 -- `Prod`/`ZMod` instance chains, exactly as in `BBCover.lean`.
 set_option maxRecDepth 4096
@@ -171,9 +173,9 @@ lemma epsH1_mk (v : D.coverComplex.cycles) :
 /-- **The deck-image rank floor `E ≥ k̃ − k`** (A13 rank corollary,
 inequality half): `dim H₁(cover) − dim H₁(base) ≤ dim (1+σ)·H₁(cover)`. -/
 theorem finrank_H1_sub_le_finrank_range_epsH1 :
-    Module.finrank (ZMod 2) D.coverComplex.H1
-      - Module.finrank (ZMod 2) D.baseComplex.H1
-      ≤ Module.finrank (ZMod 2) (LinearMap.range D.epsH1) :=
+    dim₂ D.coverComplex.H1
+      - dim₂ D.baseComplex.H1
+      ≤ dim₂ (LinearMap.range D.epsH1) :=
   BBBocksteinRank.finrank_sub_le_finrank_range_comp D.pushH1 D.pullH1
     D.ker_pushH1_eq_range_pullH1
 
@@ -193,22 +195,22 @@ def BocksteinVanishes : Prop :=
 `dim (1+σ)·H₁(cover) + k = k̃` exactly (no truncated subtraction) — in
 particular `k̃ ≥ k`. -/
 theorem finrank_range_epsH1_add_eq (h : D.BocksteinVanishes) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-        + Module.finrank (ZMod 2) D.baseComplex.H1
-      = Module.finrank (ZMod 2) D.coverComplex.H1 := by
+    dim₂ (LinearMap.range D.epsH1)
+        + dim₂ D.baseComplex.H1
+      = dim₂ D.coverComplex.H1 := by
   have hid := BBBocksteinRank.finrank_range_comp_add_eq D.pushH1 D.pullH1
     D.ker_pushH1_eq_range_pullH1
   rw [inf_of_le_right h] at hid
-  change Module.finrank (ZMod 2) (LinearMap.range (D.pullH1 ∘ₗ D.pushH1))
+  change dim₂ (LinearMap.range (D.pullH1 ∘ₗ D.pushH1))
       + _ = _
   omega
 
 /-- **The rank corollary, equality form.** Under `BocksteinVanishes`, the
 deck-image floor is tight: `dim (1+σ)·H₁(cover) = k̃ − k`. -/
 theorem finrank_range_epsH1_eq (h : D.BocksteinVanishes) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-      = Module.finrank (ZMod 2) D.coverComplex.H1
-        - Module.finrank (ZMod 2) D.baseComplex.H1 := by
+    dim₂ (LinearMap.range D.epsH1)
+      = dim₂ D.coverComplex.H1
+        - dim₂ D.baseComplex.H1 := by
   have h := D.finrank_range_epsH1_add_eq h
   omega
 
@@ -229,8 +231,8 @@ theorem epsH1_epsH1_apply (x : D.coverComplex.H1) :
 /-- Under `BocksteinVanishes`, `dim (ker ε_*) = k`: the complementary rank
 to `finrank_range_epsH1_eq`, via rank-nullity for `ε_*`. -/
 theorem finrank_ker_epsH1_eq (h : D.BocksteinVanishes) :
-    Module.finrank (ZMod 2) (LinearMap.ker D.epsH1)
-      = Module.finrank (ZMod 2) D.baseComplex.H1 := by
+    dim₂ (LinearMap.ker D.epsH1)
+      = dim₂ D.baseComplex.H1 := by
   have hrn := LinearMap.finrank_range_add_finrank_ker D.epsH1
   have hadd := D.finrank_range_epsH1_add_eq h
   omega

@@ -56,6 +56,7 @@ namespace Homological
 namespace BB
 
 open scoped BigOperators
+open scoped Homology
 
 -- Defeq checks through `coverComplex`/`baseComplex` projections and the
 -- `liftCoverData` structure literal unfold deep `Prod`/`ZMod` instance
@@ -102,16 +103,16 @@ variable {G : Type} [Fintype G] [AddCommGroup G]
 
 /-- The left half of `∂₂ f` is `A ⋆ f`. -/
 lemma leftHalf_bbBoundary2Fn (A B f : G → ZMod 2) :
-    leftHalf (bbBoundary2Fn A B f) = conv A f := by
+    leftHalf (bbBoundary2Fn A B f) = A ⋆ f := by
   funext g
-  change (if (0 : Fin 2) = 0 then conv A f g else conv B f g) = conv A f g
+  change (if (0 : Fin 2) = 0 then (A ⋆ f) g else (B ⋆ f) g) = (A ⋆ f) g
   rw [if_pos rfl]
 
 /-- The right half of `∂₂ f` is `B ⋆ f`. -/
 lemma rightHalf_bbBoundary2Fn (A B f : G → ZMod 2) :
-    rightHalf (bbBoundary2Fn A B f) = conv B f := by
+    rightHalf (bbBoundary2Fn A B f) = B ⋆ f := by
   funext g
-  change (if (1 : Fin 2) = 0 then conv A f g else conv B f g) = conv B f g
+  change (if (1 : Fin 2) = 0 then (A ⋆ f) g else (B ⋆ f) g) = (B ⋆ f) g
   rw [if_neg (by decide)]
 
 end BoundaryHalves
@@ -310,7 +311,7 @@ convolved with its sheet-0 lift.  This is the multiplication-operator
 form of the transfer, the key identity that turns `τ₁(seamC ζ) = liftStab ζ`
 into the `ε`-divisibility hypotheses of the element form. -/
 theorem pull0_eq_conv_deckPoly_liftC2 (u : H → ZMod 2) :
-    D.pull0 u = conv D.deckPoly (D.liftC2 u) := by
+    D.pull0 u = D.deckPoly ⋆ D.liftC2 u := by
   have h1 : D.push0 (D.liftC2 u) = u := by
     change fiberSumFn (⇑D.proj) (D.liftC2 u) = u
     exact D.push0_liftC2 u
@@ -318,7 +319,7 @@ theorem pull0_eq_conv_deckPoly_liftC2 (u : H → ZMod 2) :
 
 /-- Multiplication by `deckPoly` lands in `ker p₀`. -/
 theorem push0_conv_deckPoly_eq_zero (w : G → ZMod 2) :
-    D.push0 (conv D.deckPoly w) = 0 := by
+    D.push0 (D.deckPoly ⋆ w) = 0 := by
   rw [D.conv_deckPoly_eq, ← D.pull0_push0]
   exact D.push0_pull0_eq_zero _
 
@@ -352,11 +353,11 @@ lemma rightHalf_pull1 (u : H × Fin 2 → ZMod 2) :
 component of `τ₁(seamC ζ) = liftStab ζ` read through `τ₀ = ε·lift`. -/
 theorem conv_Ac_liftC2_seamC {ζ : H → ZMod 2}
     (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
-    conv D.Ac (D.liftC2 ζ)
-      = conv D.deckPoly (D.liftC2 (leftHalf (D.seamC ζ))) := by
+    D.Ac ⋆ D.liftC2 ζ
+      = D.deckPoly ⋆ D.liftC2 (leftHalf (D.seamC ζ)) := by
   have hL := congrArg leftHalf (D.pull1_seamC hζ)
   rw [D.leftHalf_pull1, D.pull0_eq_conv_deckPoly_liftC2] at hL
-  have hstab : leftHalf (D.liftStab ζ) = conv D.Ac (D.liftC2 ζ) :=
+  have hstab : leftHalf (D.liftStab ζ) = D.Ac ⋆ D.liftC2 ζ :=
     leftHalf_bbBoundary2Fn D.Ac D.Bc (D.liftC2 ζ)
   rw [hstab] at hL
   exact hL.symm
@@ -364,11 +365,11 @@ theorem conv_Ac_liftC2_seamC {ζ : H → ZMod 2}
 /-- `B⋆(lift ζ) = ε⋆(lift of the right half of seamC ζ)`. -/
 theorem conv_Bc_liftC2_seamC {ζ : H → ZMod 2}
     (hζ : bbBoundary2Fn D.Ab D.Bb ζ = 0) :
-    conv D.Bc (D.liftC2 ζ)
-      = conv D.deckPoly (D.liftC2 (rightHalf (D.seamC ζ))) := by
+    D.Bc ⋆ D.liftC2 ζ
+      = D.deckPoly ⋆ D.liftC2 (rightHalf (D.seamC ζ)) := by
   have hR := congrArg rightHalf (D.pull1_seamC hζ)
   rw [D.rightHalf_pull1, D.pull0_eq_conv_deckPoly_liftC2] at hR
-  have hstab : rightHalf (D.liftStab ζ) = conv D.Bc (D.liftC2 ζ) :=
+  have hstab : rightHalf (D.liftStab ζ) = D.Bc ⋆ D.liftC2 ζ :=
     rightHalf_bbBoundary2Fn D.Ac D.Bc (D.liftC2 ζ)
   rw [hstab] at hR
   exact hR.symm
@@ -383,11 +384,11 @@ lies in `ε·(A, B)`.  This is the `δ₁∘δ₂ = 0` element fact (A13 §1, cl
 deck. -/
 def BocksteinElementForm : Prop :=
   ∀ z a b : G → ZMod 2,
-    conv D.Ac z = conv D.deckPoly a →
-    conv D.Bc z = conv D.deckPoly b →
+    D.Ac ⋆ z = D.deckPoly ⋆ a →
+    D.Bc ⋆ z = D.deckPoly ⋆ b →
     ∃ r s : G → ZMod 2,
-      conv D.Ac b + conv D.Bc a
-        = conv D.deckPoly (conv D.Ac r + conv D.Bc s)
+      D.Ac ⋆ b + D.Bc ⋆ a
+        = D.deckPoly ⋆ (D.Ac ⋆ r + D.Bc ⋆ s)
 
 /-- **The transport core**: under the element form, every seam chain is
 the pushforward of a cover 1-cycle — on the nose.  The corrected lift
@@ -400,41 +401,41 @@ theorem exists_cycle_push_eq_seamC (hEF : D.BocksteinElementForm)
       v ∈ D.coverComplex.cycles ∧ D.push1 v = D.seamC ζ := by
   set za := D.liftC2 (leftHalf (D.seamC ζ)) with hza
   set zb := D.liftC2 (rightHalf (D.seamC ζ)) with hzb
-  have hA : conv D.Ac (D.liftC2 ζ) = conv D.deckPoly za :=
+  have hA : D.Ac ⋆ D.liftC2 ζ = D.deckPoly ⋆ za :=
     D.conv_Ac_liftC2_seamC hζ
-  have hB : conv D.Bc (D.liftC2 ζ) = conv D.deckPoly zb :=
+  have hB : D.Bc ⋆ D.liftC2 ζ = D.deckPoly ⋆ zb :=
     D.conv_Bc_liftC2_seamC hζ
   obtain ⟨r, s, hrs⟩ := hEF (D.liftC2 ζ) za zb hA hB
-  refine ⟨joinHalves (za + conv D.deckPoly s) (zb + conv D.deckPoly r),
+  refine ⟨joinHalves (za + D.deckPoly ⋆ s) (zb + D.deckPoly ⋆ r),
     ?_, ?_⟩
   · -- the corrected lift is a cover cycle
-    have hcommA : conv D.Ac (conv D.deckPoly r)
-        = conv D.deckPoly (conv D.Ac r) := by
+    have hcommA : D.Ac ⋆ (D.deckPoly ⋆ r)
+        = D.deckPoly ⋆ (D.Ac ⋆ r) := by
       rw [← conv_assoc, conv_comm D.Ac D.deckPoly, conv_assoc]
-    have hcommB : conv D.Bc (conv D.deckPoly s)
-        = conv D.deckPoly (conv D.Bc s) := by
+    have hcommB : D.Bc ⋆ (D.deckPoly ⋆ s)
+        = D.deckPoly ⋆ (D.Bc ⋆ s) := by
       rw [← conv_assoc, conv_comm D.Bc D.deckPoly, conv_assoc]
     have hbd : bbBoundary1Fn D.Ac D.Bc
-        (joinHalves (za + conv D.deckPoly s) (zb + conv D.deckPoly r)) = 0 := by
+        (joinHalves (za + D.deckPoly ⋆ s) (zb + D.deckPoly ⋆ r)) = 0 := by
       have hexp : bbBoundary1Fn D.Ac D.Bc
-          (joinHalves (za + conv D.deckPoly s) (zb + conv D.deckPoly r))
-          = conv D.Bc (leftHalf (joinHalves (za + conv D.deckPoly s)
-              (zb + conv D.deckPoly r)))
-            + conv D.Ac (rightHalf (joinHalves (za + conv D.deckPoly s)
-              (zb + conv D.deckPoly r))) := rfl
+          (joinHalves (za + D.deckPoly ⋆ s) (zb + D.deckPoly ⋆ r))
+          = D.Bc ⋆ leftHalf (joinHalves (za + D.deckPoly ⋆ s)
+              (zb + D.deckPoly ⋆ r))
+            + D.Ac ⋆ rightHalf (joinHalves (za + D.deckPoly ⋆ s)
+              (zb + D.deckPoly ⋆ r)) := rfl
       rw [hexp, leftHalf_joinHalves, rightHalf_joinHalves, conv_add_right,
         conv_add_right, hcommA, hcommB]
-      have hre : conv D.Bc za + conv D.deckPoly (conv D.Bc s)
-          + (conv D.Ac zb + conv D.deckPoly (conv D.Ac r))
-          = (conv D.Ac zb + conv D.Bc za)
-            + conv D.deckPoly (conv D.Ac r + conv D.Bc s) := by
+      have hre : D.Bc ⋆ za + D.deckPoly ⋆ (D.Bc ⋆ s)
+          + (D.Ac ⋆ zb + D.deckPoly ⋆ (D.Ac ⋆ r))
+          = (D.Ac ⋆ zb + D.Bc ⋆ za)
+            + D.deckPoly ⋆ (D.Ac ⋆ r + D.Bc ⋆ s) := by
         rw [conv_add_right]
         abel
       rw [hre, hrs]
       funext g
       exact CharTwo.add_self_eq_zero _
     have hgoal : D.coverComplex.boundary1
-        (joinHalves (za + conv D.deckPoly s) (zb + conv D.deckPoly r)) = 0 :=
+        (joinHalves (za + D.deckPoly ⋆ s) (zb + D.deckPoly ⋆ r)) = 0 :=
       hbd
     exact hgoal
   · -- it pushes forward to the seam chain exactly
@@ -485,23 +486,23 @@ theorem bocksteinVanishes_of_elementForm (hEF : D.BocksteinElementForm) :
 /-- **The Bockstein rank equality** under the element form:
 `dim (1+σ)·H₁(cover) = k̃ − k`. -/
 theorem finrank_range_epsH1_eq_of_elementForm (hEF : D.BocksteinElementForm) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-      = Module.finrank (ZMod 2) D.coverComplex.H1
-        - Module.finrank (ZMod 2) D.baseComplex.H1 :=
+    dim₂ (LinearMap.range D.epsH1)
+      = dim₂ D.coverComplex.H1
+        - dim₂ D.baseComplex.H1 :=
   D.finrank_range_epsH1_eq (D.bocksteinVanishes_of_elementForm hEF)
 
 /-- Additive form: `E + k = k̃` (in particular `k̃ ≥ k`). -/
 theorem finrank_range_epsH1_add_eq_of_elementForm
     (hEF : D.BocksteinElementForm) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-        + Module.finrank (ZMod 2) D.baseComplex.H1
-      = Module.finrank (ZMod 2) D.coverComplex.H1 :=
+    dim₂ (LinearMap.range D.epsH1)
+        + dim₂ D.baseComplex.H1
+      = dim₂ D.coverComplex.H1 :=
   D.finrank_range_epsH1_add_eq (D.bocksteinVanishes_of_elementForm hEF)
 
 /-- Companion rank: `dim ker ε_* = k`. -/
 theorem finrank_ker_epsH1_eq_of_elementForm (hEF : D.BocksteinElementForm) :
-    Module.finrank (ZMod 2) (LinearMap.ker D.epsH1)
-      = Module.finrank (ZMod 2) D.baseComplex.H1 :=
+    dim₂ (LinearMap.ker D.epsH1)
+      = dim₂ D.baseComplex.H1 :=
   D.finrank_ker_epsH1_eq (D.bocksteinVanishes_of_elementForm hEF)
 
 /-! ## Discharging the element form from an order-4 lift of the deck -/
@@ -612,7 +613,7 @@ theorem elementForm_of_orderFourLift {Ghat : Type}
       rw [← convEquiv_mapDomainRingHom q x, hx, map_zero]
     obtain ⟨u, hu⟩ := (fiberSumFn_eq_zero_iff hσne hfiber
       (fun p => Function.surjInv_eq hsurj p) (convEquiv x)).mp hfx
-    have hpull : convEquiv x = conv Dh.deckPoly (Dh.liftC2 u) := by
+    have hpull : convEquiv x = Dh.deckPoly ⋆ Dh.liftC2 u := by
       rw [hu, ← Dh.pull0_eq_conv_deckPoly_liftC2 u]
       rfl
     have hconvsq : convEquiv
@@ -655,13 +656,13 @@ theorem elementForm_of_orderFourLift {Ghat : Type}
   refine ⟨convEquiv r', convEquiv s', ?_⟩
   have hL : convEquiv (convEquiv.symm D.Ac * convEquiv.symm b
       + convEquiv.symm D.Bc * convEquiv.symm a)
-      = conv D.Ac b + conv D.Bc a := by
+      = D.Ac ⋆ b + D.Bc ⋆ a := by
     rw [map_add, convEquiv_mul, convEquiv_mul, LinearEquiv.apply_symm_apply,
       LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply,
       LinearEquiv.apply_symm_apply]
   have hR : convEquiv ((1 + AddMonoidAlgebra.single D.deckS (1 : ZMod 2))
       * (convEquiv.symm D.Ac * r' + convEquiv.symm D.Bc * s'))
-      = conv D.deckPoly (conv D.Ac (convEquiv r') + conv D.Bc (convEquiv s')) := by
+      = D.deckPoly ⋆ (D.Ac ⋆ convEquiv r' + D.Bc ⋆ convEquiv s') := by
     rw [convEquiv_mul, hconvεG]
     congr 1
     rw [map_add, convEquiv_mul, convEquiv_mul, LinearEquiv.apply_symm_apply,
@@ -690,9 +691,9 @@ theorem finrank_range_epsH1_eq_of_orderFourLift {Ghat : Type}
     (hsurj : Function.Surjective ⇑q)
     (hshat : q shat = D.deckS)
     (hker : ∀ x : Ghat, q x = 0 ↔ x = 0 ∨ x = shat + shat) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-      = Module.finrank (ZMod 2) D.coverComplex.H1
-        - Module.finrank (ZMod 2) D.baseComplex.H1 :=
+    dim₂ (LinearMap.range D.epsH1)
+      = dim₂ D.coverComplex.H1
+        - dim₂ D.baseComplex.H1 :=
   D.finrank_range_epsH1_eq
     (D.bocksteinVanishes_of_orderFourLift q shat horder hsurj hshat hker)
 
@@ -837,9 +838,9 @@ theorem finrank_range_epsH1_eq_of_zmod_double {n m : ℕ} [NeZero n] [NeZero m]
     (D : XDoubleCoverData (ZMod (2 * n) × ZMod m) H)
     (t : ZMod m) (ht : t + t = 0)
     (hdeck : D.deckS = (((n : ℕ) : ZMod (2 * n)), t)) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-      = Module.finrank (ZMod 2) D.coverComplex.H1
-        - Module.finrank (ZMod 2) D.baseComplex.H1 :=
+    dim₂ (LinearMap.range D.epsH1)
+      = dim₂ D.coverComplex.H1
+        - dim₂ D.baseComplex.H1 :=
   D.finrank_range_epsH1_eq (D.bocksteinVanishes_of_zmod_double t ht hdeck)
 
 /-- **The element form for doubled-axis `ZMod` products, second-axis
@@ -959,9 +960,9 @@ theorem finrank_range_epsH1_eq_of_zmod_double_right {n m : ℕ}
     (D : XDoubleCoverData (ZMod m × ZMod (2 * n)) H)
     (t : ZMod m) (ht : t + t = 0)
     (hdeck : D.deckS = (t, ((n : ℕ) : ZMod (2 * n)))) :
-    Module.finrank (ZMod 2) (LinearMap.range D.epsH1)
-      = Module.finrank (ZMod 2) D.coverComplex.H1
-        - Module.finrank (ZMod 2) D.baseComplex.H1 :=
+    dim₂ (LinearMap.range D.epsH1)
+      = dim₂ D.coverComplex.H1
+        - dim₂ D.baseComplex.H1 :=
   D.finrank_range_epsH1_eq
     (D.bocksteinVanishes_of_zmod_double_right t ht hdeck)
 

@@ -66,19 +66,19 @@ noncomputable def toricHomologicalCode (L : ℕ) [Fact (0 < L)] :
 
 /-- The toric cycle submodule equals the generic version on `toricHomologicalCode L`. -/
 theorem toricHomologicalCode_cycles_eq (L : ℕ) [Fact (0 < L)] :
-    toricCycles (L := L) = (toricHomologicalCode L).cycles := rfl
+    Z₁ L = (toricHomologicalCode L).cycles := rfl
 
 /-- The toric boundary submodule equals the generic version. -/
 theorem toricHomologicalCode_boundaries_eq (L : ℕ) [Fact (0 < L)] :
-    toricBoundaries (L := L) = (toricHomologicalCode L).boundaries := rfl
+    B₁ L = (toricHomologicalCode L).boundaries := rfl
 
 /-- The toric H₁ definition agrees with the generic version. -/
 theorem toricHomologicalCode_H1_eq (L : ℕ) [Fact (0 < L)] :
-    toricH1 (L := L) = (toricHomologicalCode L).H1 := rfl
+    H₁ L = (toricHomologicalCode L).H1 := rfl
 
 /-- The toric `boundaries ≤ cycles` follows from the generic chain-complex law. -/
 theorem toricHomologicalCode_boundaries_le_cycles (L : ℕ) [Fact (0 < L)] :
-    toricBoundaries (L := L) ≤ toricCycles (L := L) :=
+    B₁ L ≤ Z₁ L :=
   (toricHomologicalCode L).boundaries_le_cycles
 
 /-- The toric `HomologicalCode`'s `numQubits` is definitionally `2 * L * L`. -/

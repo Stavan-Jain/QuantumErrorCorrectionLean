@@ -138,7 +138,7 @@ configurations. -/
 
 /-- The augmentation is multiplicative on convolutions. -/
 lemma sum_conv {G : Type} [Fintype G] [AddCommGroup G] (a b : G → ZMod 2) :
-    ∑ g : G, conv a b g = (∑ h : G, a h) * (∑ g : G, b g) := by
+    ∑ g : G, (a ⋆ b) g = (∑ h : G, a h) * (∑ g : G, b g) := by
   simp only [conv_apply]
   rw [Finset.sum_comm]
   rw [Finset.sum_mul]
@@ -158,7 +158,7 @@ lemma cycle_total_parity (u : BaseGroup × Fin 2 → ZMod 2)
       = (∑ h : BaseGroup, baseB h) * (∑ g : BaseGroup, leftHalf u g)
         + (∑ h : BaseGroup, baseA h) * (∑ g : BaseGroup, rightHalf u g) := by
     rw [show (fun g => bbBoundary1Fn baseA baseB u g)
-        = fun g => conv baseB (leftHalf u) g + conv baseA (rightHalf u) g
+        = fun g => (baseB ⋆ leftHalf u) g + (baseA ⋆ rightHalf u) g
       from rfl]
     rw [Finset.sum_add_distrib, sum_conv, sum_conv]
   have hA : (∑ h : BaseGroup, baseA h) = 1 := by decide +kernel

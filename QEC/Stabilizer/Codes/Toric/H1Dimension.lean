@@ -1,5 +1,6 @@
 import Mathlib.Tactic
 import QEC.Stabilizer.Codes.Toric.Homology
+import QEC.Stabilizer.Framework.Homological.Code
 
 
 namespace Quantum
@@ -7,59 +8,60 @@ namespace Stabilizer
 namespace Lattice
 
 open scoped BigOperators
+open scoped Homology
 open scoped ToricChain
 
 variable (L : ℕ) [Fact (0 < L)]
 
 /-- The boundary submodule viewed inside the cycle submodule (`B₁` as a submodule of `Z₁`). -/
-abbrev toricBoundarySubmoduleInCycles : Submodule (ZMod 2) (toricCycles (L := L)) :=
-  Submodule.comap (toricCycles (L := L)).subtype (toricBoundaries (L := L))
+abbrev toricBoundarySubmoduleInCycles : Submodule (ZMod 2) (Z₁ L) :=
+  Submodule.comap (Z₁ L).subtype (B₁ L)
 
 /-- Finrank of the toric 0-chain space. -/
 theorem toric_finrank_C0 :
-    Module.finrank (ZMod 2) (C0 L) = L * L := by
+    dim₂ (C0 L) = L * L := by
   let _ := (Fact.out : 0 < L)
   calc
-    Module.finrank (ZMod 2) (C0 L) = Fintype.card (VtxIdx L) := by
+    dim₂ (C0 L) = Fintype.card (VtxIdx L) := by
       exact Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := VtxIdx L)
     _ = L * L := by simp
 
 /-- Finrank of the toric 1-chain space. -/
 theorem toric_finrank_C1 :
-    Module.finrank (ZMod 2) (C1 L) = 2 * L * L := by
+    dim₂ (C1 L) = 2 * L * L := by
   let _ := (Fact.out : 0 < L)
   calc
-    Module.finrank (ZMod 2) (C1 L) = Fintype.card (EdgeIdx L) := by
+    dim₂ (C1 L) = Fintype.card (EdgeIdx L) := by
       exact Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := EdgeIdx L)
     _ = 2 * L * L := by simp
 
 /-- Finrank of the toric 2-chain space. -/
 theorem toric_finrank_C2 :
-    Module.finrank (ZMod 2) (C2 L) = L * L := by
+    dim₂ (C2 L) = L * L := by
   let _ := (Fact.out : 0 < L)
   calc
-    Module.finrank (ZMod 2) (C2 L) = Fintype.card (FaceIdx L) := by
+    dim₂ (C2 L) = Fintype.card (FaceIdx L) := by
       exact Module.finrank_fintype_fun_eq_card (R := ZMod 2) (η := FaceIdx L)
     _ = L * L := by simp
 
 /-- `B₁ ≤ Z₁` for the toric chain complex. -/
 theorem toric_boundaries_le_cycles :
-    toricBoundaries (L := L) ≤ toricCycles (L := L) := by
-  simpa using toricBoundaries_le_toricCycles (L := L)
+    B₁ L ≤ Z₁ L := by
+  simpa using toricBoundaries_le_toricCycles L
 
 /-- Rank-nullity specialization for `∂₁`. -/
 theorem toric_rank_nullity_boundary1 :
-    Module.finrank (ZMod 2) (C1 L) =
-      Module.finrank (ZMod 2) (toricCycles (L := L)) +
-        Module.finrank (ZMod 2) (LinearMap.range (∂₁ (L := L))) := by
+    dim₂ (C1 L) =
+      dim₂ (Z₁ L) +
+        dim₂ (LinearMap.range (∂₁ (L := L))) := by
   simpa [toricCycles, add_comm, add_left_comm, add_assoc] using
     (LinearMap.finrank_range_add_finrank_ker (∂₁ (L := L))).symm
 
 /-- Rank-nullity specialization for `∂₂`. -/
 theorem toric_rank_nullity_boundary2 :
-    Module.finrank (ZMod 2) (C2 L) =
-      Module.finrank (ZMod 2) (LinearMap.ker (∂₂ (L := L))) +
-        Module.finrank (ZMod 2) (toricBoundaries (L := L)) := by
+    dim₂ (C2 L) =
+      dim₂ (LinearMap.ker (∂₂ (L := L))) +
+        dim₂ (B₁ L) := by
   simpa [toricBoundaries, add_comm, add_left_comm, add_assoc] using
     (LinearMap.finrank_range_add_finrank_ker (∂₂ (L := L))).symm
 
@@ -159,8 +161,8 @@ theorem toricBoundary1_cutMap_transpose (c : C1 L) (s : C0 L) :
 
 /-- `∂₁` and `toricVertexCutMap` are mutual transposes, so they have equal rank. -/
 theorem toric_rank_boundary1_eq_rank_cutMap :
-    Module.finrank (ZMod 2) (LinearMap.range (∂₁ (L := L))) =
-      Module.finrank (ZMod 2) (LinearMap.range (δ⁰ (L := L))) := by
+    dim₂ (LinearMap.range (∂₁ (L := L))) =
+      dim₂ (LinearMap.range (δ⁰ (L := L))) := by
   rw [ ← LinearMap.finrank_range_dualMap_eq_finrank_range ];
   fapply LinearEquiv.finrank_eq;
   symm;
@@ -268,30 +270,30 @@ theorem ker_toricVertexCutMap_eq_span_one :
 
 /-- Kernel-dimension result for the cut-map connectivity argument. -/
 theorem toric_finrank_ker_cutMap_eq_one :
-    Module.finrank (ZMod 2) (LinearMap.ker (δ⁰ (L := L))) = 1 := by
+    dim₂ (LinearMap.ker (δ⁰ (L := L))) = 1 := by
   rw [ker_toricVertexCutMap_eq_span_one, finrank_span_singleton]
   exact fun h => by simpa using congr_fun h (⟨0, Fact.out⟩, ⟨0, Fact.out⟩)
 
 /-- Target rank formula for `∂₁`. -/
 theorem toric_rank_boundary1 :
-    Module.finrank (ZMod 2) (LinearMap.range (∂₁ (L := L))) = L * L - 1 := by
+    dim₂ (LinearMap.range (∂₁ (L := L))) = L * L - 1 := by
   have hcut_rk :
-      Module.finrank (ZMod 2) (LinearMap.range (δ⁰ (L := L))) = L * L - 1 := by
+      dim₂ (LinearMap.range (δ⁰ (L := L))) = L * L - 1 := by
     have hcut_rn := LinearMap.finrank_range_add_finrank_ker (δ⁰ (L := L))
-    have hC0 := toric_finrank_C0 (L := L)
-    have hker := toric_finrank_ker_cutMap_eq_one (L := L)
+    have hC0 := toric_finrank_C0 L
+    have hker := toric_finrank_ker_cutMap_eq_one L
     omega
-  have hbridge := toric_rank_boundary1_eq_rank_cutMap (L := L)
+  have hbridge := toric_rank_boundary1_eq_rank_cutMap L
   omega
 
 /-- Target cycle-space dimension formula. -/
 theorem toric_finrank_cycles :
-    Module.finrank (ZMod 2) (toricCycles (L := L)) = L * L + 1 := by
-  have hrn := toric_rank_nullity_boundary1 (L := L)
-  have hC1 := toric_finrank_C1 (L := L)
-  have hrk := toric_rank_boundary1 (L := L)
+    dim₂ (Z₁ L) = L * L + 1 := by
+  have hrn := toric_rank_nullity_boundary1 L
+  have hC1 := toric_finrank_C1 L
+  have hrk := toric_rank_boundary1 L
   rw [hC1, hrk] at hrn
-  have hEq : Module.finrank (ZMod 2) (toricCycles (L := L)) + (L * L - 1) = 2 * L * L := by
+  have hEq : dim₂ (Z₁ L) + (L * L - 1) = 2 * L * L := by
     simpa [add_comm, add_left_comm, add_assoc] using hrn.symm
   have hsq : 1 ≤ L * L := by
     have hL : 0 < L := Fact.out
@@ -303,7 +305,7 @@ theorem toric_finrank_cycles :
       _ = (L * L) + (L * L) := by
         rw [Nat.sub_add_cancel hsq]
       _ = 2 * L * L := by ring
-  have : Module.finrank (ZMod 2) (toricCycles (L := L)) + (L * L - 1) =
+  have : dim₂ (Z₁ L) + (L * L - 1) =
       (L * L + 1) + (L * L - 1) := by
     exact hEq.trans hsplit.symm
   exact Nat.add_right_cancel this
@@ -384,53 +386,53 @@ theorem ker_toricBoundary2_eq_span_one :
 
 /-- Kernel-dimension result for `∂₂`. -/
 theorem toric_finrank_ker_boundary2_eq_one :
-    Module.finrank (ZMod 2) (LinearMap.ker (∂₂ (L := L))) = 1 := by
+    dim₂ (LinearMap.ker (∂₂ (L := L))) = 1 := by
   rw [ker_toricBoundary2_eq_span_one, finrank_span_singleton]
   exact fun h => by simpa using congr_fun h (⟨0, Fact.out⟩, ⟨0, Fact.out⟩)
 
 /-- Target boundary-space dimension formula. -/
 theorem toric_finrank_boundaries :
-    Module.finrank (ZMod 2) (toricBoundaries (L := L)) = L * L - 1 := by
-  have hrn := toric_rank_nullity_boundary2 (L := L)
-  have hC2 := toric_finrank_C2 (L := L)
-  have hker := toric_finrank_ker_boundary2_eq_one (L := L)
+    dim₂ (B₁ L) = L * L - 1 := by
+  have hrn := toric_rank_nullity_boundary2 L
+  have hC2 := toric_finrank_C2 L
+  have hker := toric_finrank_ker_boundary2_eq_one L
   omega
 
 /-- Quotient-dimension bridge for `H₁ = Z₁ / B₁`. -/
 theorem toric_finrank_H1_eq_cycles_sub_boundaries
     :
-    @Module.finrank (ZMod 2) (toricH1 (L := L)) _
-      (Submodule.Quotient.addCommGroup (toricBoundarySubmoduleInCycles (L := L))).toAddCommMonoid
-      (Submodule.Quotient.module (toricBoundarySubmoduleInCycles (L := L))) =
-      Module.finrank (ZMod 2) (toricCycles (L := L)) -
-        Module.finrank (ZMod 2) (toricBoundaries (L := L)) := by
+    @Module.finrank (ZMod 2) (H₁ L) _
+      (Submodule.Quotient.addCommGroup (toricBoundarySubmoduleInCycles L)).toAddCommMonoid
+      (Submodule.Quotient.module (toricBoundarySubmoduleInCycles L)) =
+      dim₂ (Z₁ L) -
+        dim₂ (B₁ L) := by
   have hquot :
-      @Module.finrank (ZMod 2) (toricH1 (L := L)) _
+      @Module.finrank (ZMod 2) (H₁ L) _
           (Submodule.Quotient.addCommGroup
-            (toricBoundarySubmoduleInCycles (L := L))).toAddCommMonoid
-          (Submodule.Quotient.module (toricBoundarySubmoduleInCycles (L := L))) +
-          Module.finrank (ZMod 2) (toricBoundarySubmoduleInCycles (L := L)) =
-        Module.finrank (ZMod 2) (toricCycles (L := L)) := by
+            (toricBoundarySubmoduleInCycles L)).toAddCommMonoid
+          (Submodule.Quotient.module (toricBoundarySubmoduleInCycles L)) +
+          dim₂ (toricBoundarySubmoduleInCycles L) =
+        dim₂ (Z₁ L) := by
     simpa [toricH1, toricBoundarySubmoduleInCycles] using
       (Submodule.finrank_quotient_add_finrank (R := ZMod 2)
-        (toricBoundarySubmoduleInCycles (L := L)))
+        (toricBoundarySubmoduleInCycles L))
   have hcomap :
-      Module.finrank (ZMod 2) (toricBoundarySubmoduleInCycles (L := L)) =
-        Module.finrank (ZMod 2) (toricBoundaries (L := L)) := by
+      dim₂ (toricBoundarySubmoduleInCycles L) =
+        dim₂ (B₁ L) := by
     simpa [toricBoundarySubmoduleInCycles] using
-      (Submodule.comapSubtypeEquivOfLe (toric_boundaries_le_cycles (L := L))).finrank_eq
+      (Submodule.comapSubtypeEquivOfLe (toric_boundaries_le_cycles L)).finrank_eq
   rw [hcomap] at hquot
   exact Nat.eq_sub_of_add_eq hquot
 
 /-- `dim(H₁) = 2` for the toric chain complex over `ZMod 2`. -/
 theorem toric_finrank_H1_eq_two
     :
-    @Module.finrank (ZMod 2) (toricH1 (L := L)) _
-      (Submodule.Quotient.addCommGroup (toricBoundarySubmoduleInCycles (L := L))).toAddCommMonoid
-      (Submodule.Quotient.module (toricBoundarySubmoduleInCycles (L := L))) = 2 := by
-  have hH := toric_finrank_H1_eq_cycles_sub_boundaries (L := L)
-  have hC := toric_finrank_cycles (L := L)
-  have hB := toric_finrank_boundaries (L := L)
+    @Module.finrank (ZMod 2) (H₁ L) _
+      (Submodule.Quotient.addCommGroup (toricBoundarySubmoduleInCycles L)).toAddCommMonoid
+      (Submodule.Quotient.module (toricBoundarySubmoduleInCycles L)) = 2 := by
+  have hH := toric_finrank_H1_eq_cycles_sub_boundaries L
+  have hC := toric_finrank_cycles L
+  have hB := toric_finrank_boundaries L
   rw [hC, hB] at hH
   have hsq : 1 ≤ L * L := by
     have hL : 0 < L := Fact.out

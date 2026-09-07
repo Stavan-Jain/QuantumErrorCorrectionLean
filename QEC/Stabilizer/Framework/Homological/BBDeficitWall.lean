@@ -57,7 +57,7 @@ variable {G : Type} [Fintype G] [AddCommGroup G]
 /-- The augmentation of a convolution is the product of augmentations:
 `∑ (a ⋆ b) = (∑ a) · (∑ b)`. -/
 lemma sum_conv (a b : G → ZMod 2) :
-    ∑ g : G, conv a b g = (∑ g : G, a g) * (∑ g : G, b g) := by
+    ∑ g : G, (a ⋆ b) g = (∑ g : G, a g) * (∑ g : G, b g) := by
   simp only [conv_apply]
   rw [Finset.sum_comm, Finset.sum_mul]
   refine Finset.sum_congr rfl fun h _ => ?_

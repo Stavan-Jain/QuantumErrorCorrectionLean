@@ -8,6 +8,7 @@ namespace Stabilizer
 namespace Lattice
 
 open scoped BigOperators
+open scoped Homology
 open scoped ToricChain
 
 variable (L : ℕ)
@@ -46,15 +47,15 @@ def vAtLinear (y0 : Fin L) : C1 L →ₗ[ZMod 2] ZMod 2 where
 variable [Fact (0 < L)]
 
 /-- Section-6 invariant `h` on cycles (using distinguished column `x=0`). -/
-def hWrap (c : toricCycles (L := L)) : ZMod 2 :=
+def hWrap (c : Z₁ L) : ZMod 2 :=
   hAt (L := L) (zeroCoord L) c.1
 
 /-- Section-6 invariant `v` on cycles (using distinguished row `y=0`). -/
-def vWrap (c : toricCycles (L := L)) : ZMod 2 :=
+def vWrap (c : Z₁ L) : ZMod 2 :=
   vAt (L := L) (zeroCoord L) c.1
 
 /-- Pairing of cycle invariants `(h,v)` before quotienting by boundaries. -/
-def phiOnCycles (c : toricCycles (L := L)) : ZMod 2 × ZMod 2 :=
+def phiOnCycles (c : Z₁ L) : ZMod 2 × ZMod 2 :=
   (hWrap (L := L) c, vWrap (L := L) c)
 
 /-- `hAt` is linear in the chain argument. -/
@@ -72,7 +73,7 @@ theorem vAt_linear (y0 : Fin L) :
   simp [vAt, Finset.sum_add_distrib]
 
 /-- `hAt` is independent of the chosen column on cycles. -/
-theorem hAt_independent_on_cycles (c : toricCycles (L := L)) (x0 x1 : Fin L) :
+theorem hAt_independent_on_cycles (c : Z₁ L) (x0 x1 : Fin L) :
     hAt (L := L) x0 c.1 = hAt (L := L) x1 c.1 := by
   have hAt_indep : ∀ x : Fin L, hAt L x c.1 = hAt L (prev L x) c.1 := by
     intro x
@@ -119,7 +120,7 @@ theorem hAt_independent_on_cycles (c : toricCycles (L := L)) (x0 x1 : Fin L) :
     (show (x0 : ℕ) ≤ x1 + L from by linarith [Fin.is_lt x0, Fin.is_lt x1]), Nat.mod_eq_of_lt]
 
 /-- `vAt` is independent of the chosen row on cycles. -/
-theorem vAt_independent_on_cycles (c : toricCycles (L := L)) (y0 y1 : Fin L) :
+theorem vAt_independent_on_cycles (c : Z₁ L) (y0 y1 : Fin L) :
     vAt (L := L) y0 c.1 = vAt (L := L) y1 c.1 := by
   have h_B1_gen : ∀ y : Fin L, vAt (L := L) y (c.1) = vAt (L := L) (prev (L := L) y) (c.1) := by
     intro y
@@ -160,7 +161,7 @@ theorem vAt_independent_on_cycles (c : toricCycles (L := L)) (y0 y1 : Fin L) :
     (show (y0 : ℕ) ≤ y1 + L from by linarith [Fin.is_lt y0, Fin.is_lt y1]), Nat.mod_eq_of_lt]
 
 /-- Boundaries have trivial `h` invariant. -/
-theorem h_boundary_zero (b : toricBoundaries (L := L)) :
+theorem h_boundary_zero (b : B₁ L) :
     hAt (L := L) (zeroCoord L) b.1 = 0 := by
   rcases b with ⟨b, hb⟩
   rcases hb with ⟨f, rfl⟩
@@ -188,7 +189,7 @@ theorem h_boundary_zero (b : toricBoundaries (L := L)) :
   simpa [toricBoundary2, Finset.sum_add_distrib, hsum_prev] using hdouble_zero
 
 /-- Boundaries have trivial `v` invariant. -/
-theorem v_boundary_zero (b : toricBoundaries (L := L)) :
+theorem v_boundary_zero (b : B₁ L) :
     vAt (L := L) (zeroCoord L) b.1 = 0 := by
   rcases b with ⟨b, hb⟩
   rcases hb with ⟨f, rfl⟩
@@ -216,14 +217,14 @@ theorem v_boundary_zero (b : toricBoundaries (L := L)) :
   simpa [toricBoundary2, Finset.sum_add_distrib, hsum_prev] using hdouble_zero
 
 /-- Quotient-level `(h,v)` map is well-defined. -/
-noncomputable def phi : toricH1 (L := L) → ZMod 2 × ZMod 2 :=
+noncomputable def phi : H₁ L → ZMod 2 × ZMod 2 :=
   -- Inline the boundary-submodule-in-cycles so Lean can synthesize instances on
   -- the explicit `⧸` quotient, sidestepping the opaque `toricH1` def.
-  let N : Submodule (ZMod 2) (toricCycles (L := L)) :=
-    Submodule.comap (toricCycles (L := L)).subtype (toricBoundaries (L := L))
+  let N : Submodule (ZMod 2) (Z₁ L) :=
+    Submodule.comap (Z₁ L).subtype (B₁ L)
   -- Define phiLin with an explicit toFun so application reduces by rfl,
   -- avoiding the `Pi.prod` intermediate form from `LinearMap.prod`.
-  let phiLin : toricCycles (L := L) →ₗ[ZMod 2] ZMod 2 × ZMod 2 :=
+  let phiLin : Z₁ L →ₗ[ZMod 2] ZMod 2 × ZMod 2 :=
     { toFun := fun c => (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1)
       map_add' := fun a b => by
         simp only [Submodule.coe_add]
@@ -232,19 +233,19 @@ noncomputable def phi : toricH1 (L := L) → ZMod 2 × ZMod 2 :=
       map_smul' := fun r c => by
         simp only [RingHom.id_apply, Submodule.coe_smul_of_tower]
         ext <;> simp [hAt, vAt, Finset.mul_sum] }
-  -- `Submodule.liftQ` produces a linear map on `toricCycles L ⧸ N`,
-  -- which is definitionally `toricH1 L`.
+  -- `Submodule.liftQ` produces a linear map on `Z₁ L ⧸ N`,
+  -- which is definitionally `H₁ L`.
   Submodule.liftQ N phiLin (by
     intro c hc
     rw [LinearMap.mem_ker]
     rw [Submodule.mem_comap] at hc
-    -- hc : c.1 ∈ toricBoundaries L
+    -- hc : c.1 ∈ B₁ L
     have hh := h_boundary_zero (L := L) ⟨c.1, hc⟩
     have hv := v_boundary_zero (L := L) ⟨c.1, hc⟩
     exact Prod.ext hh hv)
 
 /-- `phi` agrees with the underlying linear lift on equivalence classes. -/
-theorem phi_liftQ_eq (c : toricCycles (L := L)) :
+theorem phi_liftQ_eq (c : Z₁ L) :
     phi (L := L) (Submodule.Quotient.mk c) =
       (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1) := by
   simp only [phi, Submodule.liftQ_apply, LinearMap.coe_mk, AddHom.coe_mk]
@@ -273,8 +274,8 @@ theorem phi_surjective :
   simp +decide [ hAt, vAt, hc ]
 
 /-- phi as an explicit linear map. -/
-noncomputable def phiLinearMap : (toricCycles (L := L) ⧸
-    Submodule.comap (toricCycles (L := L)).subtype (toricBoundaries (L := L))) →ₗ[ZMod 2]
+noncomputable def phiLinearMap : (Z₁ L ⧸
+    Submodule.comap (Z₁ L).subtype (B₁ L)) →ₗ[ZMod 2]
     ZMod 2 × ZMod 2 :=
   Submodule.liftQ _ {
     toFun := fun c => (hAt (L := L) (zeroCoord L) c.1, vAt (L := L) (zeroCoord L) c.1)
@@ -296,7 +297,7 @@ noncomputable def phiLinearMap : (toricCycles (L := L) ⧸
 /-
 phi agrees with phiLinearMap.
 -/
-theorem phi_eq_phiLinearMap (x : toricH1 (L := L)) :
+theorem phi_eq_phiLinearMap (x : H₁ L) :
     phi (L := L) x = phiLinearMap (L := L) x := by
   convert rfl
 
@@ -307,9 +308,9 @@ theorem phi_injective :
   have h1 : Function.Injective (⇑(phiLinearMap (L := L))) ↔
       Function.Surjective (⇑(phiLinearMap (L := L))) := by
     apply LinearMap.injective_iff_surjective_of_finrank_eq_finrank
-    have : Module.finrank (ZMod 2)
-        (↑(toricCycles (L := L)) ⧸
-          Submodule.comap (toricCycles (L := L)).subtype (toricBoundaries (L := L))) = 2 :=
+    have : dim₂
+        (↑(Z₁ L) ⧸
+          Submodule.comap (Z₁ L).subtype (B₁ L)) = 2 :=
       toric_finrank_H1_eq_two (L := L)
     rw [this]
     simp [Module.finrank_prod]
@@ -324,7 +325,7 @@ theorem phi_injective :
 /-- `H₁ ≃ (Z/2Z)²` via wrapping invariants. -/
 theorem phi_equiv
     :
-    ∃ _ : toricH1 (L := L) ≃ₗ[ZMod 2] (ZMod 2 × ZMod 2), True := by
+    ∃ _ : H₁ L ≃ₗ[ZMod 2] (ZMod 2 × ZMod 2), True := by
   have hphiLin_inj : Function.Injective (⇑(phiLinearMap (L := L))) := by
     intro x y hxy
     apply phi_injective (L := L)
@@ -334,7 +335,7 @@ theorem phi_equiv
     obtain ⟨x, hx⟩ := phi_surjective (L := L) z
     refine ⟨x, ?_⟩
     simpa [phi_eq_phiLinearMap (L := L) x] using hx
-  let e : toricH1 (L := L) ≃ₗ[ZMod 2] (ZMod 2 × ZMod 2) :=
+  let e : H₁ L ≃ₗ[ZMod 2] (ZMod 2 × ZMod 2) :=
     LinearEquiv.ofBijective (phiLinearMap (L := L)) ⟨hphiLin_inj, hphiLin_surj⟩
   exact ⟨e, trivial⟩
 

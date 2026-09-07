@@ -32,11 +32,11 @@ namespace BB
 
 /-! ## Machine-certified polynomial identities -/
 
-theorem gross_conv_B_B : conv grossB grossB = bSquaredPoly := by
+theorem gross_conv_B_B : grossB ⋆ grossB = bSquaredPoly := by
   decide +kernel
 
 theorem gross_conv_onePlusX2_Bsq :
-    conv onePlusX2 bSquaredPoly = onePlusX6 := by
+    onePlusX2 ⋆ bSquaredPoly = onePlusX6 := by
   decide +kernel
 
 /-! ## `1 + x⁶` acts as `1 + deck shift` -/
@@ -46,7 +46,7 @@ theorem onePlusX6_eq :
   decide +kernel
 
 theorem conv_onePlusX6 (v : GrossGroup → ZMod 2) :
-    conv onePlusX6 v = v + deckShift0 v := by
+    onePlusX6 ⋆ v = v + deckShift0 v := by
   rw [onePlusX6_eq, conv_add_left, conv_single_left, conv_single_left]
   funext g
   simp only [Pi.add_apply, sub_zero, deckShift0_apply]
@@ -56,69 +56,69 @@ theorem conv_onePlusX6 (v : GrossGroup → ZMod 2) :
 
 /-- The homotopy chain `z := (1 + x²) ⋆ B ⋆ v_R`. -/
 def homotopyChain (v : GrossGroup × Fin 2 → ZMod 2) : GrossGroup → ZMod 2 :=
-  conv onePlusX2 (conv grossB (rightHalf v))
+  onePlusX2 ⋆ (grossB ⋆ rightHalf v)
 
 /-- Cycle condition in convolution form: `A⋆v_R = B⋆v_L`. -/
 lemma cycle_conv_eq {v : GrossGroup × Fin 2 → ZMod 2}
     (hv : v ∈ grossComplex.cycles) :
-    conv grossA (rightHalf v) = conv grossB (leftHalf v) := by
+    grossA ⋆ rightHalf v = grossB ⋆ leftHalf v := by
   have h0 : bbBoundary1Fn grossA grossB v = 0 :=
     (HomologicalCode.mem_cycles_iff grossComplex v).mp hv
   funext g
-  have hg : conv grossB (leftHalf v) g + conv grossA (rightHalf v) g = 0 :=
+  have hg : (grossB ⋆ leftHalf v) g + (grossA ⋆ rightHalf v) g = 0 :=
     congrFun h0 g
-  have := (CharTwo.add_eq_zero (a := conv grossB (leftHalf v) g)
-    (b := conv grossA (rightHalf v) g)).mp hg
+  have := (CharTwo.add_eq_zero (a := (grossB ⋆ leftHalf v) g)
+    (b := (grossA ⋆ rightHalf v) g)).mp hg
   exact this.symm
 
 /-- `A ⋆ z = v_L + σ v_L`. -/
 lemma conv_grossA_homotopyChain {v : GrossGroup × Fin 2 → ZMod 2}
     (hv : v ∈ grossComplex.cycles) :
-    conv grossA (homotopyChain v) = leftHalf v + deckShift0 (leftHalf v) := by
+    grossA ⋆ homotopyChain v = leftHalf v + deckShift0 (leftHalf v) := by
   unfold homotopyChain
-  calc conv grossA (conv onePlusX2 (conv grossB (rightHalf v)))
-      = conv (conv grossA onePlusX2) (conv grossB (rightHalf v)) :=
+  calc (grossA ⋆ (onePlusX2 ⋆ (grossB ⋆ rightHalf v)))
+      = (grossA ⋆ onePlusX2) ⋆ (grossB ⋆ rightHalf v) :=
         (conv_assoc _ _ _).symm
-    _ = conv (conv onePlusX2 grossA) (conv grossB (rightHalf v)) := by
+    _ = (onePlusX2 ⋆ grossA) ⋆ (grossB ⋆ rightHalf v) := by
         rw [conv_comm grossA]
-    _ = conv onePlusX2 (conv grossA (conv grossB (rightHalf v))) :=
+    _ = onePlusX2 ⋆ (grossA ⋆ (grossB ⋆ rightHalf v)) :=
         conv_assoc _ _ _
-    _ = conv onePlusX2 (conv (conv grossA grossB) (rightHalf v)) := by
+    _ = onePlusX2 ⋆ ((grossA ⋆ grossB) ⋆ rightHalf v) := by
         rw [conv_assoc]
-    _ = conv onePlusX2 (conv (conv grossB grossA) (rightHalf v)) := by
+    _ = onePlusX2 ⋆ ((grossB ⋆ grossA) ⋆ rightHalf v) := by
         rw [conv_comm grossA grossB]
-    _ = conv onePlusX2 (conv grossB (conv grossA (rightHalf v))) := by
+    _ = onePlusX2 ⋆ (grossB ⋆ (grossA ⋆ rightHalf v)) := by
         rw [conv_assoc]
-    _ = conv onePlusX2 (conv grossB (conv grossB (leftHalf v))) := by
+    _ = onePlusX2 ⋆ (grossB ⋆ (grossB ⋆ leftHalf v)) := by
         rw [cycle_conv_eq hv]
-    _ = conv onePlusX2 (conv (conv grossB grossB) (leftHalf v)) := by
+    _ = onePlusX2 ⋆ ((grossB ⋆ grossB) ⋆ leftHalf v) := by
         rw [conv_assoc]
-    _ = conv onePlusX2 (conv bSquaredPoly (leftHalf v)) := by
+    _ = onePlusX2 ⋆ (bSquaredPoly ⋆ leftHalf v) := by
         rw [gross_conv_B_B]
-    _ = conv (conv onePlusX2 bSquaredPoly) (leftHalf v) :=
+    _ = (onePlusX2 ⋆ bSquaredPoly) ⋆ leftHalf v :=
         (conv_assoc _ _ _).symm
-    _ = conv onePlusX6 (leftHalf v) := by
+    _ = onePlusX6 ⋆ leftHalf v := by
         rw [gross_conv_onePlusX2_Bsq]
     _ = leftHalf v + deckShift0 (leftHalf v) := conv_onePlusX6 _
 
 /-- `B ⋆ z = v_R + σ v_R`. -/
 lemma conv_grossB_homotopyChain (v : GrossGroup × Fin 2 → ZMod 2) :
-    conv grossB (homotopyChain v) = rightHalf v + deckShift0 (rightHalf v) := by
+    grossB ⋆ homotopyChain v = rightHalf v + deckShift0 (rightHalf v) := by
   unfold homotopyChain
-  calc conv grossB (conv onePlusX2 (conv grossB (rightHalf v)))
-      = conv (conv grossB onePlusX2) (conv grossB (rightHalf v)) :=
+  calc (grossB ⋆ (onePlusX2 ⋆ (grossB ⋆ rightHalf v)))
+      = (grossB ⋆ onePlusX2) ⋆ (grossB ⋆ rightHalf v) :=
         (conv_assoc _ _ _).symm
-    _ = conv (conv onePlusX2 grossB) (conv grossB (rightHalf v)) := by
+    _ = (onePlusX2 ⋆ grossB) ⋆ (grossB ⋆ rightHalf v) := by
         rw [conv_comm grossB]
-    _ = conv onePlusX2 (conv grossB (conv grossB (rightHalf v))) :=
+    _ = onePlusX2 ⋆ (grossB ⋆ (grossB ⋆ rightHalf v)) :=
         conv_assoc _ _ _
-    _ = conv onePlusX2 (conv (conv grossB grossB) (rightHalf v)) := by
+    _ = onePlusX2 ⋆ ((grossB ⋆ grossB) ⋆ rightHalf v) := by
         rw [conv_assoc]
-    _ = conv onePlusX2 (conv bSquaredPoly (rightHalf v)) := by
+    _ = onePlusX2 ⋆ (bSquaredPoly ⋆ rightHalf v) := by
         rw [gross_conv_B_B]
-    _ = conv (conv onePlusX2 bSquaredPoly) (rightHalf v) :=
+    _ = (onePlusX2 ⋆ bSquaredPoly) ⋆ rightHalf v :=
         (conv_assoc _ _ _).symm
-    _ = conv onePlusX6 (rightHalf v) := by
+    _ = onePlusX6 ⋆ rightHalf v := by
         rw [gross_conv_onePlusX2_Bsq]
     _ = rightHalf v + deckShift0 (rightHalf v) := conv_onePlusX6 _
 
@@ -129,10 +129,10 @@ theorem bbBoundary2Fn_homotopyChain {v : GrossGroup × Fin 2 → ZMod 2}
   funext p
   obtain ⟨h, j⟩ := p
   fin_cases j
-  · change conv grossA (homotopyChain v) h = (v + deckShift1 v) (h, 0)
+  · change (grossA ⋆ homotopyChain v) h = (v + deckShift1 v) (h, 0)
     rw [conv_grossA_homotopyChain hv]
     rfl
-  · change conv grossB (homotopyChain v) h = (v + deckShift1 v) (h, 1)
+  · change (grossB ⋆ homotopyChain v) h = (v + deckShift1 v) (h, 1)
     rw [conv_grossB_homotopyChain v]
     rfl
 

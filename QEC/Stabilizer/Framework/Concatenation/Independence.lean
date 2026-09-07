@@ -312,7 +312,7 @@ are (`hlog`) and the outer generators are (`hout`). Each block restriction is a 
 `X̄₁, Z̄₁`; `hlog` forces the two aggregated coefficients to vanish at every block, which
 reassembles into an outer linear relation killed by `hout`. -/
 lemma rowsLinearIndependent_promotedOuterList
-    (hlog : rowsLinearIndependent [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp])
+    (hlog : rowsLinearIndependent [D.Cin.logicalX 0, D.Cin.logicalZ 0])
     (hout : rowsLinearIndependent (D.outerZ ++ D.outerX)) :
     rowsLinearIndependent D.promotedOuterList := by
   rw [ConcatCSSData.promotedOuterList]
@@ -360,7 +360,7 @@ lemma rowsLinearIndependent_promotedOuterList
     -- Use independence of the two inner-logical rows.
     have hlog' := Fintype.linearIndependent_iff.mp hlog ![c1, c2]
     have hsum2 : (∑ j, (![c1, c2]) j
-        • checkMatrix [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp] j) = 0 := by
+        • checkMatrix [D.Cin.logicalX 0, D.Cin.logicalZ 0] j) = 0 := by
       rw [Fin.sum_univ_two]
       simpa [checkMatrix, ConcatCSSData.Xbar, ConcatCSSData.Zbar] using h1
     exact ⟨by simpa using hlog' hsum2 0, by simpa using hlog' hsum2 1⟩
@@ -412,9 +412,9 @@ logical symplectic vectors. -/
 lemma blockRestrictSymp_mem_span_logicals (b : Fin n₂)
     {v : Fin (n₁ * n₂ + n₁ * n₂) → ZMod 2} (hv : v ∈ sympSpan D.promotedOuterList) :
     blockRestrictSymp b v
-      ∈ sympSpan [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp] := by
+      ∈ sympSpan [D.Cin.logicalX 0, D.Cin.logicalZ 0] := by
   have hle : sympSpan D.promotedOuterList ≤ Submodule.comap (blockRestrictSymp b)
-      (sympSpan [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp]) := by
+      (sympSpan [D.Cin.logicalX 0, D.Cin.logicalZ 0]) := by
     rw [sympSpan_eq_span_listToSet, Submodule.span_le]
     rintro x ⟨e, he, rfl⟩
     simp only [listToSet, Set.mem_setOf_eq, ConcatCSSData.promotedOuterList] at he
@@ -431,7 +431,7 @@ generators are independent from the two inner logicals (`hdisj`). Every block re
 shared vector lies in `sympSpan Cin.gens ⊓ span{X̄₁, Z̄₁} = 0`, so the vector itself is `0`. -/
 lemma disjoint_s1_promoted
     (hdisj : Disjoint (sympSpan D.Cin.generatorsList)
-      (sympSpan [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp])) :
+      (sympSpan [D.Cin.logicalX 0, D.Cin.logicalZ 0])) :
     Disjoint (sympSpan D.s1PerBlockList) (sympSpan D.promotedOuterList) := by
   rw [Submodule.disjoint_def]
   intro v hv_s1 hv_promo
@@ -455,7 +455,7 @@ Both inputs are small (Steane: `2 ^ 8` and `2 ^ 6`), hence `decide`/`native_deci
 instance — unlike the `2 ^ (n₁ n₂ - k₂)` direct check on the concatenated list. -/
 theorem rowsLinearIndependent_concat
     (hin : rowsLinearIndependent (D.Cin.generatorsList ++
-      [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp]))
+      [D.Cin.logicalX 0, D.Cin.logicalZ 0]))
     (hout : rowsLinearIndependent (D.outerZ ++ D.outerX)) :
     rowsLinearIndependent D.concatGeneratorsList := by
   obtain ⟨hCin, hlog, hdisj⟩ := (rowsLinearIndependent_append_iff _ _).mp hin
@@ -467,7 +467,7 @@ theorem rowsLinearIndependent_concat
 /-- The `GeneratorsIndependent` corollary, ready to feed `concatenate` and the M7 instances. -/
 theorem generatorsIndependent_concat
     (hin : rowsLinearIndependent (D.Cin.generatorsList ++
-      [(D.Cin.logicalOps 0).xOp, (D.Cin.logicalOps 0).zOp]))
+      [D.Cin.logicalX 0, D.Cin.logicalZ 0]))
     (hout : rowsLinearIndependent (D.outerZ ++ D.outerX)) :
     GeneratorsIndependent (n₁ * n₂) D.concatGeneratorsList :=
   GeneratorsIndependent_of_rowsLinearIndependent _ _ (D.rowsLinearIndependent_concat hin hout)

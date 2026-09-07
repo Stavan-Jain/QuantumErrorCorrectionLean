@@ -374,7 +374,7 @@ three-point indicator collapses the `Finset.sum` to three translates. -/
 lemma conv_indicator3 {G : Type} [Fintype G] [AddCommGroup G] [DecidableEq G]
     (m₁ m₂ m₃ : G) (h₁₂ : m₁ ≠ m₂) (h₁₃ : m₁ ≠ m₃) (h₂₃ : m₂ ≠ m₃)
     (f : G → ZMod 2) (g : G) :
-    conv (fun h => if h = m₁ ∨ h = m₂ ∨ h = m₃ then 1 else 0) f g
+    ((fun h => if h = m₁ ∨ h = m₂ ∨ h = m₃ then 1 else 0) ⋆ f) g
       = f (g - m₁) + f (g - m₂) + f (g - m₃) := by
   have key : ∀ h : G,
       (if h = m₁ ∨ h = m₂ ∨ h = m₃ then (1 : ZMod 2) else 0) * f (g - h)
@@ -413,14 +413,14 @@ theorem seamC_eq_sparse (ξ : BaseGroup → ZMod 2) : seamC ξ = seamCSparse ξ 
   change liftStab ξ (deckSigma1 (coverSec1 (p, j))) = _
   rw [deckSigma1_apply]
   change bbBoundary2Fn grossA grossB (liftC2 ξ) ((coverSec1 (p, j)).1 + deckS, j) = _
-  change (if j = 0 then conv grossA (liftC2 ξ) (coverSec p + deckS)
-        else conv grossB (liftC2 ξ) (coverSec p + deckS)) = _
-  have hA : conv grossA (liftC2 ξ) (coverSec p + deckS)
+  change (if j = 0 then (grossA ⋆ liftC2 ξ) (coverSec p + deckS)
+        else (grossB ⋆ liftC2 ξ) (coverSec p + deckS)) = _
+  have hA : (grossA ⋆ liftC2 ξ) (coverSec p + deckS)
       = liftC2 ξ (coverSec p + deckS - (3, 0)) + liftC2 ξ (coverSec p + deckS - (0, 1))
         + liftC2 ξ (coverSec p + deckS - (0, 2)) :=
     conv_indicator3 ((3, 0) : GrossGroup) (0, 1) (0, 2)
       (by decide) (by decide) (by decide) (liftC2 ξ) (coverSec p + deckS)
-  have hB : conv grossB (liftC2 ξ) (coverSec p + deckS)
+  have hB : (grossB ⋆ liftC2 ξ) (coverSec p + deckS)
       = liftC2 ξ (coverSec p + deckS - (0, 3)) + liftC2 ξ (coverSec p + deckS - (1, 0))
         + liftC2 ξ (coverSec p + deckS - (2, 0)) :=
     conv_indicator3 ((0, 3) : GrossGroup) (1, 0) (2, 0)

@@ -36,6 +36,7 @@ both are equivalent via global Hadamard (X ↔ Z on every qubit).
 namespace Quantum
 open scoped BigOperators
 open scoped ToricChain
+open scoped Pauli
 
 namespace StabilizerGroup
 namespace ToricCodeN
@@ -135,17 +136,13 @@ abbrev prev (L : ℕ) [Fact (0 < L)] (i : Fin L) : Fin L := Stabilizer.Lattice.p
 
 /-- Vertex stabilizer at `(x,y)`: Z on the four incident edges. -/
 def vertexStab (L : ℕ) [Fact (0 < L)] (x y : Fin L) : NQubitPauliGroupElement (numQubits L) :=
-  ⟨0, (((NQubitPauliOperator.identity (numQubits L)).set (hEdge L x y) PauliOperator.Z
-    |>.set (hEdge L (prev L x) y) PauliOperator.Z
-    |>.set (vEdge L x y) PauliOperator.Z)
-    |>.set (vEdge L x (prev L y)) PauliOperator.Z)⟩
+  σ[numQubits L | hEdge L x y ↦ Z, hEdge L (prev L x) y ↦ Z,
+    vEdge L x y ↦ Z, vEdge L x (prev L y) ↦ Z]
 
 /-- Face stabilizer at `(x,y)`: X on the four boundary edges. -/
 def faceStab (L : ℕ) [Fact (0 < L)] (x y : Fin L) : NQubitPauliGroupElement (numQubits L) :=
-  ⟨0, (((NQubitPauliOperator.identity (numQubits L)).set (hEdge L x y) PauliOperator.X
-    |>.set (hEdge L x (next L y)) PauliOperator.X
-    |>.set (vEdge L x y) PauliOperator.X)
-    |>.set (vEdge L (next L x) y) PauliOperator.X)⟩
+  σ[numQubits L | hEdge L x y ↦ X, hEdge L x (next L y) ↦ X,
+    vEdge L x y ↦ X, vEdge L (next L x) y ↦ X]
 
 /-- X-type generator family indexed by faces. -/
 def XGenerators (L : ℕ) [Fact (0 < L)] : Set (NQubitPauliGroupElement (numQubits L)) :=
@@ -624,15 +621,15 @@ abbrev toricBoundary1 (L : ℕ) [Fact (0 < L)] :=
 
 /-- Alias for toric 1-cycles from the lattice homology layer. -/
 abbrev toricCycles (L : ℕ) [Fact (0 < L)] :=
-  Stabilizer.Lattice.toricCycles (L := L)
+  Stabilizer.Lattice.toricCycles L
 
 /-- Alias for toric 1-boundaries from the lattice homology layer. -/
 abbrev toricBoundaries (L : ℕ) [Fact (0 < L)] :=
-  Stabilizer.Lattice.toricBoundaries (L := L)
+  Stabilizer.Lattice.toricBoundaries L
 
 /-- Alias for toric first homology from the lattice homology layer. -/
 abbrev toricH1 (L : ℕ) [Fact (0 < L)] :=
-  Stabilizer.Lattice.toricH1 (L := L)
+  Stabilizer.Lattice.toricH1 L
 
 end ToricCodeN
 end StabilizerGroup

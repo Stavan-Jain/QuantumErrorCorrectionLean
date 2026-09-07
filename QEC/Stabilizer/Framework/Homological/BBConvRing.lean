@@ -55,7 +55,7 @@ variable [AddCommGroup G]
 /-- **Convolution is the group-algebra product.** Under `convEquiv` the
 multiplication of `𝔽₂[G]` is exactly the repo's `conv`. -/
 lemma convEquiv_mul (a b : AddMonoidAlgebra (ZMod 2) G) :
-    convEquiv (a * b) = conv (convEquiv a) (convEquiv b) := by
+    convEquiv (a * b) = convEquiv a ⋆ convEquiv b := by
   classical
   funext g
   rw [convEquiv_apply, conv_apply]
@@ -79,7 +79,7 @@ lemma convEquiv_mul (a b : AddMonoidAlgebra (ZMod 2) G) :
 `conv (x^s) v = translate (-s) v`.  (`x^s := convEquiv (single s 1)`, the
 indicator of `s`.) -/
 lemma conv_convEquiv_single (s : G) (v : G → ZMod 2) :
-    conv (convEquiv (AddMonoidAlgebra.single s 1)) v = translate (-s) v := by
+    convEquiv (AddMonoidAlgebra.single s 1) ⋆ v = translate (-s) v := by
   classical
   funext g
   rw [conv_apply, translate_apply, Finset.sum_eq_single s]
@@ -95,13 +95,13 @@ lemma conv_convEquiv_single (s : G) (v : G → ZMod 2) :
 through `convEquiv`, acts on `0`/`2`-chains as `v ↦ v + translate (-σ) v`
 — the repo's `v + σv` once `σ` has order 2. -/
 lemma conv_convEquiv_one_add_single (σ : G) (v : G → ZMod 2) :
-    conv (convEquiv (1 + AddMonoidAlgebra.single σ 1)) v
+    convEquiv (1 + AddMonoidAlgebra.single σ 1) ⋆ v
       = v + translate (-σ) v := by
   classical
   have h1 : convEquiv (1 + AddMonoidAlgebra.single σ (1 : ZMod 2))
       = convEquiv 1 + convEquiv (AddMonoidAlgebra.single σ 1) := map_add _ _ _
   rw [h1, conv_add_left]
-  have hone : conv (convEquiv (1 : AddMonoidAlgebra (ZMod 2) G)) v = v := by
+  have hone : convEquiv (1 : AddMonoidAlgebra (ZMod 2) G) ⋆ v = v := by
     funext g
     rw [conv_apply, Finset.sum_eq_single (0 : G)]
     · rw [convEquiv_apply, AddMonoidAlgebra.one_def, AddMonoidAlgebra.single_apply,
