@@ -155,11 +155,15 @@ content there. Same convention for the sub-umbrellas
   for genuinely reusable typeclass content. **Always run a whole-repo
   `lake build` after adding a global instance** — the typeclass synthesizer
   can take very different paths once a new instance enters the global pool,
-  and unrelated proofs (especially `native_decide` ones) can break. The
-  failure mode is distinctive: `failed to synthesize Decidable (∀-∃
-  proposition)` on a proof that previously closed. See
-  qec-lab's `pipeline/attempts/stab_5_1_3/result.md` § "Lessons learned"
-  for a concrete worked example of this footgun and the locality fix.
+  and the kernel-reduction cost of every `decide` proof in the repo depends
+  on which instance it is handed, so an unrelated proof can slow down, time
+  out, or stop synthesizing. The historical failure mode was distinctive:
+  `failed to synthesize Decidable (∀-∃ proposition)` on a `native_decide`
+  proof that previously closed. See qec-lab's
+  `pipeline/attempts/stab_5_1_3/result.md` § "Lessons learned" for that
+  worked example; the instances involved (`DecidableEq
+  (NQubitPauliGroupElement n)`, `Decidable (Anticommute p q)`) are global
+  again now that `main` is `native_decide`-free, verified by a full build.
 
 ## Axiom policy
 
@@ -314,17 +318,16 @@ These are local to this codebase — search here before assuming mathlib has the
 - `NQubitPauliGroupElement.commutes_iff_even_anticommutes` — main parity-based
   commutation lemma for general Paulis (the "count of anticommuting qubits is
   even" characterization)
-- **`Decidable (NQubitPauliGroupElement.Anticommute p q)`** is a
-  **file-local** instance, not a global one: `Codes/Small/FiveQubit_5_1_3.lean`
-  (§ "Local Decidable instances") declares `local instance`s for
-  `DecidableEq (NQubitPauliGroupElement n)` and `Decidable (Anticommute p q)`
-  on top of the computable `DecidableEq (NQubitPauliOperator n)` from
-  `Representation.lean`, and its 105-case weight-{1,2} anti-witness tables
-  close by `decide` (the instance is `noncomputable` because `Mul` is;
-  `native_decide` does **not** work — prefer `decide`). A new non-CSS code
-  that needs this should copy those two instances rather than make them
-  global, per the `local instance` discipline above — see the note in
-  `PauliGroup/Commutation.lean` § "Decidability of equality and `Anticommute`".
+- **`DecidableEq (NQubitPauliGroupElement n)` and
+  `Decidable (NQubitPauliGroupElement.Anticommute p q)`** are global instances
+  in `PauliGroup/Commutation.lean` (§ "Decidability of equality and
+  `Anticommute`"), built on the computable `DecidableEq (NQubitPauliOperator n)`
+  from `Representation.lean`. Closed identities between literal group
+  elements (`Z1 * X1 = X1 * Z1`, `Anticommute (weightOneAt i P) g`) close by
+  `decide`; the `Anticommute` instance is `noncomputable` because `Mul` is,
+  and `native_decide` does **not** work on it — prefer `decide`. The
+  [[5,1,3]] anti-witness tables (105 cases) and the Steane7 commutation
+  lemmas are the canonical users.
 - `StabilizerGroup`, `.toSubgroup`, `.is_abelian`, `.one_mem`,
   `.neg_identity_not_mem`, `.codespaceSubmodule`
 - `IsNontrivialLogicalOperator` has **three** conditions (see
@@ -616,11 +619,11 @@ Add new entries there when you hit a version-specific quirk; don't add them
 to this file (CLAUDE.md is the small must-read doc, the quirks file is the
 version-grouped reference).
 
-The "global typeclass instance can break unrelated `native_decide` proofs"
-footgun is documented in the "Global vs. `local instance` discipline"
-bullet in the *Naming and style conventions* section above — that's the
-canonical location for the rule and its worked example
-(qec-lab's `pipeline/attempts/stab_5_1_3/result.md` § "Lessons learned").
+The "global typeclass instance can change the synthesis path of unrelated
+`decide` / `native_decide` proofs" footgun is documented in the "Global vs.
+`local instance` discipline" bullet in the *Naming and style conventions*
+section above — that's the canonical location for the rule and its worked
+example (qec-lab's `pipeline/attempts/stab_5_1_3/result.md` § "Lessons learned").
 
 ## Formalization pipeline (lives in qec-lab)
 

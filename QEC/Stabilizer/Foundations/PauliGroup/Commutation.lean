@@ -235,23 +235,29 @@ def Anticommute (p q : NQubitPauliGroupElement n) : Prop :=
 
 /-! ### Decidability of equality and `Anticommute`
 
-`DecidableEq (NQubitPauliOperator n)` is computable (via the underlying
-function type `Fin n → PauliOperator`, see `Representation.lean`). From it one
-can derive `DecidableEq (NQubitPauliGroupElement n)` by field-wise decision and
-then `Decidable (Anticommute p q)` (which unfolds to an equality of two group
-elements); the latter is necessarily `noncomputable`, because the `Mul`
-instance on `NQubitPauliGroupElement` is, but the kernel still reduces
-`decide` through it (`native_decide` does not work for the same reason —
-prefer `decide`).
+`DecidableEq (NQubitPauliOperator n)` is computable (via the underlying function type
+`Fin n → PauliOperator`, see `Representation.lean`). Field-wise decision lifts it to
+`DecidableEq (NQubitPauliGroupElement n)`, and `Anticommute p q` unfolds to an equality of two
+group elements, so it is decidable too. The latter instance is necessarily `noncomputable`,
+because the `Mul` instance on `NQubitPauliGroupElement` is, but the kernel still reduces
+`decide` through it (`native_decide` does not work for the same reason — prefer `decide`).
 
-Neither instance is declared here, on purpose. They were once added globally
-and disrupted typeclass synthesis in an unrelated `native_decide` proof
-(`RotatedSurfaceCode3`, since parked on `claude/z3z6-parked`) — the footgun
-recorded under "Global vs. `local instance` discipline" in `CLAUDE.md`. They
-now live as `local instance`s in `Codes/Small/FiveQubit_5_1_3.lean`
-(§ "Local Decidable instances"), where the [[5,1,3]] distance proof needs
-them; copy them from there into any other file that wants `decide` on
-`Anticommute`. -/
+Both instances are global. They were file-local for a while (in `Codes/Small/FiveQubit_5_1_3.lean`)
+because a global copy once changed the synthesis path of a `native_decide` proof in the 3×3
+rotated surface code; that file is parked on `claude/z3z6-parked` and `main` is
+`native_decide`-free, so the instances were promoted back. Concrete commutation facts such as
+`Z1 * X1 = X1 * Z1` on a literal code now close by `decide`. -/
+
+/-- Equality of Pauli group elements is decidable, field by field. -/
+instance instDecidableEq : DecidableEq (NQubitPauliGroupElement n) := fun p q =>
+  decidable_of_iff (p.phasePower = q.phasePower ∧ p.operators = q.operators)
+    ⟨fun ⟨h1, h2⟩ => NQubitPauliGroupElement.ext p q h1 h2, fun h => by cases h; exact ⟨rfl, rfl⟩⟩
+
+/-- `Anticommute p q` is an equality of group elements, hence decidable (`noncomputable`
+because `*` is; the kernel reduces it regardless). -/
+noncomputable instance instDecidableAnticommute (p q : NQubitPauliGroupElement n) :
+    Decidable (Anticommute p q) :=
+  inferInstanceAs (Decidable (p * q = minusOne n * (q * p)))
 
 /-- Anticommutation reduces to the mulOp phase differing by 2 (mod 4). -/
 lemma anticommutes_iff_mulOp_phasePower (p q : NQubitPauliGroupElement n) :

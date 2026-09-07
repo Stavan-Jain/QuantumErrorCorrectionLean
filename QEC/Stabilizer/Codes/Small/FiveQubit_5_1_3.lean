@@ -77,33 +77,11 @@ lints inherited from upstream files. See
 
 open NQubitPauliGroupElement
 
-/-! ## Local Decidable instances
+/-! ## Decidability
 
-These are scoped to this file (via `local instance`) because adding them
-to the global instance pool — as `PauliGroup/Commutation.lean` originally
-did during Stage 4 — disrupted the typeclass synthesis of the
-`weight_2_pairs_span_coeffs` `native_decide` proof in `RotatedSurfaceCode3.lean`.
-The standard Pi-decidability chain in that proof must remain primary, so
-we localise the group-element-level instances here, where the [[5,1,3]]
-distance proof needs them. -/
-
-/-- `DecidableEq` on `NQubitPauliGroupElement n` via field-wise decision.
-File-local to keep RotatedSurfaceCode3.lean's synthesis path intact. -/
-local instance instDecidableEqNQubitPauliGroupElement (n : ℕ) :
-    DecidableEq (NQubitPauliGroupElement n) := fun p q =>
-  decidable_of_iff (p.phasePower = q.phasePower ∧ p.operators = q.operators)
-    ⟨fun ⟨h1, h2⟩ => by cases p; cases q; simp_all,
-     fun h => by cases h; exact ⟨rfl, rfl⟩⟩
-
-/-- `Decidable (Anticommute p q)`: unfolds to equality of two Pauli group
-elements and decides via the local `DecidableEq` above. Marked
-`noncomputable` because `*` on `NQubitPauliGroupElement` is noncomputable,
-but `decide` still reduces through the kernel. (`native_decide` does not
-work — prefer `decide`.) -/
-noncomputable local instance decidableAnticommute
-(p q : NQubitPauliGroupElement 5) :
-    Decidable (NQubitPauliGroupElement.Anticommute p q) :=
-  show Decidable (p * q = NQubitPauliGroupElement.minusOne 5 * (q * p)) from inferInstance
+The anti-witness tables below close by `decide`, through the global
+`DecidableEq (NQubitPauliGroupElement n)` and `Decidable (Anticommute p q)` instances in
+`PauliGroup/Commutation.lean` (§ "Decidability of equality and `Anticommute`"). -/
 
 /-! ## §1 — Generators (cyclic shifts of `XZZXI`) -/
 
