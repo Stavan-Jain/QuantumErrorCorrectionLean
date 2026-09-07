@@ -288,14 +288,11 @@ private lemma logicalX_commutes_Z2 : logicalX * Z2 = Z2 * logicalX := by decide
 
 private lemma logicalX_commutes_Z3 : logicalX * Z3 = Z3 * logicalX := by decide
 
-private lemma logicalX_commutes_X1 : logicalX * X1 = X1 * logicalX := by
-  pauli_comm_componentwise [logicalX, X1, NQubitPauliOperator.X]
+private lemma logicalX_commutes_X1 : logicalX * X1 = X1 * logicalX := by decide
 
-private lemma logicalX_commutes_X2 : logicalX * X2 = X2 * logicalX := by
-  pauli_comm_componentwise [logicalX, X2, NQubitPauliOperator.X]
+private lemma logicalX_commutes_X2 : logicalX * X2 = X2 * logicalX := by decide
 
-private lemma logicalX_commutes_X3 : logicalX * X3 = X3 * logicalX := by
-  pauli_comm_componentwise [logicalX, X3, NQubitPauliOperator.X]
+private lemma logicalX_commutes_X3 : logicalX * X3 = X3 * logicalX := by decide
 
 /-- Logical X commutes with every element of the stabilizer. -/
 theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := by
@@ -313,14 +310,11 @@ theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := b
     · exact logicalX_commutes_X2.symm
     · exact logicalX_commutes_X3.symm
 
-private lemma logicalZ_commutes_Z1 : logicalZ * Z1 = Z1 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z1, NQubitPauliOperator.Z]
+private lemma logicalZ_commutes_Z1 : logicalZ * Z1 = Z1 * logicalZ := by decide
 
-private lemma logicalZ_commutes_Z2 : logicalZ * Z2 = Z2 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z2, NQubitPauliOperator.Z]
+private lemma logicalZ_commutes_Z2 : logicalZ * Z2 = Z2 * logicalZ := by decide
 
-private lemma logicalZ_commutes_Z3 : logicalZ * Z3 = Z3 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z3, NQubitPauliOperator.Z]
+private lemma logicalZ_commutes_Z3 : logicalZ * Z3 = Z3 * logicalZ := by decide
 
 private lemma logicalZ_commutes_X1 : logicalZ * X1 = X1 * logicalZ := by decide
 
