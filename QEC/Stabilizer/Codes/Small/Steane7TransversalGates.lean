@@ -2,7 +2,6 @@ import Mathlib.Tactic
 import Mathlib.LinearAlgebra.Matrix.Defs
 import Mathlib.Data.Complex.Basic
 import QEC.Stabilizer.Codes.Small.Steane7
-import QEC.Foundations.UniformTransversalGate
 import QEC.Foundations.Gates
 import QEC.Foundations.GateConjugation
 import QEC.Stabilizer.Framework.Core.Logical.LogicalGates
@@ -19,8 +18,8 @@ open Matrix
 open scoped BigOperators
 
 /-!
-Conjugation convention: conjugation by a matrix U means U P U† (adjoint on the right).
-So we state and prove equalities of the form U * M * star U = ...
+Conjugation convention: conjugation by a matrix U means U P U† (adjoint on the
+right). So we state and prove equalities of the form U * M * star U = ...
 -/
 
 namespace StabilizerGroup
@@ -32,17 +31,16 @@ open scoped BigOperators
 /-!
 # Transversal H and S as logical gates for the Steane [[7,1,3]] code
 
-We show that the uniform transversal Hadamard and phase gates
-(H⊗7 and S⊗7) are logical gates for the Steane code:
-they map the codespace to itself.
+We show that the uniform transversal Hadamard and phase gates (H⊗7 and S⊗7) are
+logical gates for the Steane code: they map the codespace to itself.
 -/
 
 /-- Transversal Hadamard: H on each of the 7 physical qubits. -/
 noncomputable def transversalH_Steane7 : NQubitGate 7 :=
   uniformTransversalGate 7 H
 
-/-- Transversal phase gate: S† on each of the 7 physical qubits.
-Conjugation is U P U† (adjoint on the right). -/
+/-- Transversal phase gate: S† on each of the 7 physical qubits. Conjugation is
+U P U† (adjoint on the right). -/
 noncomputable def transversalS_Steane7 : NQubitGate 7 :=
   uniformTransversalGate 7 inv_S
 
@@ -69,7 +67,8 @@ private lemma swapXZ_element_swaps_generators :
       simp [Z1, Z2, Z3, X1, X2, X3, NQubitPauliOperator.transversalSwapXZ,
         PauliOperator.swapXZ, NQubitPauliOperator.set, NQubitPauliOperator.identity])
 
-/-- Swapping X↔Z on any Steane generator yields an element of the stabilizer subgroup. -/
+/-- Swapping X↔Z on any Steane generator yields an element of the stabilizer
+subgroup. -/
 lemma transversalSwapXZ_mem_subgroup
     (g : NQubitPauliGroupElement 7) (hg : g ∈ generatorsList) :
     (⟨g.phasePower, NQubitPauliOperator.transversalSwapXZ g.operators⟩ :
@@ -83,7 +82,8 @@ lemma transversalSwapXZ_mem_subgroup
     refine Subgroup.subset_closure ?_
     simp [generators, ZGenerators, XGenerators, hZ1, hZ2, hZ3, hX1, hX2, hX3]
 
-/-- Conjugating a Pauli group element (no Y) by transversal H gives the swapXZ element (U P U†). -/
+/-- Conjugating a Pauli group element (no Y) by transversal H gives the swapXZ
+element (U P U†). -/
 lemma transversalH_conjugates_element
     (g : NQubitPauliGroupElement 7) (h_no_Y : ∀ i, g.operators i ≠ .Y) :
     (uniformTransversalGateMatrix 7 H) * g.toMatrix * star (uniformTransversalGateMatrix 7 H) =
@@ -92,7 +92,8 @@ lemma transversalH_conjugates_element
   unfold NQubitPauliGroupElement.toMatrix swapXZ_element
   simp [h_conj]
 
-/-- Transversal H conjugates every stabilizer element to some stabilizer element (U P U†). -/
+/-- Transversal H conjugates every stabilizer element to some stabilizer element
+(U P U†). -/
 lemma transversalH_conjugates_stabilizer_to_stabilizer (g : NQubitPauliGroupElement 7)
     (hg : g ∈ stabilizerGroup.toSubgroup) :
     ∃ g' ∈ stabilizerGroup.toSubgroup,
@@ -160,7 +161,8 @@ private lemma logicalX_no_Y : ∀ i, logicalX.operators i ≠ PauliOperator.Y :=
 private lemma logicalZ_no_Y : ∀ i, logicalZ.operators i ≠ PauliOperator.Y := by
   simp [logicalZ, NQubitPauliOperator.Z]
 
-/-- Transversal Hadamard acts as logical Hadamard on the canonical Steane logical pair. -/
+/-- Transversal Hadamard acts as logical Hadamard on the canonical Steane
+logical pair. -/
 theorem transversalH_Steane7_isLogicalHadamard :
     LogicalQubitOps.IsLogicalHadamard
       ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
@@ -179,8 +181,8 @@ theorem transversalH_Steane7_isLogicalHadamard :
 /-!
 ## Transversal S as a logical gate
 
-Conjugation is U P U† (adjoint on the right). S† on each qubit fixes Z and sends X to Y.
-Z-generators are fixed; X-generators go to X*Z (in the stabilizer).
+Conjugation is U P U† (adjoint on the right). S† on each qubit fixes Z and sends
+X to Y. Z-generators are fixed; X-generators go to X*Z (in the stabilizer).
 -/
 
 lemma transversalS_conjugates_Z_generator (g : NQubitPauliGroupElement 7) (hg : g ∈ ZGenerators) :
@@ -201,9 +203,10 @@ lemma transversalS_conjugates_Z_generator_gate
   simpa [conjByGate_val, NQubitPauliGroupElement.gate_val] using
     transversalS_conjugates_Z_generator g hg
 
-/-- Generic gate-level helper: transversal `inv_S` conjugation for a phase-0 X/I generator
-with X-support of size 4 sends `g` to `h` whenever `invSConjXIImage` matches `h.operators`
-and `h.phasePower = 0`. Specializations follow for each Steane X-generator. -/
+/-- Generic gate-level helper: transversal `inv_S` conjugation for a phase-0 X/I
+generator with X-support of size 4 sends `g` to `h` whenever `invSConjXIImage`
+matches `h.operators` and `h.phasePower = 0`. Specializations follow for each
+Steane X-generator. -/
 private lemma transversalS_conjugates_XI_phase0_card4_gate
     {g h : NQubitPauliGroupElement 7}
     (hphase_g : g.phasePower = 0) (hphase_h : h.phasePower = 0)
@@ -313,8 +316,9 @@ theorem transversalS_Steane7_isLogicalGate :
         (hmemGen Z3 (by simp [generatorsList]))
     · simpa [transversalS_Steane7] using transversalS_conjugates_X3_gate
 
-/-- Transversal `S†` (implemented as `inv_S` on each qubit) acts as logical phase `S` on the
-canonical Steane logical pair under the convention `Ȳ := i X̄ Z̄`. -/
+/-- Transversal `S†` (implemented as `inv_S` on each qubit) acts as logical
+phase `S` on the canonical Steane logical pair under the convention
+`Ȳ := i X̄ Z̄`. -/
 theorem transversalS_Steane7_isLogicalS :
     LogicalQubitOps.IsLogicalS
       ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,

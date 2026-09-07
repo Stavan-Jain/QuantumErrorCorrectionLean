@@ -8,41 +8,99 @@ open Matrix
 /-!
 # Vectors, norms, and quantum states
 
-This file is the **linear-algebra foundation** for the QEC library: complex amplitude
-vectors indexed by a finite basis, the Euclidean norm, and normalized **quantum states**
-as a subtype.
+This file is the **linear-algebra foundation** for the QEC library: complex
+amplitude vectors over a finite index type, the Euclidean norm, and normalized
+**quantum states** as a subtype.
+
+## Reading the index type `α`
+
+Every state space in this library is `Vector α = α → ℂ` for a finite `α`. The
+point to internalize is that
+
+> `α` is *not* the state space — it **indexes the computational basis**
+> of the state space.
+
+`Vector α` is the free complex vector space on `α`, of dimension `|α|`. An
+element is the tuple of amplitudes of a state *in that basis*: `v i` is the
+amplitude on basis ket `i`. Each index `i : α` names one basis vector,
+`basisVec i`, and these are orthonormal — `norm_basisVec` for unit length,
+`dot_basisVec_left` for coordinate extraction.
+
+Elements of `α` carry no structure beyond their identity, so choosing `α`
+amounts to choosing *how to label* the `2 ^ n` computational basis states of an
+`n`-qubit register. That is what the basis bundles below are: different
+labelings of the same space, picked for ergonomics rather than for mathematical
+content.
 
 ## Core types
 
-- **`Vector α`**: `α → ℂ` — not necessarily normalized; used for amplitudes and intermediates.
-- **`norm`**: `√(∑ᵢ |v i|²)` — standard finite-dimensional norm; lemmas show positivity,
-  scaling, and `norm_zero`.
-- **`QuantumState α`**: `{ v : Vector α // norm v = 1 }` — normalized vectors only.
-  Coerced to `Vector α` via `CoeTC` for convenient use in sums and matrix-vector products.
+- **`Vector α`** = `α → ℂ` — amplitudes, not necessarily normalized. Used for
+  intermediates, and for the image of a state under a map not yet known to be
+  unitary.
+- **`norm v`** = `√(∑ᵢ ‖v i‖²)` — the Euclidean (L²) norm. Note this is
+  deliberately *not* mathlib's `‖·‖` on `α → ℂ`, which is the **sup** norm
+  (`Pi.norm_def`); mathlib puts the L² norm on the type synonym
+  `EuclideanSpace ℂ α`, which this library does not use. Lemmas below give
+  non-negativity, `norm_zero`, homogeneity (`norm_smul`), and the bridges
+  between `norm` and `norm ^ 2`.
+- **`QuantumState α`** = `{ v : Vector α // norm v = 1 }` — the unit sphere of
+  `Vector α`. Global phase is *not* quotiented out: `ψ` and `-ψ` are distinct
+  terms. Recover the amplitudes with the subtype coercion `(ψ : Vector α)`,
+  which `QuantumState.coe_val` identifies with `ψ.val`.
 
 ## Basis bundles
 
-- **`QubitBasis`** (= `Fin 2`): one qubit.
-- **`TwoQubitBasis`**, **`ThreeQubitBasis`**: tuple bases for 2- and 3-qubit systems
-  (convenient for repetition code indexing).
-- **`NQubitBasis n`**: function type `Fin n → QubitBasis` for generic n-qubit systems
-  (used with stabilizer / Pauli formalism).
+Concrete choices of `α`, each of size `2 ^ n`, hence all giving the same ambient
+space up to isomorphism. They differ only in how convenient they are to compute
+with:
 
-Standard kets **`ket0`**, **`ket1`** and basis vectors are defined here, with the scoped
-Dirac notation `|0⟩`, `|01⟩`, `|0101⟩`, … (see the end of the file); `Gates.lean`
-builds unitary matrices on these spaces.
+- **`QubitBasis`** = `Fin 2`, size `2` — a single qubit.
+- **`TwoQubitBasis`** = `QubitBasis × QubitBasis`, size `4` — pattern matching,
+  and `tensorGate` in `Tensor.lean`.
+- **`ThreeQubitBasis`** = `QubitBasis × QubitBasis × QubitBasis`, size `8` — the
+  same, e.g. for indexing the 3-qubit repetition code.
+- **`NQubitBasis n`** = `Fin n → QubitBasis`, size `2 ^ n` — generic `n`, and
+  the only bundle that indexes *by qubit position*, which is what the Pauli /
+  stabilizer layer needs.
+
+The tuple bundles stop at three qubits, which is where writing them out stops
+paying; from four on, `NQubitBasis n` is the only option. The isomorphisms
+between the two styles are witnessed by `TwoQubitBasis.toNQubitBasis` and
+`ThreeQubitBasis.toNQubitBasis`, with inverses `NQubitBasis.toTwoQubitBasis` and
+`NQubitBasis.toThreeQubitBasis`.
+
+Each bundle comes with abbreviations for its vector and state types: `QubitVec`
+/ `Qubit`, `TwoQubitState`, `ThreeQubitVec` / `ThreeQubitState`, and
+`NQubitVec n` / `NQubitState n`. (There is no `TwoQubitVec`; spell it
+`Vector TwoQubitBasis`.)
+
+## Kets
+
+`basisVec i` is the standard basis vector at index `i`, and `nQubitKet n b`
+packages it as a `QuantumState`. The named kets are the concrete cases: `ket0`,
+`ket1` for one qubit, `ket00`–`ket11` for two, `ket000`–`ket111` for three, plus
+the Hadamard-basis `ketPlus` and `ketMinus`. The scoped Dirac notation for all
+of them (`|0⟩`, `|01⟩`, `|0101⟩`, …) lives in `KetNotation.lean`; `Gates.lean`
+builds the unitary matrices that act on these spaces.
 -/
-
 variable {α : Type*} [Fintype α] [DecidableEq α]
 
-/-- Complex amplitude vector over basis `α` (not necessarily normalized). -/
+/-- Complex amplitude vector whose computational basis is indexed by `α`: the
+free `ℂ`-vector space on `α`, of dimension `|α|`. `v i` is the amplitude on
+basis ket `i`. Not necessarily normalized — see `QuantumState` for the unit-norm
+subtype. -/
 abbrev Vector (α : Type*) [Fintype α] [DecidableEq α] := α → ℂ
 
-/-- Euclidean norm of an amplitude vector: `√(∑ᵢ ‖v i‖²)`. -/
+/-- Euclidean (L²) norm of an amplitude vector: `√(∑ᵢ ‖v i‖²)`.
+
+Defined here rather than taken from mathlib because `Vector α` is a plain Pi
+type, and mathlib's `‖·‖` on `α → ℂ` is the **sup** norm, not this one. See the
+module docstring. -/
 noncomputable def norm (v : Vector α) :=
   Real.sqrt (∑ i, ‖v i‖^2)
 
-/-- Unfold `norm` into the square root of the sum of squared magnitudes. -/
+/-- Definitional unfolding of `norm`, as a `simp` lemma:
+`norm v = √(∑ᵢ ‖v i‖²)`. -/
 @[simp] lemma norm_def {v : Vector α} : norm v = Real.sqrt (∑ i, ‖v i‖^2) := rfl
 
 /-- The norm is always non-negative. -/
@@ -56,7 +114,8 @@ lemma norm_zero : norm (0 : Vector α) = 0 := by
   have h_sum : (∑ i, ‖(0 : Vector α) i‖^2) = 0 := Finset.sum_eq_zero (fun i _ => by simp)
   rw [h_sum, Real.sqrt_zero]
 
-/-- The square of the norm equals the sum of squared magnitudes. -/
+/-- Squaring cancels the square root: `(norm v) ^ 2 = ∑ᵢ ‖v i‖²`. The usual way
+to discharge a norm goal without reasoning about `Real.sqrt`. -/
 lemma norm_sq_def {v : Vector α} : (norm v)^2 = ∑ i, ‖v i‖^2 := by
   simp only [norm_def]
   rw [Real.sq_sqrt]
@@ -64,7 +123,9 @@ lemma norm_sq_def {v : Vector α} : (norm v)^2 = ∑ i, ‖v i‖^2 := by
   intro i _
   apply sq_nonneg
 
-/-- Two vectors have equal norms if and only if their norm squares are equal. -/
+/-- Norms may be compared through their squares:
+`norm v = norm w ↔ (norm v)² = (norm w)²`. Sound in both directions because
+`norm` is non-negative (`norm_nonneg`). -/
 lemma norm_eq_iff_norm_sq_eq {v w : Vector α} :
   norm v = norm w ↔ (norm v)^2 = (norm w)^2 := by
   constructor
@@ -78,148 +139,177 @@ lemma norm_eq_iff_norm_sq_eq {v w : Vector α} :
     rw [← norm_def, ← norm_def] at hsqrt_eq
     exact hsqrt_eq
 
-/-- Scaling a vector by a scalar scales its norm by the magnitude of the scalar. -/
+/-- Absolute homogeneity: `norm (c • v) = ‖c‖ * norm v` for a complex scalar
+`c`. This is what makes `(norm v)⁻¹ • v` a unit vector for `v ≠ 0`. -/
 lemma norm_smul (c : ℂ) (v : Vector α) : norm (c • v) = ‖c‖ * norm v := by
   simp only [norm_def, Pi.smul_apply, smul_eq_mul, Complex.norm_mul]
   have h_factor : ∑ x : α, (‖c‖ * ‖v x‖)^2 = ‖c‖^2 * ∑ x : α, ‖v x‖^2 := by
     simp [mul_pow, Finset.mul_sum]
   rw [h_factor, Real.sqrt_mul (by positivity), Real.sqrt_sq (by positivity)]
 
-/-- Normalized vector: unit norm in the `norm` above (quantum state in Dirac notation). -/
+/-- A quantum state over the basis indexed by `α`: an amplitude vector of unit
+`norm`, i.e. a point of the unit sphere of `Vector α`, bundled with its
+normalization proof.
+
+Global phase is not quotiented out — `ψ` and `-ψ` are distinct terms of this
+type. -/
 abbrev QuantumState (α : Type*) [Fintype α] [DecidableEq α] :=
   { v : Vector α // norm v = 1 }
 
-/-- The coercion of a quantum state to a vector is its `.val`. -/
+/-- The subtype coercion `(ψ : Vector α)` is just the underlying amplitude
+vector `ψ.val`. There is no bespoke `Coe` instance; this lemma exists so that
+goals stated with the coercion and goals stated with `.val` can be rewritten
+into one another. -/
 lemma QuantumState.coe_val (ψ : QuantumState α) : (ψ : Vector α) = ψ.val := rfl
 
-/-- Computational basis index for one qubit (`0` and `1`). -/
+/-- Index type for the computational basis of a single qubit: the two indices
+`0` and `1` name the basis kets `|0⟩` and `|1⟩`. -/
 abbrev QubitBasis : Type := Fin 2
 
 /-- Normalized 1-qubit state. -/
 abbrev Qubit := QuantumState QubitBasis
 
-/-- Unnormalized 1-qubit amplitudes (same as `Vector QubitBasis`). -/
+/-- Unnormalized 1-qubit amplitudes. Definitionally `Vector QubitBasis`, spelled
+out here so that the arrow is visible at use sites. -/
 abbrev QubitVec := QubitBasis → ℂ
 
-/-- Computational basis ket |0⟩ = (1, 0). -/
+/-- Computational basis ket `|0⟩`, amplitudes `(1, 0)`. -/
 def ket0 : Qubit := ⟨![1, 0], by simp⟩
 
-/-- Computational basis ket |1⟩ = (0, 1). -/
+/-- Computational basis ket `|1⟩`, amplitudes `(0, 1)`. -/
 def ket1 : Qubit := ⟨![0, 1], by simp⟩
 
-/-- Basis type for 2-qubit systems using tuple representation.
+/-- Index type for the computational basis of a 2-qubit system, labelling the
+four basis kets by pairs: `(0, 0)` names `|00⟩`, `(1, 0)` names `|10⟩`, and so
+on.
 
-This is isomorphic to `NQubitBasis 2` but uses tuples for convenience with
-pattern matching and tensor products. Use `TwoQubitBasis.toNQubitBasis` to convert.
+Isomorphic to `NQubitBasis 2`, but the tuple shape pattern-matches and composes
+with `tensorGate` more readily. Convert with `TwoQubitBasis.toNQubitBasis` and
+back with `NQubitBasis.toTwoQubitBasis`.
 -/
 abbrev TwoQubitBasis : Type := QubitBasis × QubitBasis
 
 /-- Normalized 2-qubit state. -/
 abbrev TwoQubitState : Type := QuantumState TwoQubitBasis
 
-/-- Basis type for 3-qubit systems using tuple representation.
+/-- Index type for the computational basis of a 3-qubit system, labelling the
+eight basis kets by triples: `(0, 0, 1)` names `|001⟩`, and so on.
 
-This is isomorphic to `NQubitBasis 3` but uses tuples for convenience with
-pattern matching and tensor products. Use `ThreeQubitBasis.toNQubitBasis` to convert.
+Isomorphic to `NQubitBasis 3`, with the same trade-off as `TwoQubitBasis`.
+Convert with `ThreeQubitBasis.toNQubitBasis` and back with
+`NQubitBasis.toThreeQubitBasis`.
 -/
 abbrev ThreeQubitBasis := QubitBasis × QubitBasis × QubitBasis
 
-/-- Unnormalized 3-qubit amplitudes (same as `Vector ThreeQubitBasis`). -/
+/-- Unnormalized 3-qubit amplitudes. Definitionally `Vector ThreeQubitBasis`. -/
 abbrev ThreeQubitVec := ThreeQubitBasis → ℂ
 
 /-- Normalized 3-qubit state. -/
 abbrev ThreeQubitState := QuantumState ThreeQubitBasis
 
 /-!
-# N-Qubit Basis Types
+## `n`-qubit basis types
 
-Generic basis types for n-qubit systems, extending the pattern of `TwoQubitBasis` and
-`ThreeQubitBasis` to arbitrary n.
+The generic bundle, extending `TwoQubitBasis` / `ThreeQubitBasis` to arbitrary
+`n` by labelling basis kets with *functions from qubit position to bit* rather
+than tuples. This is the labeling the stabilizer layer uses, because a Pauli
+operator acts qubit-wise and so wants its index to be addressable by position.
 -/
 
-/-- The basis type for an n-qubit system.
+/-- Index type for the computational basis of an `n`-qubit system: a basis ket
+is labelled by the bitstring naming it, presented as a function from qubit
+position to bit. So `b : NQubitBasis n` is the ket `|b 0 , b 1 , … , b (n-1)⟩`,
+and there are `2 ^ n` of them. `basisVec b` is the corresponding vector,
+`nQubitKet n b` the corresponding state.
 
-This represents the computational basis states as functions from qubit positions
-to individual qubit basis states. For n qubits, there are 2^n basis states.
+For `n = 2` the bitstrings are the four `Fin 2 → Fin 2` literals: `![0, 0]`
+labels `|00⟩`, `![1, 0]` labels `|10⟩`, `![0, 1]` labels `|01⟩`, `![1, 1]`
+labels `|11⟩`.
 
-**When to use:**
-- Use `NQubitBasis n` for generic n-qubit operations (e.g., n-qubit Pauli groups)
-- Use `TwoQubitBasis` / `ThreeQubitBasis` for small fixed n
-  (better pattern matching, works with `tensorGate`)
+**When to use this rather than a tuple bundle:**
+- `NQubitBasis n` for generic `n`, and whenever an index must be read *by qubit
+  position* — everything in the Pauli / stabilizer layer.
+- `TwoQubitBasis` / `ThreeQubitBasis` for small fixed `n`, where tuples
+  pattern-match more directly and interoperate with `tensorGate`.
 
-**Relationship:**
-- `NQubitBasis 2` is isomorphic to `TwoQubitBasis` (use conversion functions)
-- `NQubitBasis 3` is isomorphic to `ThreeQubitBasis` (use conversion functions)
-
-Example: For n=2, this is isomorphic to `TwoQubitBasis`:
-- `fun i => if i = 0 then 0 else 0` represents |00⟩
-- `fun i => if i = 0 then 1 else 0` represents |10⟩
-- etc.
+The two styles agree where both apply: `NQubitBasis 2 ≃ TwoQubitBasis` and
+`NQubitBasis 3 ≃ ThreeQubitBasis`, via the four conversion functions below.
 -/
 abbrev NQubitBasis (n : ℕ) : Type := Fin n → QubitBasis
 
-/-- Vector type for n-qubit systems. -/
+/-- Unnormalized amplitudes of an `n`-qubit system: `2 ^ n` complex numbers,
+indexed by `NQubitBasis n`. -/
 abbrev NQubitVec (n : ℕ) : Type := Vector (NQubitBasis n)
 
-/-- Quantum state type for n-qubit systems. -/
+/-- A normalized `n`-qubit state: an `NQubitVec n` of unit `norm`. -/
 abbrev NQubitState (n : ℕ) : Type := QuantumState (NQubitBasis n)
 
-/-- Construct an n-qubit basis state from a function specifying each qubit's state.
-
-This is a convenience constructor that makes it easier to work with n-qubit basis states.
+/-- Name a basis index by giving each qubit's bit. Definitionally the identity
+on `Fin n → QubitBasis`; it exists only to mark intent at call sites, where a
+bare lambda would not say which of the two roles the function is playing.
 -/
 def nQubitBasisOf (n : ℕ) (f : Fin n → QubitBasis) : NQubitBasis n := f
 
-/-- Convert the tuple representation `(a, b) : QubitBasis × QubitBasis` to the
-function representation `NQubitBasis 2`.
-
-Useful for connecting the tuple-based basis types with the function-based
-n-qubit basis type.
+/-- Relabel a 2-qubit basis index from the tuple form to the by-position form:
+`(a, b) ↦ ![a, b]`. Inverse to `NQubitBasis.toTwoQubitBasis`.
 -/
 def TwoQubitBasis.toNQubitBasis (b : TwoQubitBasis) : NQubitBasis 2 :=
   fun i => if i = 0 then b.1 else b.2
 
-/-- Convert the tuple representation
-`(a, b, c) : QubitBasis × QubitBasis × QubitBasis` to the function
-representation `NQubitBasis 3`.
+/-- Relabel a 3-qubit basis index from the tuple form to the by-position form:
+`(a, b, c) ↦ ![a, b, c]`. Inverse to `NQubitBasis.toThreeQubitBasis`.
 -/
 def ThreeQubitBasis.toNQubitBasis (b : ThreeQubitBasis) : NQubitBasis 3 :=
   fun i => if i = 0 then b.1 else if i = 1 then b.2.1 else b.2.2
 
-/-- Convert from function representation back to tuple for n=2. -/
+/-- Relabel a 2-qubit basis index back to tuple form: `b ↦ (b 0, b 1)`. Inverse
+to `TwoQubitBasis.toNQubitBasis`. -/
 def NQubitBasis.toTwoQubitBasis (b : NQubitBasis 2) : TwoQubitBasis :=
   (b 0, b 1)
 
-/-- Convert from function representation back to tuple for n=3. -/
+/-- Relabel a 3-qubit basis index back to tuple form: `b ↦ (b 0, b 1, b 2)`.
+Inverse to `ThreeQubitBasis.toNQubitBasis`. -/
 def NQubitBasis.toThreeQubitBasis (b : NQubitBasis 3) : ThreeQubitBasis :=
   (b 0, b 1, b 2)
 
-/-- Helper to construct an n-qubit basis state where all qubits are in the same state.
-
-Useful for creating states like |00...0⟩ or |11...1⟩.
+/-- The constant bitstring: the basis index labelling `|q q … q⟩`, every qubit
+carrying the same bit `q`. Specialized below to `nQubitBasisZeros` and
+`nQubitBasisOnes`.
 -/
 def nQubitBasisAll (n : ℕ) (q : QubitBasis) : NQubitBasis n :=
   fun _ => q
 
-/-- The all-zeros basis state |00...0⟩ for n qubits. -/
+/-- The all-zeros basis index, labelling `|00…0⟩` on `n` qubits. -/
 def nQubitBasisZeros (n : ℕ) : NQubitBasis n :=
   nQubitBasisAll n 0
 
-/-- The all-ones basis state |11...1⟩ for n qubits. -/
+/-- The all-ones basis index, labelling `|11…1⟩` on `n` qubits. -/
 def nQubitBasisOnes (n : ℕ) : NQubitBasis n :=
   nQubitBasisAll n 1
 
-/-- The computational basis vector concentrated at `i0`: amplitude `1` at `i0`
-and `0` elsewhere. -/
+/-- The standard basis vector `e_{i0}`: amplitude `1` on basis ket `i0`, `0` on
+every other. As `i0` ranges over `α` these form an orthonormal basis of
+`Vector α` — unit length by `norm_basisVec`, and orthonormal by
+`dot_basisVec_left`. -/
 noncomputable def basisVec (i0 : α) : Vector α :=
   fun i => if i = i0 then (1 : ℂ) else 0
 
-/-- Pointwise value of a basis vector. -/
+/-- Amplitude of the basis vector `basisVec a` on basis ket `x`: `1` when
+`x = a`, else `0`. Note the equality is oriented `x = a`, query index on the
+left. -/
 @[simp] lemma basisVec_apply {α : Type*} [DecidableEq α] [Fintype α] (a x : α) :
   basisVec a x = (if x = a then 1 else 0) :=
 by simp[basisVec]
 
-/-- Dotting a vector against a basis vector reads off the corresponding component. -/
+/-- `v ⬝ᵥ basisVec i = v i`: pairing a vector with the `i`-th standard basis
+vector extracts its `i`-th amplitude. Equivalently, `basisVec i` represents the
+`i`-th coordinate functional.
+
+A caveat worth stating explicitly in a quantum setting: `⬝ᵥ` is
+`Matrix.dotProduct`, defined as the **bilinear** form `∑ⱼ v j * w j`. It takes
+no complex conjugate, so it is *not* the Hermitian inner product
+`⟪v, w⟫ = ∑ⱼ conj (v j) * w j`. The two happen to agree here only because
+`basisVec i` has real entries. -/
 @[simp] lemma dot_basisVec_left
   {α} [Fintype α] [DecidableEq α] (v : α → ℂ) (i : α) :
   (v ⬝ᵥ basisVec i) = v i := by
@@ -229,7 +319,9 @@ by simp[basisVec]
 
 open scoped BigOperators
 
-/-- Basis vectors are normalized. -/
+/-- Every standard basis vector has unit length, so it is a legitimate
+`QuantumState`. This is the normalization proof carried by `nQubitKet` and by
+each named ket below. -/
 lemma norm_basisVec {α : Type*} [Fintype α] [DecidableEq α] (i0 : α) :
   norm (basisVec i0 : α → ℂ) = 1 := by
   classical
@@ -245,16 +337,17 @@ lemma norm_basisVec {α : Type*} [Fintype α] [DecidableEq α] (i0 : α) :
     simp [Finset.mem_univ]
   rw [norm, hsum, Real.sqrt_one]
 
-/-- Construct a basis vector for an n-qubit system.
-
-This is a specialization of `basisVec` for n-qubit systems, using the n-qubit basis type.
+/-- `basisVec` at the `n`-qubit basis type: the amplitude vector of the
+computational basis ket labelled by the bitstring `b`.
 -/
 noncomputable def nQubitBasisVec (n : ℕ) (b : NQubitBasis n) : NQubitVec n :=
   basisVec b
 
-/-- Construct a normalized basis state for an n-qubit system.
+/-- The computational basis ket `|b 0 , b 1 , … , b (n-1)⟩` as a normalized
+state: `nQubitBasisVec n b` paired with its unit-norm proof from
+`norm_basisVec`.
 
-This creates a quantum state corresponding to a computational basis vector.
+This is what the Dirac notation in `KetNotation.lean` elaborates to for `n ≥ 4`.
 -/
 noncomputable def nQubitKet (n : ℕ) (b : NQubitBasis n) : NQubitState n :=
   ⟨nQubitBasisVec n b, norm_basisVec b⟩
@@ -362,223 +455,5 @@ noncomputable def ket111 : ThreeQubitState :=
 @[simp] lemma ket110_val : (ket110 : ThreeQubitVec) = basisVec (1, 1, 0) := rfl
 /-- Amplitude vector underlying `ket111`. -/
 @[simp] lemma ket111_val : (ket111 : ThreeQubitVec) = basisVec (1, 1, 1) := rfl
-
-/-!
-## Dirac ket notation
-
-Scoped notation for the computational-basis kets, so proofs and statements can be written
-the way they are on paper: `|0⟩`, `|+⟩`, `|01⟩`, `|0101⟩`, …
-
-`|b⟩` for a bitstring `b` of length `n ≥ 1` is the standard basis state of the
-corresponding `n`-qubit state type, i.e. exactly the pre-existing term for it:
-
-| length  | elaborates to                   | type              |
-|---------|---------------------------------|-------------------|
-| 1       | `ket0`, `ket1`                  | `Qubit`           |
-| 2       | `ket00`, …, `ket11`             | `TwoQubitState`   |
-| 3       | `ket000`, …, `ket111`           | `ThreeQubitState` |
-| `n ≥ 4` | `nQubitKet n ![b₀, …, bₙ₋₁]`    | `NQubitState n`   |
-
-The tuple-indexed state types stop at three qubits, so from four qubits on the only
-`n`-qubit state type is `NQubitState n`. `|+⟩` and `|-⟩` are the Hadamard-basis kets
-`ketPlus` and `ketMinus`.
-
-**Parsing.** The bitstring lexes as a single numeral token (`0101` is one `num`
-literal), and the macro reads that token's *source text* — `"0101"`, leading zeros
-included, where the literal's numeric value would lose them — accepting only the digits
-`0` and `1`. No new token is introduced: `|` and `⟩` are the ordinary bar and
-right-angle tokens, and the whole form is `atomic`, so `|x|` (absolute value) and
-`{x | p x}` (set-builder) parse exactly as before.
-
-Bring the notation into scope with `open scoped Quantum` (or `open Quantum`). It is
-`scoped` deliberately, like the rest of this file's notation, so that files which never
-mention kets do not get a term-level parser on the bar token. Each ket displays back as
-`|…⟩` in goals while the scope is open (`set_option pp.notation false` recovers the
-names).
--/
-
-section KetNotation
-
-open Lean
-
-/-- `|b⟩` for a bitstring `b` (e.g. `|0⟩`, `|01⟩`, `|0101⟩`): the computational basis
-state of the `n`-qubit state type, `n` the length of `b` — `ket0`/`ket1` for one qubit,
-`ket00`…`ket11` for two, `ket000`…`ket111` for three, and `nQubitKet n ![b₀, …, bₙ₋₁]`
-from four qubits on. Scoped: `open scoped Quantum`. -/
-scoped syntax:max (name := ketLit) atomic("|" noWs num noWs "⟩") : term
-
-/-- The bit `0`/`1` as a numeral term (for the `![…]` of an `n ≥ 4` ket). -/
-private def bitLit (c : Char) : Term :=
-  ⟨(Syntax.mkNumLit (if c == '1' then "1" else "0")).raw⟩
-
-macro_rules
-  | `(|$b:num⟩) => do
-    let some s := b.raw.isLit? numLitKind
-      | Macro.throwErrorAt b "expected a bitstring of 0s and 1s"
-    unless s.all fun c => c == '0' || c == '1' do
-      Macro.throwErrorAt b s!"invalid ket bitstring '{s}': expected the digits 0 and 1 only"
-    match s with
-    | "0" => `(ket0)
-    | "1" => `(ket1)
-    | "00" => `(ket00)
-    | "01" => `(ket01)
-    | "10" => `(ket10)
-    | "11" => `(ket11)
-    | "000" => `(ket000)
-    | "001" => `(ket001)
-    | "010" => `(ket010)
-    | "011" => `(ket011)
-    | "100" => `(ket100)
-    | "101" => `(ket101)
-    | "110" => `(ket110)
-    | "111" => `(ket111)
-    | _ =>
-      let bits : Syntax.TSepArray `term "," := .ofElems (s.toList.toArray.map bitLit)
-      `(nQubitKet $(quote s.length) ![$bits,*])
-
-/-- Hadamard-basis ket `|+⟩ = (|0⟩ + |1⟩)/√2`, i.e. `ketPlus`. -/
-scoped notation "|+⟩" => ketPlus
-
-/-- Hadamard-basis ket `|−⟩ = (|0⟩ − |1⟩)/√2`, i.e. `ketMinus`. -/
-scoped notation "|-⟩" => ketMinus
-
-/-! ### Display
-
-The named kets display back as `|…⟩` (one unexpander each), and an `n ≥ 4` ket
-`nQubitKet n ![b₀, …, bₙ₋₁]` with literal `n` and literal bits displays as
-`|b₀…bₙ₋₁⟩`. All of these are scoped with the notation. -/
-
-/-- `ket0` displays as `|0⟩`. -/
-@[scoped app_unexpander Quantum.ket0] def unexpandKet0 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|0⟩)
-  | _ => throw ()
-
-/-- `ket1` displays as `|1⟩`. -/
-@[scoped app_unexpander Quantum.ket1] def unexpandKet1 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|1⟩)
-  | _ => throw ()
-
-/-- `ket00` displays as `|00⟩`. -/
-@[scoped app_unexpander Quantum.ket00] def unexpandKet00 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|00⟩)
-  | _ => throw ()
-
-/-- `ket01` displays as `|01⟩`. -/
-@[scoped app_unexpander Quantum.ket01] def unexpandKet01 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|01⟩)
-  | _ => throw ()
-
-/-- `ket10` displays as `|10⟩`. -/
-@[scoped app_unexpander Quantum.ket10] def unexpandKet10 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|10⟩)
-  | _ => throw ()
-
-/-- `ket11` displays as `|11⟩`. -/
-@[scoped app_unexpander Quantum.ket11] def unexpandKet11 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|11⟩)
-  | _ => throw ()
-
-/-- `ket000` displays as `|000⟩`. -/
-@[scoped app_unexpander Quantum.ket000] def unexpandKet000 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|000⟩)
-  | _ => throw ()
-
-/-- `ket001` displays as `|001⟩`. -/
-@[scoped app_unexpander Quantum.ket001] def unexpandKet001 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|001⟩)
-  | _ => throw ()
-
-/-- `ket010` displays as `|010⟩`. -/
-@[scoped app_unexpander Quantum.ket010] def unexpandKet010 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|010⟩)
-  | _ => throw ()
-
-/-- `ket011` displays as `|011⟩`. -/
-@[scoped app_unexpander Quantum.ket011] def unexpandKet011 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|011⟩)
-  | _ => throw ()
-
-/-- `ket100` displays as `|100⟩`. -/
-@[scoped app_unexpander Quantum.ket100] def unexpandKet100 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|100⟩)
-  | _ => throw ()
-
-/-- `ket101` displays as `|101⟩`. -/
-@[scoped app_unexpander Quantum.ket101] def unexpandKet101 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|101⟩)
-  | _ => throw ()
-
-/-- `ket110` displays as `|110⟩`. -/
-@[scoped app_unexpander Quantum.ket110] def unexpandKet110 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|110⟩)
-  | _ => throw ()
-
-/-- `ket111` displays as `|111⟩`. -/
-@[scoped app_unexpander Quantum.ket111] def unexpandKet111 : PrettyPrinter.Unexpander
-  | `($_:ident) => `(|111⟩)
-  | _ => throw ()
-
-/-- A literal natural: a raw `Nat` literal or `OfNat.ofNat` of one. -/
-private def natLit? (e : Expr) : Option Nat :=
-  match e with
-  | .lit (.natVal k) => some k
-  | _ =>
-    if e.isAppOfArity ``OfNat.ofNat 3 then
-      match e.getArg! 1 with
-      | .lit (.natVal k) => some k
-      | _ => none
-    else none
-
-/-- The literal bits of a `![b₀, …, bₙ₋₁]` vector (a `Matrix.vecCons` chain ending in
-`Matrix.vecEmpty`), each a literal `0` or `1`; `none` on any other shape. -/
-private partial def vecBits? (e : Expr) (acc : Array Nat := #[]) : Option (Array Nat) :=
-  if e.isAppOfArity ``Matrix.vecCons 4 then do
-    let b ← natLit? (e.getArg! 2)
-    guard (b == 0 || b == 1)
-    vecBits? (e.getArg! 3) (acc.push b)
-  else if e.isAppOfArity ``Matrix.vecEmpty 1 then
-    some acc
-  else none
-
-open PrettyPrinter Delaborator SubExpr in
-/-- Delaborate `nQubitKet n ![b₀, …, bₙ₋₁]` with literal `n ≥ 4` and literal bits back to
-`|b₀…bₙ₋₁⟩`. Stays silent on any other shape, and on `n ≤ 3` (where `|…⟩` denotes the
-tuple-indexed kets, so displaying it would not round-trip). -/
-@[scoped app_delab Quantum.nQubitKet] def delabNQubitKet : Delab :=
-  whenPPOption getPPNotation <| whenNotPPOption getPPExplicit do
-    let e ← getExpr
-    unless e.isAppOfArity ``Quantum.nQubitKet 2 do failure
-    let some n := natLit? (e.getArg! 0) | failure
-    let some bits := vecBits? (e.getArg! 1) | failure
-    unless bits.size == n && 4 ≤ n do failure
-    let s := String.ofList (bits.toList.map fun b => if b == 1 then '1' else '0')
-    `(|$(Syntax.mkNumLit s)⟩)
-
-end KetNotation
-
-/-!
-### Round-trip tests
-
-Each ket literal elaborates to exactly the pre-existing term.
--/
-
-section KetRoundTrip
-
-example : |0⟩ = ket0 := rfl
-example : |1⟩ = ket1 := rfl
-example : |00⟩ = ket00 := rfl
-example : |01⟩ = ket01 := rfl
-example : |10⟩ = ket10 := rfl
-example : |11⟩ = ket11 := rfl
-example : |000⟩ = ket000 := rfl
-example : |101⟩ = ket101 := rfl
-example : |111⟩ = ket111 := rfl
-example : |0101⟩ = nQubitKet 4 ![0, 1, 0, 1] := rfl
-example : |1000000⟩ = nQubitKet 7 ![1, 0, 0, 0, 0, 0, 0] := rfl
-example : (|0110⟩ : NQubitState 4).val = basisVec ![0, 1, 1, 0] := rfl
-example : |+⟩ = ketPlus := rfl
-example : |-⟩ = ketMinus := rfl
-
-end KetRoundTrip
 
 end Quantum

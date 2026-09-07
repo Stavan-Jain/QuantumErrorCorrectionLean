@@ -1,7 +1,7 @@
 import Mathlib.Tactic
 import Mathlib.LinearAlgebra.Matrix.Defs
 import Mathlib.Data.Complex.Basic
-import QEC.Foundations.UniformTransversalGate
+import QEC.Foundations.Tensor
 import QEC.Foundations.Gates
 import QEC.Foundations.GateConjugation
 import QEC.Stabilizer.Foundations.PauliGroup.NQubitOperator
@@ -15,12 +15,36 @@ open scoped BigOperators
 variable {n : ℕ}
 
 /-!
-Conjugation convention: conjugation by a matrix U means U P U† (adjoint on the right).
-So we state and prove equalities of the form U * M * star U = ...
+Conjugation convention: conjugation by a matrix U means U P U† (adjoint on the
+right). So we state and prove equalities of the form U * M * star U = ...
 -/
 
-/-- Conjugation by a uniform transversal gate (U P U†) distributes to component-wise
-single-qubit conjugation. -/
+/-! ### Uniform transversal gates
+
+A physical gate is **uniform transversal** when it applies the same one-qubit
+gate to every physical qubit of the register. Mathematically that is nothing but
+the `n`-fold tensor power `tensorPowGate` from `Foundations/Tensor.lean`; the
+name below is the error-correction reading of it, and it lives here rather than
+in `Foundations/` because transversality is a statement *about a code's qubits*
+— the construction itself knows nothing about codes.
+
+Both are `abbrev`s, so they are reducibly the tensor power and every lemma about
+one applies to the other.
+-/
+
+/-- Matrix of the uniform transversal gate on `n` qubits: apply the one-qubit
+gate `G` to every qubit. Reducibly `tensorPowMatrix n G`. -/
+noncomputable abbrev uniformTransversalGateMatrix (n : ℕ) (G : OneQubitGate) :
+    Matrix (NQubitBasis n) (NQubitBasis n) ℂ :=
+  tensorPowMatrix n G
+
+/-- The uniform transversal gate on `n` qubits: apply the one-qubit gate `G` to
+every qubit. Reducibly `tensorPowGate n G`. -/
+noncomputable abbrev uniformTransversalGate (n : ℕ) (G : OneQubitGate) : NQubitGate n :=
+  tensorPowGate n G
+
+/-- Conjugation by a uniform transversal gate (U P U†) distributes to
+component-wise single-qubit conjugation. -/
 lemma uniformTransversalGateMatrix_conjugation
     (n : ℕ) (G : OneQubitGate) (op : NQubitPauliOperator n) :
     (uniformTransversalGateMatrix n G) * op.toMatrix *
@@ -30,7 +54,7 @@ lemma uniformTransversalGateMatrix_conjugation
         (fun i => (G.val * (op i).toMatrix * star G.val) (b₁ i) (b₂ i)) := by
   ext b₁ b₂
   simp +decide [ Matrix.mul_apply ]
-  simp +decide [ NQubitPauliOperator.toMatrix, uniformTransversalGateMatrix, mul_assoc,
+  simp +decide [ NQubitPauliOperator.toMatrix, tensorPowMatrix, mul_assoc,
     Finset.sum_mul ]
   have h_fubini :
       ∑ x : NQubitBasis n, ∑ x_1 : NQubitBasis n,
@@ -55,7 +79,8 @@ lemma uniformTransversalGateMatrix_conjugation
     simp +decide
     ring
 
-/-- `inv_S` conjugates an operator that is pointwise `Z` or `I` to itself (U P U†). -/
+/-- `inv_S` conjugates an operator that is pointwise `Z` or `I` to itself (U P
+U†). -/
 lemma uniformTransversalGateMatrix_inv_S_conj_Z_op (n : ℕ) (op : NQubitPauliOperator n)
     (h : ∀ i, op i = .Z ∨ op i = .I) :
     (uniformTransversalGateMatrix n inv_S) * op.toMatrix *
@@ -69,7 +94,8 @@ lemma uniformTransversalGateMatrix_inv_S_conj_Z_op (n : ℕ) (op : NQubitPauliOp
   ext b₁ b₂
   simp [NQubitPauliOperator.toMatrix, h_inv_S_Z]
 
-/-- `inv_S` conjugates all-`X` to all-`Y` with global phase `(-1)^n` (U P U†). -/
+/-- `inv_S` conjugates all-`X` to all-`Y` with global phase `(-1)^n` (U P U†).
+-/
 lemma uniformTransversalGateMatrix_inv_S_conj_allX (n : ℕ) :
     (uniformTransversalGateMatrix n inv_S) * (NQubitPauliOperator.X n).toMatrix *
       star (uniformTransversalGateMatrix n inv_S) =
@@ -104,12 +130,13 @@ def pointwiseImage (F : PauliOperator → PauliOperator) (op : NQubitPauliOperat
     NQubitPauliOperator n :=
   fun i => F (op i)
 
-/-- Product of local scalar contributions over qubits for a given n-qubit Pauli operator. -/
+/-- Product of local scalar contributions over qubits for a given n-qubit Pauli
+operator. -/
 noncomputable def pointwiseScalarProduct (c : PauliOperator → ℂ) (op : NQubitPauliOperator n) : ℂ :=
   (Finset.univ : Finset (Fin n)).prod (fun i => c (op i))
 
-/-- If each local conjugation has shape `U P U† = c(P) • F(P)`, then transversal conjugation has
-the same shape with product scalar and pointwise image. -/
+/-- If each local conjugation has shape `U P U† = c(P) • F(P)`, then transversal
+conjugation has the same shape with product scalar and pointwise image. -/
 lemma uniformTransversalGateMatrix_conj_op_of_localRule
     (n : ℕ) (G : OneQubitGate) (op : NQubitPauliOperator n)
     (F : PauliOperator → PauliOperator) (c : PauliOperator → ℂ)
@@ -144,8 +171,8 @@ lemma uniformTransversalGateMatrix_conj_op_of_localRule
     _ = ((pointwiseScalarProduct c op) • (pointwiseImage F op).toMatrix) b₁ b₂ := by
           simp [NQubitPauliOperator.toMatrix]
 
-/-- Gate-level wrapper of `uniformTransversalGateMatrix_conj_op_of_localRule` for scalar-free
-local rules (`c p = 1`). -/
+/-- Gate-level wrapper of `uniformTransversalGateMatrix_conj_op_of_localRule`
+for scalar-free local rules (`c p = 1`). -/
 lemma uniformTransversalGate_conj_op_gate_of_localRule
     (n : ℕ) (G : OneQubitGate) (op : NQubitPauliOperator n)
     (F : PauliOperator → PauliOperator)
@@ -165,13 +192,13 @@ lemma uniformTransversalGate_conj_op_gate_of_localRule
   simpa [conjByGate_val, pointwiseScalarProduct]
     using hmat
 
-/-- Pointwise image of an X/I Pauli operator under `inv_S` conjugation:
-`X ↦ Y`, `I ↦ I`. -/
+/-- Pointwise image of an X/I Pauli operator under `inv_S` conjugation: `X ↦ Y`,
+`I ↦ I`. -/
 def invSConjXIImage (op : NQubitPauliOperator n) : NQubitPauliOperator n :=
   fun i => if op i = .X then .Y else .I
 
-/-- Pointwise scalar contribution of `inv_S` conjugation on an X/I Pauli operator:
-`X` contributes `-1`, `I` contributes `1`. -/
+/-- Pointwise scalar contribution of `inv_S` conjugation on an X/I Pauli
+operator: `X` contributes `-1`, `I` contributes `1`. -/
 noncomputable def invSConjXIScalar (op : NQubitPauliOperator n) : ℂ :=
   (Finset.univ : Finset (Fin n)).prod (fun i => if op i = .X then (-1 : ℂ) else 1)
 
@@ -190,8 +217,8 @@ lemma invSConjXIScalar_eq_negOne_pow_xSupportCard (op : NQubitPauliOperator n) :
   rw [invSConjXIScalar_eq_prod_xSupport]
   simp
 
-/-- `inv_S` conjugates an X/I-valued n-qubit Pauli operator to the corresponding Y/I image,
-up to the product of local `-1` factors (U P U†). -/
+/-- `inv_S` conjugates an X/I-valued n-qubit Pauli operator to the corresponding
+Y/I image, up to the product of local `-1` factors (U P U†). -/
 lemma uniformTransversalGateMatrix_inv_S_conj_XI_op (n : ℕ) (op : NQubitPauliOperator n)
     (hXI : ∀ i, op i = .X ∨ op i = .I) :
     (uniformTransversalGateMatrix n inv_S) * op.toMatrix *
@@ -202,7 +229,7 @@ lemma uniformTransversalGateMatrix_inv_S_conj_XI_op (n : ℕ) (op : NQubitPauliO
     (fun p => p = .X ∨ p = .I) hXI ?_
   intro p hp
   rcases hp with (hX | hI)
-  · simp [hX, inv_S_conj_X]
+  · simpa [hX] using inv_S_conj_X
   · simp [hI]
 
 /-- Gate-level wrapper: transversal `inv_S` fixes Z/I-valued operators. -/
@@ -212,15 +239,16 @@ lemma uniformTransversalGate_inv_S_conj_Z_op_gate (n : ℕ) (op : NQubitPauliOpe
   apply Subtype.ext
   simpa [conjByGate_val] using uniformTransversalGateMatrix_inv_S_conj_Z_op n op h
 
-/-- Gate-level wrapper: transversal `inv_S` conjugates an X/I-valued operator to its
-pointwise Y/I image up to scalar in matrix form. -/
+/-- Gate-level wrapper: transversal `inv_S` conjugates an X/I-valued operator to
+its pointwise Y/I image up to scalar in matrix form. -/
 lemma uniformTransversalGate_inv_S_conj_XI_op_gate
     (n : ℕ) (op : NQubitPauliOperator n) (hXI : ∀ i, op i = .X ∨ op i = .I) :
     (conjByGate (uniformTransversalGate n inv_S) op.toGate).val =
       ((invSConjXIScalar op) • (invSConjXIImage op).toMatrix) := by
   simpa [conjByGate_val] using uniformTransversalGateMatrix_inv_S_conj_XI_op n op hXI
 
-/-- Element-level helper for transversal `inv_S` on phase-0 X/I elements (U P U†). -/
+/-- Element-level helper for transversal `inv_S` on phase-0 X/I elements (U P
+U†). -/
 lemma uniformTransversalGateMatrix_inv_S_conj_element_XI_phase0
     (n : ℕ) (g : NQubitPauliGroupElement n)
     (h_phase : g.phasePower = 0)
@@ -233,7 +261,8 @@ lemma uniformTransversalGateMatrix_inv_S_conj_element_XI_phase0
   simp [h_phase]
   simpa using uniformTransversalGateMatrix_inv_S_conj_XI_op n g.operators hXI
 
-/-- Gate-level matrix-view helper for transversal `inv_S` on phase-0 X/I elements. -/
+/-- Gate-level matrix-view helper for transversal `inv_S` on phase-0 X/I
+elements. -/
 lemma uniformTransversalGate_inv_S_conj_element_XI_phase0_gate
     (n : ℕ) (g : NQubitPauliGroupElement n)
     (h_phase : g.phasePower = 0)
@@ -244,8 +273,8 @@ lemma uniformTransversalGate_inv_S_conj_element_XI_phase0_gate
   simpa [conjByGate_val, NQubitPauliGroupElement.gate_val] using
     uniformTransversalGateMatrix_inv_S_conj_element_XI_phase0 n g h_phase hXI
 
-/-- Single-qubit: `H P H† = swapXZ(P)` for `P ≠ Y`
-(conjugation = adjoint on the right). -/
+/-- Single-qubit: `H P H† = swapXZ(P)` for `P ≠ Y` (conjugation = adjoint on the
+right). -/
 lemma H_conj_mul_toMatrix_mul_H_adj
     (p : PauliOperator) (h : p ≠ .Y) :
     H.val * p.toMatrix * star H.val = (PauliOperator.swapXZ p).toMatrix := by
@@ -254,7 +283,8 @@ lemma H_conj_mul_toMatrix_mul_H_adj
   · simpa using H_conj_X
   · simpa using H_conj_Z
 
-/-- Conjugation of n-qubit Pauli (no Y) by transversal H equals transversalSwapXZ (U P U†). -/
+/-- Conjugation of n-qubit Pauli (no Y) by transversal H equals
+transversalSwapXZ (U P U†). -/
 lemma uniformTransversalGateMatrix_H_conj_op (n : ℕ) (op : NQubitPauliOperator n)
     (h : ∀ i, op i ≠ .Y) :
     (uniformTransversalGateMatrix n H) * op.toMatrix * star (uniformTransversalGateMatrix n H) =
@@ -266,8 +296,8 @@ lemma uniformTransversalGateMatrix_H_conj_op (n : ℕ) (op : NQubitPauliOperator
     exact H_conj_mul_toMatrix_mul_H_adj _ (h i)
   aesop
 
-/-- Gate-level wrapper: transversal H conjugates an n-qubit Pauli operator (without Y entries)
-to its pointwise `swapXZ` image. -/
+/-- Gate-level wrapper: transversal H conjugates an n-qubit Pauli operator
+(without Y entries) to its pointwise `swapXZ` image. -/
 lemma uniformTransversalGate_H_conj_op_gate (n : ℕ) (op : NQubitPauliOperator n)
     (h : ∀ i, op i ≠ .Y) :
     conjByGate (uniformTransversalGate n H) op.toGate =
