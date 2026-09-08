@@ -187,9 +187,16 @@ would fail.
 Instantiating \cref{def:stabilizer-code} for a concrete family \emph{is} the
 theorem that the family encodes $k$ qubits into $n$: the type carries $n$ and
 $k$, and the obligations --- generator count, independence, pairwise
-commutation, exclusion of $-I$, and the centralizer and anticommutation
-conditions on the logical operators --- must all be discharged to build an
-inhabitant.
+commutation, and exclusion of $-I$ --- must all be discharged to build an
+inhabitant. Nothing about logical operators enters the definition: a
+stabilizer code is its stabilizer group.
+
+\inputleannode{def:stabilizer-code-with-logicals}
+
+A chosen logical basis is layered on top. Its extra obligations are the
+centralizer and anticommutation conditions on the logical operators, and only
+the constructions that act on encoded qubits need it; the distance theory of
+the next section never looks at it.
 
 \section{Distance}
 

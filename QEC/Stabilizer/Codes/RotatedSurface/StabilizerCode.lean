@@ -10,7 +10,9 @@ import QEC.Stabilizer.Codes.RotatedSurface.H1Dimension
 
 Upgrades the lattice-side stabilizer family from
 [RotatedSurfaceCodeN.lean](RotatedSurfaceCodeN.lean) to a full
-`StabilizerCode (numQubits L) 1`, encoding 1 logical qubit.
+`StabilizerCode (numQubits L) 1`, encoding 1 logical qubit, and bundles the
+middle-column / middle-row logical pair on top of it as a
+`StabilizerCodeWithLogicals` (`rotatedSurfaceStabilizerCodeWithLogicals`).
 
 ## Strategy
 
@@ -1079,6 +1081,12 @@ noncomputable def rotatedSurfaceStabilizerCode :
     rw [listToSet_generatorsList]; exact generators_commute L
   closure_no_neg_identity := by
     rw [listToSet_generatorsList]; exact negIdentity_not_mem L
+
+/-- The rotated surface code packaged with its logical pair: the middle-column
+`X`-string and the middle-row `Z`-string (`logicalOps L`). -/
+noncomputable def rotatedSurfaceStabilizerCodeWithLogicals :
+    StabilizerGroup.StabilizerCodeWithLogicals (numQubits L) 1 where
+  toStabilizerCode := rotatedSurfaceStabilizerCode L
   logicalOps := logicalOps L
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 

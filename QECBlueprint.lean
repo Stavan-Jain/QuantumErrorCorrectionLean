@@ -385,11 +385,22 @@ attribute [blueprint "thm:independent-of-check-matrix"
 attribute [blueprint "def:stabilizer-code"
   (title := /-- Stabilizer code -/)
   (statement := /-- An $[[n,k]]$ stabilizer code: a list of $n-k$ independent,
-    pairwise commuting generators avoiding $-I$, together with $k$ pairs of
-    logical operators (\cref{def:logical-qubit-ops}). The type carries $n$ and
-    $k$, so instantiating it *is* the theorem that a given family of operators
-    encodes $k$ qubits into $n$. -/)]
+    pairwise commuting generators avoiding $-I$ --- and nothing else. The code
+    *is* its stabilizer group; a choice of logical operators is derived data,
+    bundled separately by \cref{def:stabilizer-code-with-logicals}. The type
+    carries $n$ and $k$, so instantiating it *is* the theorem that a given
+    family of operators encodes $k$ qubits into $n$. -/)]
   Quantum.StabilizerGroup.StabilizerCode
+
+attribute [blueprint "def:stabilizer-code-with-logicals"
+  (title := /-- Stabilizer code with a logical basis -/)
+  (statement := /-- A \cref{def:stabilizer-code} together with $k$ pairs of
+    logical operators (\cref{def:logical-qubit-ops}), one per encoded qubit,
+    such that the pairs of distinct qubits commute. This is what the
+    constructions that genuinely need a basis consume --- logical Clifford
+    actions, the encoding step of code concatenation --- while distance
+    (\cref{def:has-code-distance}) lives on the bare code. -/)]
+  Quantum.StabilizerGroup.StabilizerCodeWithLogicals
 
 attribute [blueprint "def:has-code-distance"
   (title := /-- Code distance -/)

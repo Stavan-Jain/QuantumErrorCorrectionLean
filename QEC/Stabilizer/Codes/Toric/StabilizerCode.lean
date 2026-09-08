@@ -13,7 +13,8 @@ import QEC.Stabilizer.Framework.Homological.StabGroup
 # Toric code as `StabilizerCode (2L², 2)`
 
 Upgrades the toric stabilizer family to a full `StabilizerCode (numQubits L) 2`,
-encoding 2 logical qubits.
+encoding 2 logical qubits, and bundles the four logical loop operators on top of
+it as a `StabilizerCodeWithLogicals` (`toricStabilizerCodeWithLogicals`).
 
 Status: **All sub-lemmas proven.**
   * `dropped_vertex_in_closure_remaining`, `dropped_face_in_closure_remaining` —
@@ -1553,6 +1554,12 @@ noncomputable def toricStabilizerCode (L : ℕ) [Fact (2 ≤ L)] :
   generators_independent := generators_independent_packaged L
   generators_commute := generators_commute_packaged L
   closure_no_neg_identity := negIdentity_not_mem_packaged L
+
+/-- The toric code packaged with its two logical pairs, the horizontal and
+vertical non-contractible loop operators (`toric_logicalOps`). -/
+noncomputable def toricStabilizerCodeWithLogicals (L : ℕ) [Fact (2 ≤ L)] :
+    StabilizerCodeWithLogicals (2 * L * L) 2 where
+  toStabilizerCode := toricStabilizerCode L
   logicalOps := toric_logicalOps L
   logical_commute_cross := toric_logical_commute_cross L
 

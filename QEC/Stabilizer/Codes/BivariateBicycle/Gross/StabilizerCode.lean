@@ -22,8 +22,10 @@ The offline-validated `𝔽₂` linear-algebra data lives in the generated
 
 Status: complete. `grossStabilizerCode : StabilizerCode 144 12` is built (all
 four packaging obligations — closure equality, generator independence via the
-decoder identities, the 12 logical qubits, and assembly), and the chain-level
-distance theorems are transported to `grossStabilizerCode_logical_weight_ge_6`
+decoder identities, the 12 logical qubits, and assembly), the 12 logical qubit
+pairs are bundled on top of it as `grossStabilizerCodeWithLogicals`, and the
+chain-level distance theorems are transported to
+`grossStabilizerCode_logical_weight_ge_6`
 (unconditional `≥ 6`) and `grossStabilizerCode_hasCodeDistance_12` (`= 12`,
 conditional only on `MImBound`; the `LightStabilizerClassification` input is
 discharged by `LightStab.lightStabilizerClassification_holds`).
@@ -1487,6 +1489,13 @@ noncomputable def grossStabilizerCode : StabilizerCode grossComplex.numQubits 12
   generators_independent := generators_independent_packaged
   generators_commute := gens_commute_packaged
   closure_no_neg_identity := gens_no_neg_packaged
+
+set_option maxRecDepth 4096 in
+/-- The gross code packaged with its 12 logical qubit pairs (`logicalQubit`):
+the chain operators of the offline-validated symplectic basis. -/
+noncomputable def grossStabilizerCodeWithLogicals :
+    StabilizerCodeWithLogicals grossComplex.numQubits 12 where
+  toStabilizerCode := grossStabilizerCode
   logicalOps := logicalQubit
   logical_commute_cross := logical_commute_cross
 
