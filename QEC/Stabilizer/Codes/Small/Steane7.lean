@@ -84,33 +84,23 @@ noncomputable def subgroup : Subgroup (NQubitPauliGroupElement 7) :=
 
 /-!
 ## Typing facts: Z-type / X-type generators
+
+Each generator is a `σ[…]` literal, so once the type predicates are unfolded
+to "phase `0`, and `I`-or-`Z` (resp. `I`-or-`X`) at each of the seven
+positions" the claim is a closed decidable statement.
 -/
 
 /-- Each Z-generator is Z-type (I or Z on each qubit). -/
 lemma ZGenerators_are_ZType :
     ∀ g, g ∈ ZGenerators → NQubitPauliGroupElement.IsZTypeElement g := by
-  classical
-  intro g hg
-  rcases (by simpa [ZGenerators] using hg) with rfl | rfl | rfl <;>
-    · constructor
-      · rfl
-      · intro i
-        fin_cases i <;>
-          simp [PauliOperator.IsZType, Z1, Z2, Z3, NQubitPauliOperator.set,
-            NQubitPauliOperator.identity]
+  unfold IsZTypeElement NQubitPauliOperator.IsZType PauliOperator.IsZType
+  rintro g (rfl | rfl | rfl) <;> decide
 
 /-- Each X-generator is X-type (I or X on each qubit). -/
 lemma XGenerators_are_XType :
     ∀ g, g ∈ XGenerators → NQubitPauliGroupElement.IsXTypeElement g := by
-  classical
-  intro g hg
-  rcases (by simpa [XGenerators] using hg) with rfl | rfl | rfl <;>
-    · constructor
-      · rfl
-      · intro i
-        fin_cases i <;>
-          simp [PauliOperator.IsXType, X1, X2, X3, NQubitPauliOperator.set,
-            NQubitPauliOperator.identity]
+  unfold IsXTypeElement NQubitPauliOperator.IsXType PauliOperator.IsXType
+  rintro g (rfl | rfl | rfl) <;> decide
 
 /-!
 ## Cross-commutation: Z generators commute with X generators
@@ -122,70 +112,27 @@ an X-row meet in an even number of qubits (`r₁ ∩ r₂ = {0, 1}`,
 `r₁ ∩ r₃ = {0, 2}`, `r₂ ∩ r₃ = {0, 3}`, and each row with itself in four).
 -/
 
-private lemma Z1_comm_X1 : Z1 * X1 = X1 * Z1 := by decide
-
-private lemma Z1_comm_X2 : Z1 * X2 = X2 * Z1 := by decide
-
-private lemma Z1_comm_X3 : Z1 * X3 = X3 * Z1 := by decide
-
-private lemma Z2_comm_X1 : Z2 * X1 = X1 * Z2 := by decide
-
-private lemma Z2_comm_X2 : Z2 * X2 = X2 * Z2 := by decide
-
-private lemma Z2_comm_X3 : Z2 * X3 = X3 * Z2 := by decide
-
-private lemma Z3_comm_X1 : Z3 * X1 = X1 * Z3 := by decide
-
-private lemma Z3_comm_X2 : Z3 * X2 = X2 * Z3 := by decide
-
-private lemma Z3_comm_X3 : Z3 * X3 = X3 * Z3 := by decide
-
 /-- Every Z-generator commutes with every X-generator (even intersection of row
 supports). -/
 lemma ZGenerators_commute_XGenerators :
     ∀ z ∈ ZGenerators, ∀ x ∈ XGenerators, z * x = x * z := by
-  classical
-  intro z hz x hx
-  rcases (by simpa [ZGenerators] using hz) with rfl | rfl | rfl <;>
-    rcases (by simpa [XGenerators] using hx) with rfl | rfl | rfl
-  · exact Z1_comm_X1
-  · exact Z1_comm_X2
-  · exact Z1_comm_X3
-  · exact Z2_comm_X1
-  · exact Z2_comm_X2
-  · exact Z2_comm_X3
-  · exact Z3_comm_X1
-  · exact Z3_comm_X2
-  · exact Z3_comm_X3
+  rintro z (rfl | rfl | rfl) x (rfl | rfl | rfl) <;> decide
 
 /-!
 ## Pairwise commutation of all generators
 -/
 
-private lemma ZType_commutes {g h : NQubitPauliGroupElement 7}
-    (hg : NQubitPauliGroupElement.IsZTypeElement g)
-    (hh : NQubitPauliGroupElement.IsZTypeElement h) :
-    g * h = h * g := by
-  exact CSSCommutationLemmas.ZType_commutes hg hh
-
-private lemma XType_commutes {g h : NQubitPauliGroupElement 7}
-    (hg : NQubitPauliGroupElement.IsXTypeElement g)
-    (hh : NQubitPauliGroupElement.IsXTypeElement h) :
-    g * h = h * g := by
-  exact CSSCommutationLemmas.XType_commutes hg hh
-
-/-- All six generators pairwise commute. -/
+/-- All six generators pairwise commute: same-type pairs by the CSS typing
+lemmas, cross-type pairs by `ZGenerators_commute_XGenerators`. -/
 theorem generators_commute :
     ∀ g ∈ generators, ∀ h ∈ generators, g * h = h * g := by
-  classical
-  intro g hg h hh
-  have hg' : g ∈ ZGenerators ∨ g ∈ XGenerators := by simpa [generators] using hg
-  have hh' : h ∈ ZGenerators ∨ h ∈ XGenerators := by simpa [generators] using hh
-  rcases hg' with hgZ | hgX <;> rcases hh' with hhZ | hhX
-  · exact ZType_commutes (ZGenerators_are_ZType g hgZ) (ZGenerators_are_ZType h hhZ)
+  rintro g (hgZ | hgX) h (hhZ | hhX)
+  · exact CSSCommutationLemmas.ZType_commutes (ZGenerators_are_ZType g hgZ)
+      (ZGenerators_are_ZType h hhZ)
   · exact ZGenerators_commute_XGenerators g hgZ h hhX
-  · simpa using (ZGenerators_commute_XGenerators h hhZ g hgX).symm
-  · exact XType_commutes (XGenerators_are_XType g hgX) (XGenerators_are_XType h hhX)
+  · exact (ZGenerators_commute_XGenerators h hhZ g hgX).symm
+  · exact CSSCommutationLemmas.XType_commutes (XGenerators_are_XType g hgX)
+      (XGenerators_are_XType h hhX)
 
 /-!
 ## No `-I` in the Steane stabilizer subgroup (CSS lemma)
@@ -193,13 +140,9 @@ theorem generators_commute :
 
 /-- The Steane subgroup does not contain −I (CSS lemma with Z- and
 X-generators). -/
-theorem negIdentity_not_mem :
-    negIdentity 7 ∉ subgroup := by
-  have hZX : ∀ z ∈ ZGenerators, ∀ x ∈ XGenerators, z * x = x * z :=
-    ZGenerators_commute_XGenerators
-  simpa [subgroup, generators] using
-    (CSS.negIdentity_not_mem_closure_union (n := 7) ZGenerators XGenerators
-      ZGenerators_are_ZType XGenerators_are_XType hZX)
+theorem negIdentity_not_mem : negIdentity 7 ∉ subgroup :=
+  CSS.negIdentity_not_mem_closure_union ZGenerators XGenerators
+    ZGenerators_are_ZType XGenerators_are_XType ZGenerators_commute_XGenerators
 
 /-- Generators as a list (for symplectic-span arguments and bundled stabilizer
 group). -/
@@ -207,12 +150,10 @@ def generatorsList : List (NQubitPauliGroupElement 7) :=
   [Z1, Z2, Z3, X1, X2, X3]
 
 /-- The list of generators has the same elements as the generator set. -/
-lemma listToSet_generatorsList : NQubitPauliGroupElement.listToSet generatorsList = generators := by
-  simp only [generatorsList, generators, ZGenerators, XGenerators,
-    NQubitPauliGroupElement.listToSet_cons, NQubitPauliGroupElement.listToSet_nil]
-  ext g
-  simp only [Set.mem_insert_iff, Set.mem_union, Set.mem_singleton_iff, Set.mem_empty_iff_false,
-    or_false, or_assoc]
+lemma listToSet_generatorsList :
+    NQubitPauliGroupElement.listToSet generatorsList = generators := by
+  simp only [generatorsList, generators, ZGenerators, XGenerators, listToSet_cons, listToSet_nil,
+    LawfulSingleton.insert_empty_eq, Set.insert_union, Set.singleton_union]
 
 /-!
 ## Bundled `StabilizerGroup 7`
@@ -224,9 +165,8 @@ noncomputable def stabilizerGroup : StabilizerGroup 7 :=
     (by rw [listToSet_generatorsList]; exact generators_commute)
     (by rw [listToSet_generatorsList]; exact negIdentity_not_mem)
 
-lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup := by
-  simp only [stabilizerGroup, mkStabilizerFromGenerators, subgroup]
-  rw [listToSet_generatorsList]
+lemma stabilizerGroup_toSubgroup_eq : stabilizerGroup.toSubgroup = subgroup :=
+  congrArg Subgroup.closure listToSet_generatorsList
 
 /-!
 ## Logical operators
@@ -238,13 +178,8 @@ via symplectic span).
 
 /-- Every element of the generators list has phase power 0. -/
 lemma AllPhaseZero_generatorsList : NQubitPauliGroupElement.AllPhaseZero generatorsList := by
-  rw [generatorsList, NQubitPauliGroupElement.AllPhaseZero_cons]
-  exact ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
-    ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
-      ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
-        ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
-          ⟨rfl, (NQubitPauliGroupElement.AllPhaseZero_cons _ _).mpr
-            ⟨rfl, NQubitPauliGroupElement.AllPhaseZero_nil⟩⟩⟩⟩⟩⟩
+  simp only [generatorsList, AllPhaseZero_cons, AllPhaseZero_nil, and_true]
+  exact ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩
 
 /-- The check-matrix rows of the Steane generators are linearly independent. -/
 theorem rowsLinearIndependent_generatorsList :
@@ -272,85 +207,29 @@ noncomputable def logicalY : NQubitPauliGroupElement 7 :=
 lemma logicalY_eq_phase2_allY :
     logicalY = ({ phasePower := (2 : Fin 4), operators := NQubitPauliOperator.Y 7 } :
       NQubitPauliGroupElement 7) := by
-  ext
-  · decide
-  · simp [logicalY, logicalX, logicalZ, NQubitPauliGroupElement.mul, NQubitPauliGroupElement.mulOp,
-      NQubitPauliOperator.X, NQubitPauliOperator.Z, NQubitPauliOperator.Y,
-      NQubitPauliOperator.identity, PauliOperator.mulOp]
+  decide
 
 /-- Logical X and logical Z anticommute (symplectic inner product 1 mod 2). -/
 theorem logicalX_anticommutes_logicalZ : NQubitPauliGroupElement.Anticommute logicalX logicalZ :=
   NQubitPauliOperator.allX_allZ_anticommute 7 (by decide)
 
-private lemma logicalX_commutes_Z1 : logicalX * Z1 = Z1 * logicalX := by decide
-
-private lemma logicalX_commutes_Z2 : logicalX * Z2 = Z2 * logicalX := by decide
-
-private lemma logicalX_commutes_Z3 : logicalX * Z3 = Z3 * logicalX := by decide
-
-private lemma logicalX_commutes_X1 : logicalX * X1 = X1 * logicalX := by
-  pauli_comm_componentwise [logicalX, X1, NQubitPauliOperator.X]
-
-private lemma logicalX_commutes_X2 : logicalX * X2 = X2 * logicalX := by
-  pauli_comm_componentwise [logicalX, X2, NQubitPauliOperator.X]
-
-private lemma logicalX_commutes_X3 : logicalX * X3 = X3 * logicalX := by
-  pauli_comm_componentwise [logicalX, X3, NQubitPauliOperator.X]
-
-/-- Logical X commutes with every element of the stabilizer. -/
+/-- Logical X commutes with every element of the stabilizer: it suffices to
+check the six generators, each a closed identity settled by `decide`. -/
 theorem logicalX_mem_centralizer : logicalX ∈ centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup]
-  rw [Subgroup.forall_comm_closure_iff]
-  intro s hs
-  simp [generators] at hs
-  rcases hs with hgZ | hgX
-  · rcases (by simpa [ZGenerators] using hgZ) with rfl | rfl | rfl
-    · exact logicalX_commutes_Z1.symm
-    · exact logicalX_commutes_Z2.symm
-    · exact logicalX_commutes_Z3.symm
-  · rcases (by simpa [XGenerators] using hgX) with rfl | rfl | rfl
-    · exact logicalX_commutes_X1.symm
-    · exact logicalX_commutes_X2.symm
-    · exact logicalX_commutes_X3.symm
+  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup,
+    Subgroup.forall_comm_closure_iff]
+  rintro s ((rfl | rfl | rfl) | (rfl | rfl | rfl)) <;> decide
 
-private lemma logicalZ_commutes_Z1 : logicalZ * Z1 = Z1 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z1, NQubitPauliOperator.Z]
-
-private lemma logicalZ_commutes_Z2 : logicalZ * Z2 = Z2 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z2, NQubitPauliOperator.Z]
-
-private lemma logicalZ_commutes_Z3 : logicalZ * Z3 = Z3 * logicalZ := by
-  pauli_comm_componentwise [logicalZ, Z3, NQubitPauliOperator.Z]
-
-private lemma logicalZ_commutes_X1 : logicalZ * X1 = X1 * logicalZ := by decide
-
-private lemma logicalZ_commutes_X2 : logicalZ * X2 = X2 * logicalZ := by decide
-
-private lemma logicalZ_commutes_X3 : logicalZ * X3 = X3 * logicalZ := by decide
-
-/-- Logical Z commutes with every element of the stabilizer. -/
+/-- Logical Z commutes with every element of the stabilizer (same argument as
+`logicalX_mem_centralizer`). -/
 theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := by
-  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup]
-  rw [Subgroup.forall_comm_closure_iff]
-  intro s hs
-  simp [generators] at hs
-  rcases hs with hgZ | hgX
-  · rcases (by simpa [ZGenerators] using hgZ) with rfl | rfl | rfl
-    · exact logicalZ_commutes_Z1.symm
-    · exact logicalZ_commutes_Z2.symm
-    · exact logicalZ_commutes_Z3.symm
-  · rcases (by simpa [XGenerators] using hgX) with rfl | rfl | rfl
-    · exact logicalZ_commutes_X1.symm
-    · exact logicalZ_commutes_X2.symm
-    · exact logicalZ_commutes_X3.symm
+  rw [StabilizerGroup.mem_centralizer_iff, stabilizerGroup_toSubgroup_eq, subgroup,
+    Subgroup.forall_comm_closure_iff]
+  rintro s ((rfl | rfl | rfl) | (rfl | rfl | rfl)) <;> decide
 
 /-!
 ## StabilizerCode [[7, 1]]
 -/
-
-private def logicalOpsSteane7 : Fin 1 → LogicalQubitOps 7 stabilizerGroup :=
-  fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
-    logicalX_anticommutes_logicalZ⟩
 
 /-- The Steane code as a stabilizer code [[7, 1]]: one logical qubit. -/
 noncomputable def stabilizerCode : Code[[7, 1]] where
@@ -361,7 +240,9 @@ noncomputable def stabilizerCode : Code[[7, 1]] where
   generators_independent := GeneratorsIndependent_7_generatorsList
   generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
-  logicalOps := logicalOpsSteane7
+  logicalOps := fun _ =>
+    ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+      logicalX_anticommutes_logicalZ⟩
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 
 end Steane7
