@@ -228,6 +228,11 @@ noncomputable def stabilizerCode : StabilizerCode 3 1 where
   generators_independent := GeneratorsIndependent_3_generatorsList
   generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+
+/-- The 3-qubit repetition code packaged with its logical pair
+`(logicalX, logicalZ)`. -/
+noncomputable def stabilizerCodeWithLogicals : StabilizerCodeWithLogicals 3 1 where
+  toStabilizerCode := stabilizerCode
   logicalOps := logicalOpsRep3
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 

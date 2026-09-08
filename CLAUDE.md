@@ -323,8 +323,14 @@ These are local to this codebase — search here before assuming mathlib has the
   `Z¹ L`/`B¹ L` for the dual cycles/boundaries (scope `ToricChain`), and the same
   `Z₁`/`B₁`/`H₁` for `rscCycles`/`rscBoundaries`/`rscH1` (scope `RotatedSurfaceChain` —
   the two scopes bind the same tokens, so open one per file).
-- `C.logicalX ℓ`/`C.logicalZ ℓ` are reducible abbreviations of `(C.logicalOps ℓ).xOp`/`.zOp`
-  (`Core/Stabilizer/StabilizerCode.lean`); goals print whichever spelling a term carries.
+- `StabilizerCode n k` (`Core/Stabilizer/StabilizerCode.lean`; notation `Code[[n, k]]`) is the
+  *bare* code — generators only, no logical operators; `HasCodeDistance` and `Code[[n, k, d]]`
+  live on it. A chosen logical basis is the separate `StabilizerCodeWithLogicals n k`
+  (`Code[[n, k]]ₗ`, `extends StabilizerCode n k`) with the fields `logicalOps` /
+  `logical_commute_cross`; every concrete code provides both a `stabilizerCode` and a
+  `stabilizerCodeWithLogicals`. `C.logicalX ℓ`/`C.logicalZ ℓ` are reducible abbreviations of
+  `(C.logicalOps ℓ).xOp`/`.zOp` for `C : StabilizerCodeWithLogicals n k`; goals print
+  whichever spelling a term carries.
 - `NQubitPauliGroupElement.toMatrix`, `.mulOp`, `.phasePower`, `.operators`
 - `NQubitPauliGroupElement.Anticommute`, `.anticommutesAt`
 - `NQubitPauliGroupElement.commutes_iff_even_anticommutes` — main parity-based
@@ -656,8 +662,8 @@ for formalizing a new CSS stabilizer code. It documents the standard
 §1–§14 section breakdown (generators → generator sets → typing → cross-
 commutation → all-pair commutation → −I lemma → generator list →
 `StabilizerGroup` → independence → logical operators → anticommutation →
-centralizer → `StabilizerCode` → distance), with variant notes for `k ≥ 2`
-codes, non-CSS codes, and parametric families.
+centralizer → `StabilizerCode` + `StabilizerCodeWithLogicals` → distance), with
+variant notes for `k ≥ 2` codes, non-CSS codes, and parametric families.
 
 Before drafting a new code file by hand or via the
 `qec-skeleton-drafter` agent (spec in qec-lab), **read `_TEMPLATE.lean`

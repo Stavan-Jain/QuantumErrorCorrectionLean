@@ -229,6 +229,10 @@ theorem logicalZ_mem_centralizer : logicalZ ∈ centralizer stabilizerGroup := b
 
 /-!
 ## StabilizerCode [[7, 1]]
+
+The bare code is its stabilizer group: six independent, pairwise commuting
+generators on seven qubits, hence one logical qubit. The chosen logical pair
+`(X̄, Z̄)` is bundled separately, in `stabilizerCodeWithLogicals`.
 -/
 
 /-- The Steane code as a stabilizer code [[7, 1]]: one logical qubit. -/
@@ -240,6 +244,10 @@ noncomputable def stabilizerCode : Code[[7, 1]] where
   generators_independent := GeneratorsIndependent_7_generatorsList
   generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+
+/-- The Steane code with its canonical logical basis `X̄ = X⊗⁷`, `Z̄ = Z⊗⁷`. -/
+noncomputable def stabilizerCodeWithLogicals : Code[[7, 1]]ₗ where
+  toStabilizerCode := stabilizerCode
   logicalOps := fun _ =>
     ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
       logicalX_anticommutes_logicalZ⟩

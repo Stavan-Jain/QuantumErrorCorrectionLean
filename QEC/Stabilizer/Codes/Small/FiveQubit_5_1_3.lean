@@ -476,6 +476,11 @@ noncomputable def stabilizerCode : Code[[5, 1]] where
   generators_independent := GeneratorsIndependent_5_generatorsList
   generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+
+/-- The [[5, 1, 3]] code packaged with its logical pair `(logicalX, logicalZ)`.
+-/
+noncomputable def stabilizerCodeWithLogicals : Code[[5, 1]]ₗ where
+  toStabilizerCode := stabilizerCode
   logicalOps := logicalOps5_1_3
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 

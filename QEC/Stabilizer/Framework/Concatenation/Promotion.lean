@@ -15,7 +15,8 @@ inner logical operator on its block: `I ↦ I`, `X ↦ X̄₁`, `Z ↦ Z̄₁` (
 replicated per block, followed by the promoted (typed) outer stabilizers.
 
 Unlike `Embedding` (Foundations-only), this module sits at the
-`Framework.Symplectic` tier: it needs `StabilizerCode`, the CSS typing
+`Framework.Symplectic` tier: it needs `StabilizerCodeWithLogicals` (the inner
+and outer codes come with their chosen logical bases), the CSS typing
 predicates, and `AllPhaseZero`.
 -/
 
@@ -108,12 +109,14 @@ lemma noY_of_isZType {n : ℕ} {op : NQubitPauliOperator n}
 /-! ## The concatenated-code data bundle -/
 
 /-- Input data for concatenating a `k₁ = 1` CSS inner code with a CSS outer
-code. Carries the typed (Z/X) splits of both generator lists and the CSS-typed,
-phase-0 inner logical representatives `X̄₁ = (Cin.logicalX 0)`,
-`Z̄₁ = (Cin.logicalZ 0)`. -/
+code. Both codes come with a chosen logical basis
+(`StabilizerCodeWithLogicals`): promotion sends outer Paulis to the inner
+logicals, and the concatenated logicals are the promoted outer ones. Carries the
+typed (Z/X) splits of both generator lists and the CSS-typed, phase-0 inner
+logical representatives `X̄₁ = (Cin.logicalX 0)`, `Z̄₁ = (Cin.logicalZ 0)`. -/
 structure ConcatCSSData (n₁ n₂ k₂ : ℕ) [NeZero n₁] where
-  Cin : StabilizerCode n₁ 1
-  Cout : StabilizerCode n₂ k₂
+  Cin : StabilizerCodeWithLogicals n₁ 1
+  Cout : StabilizerCodeWithLogicals n₂ k₂
   innerZ : List (NQubitPauliGroupElement n₁)
   innerX : List (NQubitPauliGroupElement n₁)
   inner_split : List.Perm Cin.generatorsList (innerZ ++ innerX)

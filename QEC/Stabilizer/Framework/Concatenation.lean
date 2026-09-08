@@ -23,7 +23,8 @@ Sub-modules:
   CSS-typing lemmas. Sits at the `Framework.Symplectic` tier (uses
   `StabilizerCode`, the CSS predicates, and `AllPhaseZero`).
 - `QEC.Stabilizer.Framework.Concatenation.Constructor` (M3) — the
-  `concatenate : ConcatCSSData → StabilizerCode (n₁ * n₂) k₂` constructor. All
+  `concatenate : ConcatCSSData → StabilizerCode (n₁ * n₂) k₂` constructor, and
+  `concatenateWithLogicals`, which adds the promoted outer logical basis. All
   obligation proofs discharged; `concatenate` is `sorry`-free.
 - `QEC.Stabilizer.Framework.Concatenation.Restriction` (M5, part 1) — the
   block-restriction calculus `restrictBlock b g`, weight additivity

@@ -218,7 +218,7 @@ Row-independence (`rowsLinearIndependent`) is an explicit hypothesis:
 `StabilizerCode` carries only the weaker subgroup `GeneratorsIndependent`. For a
 concrete code it is `native_decide`-able (as the small CSS codes discharge
 `by decide`). -/
-theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCode n 1)
+theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCodeWithLogicals n 1)
     (hindep : rowsLinearIndependent C.generatorsList)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup)
     (hX : g * C.logicalX 0 = C.logicalX 0 * g)
