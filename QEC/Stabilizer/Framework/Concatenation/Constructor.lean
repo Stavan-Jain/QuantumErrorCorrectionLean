@@ -7,7 +7,9 @@ Milestone **M3** of the CSS concatenation plan
 (`qec-lab:pipeline/attempts/concat_css_general/plan.md`).
 
 Assembles the M1 embedding calculus and the M2 promotion/generator-list into a
-bona-fide `StabilizerCode (n₁ * n₂) k₂` from a `ConcatCSSData`. The conceptual
+bona-fide `StabilizerCode (n₁ * n₂) k₂` from a `ConcatCSSData` (`concatenate`),
+and, with the promoted outer logicals, into a `StabilizerCodeWithLogicals`
+(`concatenateWithLogicals`). The conceptual
 crux is `promote_anticommute_parity` (plan risk **R6**): two promoted outer
 generators commute *on the nose* because promotion preserves the parity of the
 anticommuting-position count, and the underlying outer generators commute.
@@ -477,6 +479,13 @@ noncomputable def concatenate (D : ConcatCSSData n₁ n₂ k₂)
   generators_independent := hindep
   generators_commute := concat_generators_commute D
   closure_no_neg_identity := concat_closure_no_neg_identity D
+
+/-- `concatenate` together with the concatenated logical basis: the promoted
+outer logicals `concatLogicalOps`. -/
+noncomputable def concatenateWithLogicals (D : ConcatCSSData n₁ n₂ k₂)
+    (hindep : GeneratorsIndependent (n₁ * n₂) D.concatGeneratorsList) :
+    StabilizerCodeWithLogicals (n₁ * n₂) k₂ where
+  toStabilizerCode := D.concatenate hindep
   logicalOps := concatLogicalOps D
   logical_commute_cross := concat_logical_commute_cross D
 

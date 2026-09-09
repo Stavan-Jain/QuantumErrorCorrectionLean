@@ -446,6 +446,11 @@ noncomputable def stabilizerCode : StabilizerCode 4 2 where
   generators_independent := GeneratorsIndependent_4_generatorsList
   generators_commute := by rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by rw [listToSet_generatorsList]; exact negIdentity_not_mem
+
+/-- The [[4, 2, 2]] code packaged with its logical basis `(X̄₁, Z̄₁)`,
+`(X̄₂, Z̄₂)` (`logicalX_1`/`logicalZ_1`, `logicalX_2`/`logicalZ_2`). -/
+noncomputable def stabilizerCodeWithLogicals : StabilizerCodeWithLogicals 4 2 where
+  toStabilizerCode := stabilizerCode
   logicalOps := logicalOps4_2_2
   logical_commute_cross := by
     intro ℓ ℓ' hne

@@ -37,10 +37,12 @@ Use as-is for **CSS codes with `k = 1` logical qubit** (the most common case):
 Steane7, Shor9, RepetitionCode3, RepetitionCodeN. The structure scales
 straightforwardly to:
 
-- **`k ≥ 2`** — see variant notes under §10 (StabilizerCode packaging) and §11
-  (logical operators). The only field that genuinely changes is
-  `logical_commute_cross` — for `k = 1` the `Subsingleton.elim` shortcut
-  suffices; for `k ≥ 2` you need explicit case-splits on `Fin k × Fin k`.
+- **`k ≥ 2`** — see variant notes under §13 (packaging) and §10–§11 (logical
+  operators). The only field that genuinely changes is `logical_commute_cross`
+  of the `StabilizerCodeWithLogicals` bundle — for `k = 1` the
+  `Subsingleton.elim` shortcut suffices; for `k ≥ 2` you need explicit
+  case-splits on `Fin k × Fin k`. The bare `StabilizerCode` is the same shape
+  for every `k`.
 - **Parametric families** (toric, rotated surface, …) — generators are defined
   as functions of `L` (the toric, repetition and iceberg families write theirs
   with the symbolic `σ[n | i ↦ Z, …]` form, see §1; the rotated surface code
@@ -69,7 +71,7 @@ straightforwardly to:
 | §10 | Logical operators (`logicalX`, `logicalZ`, optional `logicalY`) | when `k ≥ 1` |
 | §11 | Logical anticommutation | when `k ≥ 1` |
 | §12 | Logicals in centralizer | when `k ≥ 1` |
-| §13 | `StabilizerCode n k` packaging | always |
+| §13 | `StabilizerCode n k` (bare) + `StabilizerCodeWithLogicals n k` packaging | always |
 | §14 | `HasCodeDistance` | optional (often in a sibling file for parametric codes) |
 
 ## File header pattern
@@ -525,15 +527,15 @@ theorem logicalX_mem_centralizer :
 -/
 
 /-!
-## §13 — `StabilizerCode n k` packaging
+## §13 — `StabilizerCode n k` packaging, and the logical basis on top
 
-The bundled structure. Combine §7–§12:
+Two bundled structures. The **bare code** combines §7–§9 only: a stabilizer
+code *is* its stabilizer group, presented by `n − k` independent generators.
+The **logical basis** (§10–§12) is derived data and lives in a separate
+`StabilizerCodeWithLogicals n k`, which `extends` the bare code:
 
 ```lean
-private def logicalOps_<CodeName> : Fin k → LogicalQubitOps n stabilizerGroup :=
-  fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
-            logicalX_anticommutes_logicalZ⟩
-
+/-- The bare `[[n, k]]` code. No logical operators are bundled here. -/
 noncomputable def stabilizerCode : StabilizerCode n k where
   hk := by decide                          -- 0 < k ≤ n; trivial for fixed values
   generatorsList := generatorsList
@@ -544,16 +546,33 @@ noncomputable def stabilizerCode : StabilizerCode n k where
     rw [listToSet_generatorsList]; exact generators_commute
   closure_no_neg_identity := by
     rw [listToSet_generatorsList]; exact negIdentity_not_mem
+
+private def logicalOps_<CodeName> : Fin k → LogicalQubitOps n stabilizerGroup :=
+  fun _ => ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+            logicalX_anticommutes_logicalZ⟩
+
+/-- The code with its chosen logical basis. -/
+noncomputable def stabilizerCodeWithLogicals : StabilizerCodeWithLogicals n k where
+  toStabilizerCode := stabilizerCode
   logicalOps := logicalOps_<CodeName>
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 ```
+
+With `import QEC.Stabilizer.Framework.Core.CodeNotation` and
+`open scoped Quantum.StabilizerGroup`, the two types can be written
+`Code[[n, k]]` and `Code[[n, k]]ₗ`. Keep the distance section (§14) on the bare
+`stabilizerCode`: `HasCodeDistance` only depends on the stabilizer group, so a
+code whose logical basis is not (yet) chosen still carries its distance proof,
+and `stabilizerCodeWithDistance : Code[[n, k, d]]` extends the bare code, not
+the one with logicals.
 
 The `logical_commute_cross` shortcut `(h (Subsingleton.elim ℓ ℓ')).elim`
 discharges the field vacuously when `k = 1` (only one possible index, so the
 hypothesis `ℓ ≠ ℓ'` is automatically false).
 
 **`k ≥ 2` variant.** The `Subsingleton.elim` trick **does not apply**. Spell out
-the cross-commutation by case-split on `Fin k × Fin k`:
+the cross-commutation by case-split on `Fin k × Fin k` (the bare
+`stabilizerCode` is unchanged):
 
 ```lean
 private def logicalOps_<CodeName> : Fin k → LogicalQubitOps n stabilizerGroup
@@ -563,8 +582,9 @@ private def logicalOps_<CodeName> : Fin k → LogicalQubitOps n stabilizerGroup
            logicalZ_2_mem_centralizer, logicalX_2_anticommutes_logicalZ_2⟩
   -- ... one per logical qubit
 
-noncomputable def stabilizerCode : StabilizerCode n k where
-  -- (fields as above)
+noncomputable def stabilizerCodeWithLogicals : StabilizerCodeWithLogicals n k where
+  toStabilizerCode := stabilizerCode
+  logicalOps := logicalOps_<CodeName>
   logical_commute_cross := fun ℓ ℓ' h => by
     fin_cases ℓ <;> fin_cases ℓ' <;> first
       | exact absurd rfl h
@@ -586,10 +606,12 @@ clean this up.
 Every distance proof on `main` is kernel-only. `native_decide` is banned
 repo-wide (CLAUDE.md § "Axiom policy"), so there is no "decide the whole
 `HasCodeDistance` predicate" shortcut, and no `sorry` placeholder either: pick
-the closer that matches the code's shape. The two CSS closers live in
-`Framework/Core/CSS/CSSDistance.lean`, the general one in
-`Framework/Core/Logical/CodeDistance.lean`. All three consume the same two
-ingredients — the §13 closure equation
+the closer that matches the code's shape. All of them are stated on the bare
+`stabilizerCode` of §13 — `HasCodeDistance` depends only on the stabilizer
+group, and only the witness's nontriviality proof touches the logical basis.
+The two CSS closers live in `Framework/Core/CSS/CSSDistance.lean`, the general
+one in `Framework/Core/Logical/CodeDistance.lean`. All three consume the same
+two ingredients — the §13 closure equation
 
 ```lean
 lemma stabilizerCode_toSubgroup_eq :

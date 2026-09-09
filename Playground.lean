@@ -16,9 +16,11 @@ Put your cursor at the end of a line to see the goal state in the InfoView.
 
 open Quantum.StabilizerGroup
 
--- The two central definitions: an `[[n, k]]` stabilizer code, and one whose
--- distance has been proved.
+-- The central definitions: an `[[n, k]]` stabilizer code (its stabilizer group,
+-- presented by `n - k` independent generators — nothing else), the same code with
+-- a chosen logical basis on top, and one whose distance has been proved.
 #check @StabilizerCode
+#check @StabilizerCodeWithLogicals
 #check @StabilizerCodeWithDistance
 #check @HasCodeDistance
 
@@ -27,10 +29,12 @@ open Quantum.StabilizerGroup
 #check FiveQubit_5_1_3.stabilizerCodeWithDistance
 
 -- The same object through the scoped `[[n, k, d]]` type notation: `Code[[5, 1, 3]]` is
--- `StabilizerCodeWithDistance 5 1 3` (and `Code[[5, 1]]` is `StabilizerCode 5 1`). The
+-- `StabilizerCodeWithDistance 5 1 3`, `Code[[5, 1]]` is `StabilizerCode 5 1`, and
+-- `Code[[7, 1]]ₗ` is `StabilizerCodeWithLogicals 7 1`. The
 -- `open Quantum.StabilizerGroup` above activates it.
 #check (FiveQubit_5_1_3.stabilizerCodeWithDistance : Code[[5, 1, 3]])
 #check (Steane7.stabilizerCode : Code[[7, 1]])
+#check (Steane7.stabilizerCodeWithLogicals : Code[[7, 1]]ₗ)
 #check (Steane7.stabilizerCodeWithDistance : Code[[7, 1, 3]])
 
 -- The parametric toric code, for every `L ≥ 2`. (It lives under

@@ -44,17 +44,18 @@ proven; they differ in what they ask of the code:
   weight/distance argument consumes.
 
 - **`operators_eq_stab_of_commutes_both_logicals`** (the *decisive direction*)
-  — stated for `k = 1` only, since it consumes the code's logical pair
-  `C.logicalX 0`, `C.logicalZ 0` plus an explicit `rowsLinearIndependent`
-  hypothesis on the generator list: a centralizing element that commutes with
-  *both* inner logicals has its operator part realized by a stabilizer element.
-  This is the genuine content of M4 and the one place the weak dichotomy is
-  insufficient — the `k = 1` "dimension-2 quotient" fact
-  `sympOrthogonal(span{stab rows, X̄, Z̄}) = span{stab rows}`. The proof is a
-  dimension count in `F₂^{2n}`: with `V` the row span, `U = span{X̄, Z̄}` and
-  `W = V ⊔ U`, the hypotheses put `symp(g)` in `Wᗮ`; the form is nondegenerate
-  (`sympBilinForm_nondegenerate`), so `LinearMap.BilinForm.finrank_orthogonal`
-  gives `dim Wᗮ = 2n − dim W = n − 1 = dim V`, and `V ≤ Wᗮ` (the stabilizer is
+  — stated for a `StabilizerCodeWithLogicals n 1`, since it consumes the
+  bundled logical pair `C.logicalX 0`, `C.logicalZ 0`, plus an explicit
+  `rowsLinearIndependent` hypothesis on the generator list: a centralizing
+  element that commutes with *both* inner logicals has its operator part
+  realized by a stabilizer element. This is the genuine content of M4 and the
+  one place the weak dichotomy is insufficient — the `k = 1` "dimension-2
+  quotient" fact `sympOrthogonal(span{stab rows, X̄, Z̄}) = span{stab rows}`.
+  The proof is a dimension count in `F₂^{2n}`: with `V` the row span,
+  `U = span{X̄, Z̄}` and `W = V ⊔ U`, the hypotheses put `symp(g)` in `Wᗮ`; the
+  form is nondegenerate (`sympBilinForm_nondegenerate`), so
+  `LinearMap.BilinForm.finrank_orthogonal` gives
+  `dim Wᗮ = 2n − dim W = n − 1 = dim V`, and `V ≤ Wᗮ` (the stabilizer is
   isotropic and commutes with the logicals) forces `V = Wᗮ`. The `BilinForm`
   section below packages the symplectic form as a mathlib `BilinForm` for
   exactly this step; `exists_mem_closure_of_symp_in_span` then turns
@@ -229,7 +230,7 @@ Row-independence (`rowsLinearIndependent`) is an explicit hypothesis:
 `StabilizerCode` carries only the weaker subgroup `GeneratorsIndependent`. For a
 concrete code it closes by `decide`, as the small CSS codes do
 (`rowsLinearIndependent_generatorsList` in `Codes/Small/Steane7.lean`). -/
-theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCode n 1)
+theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCodeWithLogicals n 1)
     (hindep : rowsLinearIndependent C.generatorsList)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup)
     (hX : g * C.logicalX 0 = C.logicalX 0 * g)

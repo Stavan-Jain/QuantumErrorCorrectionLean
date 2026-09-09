@@ -621,6 +621,12 @@ noncomputable def stabilizerCode (m : ℕ) [Fact (2 ≤ m)] :
     rw [listToSet_generatorsList]; exact generators_commute m
   closure_no_neg_identity := by
     rw [listToSet_generatorsList]; exact negIdentity_not_mem m
+
+/-- The iceberg code packaged with its `2m − 2` logical pairs
+`(logicalX m i, logicalZ m i)`. -/
+noncomputable def stabilizerCodeWithLogicals (m : ℕ) [Fact (2 ≤ m)] :
+    StabilizerCodeWithLogicals (2 * m) (2 * m - 2) where
+  toStabilizerCode := stabilizerCode m
   logicalOps := logicalOpsIceberg m
   logical_commute_cross := by
     intro ℓ ℓ' hne

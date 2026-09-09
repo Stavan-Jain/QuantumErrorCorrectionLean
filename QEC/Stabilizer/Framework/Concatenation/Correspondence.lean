@@ -274,7 +274,7 @@ theorem inducedOuter_support_eq (g : NQubitPauliGroupElement (n₁ * n₂))
     D.inducedOuterOp_eq_I_iff g b, D.restrict_commutes_both_iff_stab g hg hindep b]
   constructor
   · intro hns
-    rcases centralizer_classify_of_k1 D.Cin (restrictBlock b g)
+    rcases centralizer_classify_of_k1 D.Cin.toStabilizerCode (restrictBlock b g)
       (D.restrictBlock_mem_centralizer g hg b) with hstab | hnt
     · exact absurd hstab hns
     · exact hnt

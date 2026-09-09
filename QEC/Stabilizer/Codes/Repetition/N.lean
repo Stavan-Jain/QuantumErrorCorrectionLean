@@ -423,11 +423,13 @@ theorem logicalZ_mem_centralizer (n : ℕ) :
   · exact False.elim hEmp
 
 /-!
-## StabilizerCode [[n+2, 1]] for odd n
+## StabilizerCode [[n+2, 1]], and its logical basis for odd n
 
-The repetition code encodes one logical qubit. Logical X̄ = X on all qubits and
-Z̄ = Z on all qubits; they anticommute only when the number of physical qubits
-`n+2` is odd, so the code is defined only for odd `n` (i.e. `Odd (n + 2)`).
+The repetition code encodes one logical qubit, for every `n`: the bare
+`stabilizerCode n` is just the `n + 1` nearest-neighbour `ZZ` generators.
+Logical X̄ = X on all qubits and Z̄ = Z on all qubits anticommute only when the
+number of physical qubits `n+2` is odd, so the logical basis
+(`stabilizerCodeWithLogicals`) is defined only for odd `n` (i.e. `Odd (n + 2)`).
 -/
 
 private def logicalOpsRepN (n : ℕ) (hn : Odd (n + 2)) :
@@ -435,10 +437,10 @@ private def logicalOpsRepN (n : ℕ) (hn : Odd (n + 2)) :
   fun _ => ⟨logicalX n, logicalZ n, logicalX_mem_centralizer n, logicalZ_mem_centralizer n,
     logicalX_anticommutes_logicalZ n hn⟩
 
-/-- The parametric repetition code as a stabilizer code [[n+2, 1]] when `n+2` is
-odd. -/
-noncomputable def stabilizerCode (n : ℕ) (hn : Odd (n + 2)) :
-    StabilizerCode (n + 2) 1 where
+/-- The parametric repetition code as a stabilizer code [[n+2, 1]]. The bare
+code exists for every `n`; only the logical basis bundled in
+`stabilizerCodeWithLogicals` needs `n + 2` odd. -/
+noncomputable def stabilizerCode (n : ℕ) : StabilizerCode (n + 2) 1 where
   hk := Nat.succ_le_succ (Nat.zero_le (n + 1))
   generatorsList := generatorsList n
   generators_length := by rw [generatorsList_length]; omega
@@ -446,6 +448,12 @@ noncomputable def stabilizerCode (n : ℕ) (hn : Odd (n + 2)) :
   generators_independent := GeneratorsIndependent_generatorsList n
   generators_commute := by rw [listToSet_generators_eq]; exact generators_commute n
   closure_no_neg_identity := by rw [listToSet_generators_eq]; exact negIdentity_not_mem n
+
+/-- The parametric repetition code with its logical pair `X̄ = X` on all qubits,
+`Z̄ = Z` on all qubits, which anticommute exactly when `n + 2` is odd. -/
+noncomputable def stabilizerCodeWithLogicals (n : ℕ) (hn : Odd (n + 2)) :
+    StabilizerCodeWithLogicals (n + 2) 1 where
+  toStabilizerCode := stabilizerCode n
   logicalOps := logicalOpsRepN n hn
   logical_commute_cross := fun ℓ ℓ' h => (h (Subsingleton.elim ℓ ℓ')).elim
 

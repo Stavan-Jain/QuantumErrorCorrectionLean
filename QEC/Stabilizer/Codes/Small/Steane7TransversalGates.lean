@@ -32,7 +32,9 @@ open scoped BigOperators
 # Transversal H and S as logical gates for the Steane [[7,1,3]] code
 
 We show that the uniform transversal Hadamard and phase gates (H⊗7 and S⊗7) are
-logical gates for the Steane code: they map the codespace to itself.
+logical gates for the Steane code: they map the codespace to itself. Their
+action on the logical qubit is stated against the logical basis bundled in
+`Steane7.stabilizerCodeWithLogicals`.
 -/
 
 /-- Transversal Hadamard: H on each of the 7 physical qubits. -/
@@ -161,13 +163,16 @@ private lemma logicalX_no_Y : ∀ i, logicalX.operators i ≠ PauliOperator.Y :=
 private lemma logicalZ_no_Y : ∀ i, logicalZ.operators i ≠ PauliOperator.Y := by
   simp [logicalZ, NQubitPauliOperator.Z]
 
-/-- Transversal Hadamard acts as logical Hadamard on the canonical Steane
-logical pair. -/
+/-- Transversal Hadamard acts as logical Hadamard on the Steane code's logical
+basis (`stabilizerCodeWithLogicals`): it conjugates `X̄` to `Z̄` and `Z̄` to
+`X̄`. -/
 theorem transversalH_Steane7_isLogicalHadamard :
-    LogicalQubitOps.IsLogicalHadamard
-      ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
-        logicalX_anticommutes_logicalZ⟩
+    LogicalQubitOps.IsLogicalHadamard (stabilizerCodeWithLogicals.logicalOps 0)
       transversalH_Steane7 := by
+  change LogicalQubitOps.IsLogicalHadamard
+    ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+      logicalX_anticommutes_logicalZ⟩
+    transversalH_Steane7
   refine ⟨transversalH_Steane7_isLogicalGate, ?_, ?_⟩
   · apply Subtype.ext
     simpa [conjByGate_val, NQubitPauliGroupElement.gate_val,
@@ -317,13 +322,15 @@ theorem transversalS_Steane7_isLogicalGate :
     · simpa [transversalS_Steane7] using transversalS_conjugates_X3_gate
 
 /-- Transversal `S†` (implemented as `inv_S` on each qubit) acts as logical
-phase `S` on the canonical Steane logical pair under the convention
-`Ȳ := i X̄ Z̄`. -/
+phase `S` on the Steane code's logical basis (`stabilizerCodeWithLogicals`),
+under the convention `Ȳ := i X̄ Z̄`. -/
 theorem transversalS_Steane7_isLogicalS :
-    LogicalQubitOps.IsLogicalS
-      ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
-        logicalX_anticommutes_logicalZ⟩
+    LogicalQubitOps.IsLogicalS (stabilizerCodeWithLogicals.logicalOps 0)
       transversalS_Steane7 := by
+  change LogicalQubitOps.IsLogicalS
+    ⟨logicalX, logicalZ, logicalX_mem_centralizer, logicalZ_mem_centralizer,
+      logicalX_anticommutes_logicalZ⟩
+    transversalS_Steane7
   refine ⟨transversalS_Steane7_isLogicalGate, ?_, ?_⟩
   · apply Subtype.ext
     change (uniformTransversalGateMatrix 7 inv_S) * logicalZ.toMatrix *
