@@ -58,10 +58,12 @@ both `X` and `Z` factors on different qubits, so it satisfies neither
 * §6 (`−I ∉ closure`) — uses `negIdentity_not_mem_of_independent_phase_zero` (a
   general-form helper introduced for this code; see `gap_audit.md`), *not*
   `CSS.negIdentity_not_mem_closure_union`.
-* §14 (distance proof) — preferentially `native_decide` on full
-  `HasCodeDistance`; if that fails, manual enumeration of weight-1 (via existing
-  helper) and weight-2 (via a new helper —
-  `no_weight_two_mem_centralizer_of_anticommute_witness`).
+* §14 (distance proof) — `hasCodeDistance_of` with a `decide`-closed weight-3
+  witness, then `interval_cases` on the weight and kernel-checked anti-witness
+  tables ruling out weight 1 (via
+  `no_weight_one_mem_centralizer_of_anticommute_witness`) and weight 2 (via
+  `no_weight_two_mem_centralizer_of_anticommute_witness`, a helper introduced
+  for this code). The file is `native_decide`-free.
 
 ## References
 

@@ -358,10 +358,11 @@ theorem GeneratorsIndependent_n_generatorsList :
     rowsLinearIndependent_generatorsList
 ```
 
-`decide` works on small `n` (≤ 9 or so); for larger codes `native_decide` may be
-needed. For parametric codes with `L ≥ 2`, replace `decide` with a parametric
-independence proof — see `ToricCodeNStabilizerCode.lean` sections labelled
-`generatorsListPackaged_independent`.
+`decide` closes this for every small code on `main` (`n ≤ 9` or so); reach for
+`decide +kernel` before anything heavier, never `native_decide` (banned, see
+CLAUDE.md § "Axiom policy"). For parametric codes with `L ≥ 2`, replace `decide`
+with a parametric independence proof — see
+`rowsLinearIndependent_generatorsListPackaged` in `Toric/StabilizerCode.lean`.
 -/
 
 /-!
@@ -602,31 +603,130 @@ clean this up.
 /-!
 ## §14 — `HasCodeDistance` (optional)
 
-For **small codes** (n ≤ ~9), the distance proof goes in this same file:
+Every distance proof on `main` is kernel-only. `native_decide` is banned
+repo-wide (CLAUDE.md § "Axiom policy"), so there is no "decide the whole
+`HasCodeDistance` predicate" shortcut, and no `sorry` placeholder either: pick
+the closer that matches the code's shape. All of them are stated on the bare
+`stabilizerCode` of §13 — `HasCodeDistance` depends only on the stabilizer
+group, and only the witness's nontriviality proof touches the logical basis.
+The two CSS closers live in `Framework/Core/CSS/CSSDistance.lean`, the general
+one in `Framework/Core/Logical/CodeDistance.lean`. All three consume the same
+two ingredients — the §13 closure equation
 
 ```lean
-theorem stabilizerCode_distance : HasCodeDistance stabilizerCode d := by
-  -- Strategy 1: native_decide on the full HasCodeDistance predicate.
-  -- Works for n ≤ ~6; symbolic explosion past that.
-  native_decide
+lemma stabilizerCode_toSubgroup_eq :
+    stabilizerCode.toStabilizerGroup.toSubgroup = Subgroup.closure generators :=
+  stabilizerGroup_toSubgroup_eq  -- §8, up to unfolding
 ```
 
-If `native_decide` times out, fall back to manual enumeration:
+and an explicit witness `⟨g, h_nontrivial, by decide⟩`, a nontrivial logical of
+weight exactly `d` — and every finite side condition closes with `decide`
+(`Decidable (Anticommute p q)` is a global instance, see
+`PauliGroup/Commutation.lean`).
+
+**Distance 2, CSS** — `hasCodeDistance_two_of_anticommute_witness`. Supply a
+witness function: for every qubit `i` and non-identity Pauli `P`, a generator
+anticommuting with `weightOneAt i P`. `fin_cases` on `i`, `match` on `P`, and
+let `first` backtrack over the generators of the right type (`Z`-generators
+detect `X`/`Y`, `X`-generators detect `Z`). See `Codes/Small/CSS_4_1_2.lean`
+and `FourQubit_4_2_2.lean`.
 
 ```lean
-theorem stabilizerCode_distance : HasCodeDistance stabilizerCode d := by
-  refine ⟨?_, ?_, ?_⟩
-  · -- d > 0
-    decide
-  · -- Lower bound: every non-trivial logical has weight ≥ d
-    intro g hgLogical _hgwpos
-    -- Manual case-bash on weight-< d Paulis, showing each anticommutes
-    -- with some stabilizer (so isn't a centralizer element).
-    sorry
-  · -- Witness: an explicit element of weight d
-    refine ⟨logicalX, ?_, ?_⟩
-    · exact (IsNontrivialLogicalOperator_iff …).mpr …
-    · decide  -- weight equals d
+private lemma weight_one_anticomm_witness :
+    ∀ i : Fin n, ∀ P : PauliOperator, P ≠ PauliOperator.I →
+      ∃ g ∈ generators, NQubitPauliGroupElement.Anticommute
+        (weightOneAt i P) g := by
+  intro i P hP
+  fin_cases i <;>
+    (match P, hP with
+    | PauliOperator.X, _ => first
+      | exact ⟨Z1, by simp [generators, ZGenerators], by decide⟩
+      | exact ⟨Z2, by simp [generators, ZGenerators], by decide⟩
+    | PauliOperator.Y, _ => first
+      | exact ⟨Z1, by simp [generators, ZGenerators], by decide⟩
+      | exact ⟨Z2, by simp [generators, ZGenerators], by decide⟩
+    | PauliOperator.Z, _ => first
+      | exact ⟨X1, by simp [generators, XGenerators], by decide⟩
+      | exact ⟨X2, by simp [generators, XGenerators], by decide⟩
+    | PauliOperator.I, hP => exact (hP rfl).elim)
+
+theorem code_has_distance_two : HasCodeDistance stabilizerCode 2 :=
+  hasCodeDistance_two_of_anticommute_witness stabilizerCode generators
+    stabilizerCode_toSubgroup_eq weight_one_anticomm_witness
+    ⟨logicalX, (logicalOps_<CodeName> 0).xOp_nontrivial, by decide⟩
+```
+
+**Distance 3, CSS** — `hasCodeDistance_three_of_columns`. Present each check
+as the `Finset` of qubits it acts on (`zOn S` / `xOn S` are `Z` / `X` on `S`);
+the closer then needs only the classical column conditions on both check
+matrices — no column is zero, no two columns coincide — each a closed
+statement over `Fin n` that `decide` settles. See
+`Codes/Small/Steane7Distance.lean` (self-dual, so one `row` serves both sides).
+
+```lean
+def zRow : Fin 3 → Finset (Fin 7) := ![{0, 1, 2, 4}, {0, 1, 3, 5}, {0, 2, 3, 6}]
+
+lemma Z1_eq_zOn : Z1 = zOn {0, 1, 2, 4} :=
+  NQubitPauliGroupElement.ext _ _ rfl (funext fun i => by fin_cases i <;> rfl)
+
+lemma zOn_row_mem (r : Fin 3) : zOn (zRow r) ∈ generators := by
+  fin_cases r <;> simp [zRow, generators, ZGenerators, Z1_eq_zOn, Z2_eq_zOn, Z3_eq_zOn]
+
+lemma zRow_cover : ∀ i : Fin 7, ∃ r, i ∈ zRow r := by decide
+
+lemma zRow_separate : ∀ i j : Fin 7, i ≠ j → ∃ r, (i ∈ zRow r ↔ j ∉ zRow r) := by
+  decide
+-- … and the same for `xRow` / `xOn_row_mem` / `xRow_cover` / `xRow_separate`.
+
+theorem code_has_distance_three : HasCodeDistance stabilizerCode 3 :=
+  hasCodeDistance_three_of_columns zRow xRow generators stabilizerCode
+    stabilizerCode_toSubgroup_eq zOn_row_mem xOn_row_mem zRow_cover xRow_cover
+    zRow_separate xRow_separate ⟨logicalXw3, logicalXw3_isNontrivial, logicalXw3_weight⟩
+```
+
+The weight-3 witness is usually a stabilizer multiple of `logicalX` (`X̄ · X₁`
+for Steane); its weight is `by decide`, and its nontriviality comes from
+`isNontrivialLogicalOperator_of_anticommute_centralizer`
+(`Core/Logical/LogicalOperators.lean`): it lies in the centralizer and
+anticommutes with the centralizer element `Z̄`.
+
+**General case** (non-CSS, or no closer fits) — `hasCodeDistance_of`. It asks
+for `d ≥ 1`, the weight-`d` witness, and, for every `1 ≤ w < d`, that no
+weight-`w` element is a nontrivial logical. `interval_cases w` splits the last
+goal, and each weight is ruled out with an *anti-witness table* fed to
+`no_weight_one_mem_centralizer_of_anticommute_witness` /
+`no_weight_two_mem_centralizer_of_anticommute_witness` (they live in
+`CSSDistance.lean` but assume nothing CSS — any generating set works, which is
+how the non-CSS `[[5,1,3]]` uses them). The weight-2 table is the weight-1 one
+nested: `match` on `(P, Q)`, then `fin_cases i <;> fin_cases j`, with `first`
+backtracking over `exact absurd rfl hij` (the diagonal) and the generators. See
+`Codes/Small/FiveQubit_5_1_3.lean` and qec-lab's `docs/lean-patterns.md`
+§ non-CSS distance.
+
+```lean
+theorem code_has_distance_three : HasCodeDistance stabilizerCode 3 := by
+  refine hasCodeDistance_of stabilizerCode 3 (by decide)
+    ⟨logicalX_w3, logicalX_w3_isNontrivial, by decide⟩ ?_
+  intro w hw_pos hw_lt g hg_weight h_nontrivial
+  rcases (IsNontrivialLogicalOperator_iff g stabilizerCode.toStabilizerGroup).mp h_nontrivial
+    with ⟨h_cent, _, _⟩
+  interval_cases w
+  · exact no_weight_one_mem_centralizer_of_anticommute_witness
+      stabilizerCode.toStabilizerGroup generators stabilizerCode_toSubgroup_eq
+      weight_one_anticomm_witness g hg_weight h_cent
+  · exact no_weight_two_mem_centralizer_of_anticommute_witness
+      stabilizerCode.toStabilizerGroup generators stabilizerCode_toSubgroup_eq
+      weight_two_anticomm_witness g hg_weight h_cent
+```
+
+Whichever route, finish by bundling the code with its distance
+(`Code[[n, k, d]]` is the scoped notation for `StabilizerCodeWithDistance n k d`
+from `Framework/Core/CodeNotation.lean`):
+
+```lean
+noncomputable def stabilizerCodeWithDistance : Code[[n, k, d]] where
+  toStabilizerCode := stabilizerCode
+  hasDistance := code_has_distance_three
 ```
 
 For **parametric families**, the distance proof typically lives in a *separate
@@ -635,8 +735,8 @@ Patterns:
 
 - The X-side and Z-side bounds are proved separately (CSS structure).
 - For surface-style codes, the homological framework in
-  `Stabilizer/Homological/Distance.lean` provides the abstract bridge — see
-  `RotatedSurfaceCodeNDistance.lean` and `ToricCodeNDistance.lean`.
+  `Framework/Homological/Distance.lean` provides the abstract bridge — see
+  `RotatedSurface/Distance.lean` and `Toric/Distance.lean`.
 - A subgroup-equality bridge between `stabilizerGroup` and
   `stabilizerCode.toStabilizerGroup` is usually needed; package it as
   `<CodeName>StabilizerCode_subgroup_eq_homological`.
