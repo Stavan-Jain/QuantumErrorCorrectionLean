@@ -24,9 +24,11 @@ stabilizer is `stabilizer ⊔ ⟨X̄₁, Z̄₁⟩`; the distance proof needs to
 per block, whether a centralizing operator is "stabilizer-like" or a genuine
 logical.
 
-This module assembles the `SymplecticSpan` bridge into two results:
+This module assembles the `SymplecticSpan` bridge into two results. Both are
+proven; they differ in what they ask of the code:
 
-- **`centralizer_classify_of_k1`** (the *weak dichotomy*, proven here) — every
+- **`centralizer_classify_of_k1`** (the *weak dichotomy*) — stated for a bare
+  `StabilizerCode n k`, any `k`, and never touching the logical operators: every
   centralizing element either has its operator part realized by a stabilizer
   element, or is a nontrivial logical. This is the per-block split the distance
   argument applies to each `restrictBlock b L`.
@@ -41,13 +43,22 @@ This module assembles the `SymplecticSpan` bridge into two results:
   `∃ s ∈ stabilizer, s.operators = g.operators`. That is exactly what the
   weight/distance argument consumes.
 
-- **`operators_eq_stab_of_commutes_both_logicals`** (the *decisive direction* —
-  still `sorry`) — a centralizing element that commutes with *both* inner
-  logicals has its operator part realized by a stabilizer element. This is the
-  genuine content of M4 and the one place the weak dichotomy is insufficient: it
-  is the `k = 1` "dimension-2 quotient" fact
-  `sympOrthogonal(span{stab rows, X̄, Z̄}) = span{stab rows}`. See its
-  doc-comment for the precise scoped goal.
+- **`operators_eq_stab_of_commutes_both_logicals`** (the *decisive direction*)
+  — stated for `k = 1` only, since it consumes the code's logical pair
+  `C.logicalX 0`, `C.logicalZ 0` plus an explicit `rowsLinearIndependent`
+  hypothesis on the generator list: a centralizing element that commutes with
+  *both* inner logicals has its operator part realized by a stabilizer element.
+  This is the genuine content of M4 and the one place the weak dichotomy is
+  insufficient — the `k = 1` "dimension-2 quotient" fact
+  `sympOrthogonal(span{stab rows, X̄, Z̄}) = span{stab rows}`. The proof is a
+  dimension count in `F₂^{2n}`: with `V` the row span, `U = span{X̄, Z̄}` and
+  `W = V ⊔ U`, the hypotheses put `symp(g)` in `Wᗮ`; the form is nondegenerate
+  (`sympBilinForm_nondegenerate`), so `LinearMap.BilinForm.finrank_orthogonal`
+  gives `dim Wᗮ = 2n − dim W = n − 1 = dim V`, and `V ≤ Wᗮ` (the stabilizer is
+  isotropic and commutes with the logicals) forces `V = Wᗮ`. The `BilinForm`
+  section below packages the symplectic form as a mathlib `BilinForm` for
+  exactly this step; `exists_mem_closure_of_symp_in_span` then turns
+  `symp(g) ∈ V` back into a stabilizer element.
 -/
 
 namespace Quantum.StabilizerGroup
@@ -216,8 +227,8 @@ independent (anticommuting pair, `dim U = 2`) and meet `V` trivially
 
 Row-independence (`rowsLinearIndependent`) is an explicit hypothesis:
 `StabilizerCode` carries only the weaker subgroup `GeneratorsIndependent`. For a
-concrete code it is `native_decide`-able (as the small CSS codes discharge
-`by decide`). -/
+concrete code it closes by `decide`, as the small CSS codes do
+(`rowsLinearIndependent_generatorsList` in `Codes/Small/Steane7.lean`). -/
 theorem operators_eq_stab_of_commutes_both_logicals (C : StabilizerCode n 1)
     (hindep : rowsLinearIndependent C.generatorsList)
     (g : NQubitPauliGroupElement n) (hg : g ∈ centralizer C.toStabilizerGroup)

@@ -461,9 +461,9 @@ only available route to `GeneratorsIndependent` is `rowsLinearIndependent`
 (check-matrix row independence over `ZMod 2`), which is strictly stronger than
 the subgroup-independence `Cin`/`Cout` carry and is *not* recoverable from it
 (the reverse implication is false in general). For a concrete instance it is
-discharged by `native_decide` via
-`GeneratorsIndependent_of_rowsLinearIndependent`, exactly as the small CSS codes
-do. -/
+discharged by `decide` via `GeneratorsIndependent_of_rowsLinearIndependent`,
+exactly as the small CSS codes do — see `rowsLinearIndependent_generatorsList`
+in `Codes/Small/Steane7.lean`. -/
 noncomputable def concatenate (D : ConcatCSSData n₁ n₂ k₂)
     (hindep : GeneratorsIndependent (n₁ * n₂) D.concatGeneratorsList) :
     StabilizerCode (n₁ * n₂) k₂ where
