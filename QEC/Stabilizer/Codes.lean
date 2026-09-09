@@ -4,6 +4,7 @@ import QEC.Stabilizer.Codes.RotatedSurface
 import QEC.Stabilizer.Codes.Repetition
 import QEC.Stabilizer.Codes.Iceberg
 import QEC.Stabilizer.Codes.BivariateBicycle
+import QEC.Stabilizer.Codes.Mitten
 import QEC.Stabilizer.Codes.Small
 
 /-!

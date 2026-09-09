@@ -84,6 +84,21 @@ theorem not_mem_boundaries_of_dual_witness
   rw [h0] at h1
   exact zero_ne_one h1
 
+/-- Mirror certificate for non-dual-boundaryness: if `w` is a 1-cycle
+(`∂₁ w = 0`) and pairs oddly with `c`, then `c` is not a dual boundary
+(not in the range of `cutMap`).  Dual boundaries pair evenly with cycles,
+by the transpose identity for `∂₁`. -/
+theorem not_mem_dualBoundaries_of_witness
+    {w c : X.C1 → ZMod 2}
+    (hw : X.boundary1 w = 0) (hpair : ∑ e : X.C1, w e * c e = 1) :
+    c ∉ X.dualBoundaries := by
+  rintro ⟨s, rfl⟩
+  have h0 : ∑ e : X.C1, w e * X.cutMap s e = 0 := by
+    rw [← X.boundary1_cutMap_transpose w s, hw]
+    simp
+  rw [h0] at hpair
+  exact zero_ne_one hpair
+
 /-- Helper: `ZMod 2` dichotomy. -/
 private lemma zmod2_dichotomy_local (a : ZMod 2) : a = 0 ∨ a = 1 := by
   have hvalle : a.val ≤ 1 := Nat.le_of_lt_succ a.val_lt
